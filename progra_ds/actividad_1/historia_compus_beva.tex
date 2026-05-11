@@ -1,0 +1,560 @@
+\documentclass[10pt,letterpaper,twocolumn]{article}
+
+% ==================== PAQUETES ====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=1cm,bottom=2cm,columnsep=0.7cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{titlesec}
+\usepackage{abstract}
+\usepackage{times}    
+\usepackage{caption}
+
+% --- estilo de títulos de sección, más compacto ---
+\titleformat{\section}
+  {\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\itshape}{\thesubsection.}{0.5em}{}
+
+% --- formato del título y abstract ---
+\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape}
+\setlength{\absleftindent}{0.5cm}
+\setlength{\absrightindent}{0.5cm}
+
+% --- espaciado de párrafos ---
+\setlength{\parskip}{0.3em}
+\setlength{\parindent}{1em}
+\setlength{\columnsep}{0.7cm}
+
+% --- captions más pequeños ---
+\captionsetup{font=small,labelfont=bf}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+% ==================== DATOS DEL TRABAJO ====================
+\title{\textbf{\Large Historia de las Computadoras: \\
+de la Máquina Analítica a la Quinta Generación}}
+
+\author{Bryan Ezequiel Violante Arriaga}
+
+\date{\small\today}
+
+\begin{document}
+
+% ==================== ENCABEZADO A UNA COLUMNA ====================
+\twocolumn[
+\begin{@twocolumnfalse}
+  \maketitle
+  \begin{abstract}
+    \noindent
+    El presente trabajo (correspondiente a la actividad 1 del curso 
+    propedéutico de Programación y Estructuras de Datos para la MC. en Ciencias 
+    de la Computación) expone la evolución histórica de las computadoras,
+    desde los primeros antecedentes mecánicos del siglo~XIX hasta los
+    sistemas de quinta generación. La revisión se organiza siguiendo la
+    convención de \emph{generaciones}, asociadas a saltos tecnológicos
+    sucesivos: tubos de vacío, transistores, circuitos integrados,
+    microprocesadores y, finalmente, sistemas paralelos orientados a
+    inteligencia artificial, mencionando de manera breve la Computación Cuántica. 
+    \vspace{0.5em}
+  \end{abstract}
+  
+\end{@twocolumnfalse}
+]
+
+% ============================================================
+\section{Introducción}
+% ============================================================
+Cualquier persona interesada en la informática, más generalmente en las ciencias
+de la computación, debería conocer la historia de las computadoras. No solo por 
+una cuestión de cultura general, sino porque entender cómo llegamos a donde 
+estamos hoy es clave para comprender los conceptos y tecnologías que usamos a 
+diario, y para anticipar hacia dónde podríamos ir en el futuro.
+
+La fuente principal de esta investigación fue el libro de Andrew~S. Tanenbaum
+\emph{Sistemas Operativos Modernos}, que dedica una sección a la historia de las 
+computadoras. Para complementar esta fuente, se consultaron también diversas 
+fuentes académicas en línea.  \\
+La división en generaciones es una convención que se usa a menudo para organizar 
+la historia, y básicamente se asocia a saltos tecnológicos sucesivos. 
+Sin embargo, como advierte el propio Tanenbaum, esta división es ``un poco burda'' 
+y las fases se traslapan, con falsos inicios y callejones sin salida. 
+
+Antes de comenzar definiremos brevemente el concepto de computadora que, al ser 
+un elemento fundamental en nuestra vida diaria, muchas veces damos por sentado.
+
+\subsection{¿Qué es una computadora?}
+Una computadora, computador, u ordenador es una máquina programable para el 
+procesamiento de información. En otras palabras, una computadora es un 
+dispositivo que puede recibir datos de entrada, procesarlos (mediante 
+algoritmos) y generar resultados de salida. \\
+En la vida cotidiana, cada vez que se hace referencia al término ``computadora'' 
+se hace referencia de manera implícita a las computadoras digitales pero no es el
+único tipo de computadora existente.\\
+Las computadoras clasifican principalmente de acuerdo al 
+principio de operación en Analógicas y Digitales.
+
+\subsection{Computadoras Analógicas}
+La computadora analógica es un dispositivo electrónico o hidráulico diseñado 
+para manipular la entrada de datos en términos de niveles de 
+tensión o presiones hidráulicas, en lugar de hacerlo como datos numéricos. 
+El dispositivo de cálculo analógico más sencillo es la regla de cálculo, que 
+utiliza longitudes de escalas especialmente calibradas para facilitar 
+la multiplicación, la división y otras funciones.
+
+\subsection{Computadoras Digitales}
+Como se mencionó, las computadoras son dispositivos capaces de recibir 
+información, 
+procesarla (mediante algoritmos) y generar resultados de salida. A diferencia de
+las computadoras analógicas, que manipulan datos en forma continua, 
+las computadoras digitales representan la información en forma discreta,
+usualmente en formato binario (0s y 1s).
+
+
+% ============================================================
+\section{Antecedentes: antes de la era electrónica}
+% ============================================================
+
+Algunas fuentes consideran que la historia de las computadoras comienza con la
+invención del ábaco, un dispositivo de cálculo mecánico utilizado desde la 
+antigüedad para realizar operaciones aritméticas básicas por los griegos y los
+romanos. \\
+Otro antecedente importante es la \textbf{máquina de Pascal} o 
+\textbf{Pascalina}, 
+inventada por Blaise Pascal en 1642, que era capaz de realizar sumas y restas 
+utilizando ruedas dentadas. \\ 
+En este trabajo (como en la mayoría de los trabajos revisados) se considera que 
+la historia de las computadoras si bien no comienza con la electrónica, 
+comienza con el proyecto del matemático inglés 
+\textbf{Charles Babbage} (1792--1871) considerado como algunos 
+como el padre de la computación, en el siglo~XIX . \\ 
+Charles Babbage diseñó la \textbf{máquina analítica}, la cual es 
+considerada por la literatura como la primera computadora digital concebida en 
+la historia. A pesar de que Babbage dedicó gran parte de sus recursos y tiempo 
+a este proyecto, nunca logró que funcionara, debido a que la tecnología de su 
+época no podía fabricar los elementos con la precisión que el diseño exigía. 
+Estaba adelantado a su tiempo.
+
+En la definición de computadora se mencionó vagamente el concepto de 
+\textbf{algoritmo} que, en pocas palabras es una serie de pasos para resolver 
+un problema. Relacionada con este poderoso concepto al igual que con la máquina 
+analítica de Babbage, aparece otra figura fundamental: considerada la primera 
+programadora de la historia, \textbf{Ada Lovelace}, fue contratada por Babbage 
+para escribir los algoritmos que ejecutaría su máquina (razón por la cual se 
+nombró posteriormente al lenguaje de programación \texttt{Ada}). 
+
+Aunque la máquina analítica nunca operó, su importancia es enorme: sentó
+las bases conceptuales de una computadora programable de propósito general
+más de un siglo antes de que la tecnología pudiera construirla.
+
+% ============================================================
+\section{Primera generación (1945--1955): tubos de vacío}
+% ============================================================
+
+\subsection{Contexto y tecnología base}
+
+La construcción de computadoras digitales avanzó muy poco
+hasta la WW2 (Segunda Guerra Mundial), que impulsó esta actividad por
+necesidades militares: cálculos balísticos, criptoanálisis y simulaciones
+físicas.
+
+La tecnología característica fue el \textbf{tubo de vacío} (o bulbo).
+Estas máquinas eran enormes, ocupaban habitaciones completas, consumían
+cantidades enormes de energía y generaban mucho calor.
+Una computadora típica podía contener cerca de \textbf{20{\,}000 bulbos},
+lo que tenía inconvenientes bastante evidentes como el fundido regular de los 
+bulbos durante la ejecución (lo que detenía el cómputo en curso).
+
+\subsection{Modelos representativos}
+
+\begin{itemize}[leftmargin=*,itemsep=0.2em]
+  \item \textbf{Atanasoff-Berry Computer (ABC).} Construida por John
+    Atanasoff y Clifford Berry en la Universidad Estatal de Iowa.
+    Considerada la primera computadora digital electrónica funcional;
+    utilizaba alrededor de 300 tubos de vacío.
+  \item \textbf{Z3.} Construida por Konrad Zuse en Berlín, basada en
+    relevadores electromecánicos.
+  \item \textbf{Colossus (1944).} Desarrollada en Bletchley Park
+    (Inglaterra) por un equipo dedicado a descifrar códigos militares
+    alemanes durante la guerra.
+  \item \textbf{Mark~I.} Construida por Howard Aiken en la Universidad
+    de Harvard.
+  \item \textbf{ENIAC.} Desarrollada por John Mauchly y J.~Presper
+    Eckert en la Universidad de Pennsylvania. Es probablemente la más
+    conocida del periodo.
+\end{itemize}
+
+\subsection{Cómo se usaban}
+
+A diferencia de los recursos que tenemos hoy en día, no existían sistemas 
+operativos ni lenguajes de programación, ni siquiera el tan temido lenguaje 
+ensamblador. La programación se hacía directamente en \textbf{lenguaje máquina},
+ o conectando físicamente miles de cables a \textbf{tableros de conexiones} 
+ (\emph{plugboards}) para definir el comportamiento de la máquina. \\
+Los problemas que se resolvían eran principalmente cálculos numéricos simples: 
+tablas de senos, cosenos y logaritmos.
+
+A principios de la década de 1950, la introducción de las
+\textbf{tarjetas perforadas} mejoró parcialmente este flujo, permitiendo
+escribir programas en tarjetas en lugar de cablear plugboards.
+
+\subsection{Aporte clave}
+
+Demostraron que el cómputo electrónico de propósito general era posible
+y sentaron la base de toda la industria que vendría después.
+
+% ============================================================
+\section{Segunda generación (1955--1965): transistores}
+% ============================================================
+
+\subsection{Contexto y tecnología base}
+
+A mediados de los años~50 apareció una innovación que es considerada como el 
+invento del siglo y que cambió el panorama por completo: el \textbf{transistor}.
+A diferencia de los bulbos, los transistores eran pequeños, 
+consumían poca energía, generaban poco calor y eran mucho más confiables. 
+Esto permitió, por primera vez, fabricar y vender computadoras a clientes con 
+la expectativa razonable de que funcionaran de forma estable durante periodos 
+útiles de trabajo.
+
+El núcleo de esta etapa fueron los transistores discretos, las memorias de
+núcleos magnéticos y las cintas magnéticas como medio de almacenamiento
+secundario.
+
+\subsection{Modelos representativos}
+
+A finales de los 50's, principios de los 60's, las computadoras seguían 
+evolucionando, reduciendo su tamaño y aumentando su potencia. \\
+Estas máquinas conocidas como \textbf{mainframes} estaban encerradas en cuartos 
+especiales con aire acondicionado y eran operadas por personal especializado.
+Debido a su alto costo y complejidad de operación, solo grandes empresas, 
+universidades y el gobierno podían darse el lujo de tener una. \\
+Se desarrollaron dos líneas de máquinas, una orientada a aplicaciones 
+comerciales y otra orientada a aplicaciones científicas.
+
+\begin{itemize}[leftmargin=*,itemsep=0.2em]
+  \item \textbf{IBM~1401.} Máquina comercial orientada a caracteres,
+    ampliamente usada por bancos y aseguradoras para tareas como ordenar
+    cintas e imprimir reportes. No era buena para cálculo numérico, pero
+    sí para entrada/salida.
+  \item \textbf{IBM~7094.} Máquina científica orientada a palabras,
+    utilizada para cálculos numéricos pesados (ecuaciones diferenciales
+    en física e ingeniería). Programada principalmente en
+    \textsc{Fortran} y en lenguaje ensamblador.
+\end{itemize}
+
+\subsection{Cómo se usaban}
+
+Por primera vez existía una clara separación entre quienes diseñaban,
+construían, operaban y programaban las máquinas. Para ejecutar un
+trabajo, el programador escribía el programa en papel y después lo pasaba a
+tarjetas perforadas, las cuales eran entregadas en una ventanilla y horas
+después regresaba por los resultados impresos. \\
+Este flujo dio origen al concepto de \textbf{procesamiento por lotes} 
+(\emph{batch processing}), --- que, al menos en experiencia del autor, es 
+ampliamente utilizado en el contexto de machine learning, cuando los datos de 
+entrenamiento y prueba se procesan en lotes --- 
+en el que varios trabajos se acumulaban en una cinta y se ejecutaban uno tras 
+otro sin intervención humana.
+
+\subsection{Aporte clave}
+
+La transición del tubo al transistor hizo que las computadoras fueran
+\textbf{confiables, comercializables y mucho más eficientes}, abriendo
+el mercado más allá de los laboratorios de investigación.
+
+% ============================================================
+\section{Tercera generación (1965--1980): circuitos integrados}
+% ============================================================
+
+\subsection{Contexto y tecnología base}
+
+A inicios de los años~60, los fabricantes mantenían dos líneas de
+productos incompatibles: máquinas científicas (como la 7094) y máquinas
+comerciales (como la 1401). Mantener ambas era caro, y los clientes que
+crecían querían poder migrar a máquinas más potentes sin reescribir todo
+su software. Este problema impulsó uno de los lanzamientos más
+importantes de la historia. El \textbf{circuito integrado} (IC) a pequeña
+escala, que permitió empaquetar varios transistores en un solo chip de
+silicio. El resultado fue una mejora notable en la relación
+precio/rendimiento respecto a las máquinas de transistores discretos.
+
+\subsection{Modelos representativos}
+
+\begin{itemize}[leftmargin=*,itemsep=0.2em]
+  \item \textbf{IBM System/360 (1964).} La primera \emph{familia} de
+    computadoras compatibles entre sí en software. Iba desde modelos
+    pequeños hasta modelos más potentes que la 7094, todos con la
+    misma arquitectura y conjunto de instrucciones. Fue un éxito inmediato e
+    instauró la idea de \emph{familia compatible}, que el resto de la
+    industria adoptó.
+  \item \textbf{Sucesores de la línea 360.} Modelos 370, 4300, 3080,
+    3090 y, más recientemente, la serie zSeries. Sus descendientes
+    siguen en uso en grandes centros de cómputo (sistemas de
+    reservaciones aéreas, bases de datos masivas, servidores web de
+    alto volumen).
+  \item \textbf{DEC PDP-1 (1961).} Pionera de las minicomputadoras. 
+    Tenía solo 4K palabras de 18 bits, pero
+    a un precio de 120{\,}000~dólares (menos del 5\,\% del costo de
+    una 7094). Fue un éxito de ventas y dio origen a una nueva
+    industria.
+  \item \textbf{DEC PDP-11.} Culminación de la línea de
+    minicomputadoras de DEC, ampliamente influyente en el mundo
+    académico.
+\end{itemize}
+
+\subsection{Cómo se usaban}
+
+Tres ideas clave de software acompañaron a este hardware:
+\textbf{multiprogramación} (mantener varios trabajos en memoria al mismo
+tiempo para que la CPU no quedara ociosa cuando uno esperaba E/S),
+\textbf{spooling} (leer trabajos directamente al disco para que el
+sistema operativo pudiera tomar el siguiente automáticamente) y
+\textbf{tiempo compartido} o \emph{timesharing} (permitir que varios
+usuarios trabajaran simultáneamente desde terminales conectadas a la
+misma máquina).
+
+\subsection{Aporte clave}
+
+La idea de \textbf{familia compatible de computadoras} cambió la
+industria para siempre, y las minicomputadoras democratizaron el acceso
+al cómputo fuera de las grandes corporaciones.
+
+% ============================================================
+\section{Cuarta generación (1980--ca.~2010): computadoras personales}
+% ============================================================
+
+\subsection{Contexto y tecnología base}
+
+El desarrollo de los \textbf{circuitos LSI} (\emph{Large Scale
+Integration}), capaces de empaquetar miles de transistores en un
+centímetro cuadrado de silicio, dio nacimiento al
+\textbf{microprocesador}, que es un adelanto enorme de la microelectrónica y, con 
+él, a la era de la computadora personal.
+
+\subsection{Procesadores y modelos representativos}
+
+\begin{itemize}[leftmargin=*,itemsep=0.2em]
+  \item \textbf{Intel~8080 (1974).} Primera CPU de 8~bits de propósito
+    general. Marcó el inicio de la microcomputación moderna.
+  \item \textbf{IBM~PC (1981).} Basada inicialmente en el procesador
+    Intel~8088. Su arquitectura abierta y la decisión de IBM de no
+    monopolizar el sistema operativo generaron un ecosistema enorme de
+    fabricantes \emph{compatibles con IBM~PC}.
+  \item \textbf{IBM~PC/AT (1983).} Sucesora basada en el Intel~80286.
+  \item \textbf{Línea Intel x86.} 8086, 80286, 80386, 80486 y la
+    familia \textbf{Pentium} (I, II, III, 4) y posteriormente Core~2~Duo
+    y sus sucesores.
+  \item \textbf{Apple Lisa (1983) y Apple Macintosh (1984).} Pioneras en
+    llevar la \textbf{interfaz gráfica de usuario (GUI)} al mercado de
+    consumo. La Lisa fue un fracaso comercial por su precio elevado,
+    pero la Macintosh fue un enorme éxito por su precio más accesible y
+    su enfoque amigable con el usuario.
+  \item \textbf{Estaciones de trabajo RISC.} Sun Microsystems y
+    Hewlett-Packard llevaron al mercado profesional máquinas basadas
+    en arquitecturas RISC de alto rendimiento, estándar en aplicaciones
+    técnicas y científicas.
+\end{itemize}
+
+\subsection{Cómo se usaban}
+
+Hubo dos cambios profundos en la relación humano-máquina. El primero:
+la computadora dejó de ser un recurso compartido y carísimo, y se
+convirtió en una herramienta personal. El segundo: la \textbf{interfaz
+gráfica de usuario} (con ventanas, íconos, menús y ratón), inventada
+conceptualmente por Doug~Engelbart en Stanford y desarrollada en los
+laboratorios de Xerox~PARC, fue adoptada por Apple y posteriormente por
+Microsoft, transformando a la computadora en un dispositivo accesible
+para usuarios sin formación técnica.
+
+\subsection{Aporte clave}
+
+La \textbf{democratización masiva} del cómputo: por primera vez, tener
+una computadora propia se volvió realista para individuos, escuelas y
+pequeñas empresas.
+
+% ============================================================
+\section{Quinta generación: dos visiones complementarias}
+% ============================================================
+
+A diferencia de las generaciones anteriores, no existe un consenso único
+sobre qué constituye la \textbf{quinta generación} de computadoras. En
+la literatura conviven dos definiciones complementarias.
+
+\subsection{Visión clásica: el proyecto japonés FGCS (1982--1992)}
+
+En 1982, el gobierno japonés, a través del Ministerio de Industria y
+Comercio Internacional (MITI), lanzó el proyecto \textbf{Fifth
+Generation Computer Systems (FGCS)}. Sus metas eran ambiciosas:
+construir computadoras capaces de procesar \emph{conocimiento} y no
+solo datos numéricos; apoyarse en \textbf{procesamiento paralelo
+masivo} en lugar del procesamiento secuencial tradicional; usar
+lenguajes de \textbf{programación lógica},
+como base de la inteligencia artificial; e implementar interfaces de
+lenguaje natural y reconocimiento de voz e imagen.
+
+El proyecto se considera un \emph{éxito parcial}: no cumplió todas sus
+metas (la IA simbólica resultó más difícil de lo previsto y los
+lenguajes lógicos no se impusieron como modelo dominante), pero sembró
+ideas que más tarde fructificarían en otros contextos.
+
+\subsection{Visión moderna: paralelismo, móviles, nube e IA}
+
+Una segunda definición, más actual, sitúa a la quinta generación en el
+periodo que va desde la década de 1990 hasta el presente. En cuanto al
+hardware, la tecnología base evolucionó del LSI/VLSI al
+\textbf{ULSI} (\emph{Ultra Large Scale Integration}), que permite
+empaquetar millones e incluso miles de millones de transistores en un
+solo chip. Sobre esta base se construyen \textbf{procesadores
+multinúcleo} y el cómputo paralelo se vuelve cotidiano en dispositivos
+de uso diario.
+
+Otros rasgos característicos son: \textbf{Internet} como
+infraestructura central y el \textbf{cómputo en la nube} (\emph{cloud
+computing}) como modelo dominante de servicios; el \textbf{cómputo
+móvil} con \emph{smartphones} y tablets como computadoras personales
+primarias para gran parte de la población mundial; y, sobre todo, la
+consolidación de la \textbf{inteligencia artificial} como aplicación
+central del cómputo.
+
+La IA de esta generación se manifiesta en varias ramas concretas:
+\textbf{sistemas expertos}, \textbf{redes neuronales} y aprendizaje
+automático, \textbf{robótica}, \textbf{procesamiento de lenguaje
+natural} y reconocimiento de voz e imagen. En la última década, los
+modelos de aprendizaje profundo y los modelos de lenguaje a gran escala
+han ampliado significativamente lo que estas máquinas pueden hacer.
+
+\subsection{¿Hacia una sexta generación? La computación cuántica}
+
+Algunos autores consideran que la \textbf{computación cuántica}, junto
+con otras tecnologías emergentes como la computación neuromórfica,
+representa el inicio de una posible \emph{sexta generación} de
+computadoras. La razón es que, a diferencia de todas las generaciones
+anteriores (que son variaciones tecnológicas del mismo paradigma de
+cómputo clásico), la computación cuántica representa un cambio de
+paradigma físico fundamental.
+
+Mientras una computadora clásica usa \textbf{bits} que valen 0 o 1, una
+computadora cuántica usa \textbf{qubits} que pueden estar en una
+superposición de ambos estados al mismo tiempo, gracias a fenómenos de
+la mecánica cuántica como la superposición y el entrelazamiento. Esto
+no implica que las computadoras cuánticas sean ``más rápidas'' en
+general, sino que son potencialmente mucho más eficientes para una
+clase específica de problemas.
+
+Algunos hitos relevantes en esta área son:
+
+\begin{itemize}[leftmargin=*,itemsep=0.2em]
+  \item \textbf{1980s.} Richard Feynman propone la idea teórica de usar
+    sistemas cuánticos para simular física cuántica de manera eficiente.
+  \item \textbf{1994.} Peter Shor publica un algoritmo cuántico capaz
+    de factorizar números enteros exponencialmente más rápido que los
+    algoritmos clásicos conocidos. Este resultado amenaza directamente
+    a la criptografía RSA actual.
+  \item \textbf{1996.} Lov Grover publica un algoritmo cuántico de
+    búsqueda con ventaja cuadrática sobre el caso clásico.
+  \item \textbf{2019.} Google anuncia haber alcanzado la
+    \emph{supremacía cuántica} con su procesador Sycamore de 54
+    qubits, aunque el resultado fue disputado por IBM.
+\end{itemize}
+
+A pesar del entusiasmo, hay limitaciones importantes que conviene
+mencionar. Los qubits son extremadamente frágiles y requieren
+temperaturas cercanas al cero absoluto; el fenómeno de la
+\textbf{decoherencia} destruye la información cuántica en muy poco
+tiempo; y, hasta hoy, todos los dispositivos prácticos pertenecen a la
+era \textbf{NISQ} (\emph{Noisy Intermediate-Scale Quantum}), donde los
+qubits son pocos y propensos a errores. Las computadoras cuánticas
+\emph{no} están destinadas a reemplazar a las computadoras clásicas
+para tareas cotidianas; el modelo más probable es que ambas convivan
+de forma complementaria.
+
+% ============================================================
+\section{Reflexión y conclusiones}
+% ============================================================
+
+Resulta fascinante observar cómo la historia de las computadoras refleja un 
+proceso de innovación tecnológica que ha transformado radicalmente la sociedad 
+en poco más de un siglo. 
+A lo largo de las cinco generaciones, se pueden identificar patrones claros: 
+cada salto tecnológico ha permitido reducir el costo del cómputo, miniaturizar 
+los dispositivos y acercarlos al usuario final, democratizando el acceso a esta 
+poderosa herramienta. \\
+De igual manera resulta bastante interesante poner en perspectiva el ``de dónde 
+venimos'' con el punto en el que nos encontramos actualmente, y el ``hacia dónde 
+vamos''.
+En ocasiones he escuchado a personas decir: ``la computadora es un dispositivo 
+que no es de este planeta'', ``es imposible que los humanos hayamos inventado algo
+tan complejo'', y no es para menos, si se piensa en la complejidad de una 
+computadora moderna, con sus miles de millones de transistores, su capacidad 
+de procesamiento paralelo, y más actualmente, su capacidad de aprendizaje 
+automático y de procesamiento de lenguaje natural. Sin embargo, al revisar la 
+historia de las computadoras, al intentar entender cómo funcionan (al igual
+que todos estos avances tecnológicos), se puede apreciar que no es magia, sino 
+el resultado de un proceso acumulativo de innovación, experimentación y 
+aprendizaje a lo largo del tiempo por parte del ingenio humano (cientos, miles 
+de personas a lo largo de la historia). \\
+De esta investigación me llevo una gran expectativa por el futuro de la 
+computación, ¿cuál es el siguiente salto tecnológico que nos espera?, y 
+¿cómo este va a transformar nuestra sociedad? Me encantaría poder vivirlo y 
+aún más, contribuir y ser parte de él.
+
+% ============================================================
+\renewcommand{\refname}{Referencias}
+\addcontentsline{toc}{section}{Referencias}
+% ============================================================
+
+\begin{thebibliography}{9}
+\small
+
+\bibitem{tanenbaum2009}
+A.~S. Tanenbaum,
+\emph{Sistemas Operativos Modernos}, 3.\textsuperscript{a} ed.
+México: Pearson Educación, 2009. [Capítulo~1, Sección~1.2: Historia de
+los sistemas operativos.]
+
+\bibitem{uvmx}
+G.~Hernández,
+\emph{Historia de la computación} [en línea].
+Universidad Veracruzana, 2011. Disponible en:
+\url{https://www.uv.mx/personal/gerhernandez/files/2011/04/historia-compuesta.pdf}
+
+\bibitem{uves}
+A.~Fuertes,
+\emph{Tema 1: Tecnologías de la información} [en línea].
+Universidad de Valencia, Departamento de Informática. Disponible en:
+\url{https://www.uv.es/afuertes/Informatica/ficheros/tema1_TI.pdf}
+
+\bibitem{aniei}
+ANIEI,
+\emph{Curso de Introducción a la Programación: Generaciones de
+computadoras} [en línea]. Asociación Nacional de Instituciones de
+Educación en Tecnologías de la Información, UAM. Disponible en:
+\url{https://aniei.org.mx/paginas/uam/CursoIP/curso_ip_02.html}
+
+\bibitem{ucm}
+R.~Carpio López,
+\emph{Introducción a la computación cuántica} [trabajo de fin de grado
+en línea]. Universidad Complutense de Madrid, 2022. Disponible en:
+\url{https://hdl.handle.net/20.500.14352/3166}
+
+\bibitem{scribd}
+\emph{Quinta generación de la computadora} [presentación en línea].
+Scribd. Disponible en:
+\url{https://www.scribd.com/presentation/379887533/Quinta-Generacion-de-La-Computadora}
+
+\end{thebibliography}
+
+\end{document}
