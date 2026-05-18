@@ -172,14 +172,14 @@ Para describir el crecimiento de $T(n)$ se usan tres notaciones:
 \begin{itemize}
     \item \textbf{Cota superior:} $f(n) = \mathcal{O}(g(n))$ si existen 
     constantes $c>0$ y $n_0$ tales que
-    \begin{equation}
+    \begin{equation*}
         0 \leq f(n) \leq c\,g(n), \quad \forall n \geq n_0.
-    \end{equation}
+    \end{equation*}
     \item \textbf{Cota inferior:} $f(n) = \Omega(g(n))$ si existen $c>0$ y 
     $n_0$ tales que
-    \begin{equation}
+    \begin{equation*}
         0 \leq c\,g(n) \leq f(n), \quad \forall n \geq n_0.
-    \end{equation}
+    \end{equation*}
     \item \textbf{Cota ajustada:} $f(n) = \Theta(g(n))$ si se cumplen ambas a 
     la vez.
 \end{itemize}
@@ -312,9 +312,9 @@ rápida de enteros grandes y el algoritmo de Strassen para multiplicar matrices.
 
 Si un algoritmo divide y vencerás genera $a$ subproblemas de tamaño $n/b$ y 
 emplea $f(n)$ tiempo en dividir y combinar, su tiempo de ejecución satisface
-\begin{equation}
+\begin{equation*}
     T(n) = a\,T\!\left(\frac{n}{b}\right) + f(n).
-\end{equation}
+\end{equation*}
 El \emph{teorema maestro} permite resolver estas recurrencias de manera
 sistemática (de manera muy simplificada, este teorema dice que basta con 
 comparar $f(n)$ con $n^{\log_b a}$, el costo acumulado de los subproblemas y, 
@@ -443,9 +443,9 @@ dada una cantidad $N$ y un conjunto de denominaciones $\{d_1,\dots,d_n\}$,
 encontrar el número mínimo de monedas para pagar $N$. Sea $c[i,j]$ el número 
 mínimo de monedas para pagar $j$ usando denominaciones $\{d_1,\dots,d_i\}$. 
 La recurrencia es:
-\begin{equation}
+\begin{equation*}
     c[i,j] = \min\bigl(c[i-1,j],\; 1 + c[i, j - d_i]\bigr).
-\end{equation}
+\end{equation*}
 
 Y el pseudocódigo es el siguiente:
 
@@ -628,10 +628,10 @@ Dos dominan la práctica:
 Para medir el rendimiento de un algoritmo paralelo, se utilizan dos métricas 
 principales. Si $T_1$ es el tiempo del algoritmo secuencial y $T_p$ el tiempo 
 con $p$ procesadores, se definen:
-\begin{equation}
+\begin{equation*}
     \text{Speedup: } S_p = \frac{T_1}{T_p}, \qquad \text{Eficiencia: } 
     E_p = \frac{S_p}{p}.
-\end{equation}
+\end{equation*}
 La famosa \emph{ley de Amdahl} pone un techo a este \emph{speedup} en función 
 de la fracción del algoritmo que no se puede paralelizar.
 
