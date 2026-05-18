@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1779003323.88572 "/home/zxxz6/inaoe/progra_ds/actividad_3/tipos_algoritmos.tex" "tipos_algoritmos.pdf" "tipos_algoritmos" 1779003324.29524 0
+["pdflatex"] 1779064210.01707 "/home/zxxz6/inaoe/progra_ds/actividad_3/tipos_algoritmos.tex" "tipos_algoritmos.pdf" "tipos_algoritmos" 1779064210.42174 0
   "/etc/texmf/web2c/texmf.cnf" 1771965458.30879 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/zxxz6/inaoe/progra_ds/actividad_3/tipos_algoritmos.tex" 1779003323.75122 37449 44466317df691786eee77e5d922c8436 ""
+  "/home/zxxz6/inaoe/progra_ds/actividad_3/tipos_algoritmos.tex" 1779064209.69227 37403 a10e3946f2db69715b15293947ead589 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1200.tfm" 1136768653 3584 f80ddd985bd00e29e9a6047ebd9d4781 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -180,9 +180,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1771965466.61718 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1771965524 8215192 d8c59f61c96695c13bc97ae13dad9651 ""
-  "tipos_algoritmos.aux" 1779003324.24522 4544 22080722af28182fe1a8870b94152ed2 "pdflatex"
-  "tipos_algoritmos.out" 1779003324.24622 3120 d0286e7a8300096f4f3dea9fd905d99b "pdflatex"
-  "tipos_algoritmos.tex" 1779003323.75122 37449 44466317df691786eee77e5d922c8436 ""
+  "tipos_algoritmos.aux" 1779064210.37337 4544 22080722af28182fe1a8870b94152ed2 "pdflatex"
+  "tipos_algoritmos.out" 1779064210.37437 3120 d0286e7a8300096f4f3dea9fd905d99b "pdflatex"
+  "tipos_algoritmos.tex" 1779064209.69227 37403 a10e3946f2db69715b15293947ead589 ""
   (generated)
   "tipos_algoritmos.aux"
   "tipos_algoritmos.log"
