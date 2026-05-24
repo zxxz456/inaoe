@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador BST</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --node:#3b82f6; --hi:#f59e0b;
+          --new:#22c55e; --found:#06b6d4; --del:#ef4444; --edge:#64748b;
+          --text:#e2e8f0; --muted:#94a3b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom:1px solid #334155; }
+  header h1 { margin:0; font-size: 18px; }
+  header p { margin:4px 0 0; color: var(--muted); font-size: 13px; }
+  .seq { padding: 10px 20px; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; border-bottom:1px solid #334155; }
+  .seq .lbl { color: var(--muted); font-size:13px; margin-right:6px; }
+  .chip { padding:4px 10px; border-radius:6px; background:#334155;
+          font-variant-numeric: tabular-nums; font-size:14px; }
+
+  .ops { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155; }
+  .ops input { background:#0b1220; color:var(--text); border:1px solid #475569;
+               border-radius:8px; padding:8px 12px; font-size:15px; width:120px; }
+  .ops .ins { border-color:#15803d; }
+  .ops .bus { border-color:#0e7490; }
+  .ops .del { border-color:#b91c1c; }
+
+  #stage { width:100%; height: 52vh; background:
+           radial-gradient(circle at 50% 0%, #16233f, var(--bg)); }
+  .msg { padding: 12px 20px; min-height: 24px; font-size: 15px;
+         border-top:1px solid #334155; border-bottom:1px solid #334155; }
+  .controls { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+              flex-wrap:wrap; }
+  button { background: var(--panel); color: var(--text); border:1px solid #475569;
+           border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { background:#334155; }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .speed { display:flex; align-items:center; gap:8px; margin-left:auto;
+           color: var(--muted); font-size:13px; }
+
+  line { stroke: var(--edge); stroke-width: 2; }
+  .node circle { fill: var(--node); stroke:#1e3a8a; stroke-width:2;
+                 transition: fill .25s, stroke .25s; }
+  .node text { fill:#fff; font-size:15px; font-weight:600; text-anchor:middle;
+               dominant-baseline:central; pointer-events:none; }
+  .node.hi    circle { fill: var(--hi);    stroke:#b45309; }
+  .node.new   circle { fill: var(--new);   stroke:#15803d; }
+  .node.found circle { fill: var(--found); stroke:#155e75; }
+  .node.remove circle{ fill: var(--del);   stroke:#7f1d1d; }
+  .legend { display:flex; gap:16px; padding:0 20px 16px; color:var(--muted);
+            font-size:13px; flex-wrap:wrap; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de Arbol Binario de Busqueda (BST)</h1>
+</header>
+
+<div class="seq"><span class="lbl">Secuencia inicial:</span><span id="seq"></span></div>
+
+<div class="ops">
+  <input id="opval" type="text" placeholder="valor" autocomplete="off">
+  <button id="insertBtn" class="ins">Insertar</button>
+  <button id="searchBtn" class="bus">Buscar</button>
+  <button id="deleteBtn" class="del">Eliminar</button>
+  <button id="resetBtn" title="Reconstruye el arbol inicial">Reiniciar</button>
+</div>
+
+<svg id="stage" preserveAspectRatio="xMidYMid meet">
+  <g id="edges"></g>
+  <g id="nodes"></g>
+</svg>
+
+<div class="msg" id="msg"></div>
+
+<div class="controls">
+  <button id="first" title="Inicio">&#9198;</button>
+  <button id="prev"  title="Anterior">&#9664;</button>
+  <button id="play"  title="Reproducir">&#9654; Reproducir</button>
+  <button id="next"  title="Siguiente">&#9654;</button>
+  <button id="last"  title="Fin">&#9197;</button>
+  <span class="counter" id="counter"></span>
+  <label class="speed">Velocidad
+    <input id="speed" type="range" min="150" max="1600" value="700" step="50">
+  </label>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--node)"></i>Nodo</span>
+  <span><i class="dot" style="background:var(--hi)"></i>Comparando / camino</span>
+  <span><i class="dot" style="background:var(--new)"></i>Nuevo / resultado</span>
+  <span><i class="dot" style="background:var(--found)"></i>Encontrado</span>
+  <span><i class="dot" style="background:var(--del)"></i>A eliminar</span>
+</div>
+
+<script>
+const INITIAL_KEYS = __KEYS__;
+
+// =======================================================================
+//  Estructura del BST en JavaScript (refleja la de bst.py)
+// =======================================================================
+let NODE_ID = 0;
+class TreeNode {
+  constructor(key, parent=null){
+    this.key = key; this.left = null; this.right = null;
+    this.parent = parent; this.id = ++NODE_ID;
+  }
+}
+
+class BST {
+  constructor(){ this.root = null; this.size = 0; }
+
+  // ---- recorrido in-order para calcular posiciones (col, profundidad) ----
+  _layout(){
+    const nodes = [], edges = []; let col = 0;
+    const walk = (n, d) => {
+      if (!n) return;
+      walk(n.left, d + 1);
+      nodes.push({ id:n.id, key:String(n.key), col: col++, depth: d });
+      if (n.left)  edges.push({ parent:n.id, child:n.left.id });
+      if (n.right) edges.push({ parent:n.id, child:n.right.id });
+      walk(n.right, d + 1);
+    };
+    walk(this.root, 0);
+    return { nodes, edges };
+  }
+
+  _snap(message, states){
+    const { nodes, edges } = this._layout();
+    REC.push({ nodes, edges, message, states: states || {} });
+  }
+
+  // ---- INSERTAR ----------------------------------------------------------
+  put(key){
+    if (!this.root){
+      this.root = new TreeNode(key); this.size++;
+      this._snap(`Arbol vacio: ${key} se convierte en la RAIZ.`,
+                 { [this.root.id]: 'new' });
+      return;
+    }
+    let cur = this.root;
+    while (true){
+      if (key < cur.key){
+        this._snap(`${key} < ${cur.key}  →  IZQUIERDA.`, { [cur.id]: 'hi' });
+        if (cur.left) cur = cur.left;
+        else {
+          cur.left = new TreeNode(key, cur); this.size++;
+          this._snap(`Insertado ${key} a la izquierda de ${cur.key}.`,
+                     { [cur.left.id]: 'new' });
+          return;
+        }
+      } else {
+        this._snap(`${key} ≥ ${cur.key}  →  DERECHA.`, { [cur.id]: 'hi' });
+        if (cur.right) cur = cur.right;
+        else {
+          cur.right = new TreeNode(key, cur); this.size++;
+          this._snap(`Insertado ${key} a la derecha de ${cur.key}.`,
+                     { [cur.right.id]: 'new' });
+          return;
+        }
+      }
+    }
+  }
+
+  // ---- BUSCAR ------------------------------------------------------------
+  search(key){
+    let cur = this.root;
+    if (!cur){ this._snap(`El arbol esta vacio: ${key} no esta.`, {}); return null; }
+    while (cur){
+      if (key === cur.key){
+        this._snap(`¡Encontrado ${key}! `, { [cur.id]: 'found' });
+        return cur;
+      }
+      if (key < cur.key){
+        this._snap(`${key} < ${cur.key}  ->  IZQUIERDA.`, { [cur.id]: 'hi' });
+        cur = cur.left;
+      } else {
+        this._snap(`${key} > ${cur.key}  ->  DERECHA.`, { [cur.id]: 'hi' });
+        cur = cur.right;
+      }
+    }
+    this._snap(`${key} NO se encuentra en el arbol. `, {});
+    return null;
+  }
+
+  // ---- ELIMINAR ----------------------------------------------------------
+  _replaceInParent(node, child){
+    if (child) child.parent = node.parent;
+    if (!node.parent) this.root = child;
+    else if (node.parent.left === node) node.parent.left = child;
+    else node.parent.right = child;
+  }
+
+  _delete(node){
+    if (!node.left && !node.right){            // caso 1: hoja
+      this._snap(`${node.key} es una HOJA: se elimina directamente.`,
+                 { [node.id]: 'remove' });
+      this._replaceInParent(node, null);
+    } else if (node.left && node.right){       // caso 3: dos hijos
+      this._snap(`${node.key} tiene DOS hijos: buscamos su sucesor `
+               + `(menor del subarbol derecho).`, { [node.id]: 'remove' });
+      let succ = node.right;
+      while (succ.left){
+        this._snap(`Sucesor: bajamos a la izquierda desde ${succ.key}.`,
+                   { [node.id]: 'remove', [succ.id]: 'hi' });
+        succ = succ.left;
+      }
+      this._snap(`Sucesor = ${succ.key}. Copiara su valor en el nodo a borrar.`,
+                 { [node.id]: 'remove', [succ.id]: 'found' });
+      const newKey = succ.key;
+      this._delete(succ);                      // succ no tiene hijo izquierdo
+      node.key = newKey;
+      this._snap(`${node.key} ocupa el lugar; el sucesor fue eliminado.`,
+                 { [node.id]: 'new' });
+    } else {                                   // caso 2: un solo hijo
+      const child = node.left || node.right;
+      this._snap(`${node.key} tiene UN hijo (${child.key}): el hijo sube.`,
+                 { [node.id]: 'remove', [child.id]: 'hi' });
+      this._replaceInParent(node, child);
+      this._snap(`${child.key} reemplaza a ${node.key}.`,
+                 { [child.id]: 'new' });
+    }
+  }
+
+  remove(key){
+    let cur = this.root;
+    while (cur && cur.key !== key){
+      this._snap(`Buscando ${key}: ${key < cur.key ? '<' : '>'} ${cur.key}.`,
+                 { [cur.id]: 'hi' });
+      cur = key < cur.key ? cur.left : cur.right;
+    }
+    if (!cur){
+      this._snap(`${key} no esta en el arbol: nada que eliminar. `, {});
+      return false;
+    }
+    this._snap(`Nodo ${key} encontrado: lo eliminaremos.`, { [cur.id]: 'remove' });
+    this._delete(cur);
+    this.size--;
+    this._snap(`Listo. Tamano del arbol: ${this.size}.`, {});
+    return true;
+  }
+}
+
+// =======================================================================
+//  Motor de animacion (reproductor de fotogramas)
+// =======================================================================
+const COL_W = 70, LVL_H = 90, PAD = 50, R = 22;
+const stage  = document.getElementById('stage');
+const nodesG = document.getElementById('nodes');
+const edgesG = document.getElementById('edges');
+const seqEl  = document.getElementById('seq');
+
+let gridCols = 0, gridDepth = 0;            // solo crece, para fijar la escala
+const px = c => PAD + c * COL_W + COL_W / 2;
+const py = d => PAD + d * LVL_H + R;
+
+function ensureGrid(frame){
+  let mc = 0, md = 0;
+  frame.nodes.forEach(n => { if (n.col > mc) mc = n.col; if (n.depth > md) md = n.depth; });
+  let changed = false;
+  if (mc > gridCols){ gridCols = mc; changed = true; }
+  if (md > gridDepth){ gridDepth = md; changed = true; }
+  if (changed || !stage.getAttribute('viewBox')){
+    const W = (gridCols + 1) * COL_W + PAD * 2;
+    const H = (gridDepth + 1) * LVL_H + PAD * 2;
+    stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  }
+}
+
+let REC = [];          // buffer donde las operaciones graban fotogramas
+let FRAMES = [];        // fotogramas de la operacion actual
+let idx = 0, opName = '', playing = false, timer = null;
+
+let pos = {};           // id -> {x,y} posicion mostrada
+let rafStart = {}, rafTarget = {}, animT0 = 0, animDur = 400;
+const els = {}, edgeEls = {};
+let curFrame = null;
+
+function ease(t){ return t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+function render(frame, animate){
+  ensureGrid(frame);
+  const target = {}; const present = new Set();
+  frame.nodes.forEach(n => { target[n.id] = { x: px(n.col), y: py(n.depth) }; present.add(n.id); });
+
+  frame.nodes.forEach(n => {
+    let e = els[n.id];
+    if (!e){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','node');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('r', R);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      g.appendChild(c); g.appendChild(t); nodesG.appendChild(g);
+      e = els[n.id] = { g, circle:c, text:t };
+      pos[n.id] = target[n.id];
+    }
+    e.text.textContent = n.key;
+    const st = frame.states[n.id];
+    e.g.setAttribute('class', st ? 'node ' + st : 'node');
+  });
+
+  Object.keys(els).forEach(id => {
+    if (!present.has(Number(id))){ els[id].g.remove(); delete els[id]; delete pos[id]; }
+  });
+
+  rafStart = {}; rafTarget = target;
+  Object.keys(target).forEach(id => { rafStart[id] = pos[id] || target[id]; });
+
+  curFrame = frame;
+  if (animate){ animT0 = performance.now(); requestAnimationFrame(tick); }
+  else { Object.keys(target).forEach(id => pos[id] = target[id]); paint(frame); }
+
+  document.getElementById('msg').textContent = frame.message;
+  document.getElementById('counter').textContent =
+    `${opName} — paso ${idx + 1} / ${FRAMES.length}`;
+}
+
+function paint(frame){
+  Object.keys(els).forEach(id => {
+    const p = pos[id]; if (!p) return;
+    els[id].g.setAttribute('transform', `translate(${p.x},${p.y})`);
+  });
+  const want = {};
+  frame.edges.forEach(ed => {
+    const key = ed.parent + '-' + ed.child; want[key] = true;
+    let ln = edgeEls[key];
+    if (!ln){ ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+              edgesG.appendChild(ln); edgeEls[key] = ln; }
+    const a = pos[ed.parent], b = pos[ed.child];
+    if (a && b){ ln.setAttribute('x1',a.x); ln.setAttribute('y1',a.y);
+                 ln.setAttribute('x2',b.x); ln.setAttribute('y2',b.y); }
+  });
+  Object.keys(edgeEls).forEach(k => {
+    if (!(k in want)){ edgeEls[k].remove(); delete edgeEls[k]; }
+  });
+}
+
+function tick(now){
+  const t = Math.min(1, (now - animT0) / animDur), e = ease(t);
+  Object.keys(rafTarget).forEach(id => {
+    const s = rafStart[id], d = rafTarget[id];
+    pos[id] = { x: s.x + (d.x - s.x) * e, y: s.y + (d.y - s.y) * e };
+  });
+  paint(curFrame);
+  if (t < 1) requestAnimationFrame(tick);
+}
+
+// ---- navegacion ----
+function goto(i, animate){
+  idx = Math.max(0, Math.min(FRAMES.length - 1, i));
+  render(FRAMES[idx], animate); updateButtons();
+}
+function updateButtons(){
+  first.disabled = prev.disabled = (idx === 0);
+  last.disabled  = next.disabled = (idx === FRAMES.length - 1);
+}
+function play(){
+  if (FRAMES.length <= 1) return;
+  if (idx >= FRAMES.length - 1) goto(0, false);
+  playing = true; playBtn.innerHTML = '&#10074;&#10074; Pausa'; schedule();
+}
+function pause(){ playing = false; playBtn.innerHTML = '&#9654; Reproducir'; clearTimeout(timer); }
+function schedule(){
+  clearTimeout(timer); if (!playing) return;
+  const delay = Number(document.getElementById('speed').value);
+  timer = setTimeout(() => {
+    if (idx < FRAMES.length - 1){ goto(idx + 1, true); schedule(); } else pause();
+  }, delay);
+}
+
+// ---- ejecutar una operacion y reproducirla ----
+function runOp(name, fn){
+  pause();
+  REC = []; fn();
+  if (REC.length === 0) REC.push({ nodes:[], edges:[], message:'(sin cambios)', states:{} });
+  FRAMES = REC; idx = 0; opName = name;
+  render(FRAMES[0], false); updateButtons(); play();
+}
+
+// =======================================================================
+//  Construccion inicial e interaccion del usuario
+// =======================================================================
+let tree = new BST();
+
+function buildInitial(){
+  if (INITIAL_KEYS.length === 0){
+    REC = [{ nodes:[], edges:[], message:'Arbol vacio. Inserta valores arriba.', states:{} }];
+    FRAMES = REC; idx = 0; opName = 'Inicio';
+    render(FRAMES[0], false); updateButtons(); return;
+  }
+  runOp('Construccion', () => INITIAL_KEYS.forEach(k => tree.put(k)));
+}
+
+function parseInput(raw){
+  raw = raw.trim();
+  if (raw === '') return null;
+  const n = Number(raw);
+  return (!isNaN(n)) ? n : raw;
+}
+
+function resetTree(){
+  pause();
+  nodesG.innerHTML = ''; edgesG.innerHTML = '';
+  for (const k in els) delete els[k];
+  for (const k in edgeEls) delete edgeEls[k];
+  pos = {}; NODE_ID = 0; gridCols = 0; gridDepth = 0;
+  stage.removeAttribute('viewBox');
+  tree = new BST();
+  buildInitial();
+}
+
+// secuencia inicial como chips informativos
+INITIAL_KEYS.forEach(v => {
+  const s = document.createElement('span'); s.className = 'chip';
+  s.textContent = v; seqEl.appendChild(s);
+});
+
+const first = document.getElementById('first');
+const prev  = document.getElementById('prev');
+const next  = document.getElementById('next');
+const last  = document.getElementById('last');
+const playBtn = document.getElementById('play');
+const opval = document.getElementById('opval');
+
+first.onclick = () => { pause(); goto(0, true); };
+prev.onclick  = () => { pause(); goto(idx - 1, true); };
+next.onclick  = () => { pause(); goto(idx + 1, true); };
+last.onclick  = () => { pause(); goto(FRAMES.length - 1, false); };
+playBtn.onclick = () => playing ? pause() : play();
+
+document.getElementById('insertBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Insertar ${v}`, () => tree.put(v)); opval.value = '';
+};
+document.getElementById('searchBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Buscar ${v}`, () => tree.search(v));
+};
+document.getElementById('deleteBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Eliminar ${v}`, () => tree.remove(v)); opval.value = '';
+};
+document.getElementById('resetBtn').onclick = resetTree;
+
+opval.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('searchBtn').click();
+});
+document.addEventListener('keydown', e => {
+  if (document.activeElement === opval) return;
+  if (e.key === 'ArrowRight'){ pause(); goto(idx + 1, true); }
+  if (e.key === 'ArrowLeft'){ pause(); goto(idx - 1, true); }
+  if (e.key === ' '){ e.preventDefault(); playing ? pause() : play(); }
+});
+
+buildInitial();
+</script>
+</body>
+</html>
