@@ -39,3 +39,26 @@ htmlcov/
 
 # Logs
 *.log
+
+# Archivos generados por el simulador BST
+progra_ds/BST/bst_animacion.html
+
+# LaTeX (artefactos de compilacion; los .tex y .pdf SI se versionan)
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.idx
+*.ilg
+*.ind
+*.bcf
+*.run.xml
