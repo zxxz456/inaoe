@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Heap</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --node:#3b82f6; --hi:#f59e0b;
+          --new:#22c55e; --found:#06b6d4; --del:#ef4444; --edge:#64748b;
+          --text:#e2e8f0; --muted:#94a3b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom:1px solid #334155; }
+  header h1 { margin:0; font-size: 18px; }
+  header .mode { color: var(--muted); font-size:13px; margin-top:4px; }
+  .seq { padding: 10px 20px; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; border-bottom:1px solid #334155; }
+  .seq .lbl { color: var(--muted); font-size:13px; margin-right:6px; }
+  .chip { padding:4px 10px; border-radius:6px; background:#334155;
+          font-variant-numeric: tabular-nums; font-size:14px; }
+  .ops { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155; }
+  .ops input { background:#0b1220; color:var(--text); border:1px solid #475569;
+               border-radius:8px; padding:8px 12px; font-size:15px; width:120px; }
+  .ops .ins { border-color:#15803d; }
+  .ops .bus { border-color:#0e7490; }
+  .ops .del { border-color:#b91c1c; }
+  #stage { width:100%; height: 52vh; background:
+           radial-gradient(circle at 50% 0%, #16233f, var(--bg)); }
+  .msg { padding: 12px 20px; min-height: 24px; font-size: 15px;
+         border-top:1px solid #334155; border-bottom:1px solid #334155; }
+  .arr { padding: 10px 20px; display:flex; gap:6px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155;
+         font-variant-numeric: tabular-nums; }
+  .arr .lbl { color: var(--muted); font-size:13px; margin-right:8px; }
+  .arrcell { display:inline-flex; flex-direction:column; align-items:center;
+             justify-content:center; min-width:44px; padding:4px 6px;
+             background:#1e293b; border:1px solid #475569; border-radius:6px;
+             font-size:14px; color:#e2e8f0;
+             transition: background .2s, color .2s, border-color .2s; }
+  .arrcell .val { font-weight:600; line-height:1; }
+  .arrcell .ix  { color: var(--muted); font-size:10px; margin-top:3px; line-height:1; }
+  .arrcell.hi    { background: var(--hi);    color:#1f2937; border-color:#b45309; }
+  .arrcell.new   { background: var(--new);   color:#0f172a; border-color:#15803d; }
+  .arrcell.found { background: var(--found); color:#0f172a; border-color:#155e75; }
+  .arrcell.remove{ background: var(--del);   color:#fff;     border-color:#7f1d1d; }
+  .arrcell.hi .ix, .arrcell.new .ix, .arrcell.found .ix { color:#0f172a; opacity:.75; }
+  .arrcell.remove .ix { color:#fff; opacity:.85; }
+  .controls { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+              flex-wrap:wrap; }
+  button { background: var(--panel); color: var(--text); border:1px solid #475569;
+           border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { background:#334155; }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .speed { display:flex; align-items:center; gap:8px; margin-left:auto;
+           color: var(--muted); font-size:13px; }
+  line { stroke: var(--edge); stroke-width: 2; }
+  .node circle { fill: var(--node); stroke:#1e3a8a; stroke-width:2;
+                 transition: fill .25s, stroke .25s; }
+  .node text { fill:#fff; font-size:15px; font-weight:600; text-anchor:middle;
+               dominant-baseline:central; pointer-events:none; }
+  .node.hi    circle { fill: var(--hi);    stroke:#b45309; }
+  .node.new   circle { fill: var(--new);   stroke:#15803d; }
+  .node.found circle { fill: var(--found); stroke:#155e75; }
+  .node.remove circle{ fill: var(--del);   stroke:#7f1d1d; }
+  .legend { display:flex; gap:16px; padding:0 20px 16px; color:var(--muted);
+            font-size:13px; flex-wrap:wrap; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de Heap Binario</h1>
+  <div class="mode" id="modeLabel">modo: min-heap</div>
+</header>
+
+<div class="seq"><span class="lbl">Secuencia inicial:</span><span id="seq"></span></div>
+
+<div class="ops">
+  <input id="opval" type="text" placeholder="valor" autocomplete="off">
+  <button id="pushBtn" class="ins">Insertar</button>
+  <button id="popBtn" class="del">Extraer</button>
+  <button id="peekBtn">Peek</button>
+  <button id="searchBtn" class="bus">Buscar</button>
+  <button id="traverseBtn">Recorrer (por niveles)</button>
+  <button id="resetBtn" title="Reconstruye el heap inicial">Reiniciar</button>
+</div>
+
+<svg id="stage" preserveAspectRatio="xMidYMid meet">
+  <g id="edges"></g>
+  <g id="nodes"></g>
+</svg>
+
+<div class="arr"><span class="lbl">Arreglo:</span><span id="arr"></span></div>
+
+<div class="msg" id="msg"></div>
+
+<div class="controls">
+  <button id="first" title="Inicio">&#9198;</button>
+  <button id="prev"  title="Anterior">&#9664;</button>
+  <button id="play"  title="Reproducir">&#9654; Reproducir</button>
+  <button id="next"  title="Siguiente">&#9654;</button>
+  <button id="last"  title="Fin">&#9197;</button>
+  <span class="counter" id="counter"></span>
+  <label class="speed">Velocidad
+    <input id="speed" type="range" min="150" max="1600" value="700" step="50">
+  </label>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--node)"></i>Nodo</span>
+  <span><i class="dot" style="background:var(--hi)"></i>Comparando / camino</span>
+  <span><i class="dot" style="background:var(--new)"></i>Nuevo / resultado</span>
+  <span><i class="dot" style="background:var(--found)"></i>Encontrado / raiz</span>
+  <span><i class="dot" style="background:var(--del)"></i>A eliminar</span>
+</div>
+
+<script>
+const INITIAL_KEYS = __KEYS__;
+const ES_MIN = __ES_MIN__;
+document.getElementById('modeLabel').textContent =
+  'modo: ' + (ES_MIN ? 'min-heap (raiz = menor)' : 'max-heap (raiz = mayor)');
+
+// =======================================================================
+//  Estructura del Heap en JavaScript (refleja la de heap.py)
+// =======================================================================
+let NEXT_ID = 0;
+
+class Heap {
+  constructor(esMin){
+    this.items = [];   // {id, value}
+    this.esMin = esMin;
+  }
+  _prio(a, b){ return this.esMin ? a < b : a > b; }
+
+  _snap(message, states, highlightArrIdx){
+    const items = this.items.map((it, i) => ({ id:it.id, value:String(it.value), arrIdx:i }));
+    REC.push({ items, message, states: states || {}, highlightArrIdx });
+  }
+
+  push(v){
+    this._snap(`Insertar ${v}: lo agregamos al final del arreglo.`, {});
+    const it = { id: ++NEXT_ID, value: v };
+    this.items.push(it);
+    this._snap(`${v} colocado en el indice ${this.items.length - 1}. Ahora bubble-up.`,
+               { [it.id]: 'new' });
+    this._bubbleUp(this.items.length - 1);
+  }
+
+  _bubbleUp(i){
+    while (i > 0){
+      const padre = Math.floor((i - 1) / 2);
+      const curId = this.items[i].id;
+      const padreId = this.items[padre].id;
+      this._snap(
+        `Comparar ${this.items[i].value} con su padre ${this.items[padre].value}.`,
+        { [curId]: 'hi', [padreId]: 'hi' });
+      if (this._prio(this.items[i].value, this.items[padre].value)){
+        this._snap(
+          `${this.items[i].value} es ${this.esMin ? 'menor' : 'mayor'} → intercambiar.`,
+          { [curId]: 'remove', [padreId]: 'remove' });
+        [this.items[i], this.items[padre]] = [this.items[padre], this.items[i]];
+        this._snap(`Intercambio hecho.`, { [curId]: 'new', [padreId]: 'new' });
+        i = padre;
+      } else {
+        this._snap(`Propiedad de monticulo OK aqui.`, { [curId]: 'found' });
+        return;
+      }
+    }
+    if (this.items.length > 0)
+      this._snap(`Llegamos a la raiz: bubble-up termina.`, { [this.items[0].id]: 'found' });
+  }
+
+  pop(){
+    if (this.items.length === 0){
+      this._snap(`Heap vacio: nada que extraer. ✗`, {});
+      return null;
+    }
+    const root = this.items[0];
+    this._snap(`Extraer raiz: ${root.value}.`, { [root.id]: 'remove' });
+    const last = this.items.pop();
+    if (this.items.length === 0){
+      this._snap(`${root.value} retirado. Heap ahora vacio.`, {});
+      return root.value;
+    }
+    this.items[0] = last;
+    this._snap(`Movemos el ultimo (${last.value}) a la raiz; ahora bubble-down.`,
+               { [last.id]: 'hi' });
+    this._bubbleDown(0);
+    return root.value;
+  }
+
+  _bubbleDown(i){
+    const n = () => this.items.length;
+    while (true){
+      const iz = 2 * i + 1, de = 2 * i + 2;
+      let mejor = i;
+      if (iz < n() && this._prio(this.items[iz].value, this.items[mejor].value)) mejor = iz;
+      if (de < n() && this._prio(this.items[de].value, this.items[mejor].value)) mejor = de;
+
+      const high = { [this.items[i].id]: 'hi' };
+      if (iz < n()) high[this.items[iz].id] = 'hi';
+      if (de < n()) high[this.items[de].id] = 'hi';
+      this._snap(`Comparar con hijos.`, high);
+
+      if (mejor === i){
+        this._snap(`Propiedad restaurada en el indice ${i}.`,
+                   { [this.items[i].id]: 'found' });
+        return;
+      }
+      const cId = this.items[i].id, mId = this.items[mejor].id;
+      this._snap(`El mejor hijo es ${this.items[mejor].value}: intercambiar.`,
+                 { [cId]: 'remove', [mId]: 'remove' });
+      [this.items[i], this.items[mejor]] = [this.items[mejor], this.items[i]];
+      this._snap(`Intercambio hecho.`, { [cId]: 'new', [mId]: 'new' });
+      i = mejor;
+    }
+  }
+
+  peek(){
+    if (this.items.length === 0){
+      this._snap(`Heap vacio. ✗`, {});
+      return null;
+    }
+    const r = this.items[0];
+    this._snap(`La raiz (${this.esMin ? 'minimo' : 'maximo'}) es ${r.value}.`,
+               { [r.id]: 'found' });
+    return r.value;
+  }
+
+  search(v){
+    if (this.items.length === 0){
+      this._snap(`Heap vacio: ${v} no se encuentra. ✗`, {});
+      return -1;
+    }
+    for (let i = 0; i < this.items.length; i++){
+      const it = this.items[i];
+      this._snap(`Comparar arreglo[${i}] = ${it.value} con ${v}.`,
+                 { [it.id]: 'hi' });
+      if (it.value === v){
+        this._snap(`¡Encontrado ${v} en el indice ${i}! ✓`,
+                   { [it.id]: 'found' });
+        return i;
+      }
+    }
+    this._snap(`${v} NO se encuentra en el heap. ✗`, {});
+    return -1;
+  }
+
+  traverse(){
+    if (this.items.length === 0){
+      this._snap(`Heap vacio: nada que recorrer.`, {});
+      return;
+    }
+    this._snap(`Recorrido por niveles (orden del arreglo).`, {});
+    for (let i = 0; i < this.items.length; i++){
+      const it = this.items[i];
+      this._snap(`Visitar arreglo[${i}] = ${it.value}.`, { [it.id]: 'hi' });
+    }
+    this._snap(`Recorrido completo: ${this.items.length} elementos.`, {});
+  }
+}
+
+// =======================================================================
+//  Motor de animacion
+// =======================================================================
+const UNIT = 60, LVL_H = 90, PAD = 50, R = 22;
+
+const stage  = document.getElementById('stage');
+const nodesG = document.getElementById('nodes');
+const edgesG = document.getElementById('edges');
+const seqEl  = document.getElementById('seq');
+const arrEl  = document.getElementById('arr');
+
+let MAX_DEPTH = 0;   // grows only
+
+function setViewBox(){
+  const slots = Math.pow(2, MAX_DEPTH);
+  const W = slots * UNIT + PAD * 2;
+  const H = (MAX_DEPTH + 1) * LVL_H + PAD * 2;
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+}
+
+function layoutOf(arrIdx, total){
+  const depth = Math.floor(Math.log2(arrIdx + 1));
+  const posInLevel = arrIdx - (Math.pow(2, depth) - 1);
+  // x in slot units within the deepest level (2^MAX_DEPTH slots)
+  const slotWidth = Math.pow(2, MAX_DEPTH - depth);
+  const slotsX = posInLevel * slotWidth + slotWidth / 2;
+  const x = PAD + slotsX * UNIT;
+  const y = PAD + depth * LVL_H + R;
+  return { x, y, depth };
+}
+
+let REC = [], FRAMES = [], idx = 0, opName = '';
+let playing = false, timer = null;
+let pos = {}, rafStart = {}, rafTarget = {}, animT0 = 0;
+const els = {}, edgeEls = {};
+let curFrame = null;
+
+function ease(t){ return t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+function render(frame, animate){
+  // Expand MAX_DEPTH if needed
+  const n = frame.items.length;
+  if (n > 0){
+    const need = Math.floor(Math.log2(n));
+    if (need > MAX_DEPTH){ MAX_DEPTH = need; setViewBox(); }
+  }
+  if (!stage.getAttribute('viewBox')) setViewBox();
+
+  const target = {}; const present = new Set();
+  frame.items.forEach(it => {
+    const L = layoutOf(it.arrIdx, n);
+    target[it.id] = { x: L.x, y: L.y };
+    present.add(it.id);
+  });
+
+  frame.items.forEach(it => {
+    let e = els[it.id];
+    if (!e){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','node');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('r', R);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      g.appendChild(c); g.appendChild(t); nodesG.appendChild(g);
+      e = els[it.id] = { g, circle:c, text:t };
+      pos[it.id] = target[it.id];
+    }
+    e.text.textContent = it.value;
+    const st = frame.states[it.id];
+    e.g.setAttribute('class', st ? 'node ' + st : 'node');
+  });
+
+  Object.keys(els).forEach(id => {
+    if (!present.has(Number(id))){
+      els[id].g.remove(); delete els[id]; delete pos[id];
+    }
+  });
+
+  // edges from parent-child relationships in array
+  const wantEdges = {};
+  for (let i = 0; i < frame.items.length; i++){
+    const par = frame.items[i];
+    const li = 2*i + 1, ri = 2*i + 2;
+    if (li < frame.items.length) wantEdges[par.id + '-' + frame.items[li].id] = [par.id, frame.items[li].id];
+    if (ri < frame.items.length) wantEdges[par.id + '-' + frame.items[ri].id] = [par.id, frame.items[ri].id];
+  }
+
+  rafStart = {}; rafTarget = target;
+  Object.keys(target).forEach(id => { rafStart[id] = pos[id] || target[id]; });
+  curFrame = { ...frame, wantEdges };
+
+  if (animate){ animT0 = performance.now(); requestAnimationFrame(tick); }
+  else { Object.keys(target).forEach(id => pos[id] = target[id]); paint(curFrame); }
+
+  document.getElementById('msg').textContent = frame.message;
+  document.getElementById('counter').textContent =
+    `${opName} — paso ${idx + 1} / ${FRAMES.length}`;
+  renderArray(frame);
+}
+
+function paint(frame){
+  Object.keys(els).forEach(id => {
+    const p = pos[id]; if (!p) return;
+    els[id].g.setAttribute('transform', `translate(${p.x},${p.y})`);
+  });
+  Object.entries(frame.wantEdges).forEach(([key, [pId, cId]]) => {
+    let ln = edgeEls[key];
+    if (!ln){
+      ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      edgesG.appendChild(ln); edgeEls[key] = ln;
+    }
+    const a = pos[pId], b = pos[cId];
+    if (a && b){
+      ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y);
+      ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y);
+    }
+  });
+  Object.keys(edgeEls).forEach(k => {
+    if (!(k in frame.wantEdges)){ edgeEls[k].remove(); delete edgeEls[k]; }
+  });
+}
+
+function tick(now){
+  const t = Math.min(1, (now - animT0) / 400), e = ease(t);
+  Object.keys(rafTarget).forEach(id => {
+    const s = rafStart[id], d = rafTarget[id];
+    pos[id] = { x: s.x + (d.x - s.x) * e, y: s.y + (d.y - s.y) * e };
+  });
+  paint(curFrame);
+  if (t < 1) requestAnimationFrame(tick);
+}
+
+function renderArray(frame){
+  arrEl.innerHTML = '';
+  frame.items.forEach((it, i) => {
+    const c = document.createElement('span');
+    c.className = 'arrcell';
+    const st = frame.states[it.id];
+    if (st) c.classList.add(st);
+    const val = document.createElement('span');
+    val.className = 'val';
+    val.textContent = it.value;
+    const ix = document.createElement('span');
+    ix.className = 'ix';
+    ix.textContent = '[' + i + ']';
+    c.appendChild(val);
+    c.appendChild(ix);
+    arrEl.appendChild(c);
+  });
+}
+
+function goto(i, animate){
+  idx = Math.max(0, Math.min(FRAMES.length - 1, i));
+  render(FRAMES[idx], animate); updateButtons();
+}
+function updateButtons(){
+  first.disabled = prev.disabled = (idx === 0);
+  last.disabled  = next.disabled = (idx === FRAMES.length - 1);
+}
+function play(){
+  if (FRAMES.length <= 1) return;
+  if (idx >= FRAMES.length - 1) goto(0, false);
+  playing = true; playBtn.innerHTML = '&#10074;&#10074; Pausa'; schedule();
+}
+function pause(){ playing = false; playBtn.innerHTML = '&#9654; Reproducir'; clearTimeout(timer); }
+function schedule(){
+  clearTimeout(timer); if (!playing) return;
+  const delay = Number(document.getElementById('speed').value);
+  timer = setTimeout(() => {
+    if (idx < FRAMES.length - 1){ goto(idx + 1, true); schedule(); } else pause();
+  }, delay);
+}
+function runOp(name, fn){
+  pause();
+  REC = []; fn();
+  if (REC.length === 0) REC.push({ items:[], message:'(sin cambios)', states:{} });
+  FRAMES = REC; idx = 0; opName = name;
+  render(FRAMES[0], false); updateButtons(); play();
+}
+
+let heap = new Heap(ES_MIN);
+function buildInitial(){
+  if (INITIAL_KEYS.length === 0){
+    REC = [{ items:[], message:'Heap vacio. Usa "Insertar" para agregar valores.', states:{} }];
+    FRAMES = REC; idx = 0; opName = 'Inicio';
+    render(FRAMES[0], false); updateButtons(); return;
+  }
+  runOp('Construccion', () => INITIAL_KEYS.forEach(k => heap.push(k)));
+}
+
+function parseInput(raw){
+  raw = raw.trim();
+  if (raw === '') return null;
+  const n = Number(raw);
+  return (!isNaN(n)) ? n : raw;
+}
+
+function resetTree(){
+  pause();
+  nodesG.innerHTML = ''; edgesG.innerHTML = '';
+  for (const k in els) delete els[k];
+  for (const k in edgeEls) delete edgeEls[k];
+  pos = {}; NEXT_ID = 0; MAX_DEPTH = 0;
+  stage.removeAttribute('viewBox');
+  heap = new Heap(ES_MIN);
+  buildInitial();
+}
+
+INITIAL_KEYS.forEach(v => {
+  const s = document.createElement('span'); s.className = 'chip';
+  s.textContent = v; seqEl.appendChild(s);
+});
+
+const first = document.getElementById('first');
+const prev  = document.getElementById('prev');
+const next  = document.getElementById('next');
+const last  = document.getElementById('last');
+const playBtn = document.getElementById('play');
+const opval = document.getElementById('opval');
+
+first.onclick = () => { pause(); goto(0, true); };
+prev.onclick  = () => { pause(); goto(idx - 1, true); };
+next.onclick  = () => { pause(); goto(idx + 1, true); };
+last.onclick  = () => { pause(); goto(FRAMES.length - 1, false); };
+playBtn.onclick = () => playing ? pause() : play();
+
+document.getElementById('pushBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Insertar ${v}`, () => heap.push(v)); opval.value = '';
+};
+document.getElementById('popBtn').onclick = () => runOp('Extraer raiz', () => heap.pop());
+document.getElementById('peekBtn').onclick = () => runOp('Peek', () => heap.peek());
+document.getElementById('searchBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Buscar ${v}`, () => heap.search(v));
+};
+document.getElementById('traverseBtn').onclick = () => runOp('Recorrido', () => heap.traverse());
+document.getElementById('resetBtn').onclick = resetTree;
+
+opval.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('pushBtn').click();
+});
+document.addEventListener('keydown', e => {
+  if (document.activeElement === opval) return;
+  if (e.key === 'ArrowRight'){ pause(); goto(idx + 1, true); }
+  if (e.key === 'ArrowLeft'){ pause(); goto(idx - 1, true); }
+  if (e.key === ' '){ e.preventDefault(); playing ? pause() : play(); }
+});
+
+buildInitial();
+</script>
+</body>
+</html>
