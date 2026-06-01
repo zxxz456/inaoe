@@ -20,3 +20,9 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     y bubble-down animados.
   - [HashTable/](progra_ds/HashTable/) — Simulador interactivo de una Tabla
     Hash con encadenamiento: insertar, buscar, eliminar y recorrer.
+  - [ArbolBinario/](progra_ds/ArbolBinario/) — Simulador interactivo de un
+    Árbol Binario genérico (no BST): inserción por nivel, búsqueda,
+    eliminación de subárbol y recorridos pre/in/post/level.
+  - [Arbol/](progra_ds/Arbol/) — Simulador interactivo de un Árbol n-ario
+    (general): inserción como hijo de un padre, búsqueda, eliminación de
+    subárbol y recorridos pre/post/level.
