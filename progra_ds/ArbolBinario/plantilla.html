@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Arbol Binario</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --node:#3b82f6; --hi:#f59e0b;
+          --new:#22c55e; --found:#06b6d4; --del:#ef4444; --edge:#64748b;
+          --text:#e2e8f0; --muted:#94a3b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom:1px solid #334155; }
+  header h1 { margin:0; font-size: 18px; }
+  header p { margin:4px 0 0; color: var(--muted); font-size: 13px; }
+  .seq { padding: 10px 20px; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; border-bottom:1px solid #334155; }
+  .seq .lbl { color: var(--muted); font-size:13px; margin-right:6px; }
+  .chip { padding:4px 10px; border-radius:6px; background:#334155;
+          font-variant-numeric: tabular-nums; font-size:14px; }
+  .ops { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155; }
+  .ops input { background:#0b1220; color:var(--text); border:1px solid #475569;
+               border-radius:8px; padding:8px 12px; font-size:15px; width:120px; }
+  .ops .ins { border-color:#15803d; }
+  .ops .bus { border-color:#0e7490; }
+  .ops .del { border-color:#b91c1c; }
+  .ops .sub { color: var(--muted); font-size:13px; margin-left:8px; }
+  #stage { width:100%; height: 56vh; background:
+           radial-gradient(circle at 50% 0%, #16233f, var(--bg)); }
+  .msg { padding: 12px 20px; min-height: 24px; font-size: 15px;
+         border-top:1px solid #334155; border-bottom:1px solid #334155; }
+  .controls { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+              flex-wrap:wrap; }
+  button { background: var(--panel); color: var(--text); border:1px solid #475569;
+           border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { background:#334155; }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .speed { display:flex; align-items:center; gap:8px; margin-left:auto;
+           color: var(--muted); font-size:13px; }
+  line { stroke: var(--edge); stroke-width: 2; }
+  .node circle { fill: var(--node); stroke:#1e3a8a; stroke-width:2;
+                 transition: fill .25s, stroke .25s; }
+  .node text { fill:#fff; font-size:15px; font-weight:600; text-anchor:middle;
+               dominant-baseline:central; pointer-events:none; }
+  .node.hi    circle { fill: var(--hi);    stroke:#b45309; }
+  .node.new   circle { fill: var(--new);   stroke:#15803d; }
+  .node.found circle { fill: var(--found); stroke:#155e75; }
+  .node.remove circle{ fill: var(--del);   stroke:#7f1d1d; }
+  .legend { display:flex; gap:16px; padding:0 20px 16px; color:var(--muted);
+            font-size:13px; flex-wrap:wrap; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de Arbol Binario generico</h1>
+  <p>Insercion por nivel (BFS-fill). Sin orden BST.</p>
+</header>
+
+<div class="seq"><span class="lbl">Secuencia inicial:</span><span id="seq"></span></div>
+
+<div class="ops">
+  <input id="opval" type="text" placeholder="valor" autocomplete="off">
+  <button id="insertBtn" class="ins">Insertar</button>
+  <button id="searchBtn" class="bus">Buscar</button>
+  <button id="deleteBtn" class="del">Eliminar subarbol</button>
+  <span class="sub">recorridos:</span>
+  <button id="preBtn">Preorden</button>
+  <button id="inBtn">Inorden</button>
+  <button id="postBtn">Postorden</button>
+  <button id="lvlBtn">Por niveles</button>
+  <button id="resetBtn" title="Reconstruye el arbol inicial">Reiniciar</button>
+</div>
+
+<svg id="stage" preserveAspectRatio="xMidYMid meet">
+  <g id="edges"></g>
+  <g id="nodes"></g>
+</svg>
+
+<div class="msg" id="msg"></div>
+
+<div class="controls">
+  <button id="first" title="Inicio">&#9198;</button>
+  <button id="prev"  title="Anterior">&#9664;</button>
+  <button id="play"  title="Reproducir">&#9654; Reproducir</button>
+  <button id="next"  title="Siguiente">&#9654;</button>
+  <button id="last"  title="Fin">&#9197;</button>
+  <span class="counter" id="counter"></span>
+  <label class="speed">Velocidad
+    <input id="speed" type="range" min="150" max="1600" value="700" step="50">
+  </label>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--node)"></i>Nodo</span>
+  <span><i class="dot" style="background:var(--hi)"></i>Visitando</span>
+  <span><i class="dot" style="background:var(--new)"></i>Nuevo / resultado</span>
+  <span><i class="dot" style="background:var(--found)"></i>Encontrado</span>
+  <span><i class="dot" style="background:var(--del)"></i>A eliminar</span>
+</div>
+
+<script>
+const INITIAL_KEYS = __KEYS__;
+
+// =======================================================================
+//  Estructura del Arbol Binario en JS (refleja arbol_binario.py)
+// =======================================================================
+let NODE_ID = 0;
+
+class NodoBinario {
+  constructor(valor, padre=null){
+    this.valor = valor; this.izq = null; this.der = null;
+    this.padre = padre; this.id = ++NODE_ID;
+  }
+}
+
+class ArbolBinario {
+  constructor(){ this.root = null; }
+
+  _layout(){
+    // Asigna a cada nodo un "indice binario" (i): root=0, izq=2i+1, der=2i+2
+    // y calcula su (col,depth) en un layout tipo heap.
+    if (!this.root) return { nodes:[], edges:[], maxDepth:0 };
+    const info = [];
+    let maxDepth = 0;
+    const queue = [[this.root, 0, 0]];
+    while (queue.length){
+      const [n, bi, d] = queue.shift();
+      info.push({ n, bi, d });
+      if (d > maxDepth) maxDepth = d;
+      if (n.izq) queue.push([n.izq, 2*bi+1, d+1]);
+      if (n.der) queue.push([n.der, 2*bi+2, d+1]);
+    }
+    const nodes = [], edges = [];
+    for (const { n, bi, d } of info){
+      const posInLevel = bi - (Math.pow(2, d) - 1);
+      const slotW = Math.pow(2, maxDepth - d);
+      const col = posInLevel * slotW + slotW / 2;
+      nodes.push({ id:n.id, value:String(n.valor), col, depth:d });
+      if (n.izq) edges.push({ parent:n.id, child:n.izq.id });
+      if (n.der) edges.push({ parent:n.id, child:n.der.id });
+    }
+    return { nodes, edges, maxDepth };
+  }
+
+  _snap(message, states){
+    const { nodes, edges, maxDepth } = this._layout();
+    REC.push({ nodes, edges, maxDepth, message, states: states || {} });
+  }
+
+  put(valor){
+    if (this.root === null){
+      this.root = new NodoBinario(valor);
+      this._snap(`Arbol vacio: ${valor} se convierte en la RAIZ.`,
+                 { [this.root.id]: 'new' });
+      return;
+    }
+    this._snap(`Insertar ${valor}: busco primer hueco libre por niveles.`, {});
+    const q = [this.root];
+    while (q.length){
+      const n = q.shift();
+      this._snap(`Visito ${n.valor}.`, { [n.id]: 'hi' });
+      if (n.izq === null){
+        n.izq = new NodoBinario(valor, n);
+        this._snap(`${n.valor} no tenia hijo izquierdo: aqui va ${valor}.`,
+                   { [n.izq.id]: 'new' });
+        return;
+      }
+      q.push(n.izq);
+      if (n.der === null){
+        n.der = new NodoBinario(valor, n);
+        this._snap(`${n.valor} no tenia hijo derecho: aqui va ${valor}.`,
+                   { [n.der.id]: 'new' });
+        return;
+      }
+      q.push(n.der);
+    }
+  }
+
+  search(valor){
+    if (!this.root){
+      this._snap(`Arbol vacio: ${valor} no se encuentra.`, {});
+      return null;
+    }
+    let found = null;
+    const dfs = (n) => {
+      if (n === null || found) return;
+      this._snap(`Comparo ${n.valor} con ${valor}.`, { [n.id]: 'hi' });
+      if (n.valor === valor){
+        this._snap(`Encontrado ${valor}.`, { [n.id]: 'found' });
+        found = n; return;
+      }
+      dfs(n.izq); dfs(n.der);
+    };
+    dfs(this.root);
+    if (!found) this._snap(`${valor} NO se encuentra en el arbol.`, {});
+    return found;
+  }
+
+  remove(valor){
+    if (!this.root){
+      this._snap(`Arbol vacio: nada que eliminar.`, {});
+      return false;
+    }
+    // Buscamos primero
+    let target = null;
+    const dfs = (n) => {
+      if (n === null || target) return;
+      this._snap(`Comparo ${n.valor} con ${valor}.`, { [n.id]: 'hi' });
+      if (n.valor === valor){ target = n; return; }
+      dfs(n.izq); dfs(n.der);
+    };
+    dfs(this.root);
+    if (!target){
+      this._snap(`${valor} no esta en el arbol: nada que eliminar.`, {});
+      return false;
+    }
+    // Marcamos el subarbol entero
+    const sub = {};
+    const collect = (n) => { if (!n) return; sub[n.id] = 'remove'; collect(n.izq); collect(n.der); };
+    collect(target);
+    this._snap(`Eliminaremos ${valor} con todo su subarbol.`, sub);
+    // Desconectamos del padre
+    if (target.padre === null) this.root = null;
+    else if (target.padre.izq === target) target.padre.izq = null;
+    else target.padre.der = null;
+    this._snap(`Subarbol de ${valor} eliminado.`, {});
+    return true;
+  }
+
+  _walkOrden(orden){
+    const out = [];
+    const dfs = (n) => {
+      if (!n) return;
+      if (orden === 'pre'){
+        this._snap(`Visito ${n.valor}.`, { [n.id]: 'hi' });
+        out.push(n.valor);
+      }
+      dfs(n.izq);
+      if (orden === 'in'){
+        this._snap(`Visito ${n.valor}.`, { [n.id]: 'hi' });
+        out.push(n.valor);
+      }
+      dfs(n.der);
+      if (orden === 'post'){
+        this._snap(`Visito ${n.valor}.`, { [n.id]: 'hi' });
+        out.push(n.valor);
+      }
+    };
+    dfs(this.root);
+    return out;
+  }
+
+  preorden(){
+    if (!this.root){ this._snap(`Arbol vacio.`, {}); return []; }
+    this._snap(`Preorden (raiz, izquierda, derecha).`, {});
+    const r = this._walkOrden('pre');
+    this._snap(`Preorden: [${r.join(', ')}]`, {});
+    return r;
+  }
+  inorden(){
+    if (!this.root){ this._snap(`Arbol vacio.`, {}); return []; }
+    this._snap(`Inorden (izquierda, raiz, derecha).`, {});
+    const r = this._walkOrden('in');
+    this._snap(`Inorden: [${r.join(', ')}]`, {});
+    return r;
+  }
+  postorden(){
+    if (!this.root){ this._snap(`Arbol vacio.`, {}); return []; }
+    this._snap(`Postorden (izquierda, derecha, raiz).`, {});
+    const r = this._walkOrden('post');
+    this._snap(`Postorden: [${r.join(', ')}]`, {});
+    return r;
+  }
+  porNiveles(){
+    if (!this.root){ this._snap(`Arbol vacio.`, {}); return []; }
+    this._snap(`Recorrido por niveles (BFS).`, {});
+    const out = []; const q = [this.root];
+    while (q.length){
+      const n = q.shift();
+      this._snap(`Visito ${n.valor}.`, { [n.id]: 'hi' });
+      out.push(n.valor);
+      if (n.izq) q.push(n.izq);
+      if (n.der) q.push(n.der);
+    }
+    this._snap(`Por niveles: [${out.join(', ')}]`, {});
+    return out;
+  }
+}
+
+// =======================================================================
+//  Motor de animacion
+// =======================================================================
+const UNIT = 60, LVL_H = 90, PAD = 50, R = 22;
+let MAX_DEPTH = 2;
+
+const stage  = document.getElementById('stage');
+const nodesG = document.getElementById('nodes');
+const edgesG = document.getElementById('edges');
+const seqEl  = document.getElementById('seq');
+
+function setViewBox(){
+  const slots = Math.pow(2, MAX_DEPTH);
+  const W = slots * UNIT + PAD * 2;
+  const H = (MAX_DEPTH + 1) * LVL_H + PAD * 2;
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+}
+setViewBox();
+
+function ptOf(node){
+  const slotW = Math.pow(2, MAX_DEPTH - node.depth);
+  // node.col is in slot units of the deepest level scaled by slotW; we passed col already in those units
+  const x = PAD + node.col * UNIT;
+  const y = PAD + node.depth * LVL_H + R;
+  return { x, y };
+}
+
+let REC = [], FRAMES = [], idx = 0, opName = '';
+let playing = false, timer = null;
+let pos = {}, rafStart = {}, rafTarget = {}, animT0 = 0;
+const els = {}, edgeEls = {};
+let curFrame = null;
+
+function ease(t){ return t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+function render(frame, animate){
+  if (frame.maxDepth > MAX_DEPTH){ MAX_DEPTH = frame.maxDepth; setViewBox(); }
+
+  const target = {}; const present = new Set();
+  frame.nodes.forEach(n => {
+    target[n.id] = ptOf(n);
+    present.add(n.id);
+  });
+
+  frame.nodes.forEach(n => {
+    let e = els[n.id];
+    if (!e){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','node');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('r', R);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      g.appendChild(c); g.appendChild(t); nodesG.appendChild(g);
+      e = els[n.id] = { g, circle:c, text:t };
+      pos[n.id] = target[n.id];
+    }
+    e.text.textContent = n.value;
+    const st = frame.states[n.id];
+    e.g.setAttribute('class', st ? 'node ' + st : 'node');
+  });
+
+  Object.keys(els).forEach(id => {
+    if (!present.has(Number(id))){
+      els[id].g.remove(); delete els[id]; delete pos[id];
+    }
+  });
+
+  rafStart = {}; rafTarget = target;
+  Object.keys(target).forEach(id => { rafStart[id] = pos[id] || target[id]; });
+  curFrame = frame;
+
+  if (animate){ animT0 = performance.now(); requestAnimationFrame(tick); }
+  else { Object.keys(target).forEach(id => pos[id] = target[id]); paint(frame); }
+
+  document.getElementById('msg').textContent = frame.message;
+  document.getElementById('counter').textContent =
+    `${opName} - paso ${idx + 1} / ${FRAMES.length}`;
+}
+
+function paint(frame){
+  Object.keys(els).forEach(id => {
+    const p = pos[id]; if (!p) return;
+    els[id].g.setAttribute('transform', `translate(${p.x},${p.y})`);
+  });
+  const want = {};
+  frame.edges.forEach(ed => {
+    const key = ed.parent + '-' + ed.child; want[key] = true;
+    let ln = edgeEls[key];
+    if (!ln){ ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+              edgesG.appendChild(ln); edgeEls[key] = ln; }
+    const a = pos[ed.parent], b = pos[ed.child];
+    if (a && b){ ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y);
+                 ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y); }
+  });
+  Object.keys(edgeEls).forEach(k => {
+    if (!(k in want)){ edgeEls[k].remove(); delete edgeEls[k]; }
+  });
+}
+
+function tick(now){
+  const t = Math.min(1, (now - animT0) / 400), e = ease(t);
+  Object.keys(rafTarget).forEach(id => {
+    const s = rafStart[id], d = rafTarget[id];
+    pos[id] = { x: s.x + (d.x - s.x) * e, y: s.y + (d.y - s.y) * e };
+  });
+  paint(curFrame);
+  if (t < 1) requestAnimationFrame(tick);
+}
+
+function goto(i, animate){
+  idx = Math.max(0, Math.min(FRAMES.length - 1, i));
+  render(FRAMES[idx], animate); updateButtons();
+}
+function updateButtons(){
+  first.disabled = prev.disabled = (idx === 0);
+  last.disabled  = next.disabled = (idx === FRAMES.length - 1);
+}
+function play(){
+  if (FRAMES.length <= 1) return;
+  if (idx >= FRAMES.length - 1) goto(0, false);
+  playing = true; playBtn.innerHTML = '&#10074;&#10074; Pausa'; schedule();
+}
+function pause(){ playing = false; playBtn.innerHTML = '&#9654; Reproducir'; clearTimeout(timer); }
+function schedule(){
+  clearTimeout(timer); if (!playing) return;
+  const delay = Number(document.getElementById('speed').value);
+  timer = setTimeout(() => {
+    if (idx < FRAMES.length - 1){ goto(idx + 1, true); schedule(); } else pause();
+  }, delay);
+}
+function runOp(name, fn){
+  pause();
+  REC = []; fn();
+  if (REC.length === 0) REC.push({ nodes:[], edges:[], maxDepth:MAX_DEPTH, message:'(sin cambios)', states:{} });
+  FRAMES = REC; idx = 0; opName = name;
+  render(FRAMES[0], false); updateButtons(); play();
+}
+
+let arbol = new ArbolBinario();
+
+function buildInitial(){
+  if (INITIAL_KEYS.length === 0){
+    REC = [{ nodes:[], edges:[], maxDepth:0, message:'Arbol vacio. Usa "Insertar" para agregar valores.', states:{} }];
+    FRAMES = REC; idx = 0; opName = 'Inicio';
+    render(FRAMES[0], false); updateButtons(); return;
+  }
+  runOp('Construccion', () => INITIAL_KEYS.forEach(k => arbol.put(k)));
+}
+
+function parseInput(raw){
+  raw = raw.trim();
+  if (raw === '') return null;
+  const n = Number(raw);
+  return (!isNaN(n)) ? n : raw;
+}
+
+function resetTree(){
+  pause();
+  nodesG.innerHTML = ''; edgesG.innerHTML = '';
+  for (const k in els) delete els[k];
+  for (const k in edgeEls) delete edgeEls[k];
+  pos = {}; NODE_ID = 0; MAX_DEPTH = 2;
+  setViewBox();
+  arbol = new ArbolBinario();
+  buildInitial();
+}
+
+INITIAL_KEYS.forEach(v => {
+  const s = document.createElement('span'); s.className = 'chip';
+  s.textContent = v; seqEl.appendChild(s);
+});
+
+const first = document.getElementById('first');
+const prev  = document.getElementById('prev');
+const next  = document.getElementById('next');
+const last  = document.getElementById('last');
+const playBtn = document.getElementById('play');
+const opval = document.getElementById('opval');
+
+first.onclick = () => { pause(); goto(0, true); };
+prev.onclick  = () => { pause(); goto(idx - 1, true); };
+next.onclick  = () => { pause(); goto(idx + 1, true); };
+last.onclick  = () => { pause(); goto(FRAMES.length - 1, false); };
+playBtn.onclick = () => playing ? pause() : play();
+
+document.getElementById('insertBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Insertar ${v}`, () => arbol.put(v)); opval.value = '';
+};
+document.getElementById('searchBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Buscar ${v}`, () => arbol.search(v));
+};
+document.getElementById('deleteBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Eliminar subarbol de ${v}`, () => arbol.remove(v)); opval.value = '';
+};
+document.getElementById('preBtn').onclick  = () => runOp('Preorden',   () => arbol.preorden());
+document.getElementById('inBtn').onclick   = () => runOp('Inorden',    () => arbol.inorden());
+document.getElementById('postBtn').onclick = () => runOp('Postorden',  () => arbol.postorden());
+document.getElementById('lvlBtn').onclick  = () => runOp('Por niveles',() => arbol.porNiveles());
+document.getElementById('resetBtn').onclick = resetTree;
+
+opval.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('insertBtn').click();
+});
+document.addEventListener('keydown', e => {
+  if (document.activeElement === opval) return;
+  if (e.key === 'ArrowRight'){ pause(); goto(idx + 1, true); }
+  if (e.key === 'ArrowLeft'){ pause(); goto(idx - 1, true); }
+  if (e.key === ' '){ e.preventDefault(); playing ? pause() : play(); }
+});
+
+buildInitial();
+</script>
+</body>
+</html>
