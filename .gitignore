@@ -40,8 +40,14 @@ htmlcov/
 # Logs
 *.log
 
-# Archivos generados por el simulador BST
+# Archivos generados por los simuladores
 progra_ds/BST/bst_animacion.html
+progra_ds/Pila/pila_animacion.html
+progra_ds/Cola/cola_animacion.html
+progra_ds/Heap/heap_animacion.html
+progra_ds/HashTable/hash_animacion.html
+progra_ds/ArbolBinario/arbol_binario_animacion.html
+progra_ds/Arbol/arbol_animacion.html
 
 # LaTeX (artefactos de compilacion; los .tex y .pdf SI se versionan)
 *.aux
