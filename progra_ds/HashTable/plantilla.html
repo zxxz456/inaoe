@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Tabla Hash</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --box:#3b82f6; --hi:#f59e0b;
+          --new:#22c55e; --found:#06b6d4; --del:#ef4444; --edge:#64748b;
+          --text:#e2e8f0; --muted:#94a3b8; --bucket:#334155; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom:1px solid #334155; }
+  header h1 { margin:0; font-size: 18px; }
+  header .info { color: var(--muted); font-size:13px; margin-top:4px; }
+  .seq { padding: 10px 20px; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; border-bottom:1px solid #334155; }
+  .seq .lbl { color: var(--muted); font-size:13px; margin-right:6px; }
+  .chip { padding:4px 10px; border-radius:6px; background:#334155;
+          font-variant-numeric: tabular-nums; font-size:14px; }
+  .ops { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155; }
+  .ops input { background:#0b1220; color:var(--text); border:1px solid #475569;
+               border-radius:8px; padding:8px 12px; font-size:15px; width:140px; }
+  .ops .ins { border-color:#15803d; }
+  .ops .bus { border-color:#0e7490; }
+  .ops .del { border-color:#b91c1c; }
+  #stage { width:100%; height: 56vh; background:
+           radial-gradient(circle at 50% 0%, #16233f, var(--bg)); }
+  .msg { padding: 12px 20px; min-height: 24px; font-size: 15px;
+         border-top:1px solid #334155; border-bottom:1px solid #334155; }
+  .controls { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+              flex-wrap:wrap; }
+  button { background: var(--panel); color: var(--text); border:1px solid #475569;
+           border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { background:#334155; }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .speed { display:flex; align-items:center; gap:8px; margin-left:auto;
+           color: var(--muted); font-size:13px; }
+  line, .arrow { stroke: var(--edge); stroke-width: 2; fill: none; }
+  .bucket rect { fill: var(--bucket); stroke: #475569; stroke-width: 1.5; }
+  .bucket .idx { fill: var(--muted); font-size: 12px; text-anchor: middle;
+                 dominant-baseline: central; }
+  .bucket.hi rect { fill: #475569; stroke: var(--hi); stroke-width: 2; }
+  .box rect { fill: var(--box); stroke:#1e3a8a; stroke-width:2;
+              transition: fill .25s, stroke .25s; }
+  .box text { fill:#fff; font-size:14px; font-weight:600; text-anchor:middle;
+              dominant-baseline:central; pointer-events:none; }
+  .box.hi    rect { fill: var(--hi);    stroke:#b45309; }
+  .box.new   rect { fill: var(--new);   stroke:#15803d; }
+  .box.found rect { fill: var(--found); stroke:#155e75; }
+  .box.remove rect{ fill: var(--del);   stroke:#7f1d1d; }
+  .legend { display:flex; gap:16px; padding:0 20px 16px; color:var(--muted);
+            font-size:13px; flex-wrap:wrap; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de Tabla Hash (encadenamiento)</h1>
+  <div class="info" id="info"></div>
+</header>
+
+<div class="seq"><span class="lbl">Secuencia inicial:</span><span id="seq"></span></div>
+
+<div class="ops">
+  <input id="opval" type="text" placeholder="clave" autocomplete="off">
+  <button id="insertBtn" class="ins">Insertar</button>
+  <button id="searchBtn" class="bus">Buscar</button>
+  <button id="deleteBtn" class="del">Eliminar</button>
+  <button id="traverseBtn">Recorrer</button>
+  <button id="resetBtn" title="Reconstruye la tabla inicial">Reiniciar</button>
+</div>
+
+<svg id="stage" preserveAspectRatio="xMidYMid meet">
+  <g id="buckets"></g>
+  <g id="chains"></g>
+  <g id="items"></g>
+</svg>
+
+<div class="msg" id="msg"></div>
+
+<div class="controls">
+  <button id="first" title="Inicio">&#9198;</button>
+  <button id="prev"  title="Anterior">&#9664;</button>
+  <button id="play"  title="Reproducir">&#9654; Reproducir</button>
+  <button id="next"  title="Siguiente">&#9654;</button>
+  <button id="last"  title="Fin">&#9197;</button>
+  <span class="counter" id="counter"></span>
+  <label class="speed">Velocidad
+    <input id="speed" type="range" min="150" max="1600" value="700" step="50">
+  </label>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--box)"></i>Par</span>
+  <span><i class="dot" style="background:var(--hi)"></i>Visitando cubeta / par</span>
+  <span><i class="dot" style="background:var(--new)"></i>Nuevo / resultado</span>
+  <span><i class="dot" style="background:var(--found)"></i>Encontrado</span>
+  <span><i class="dot" style="background:var(--del)"></i>A eliminar</span>
+</div>
+
+<script>
+const INITIAL_KEYS = __KEYS__;
+const NUM_BUCKETS  = __M__;
+document.getElementById('info').textContent =
+  `${NUM_BUCKETS} cubetas · funcion hash: suma de codigos mod ${NUM_BUCKETS}`;
+
+// =======================================================================
+//  Estructura de la Tabla Hash en JavaScript (refleja hash_table.py)
+// =======================================================================
+let NEXT_ID = 0;
+
+function hashOf(key, M){
+  if (typeof key === 'number') return Math.abs(key | 0) % M;
+  let s = 0; const str = String(key);
+  for (let i = 0; i < str.length; i++) s += str.charCodeAt(i);
+  return s % M;
+}
+
+class HashTable {
+  constructor(M){
+    this.M = M;
+    this.buckets = Array.from({length: M}, () => []);   // cada elemento: {id,key,value}
+  }
+
+  _snap(message, states, hiBucket){
+    const items = [];
+    this.buckets.forEach((b, bi) => {
+      b.forEach((it, ci) => items.push({
+        id: it.id, key: String(it.key), bi, ci
+      }));
+    });
+    REC.push({ items, message, states: states || {}, hiBucket });
+  }
+
+  put(key){
+    const h = hashOf(key, this.M);
+    this._snap(`Insertar ${key}: hash(${key}) = ${h}.`, {}, h);
+    // Buscar si ya existe
+    const cubeta = this.buckets[h];
+    for (let i = 0; i < cubeta.length; i++){
+      this._snap(`Comparar con ${cubeta[i].key} en la cadena de [${h}].`,
+                 { [cubeta[i].id]: 'hi' }, h);
+      if (cubeta[i].key === key){
+        this._snap(`Ya existia ${key}: se actualiza (sin animacion adicional).`,
+                   { [cubeta[i].id]: 'found' }, h);
+        return;
+      }
+    }
+    const it = { id: ++NEXT_ID, key };
+    cubeta.push(it);
+    this._snap(`Sin colision con misma clave: insertamos ${key} al final de la cadena de [${h}].`,
+               { [it.id]: 'new' }, h);
+  }
+
+  get(key){
+    const h = hashOf(key, this.M);
+    this._snap(`Buscar ${key}: hash(${key}) = ${h}.`, {}, h);
+    const cubeta = this.buckets[h];
+    if (cubeta.length === 0){
+      this._snap(`Cubeta [${h}] vacia: ${key} NO esta. ✗`, {}, h);
+      return -1;
+    }
+    for (let i = 0; i < cubeta.length; i++){
+      const it = cubeta[i];
+      this._snap(`Comparar con ${it.key}.`, { [it.id]: 'hi' }, h);
+      if (it.key === key){
+        this._snap(`¡Encontrado ${key} en [${h}], posicion ${i} de la cadena! ✓`,
+                   { [it.id]: 'found' }, h);
+        return i;
+      }
+    }
+    this._snap(`Cadena recorrida: ${key} NO esta. ✗`, {}, h);
+    return -1;
+  }
+
+  remove(key){
+    const h = hashOf(key, this.M);
+    this._snap(`Eliminar ${key}: hash(${key}) = ${h}.`, {}, h);
+    const cubeta = this.buckets[h];
+    for (let i = 0; i < cubeta.length; i++){
+      const it = cubeta[i];
+      this._snap(`Comparar con ${it.key}.`, { [it.id]: 'hi' }, h);
+      if (it.key === key){
+        this._snap(`Marcamos para eliminar: ${it.key}.`,
+                   { [it.id]: 'remove' }, h);
+        cubeta.splice(i, 1);
+        this._snap(`${key} eliminado de la cadena de [${h}].`, {}, h);
+        return true;
+      }
+    }
+    this._snap(`${key} no estaba en la cubeta [${h}]: nada que eliminar. ✗`, {}, h);
+    return false;
+  }
+
+  traverse(){
+    this._snap(`Recorrido: visitamos cada cubeta en orden.`, {});
+    for (let bi = 0; bi < this.M; bi++){
+      this._snap(`Cubeta [${bi}] (${this.buckets[bi].length} elementos).`, {}, bi);
+      this.buckets[bi].forEach(it => {
+        this._snap(`Visito ${it.key}.`, { [it.id]: 'hi' }, bi);
+      });
+    }
+    const total = this.buckets.reduce((s, b) => s + b.length, 0);
+    this._snap(`Recorrido completo: ${total} elementos en ${this.M} cubetas.`, {});
+  }
+}
+
+// =======================================================================
+//  Motor de animacion
+// =======================================================================
+const BUCKET_W = 60, BUCKET_H = 44, ROW_GAP = 14, PAD = 30;
+const ITEM_W = 64, ITEM_H = 40, ITEM_GAP = 10;
+const CHAIN_X0 = PAD + BUCKET_W + 16;
+
+const stage    = document.getElementById('stage');
+const bucketsG = document.getElementById('buckets');
+const chainsG  = document.getElementById('chains');
+const itemsG   = document.getElementById('items');
+const seqEl    = document.getElementById('seq');
+
+let MAX_CHAIN = 4;
+function setViewBox(){
+  const W = CHAIN_X0 + MAX_CHAIN * (ITEM_W + ITEM_GAP) + PAD + 20;
+  const H = NUM_BUCKETS * (BUCKET_H + ROW_GAP) + PAD * 2;
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+}
+setViewBox();
+
+// Render fixed buckets
+function drawBuckets(){
+  bucketsG.innerHTML = '';
+  for (let i = 0; i < NUM_BUCKETS; i++){
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','bucket');
+    g.dataset.idx = i;
+    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x', PAD); r.setAttribute('y', PAD + i*(BUCKET_H+ROW_GAP));
+    r.setAttribute('width', BUCKET_W); r.setAttribute('height', BUCKET_H);
+    r.setAttribute('rx', 6);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('class','idx');
+    t.setAttribute('x', PAD + BUCKET_W/2);
+    t.setAttribute('y', PAD + i*(BUCKET_H+ROW_GAP) + BUCKET_H/2);
+    t.textContent = '[' + i + ']';
+    g.appendChild(r); g.appendChild(t); bucketsG.appendChild(g);
+  }
+}
+drawBuckets();
+
+function xChain(ci){ return CHAIN_X0 + ci * (ITEM_W + ITEM_GAP) + ITEM_W/2; }
+function yBucket(bi){ return PAD + bi*(BUCKET_H+ROW_GAP) + BUCKET_H/2; }
+
+let REC = [], FRAMES = [], idx = 0, opName = '';
+let playing = false, timer = null;
+let pos = {}, rafStart = {}, rafTarget = {}, animT0 = 0;
+const els = {};
+let curFrame = null;
+
+function ease(t){ return t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+function render(frame, animate){
+  // expand width if any chain gets too long
+  let maxC = 0;
+  frame.items.forEach(it => { if (it.ci + 1 > maxC) maxC = it.ci + 1; });
+  if (maxC > MAX_CHAIN){ MAX_CHAIN = maxC + 1; setViewBox(); }
+
+  const target = {}; const present = new Set();
+  frame.items.forEach(it => {
+    target[it.id] = { x: xChain(it.ci), y: yBucket(it.bi) };
+    present.add(it.id);
+  });
+
+  frame.items.forEach(it => {
+    let e = els[it.id];
+    if (!e){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','box');
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x', -ITEM_W/2); r.setAttribute('y', -ITEM_H/2);
+      r.setAttribute('width', ITEM_W); r.setAttribute('height', ITEM_H);
+      r.setAttribute('rx', 6);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      g.appendChild(r); g.appendChild(t); itemsG.appendChild(g);
+      e = els[it.id] = { g, rect:r, text:t };
+      // enter from above
+      pos[it.id] = { x: target[it.id].x, y: target[it.id].y - 40 };
+    }
+    e.text.textContent = it.key;
+    const st = frame.states[it.id];
+    e.g.setAttribute('class', st ? 'box ' + st : 'box');
+  });
+
+  Object.keys(els).forEach(id => {
+    if (!present.has(Number(id))){
+      els[id].g.remove(); delete els[id]; delete pos[id];
+    }
+  });
+
+  // Bucket highlight
+  Array.from(bucketsG.children).forEach(g => {
+    g.classList.toggle('hi', Number(g.dataset.idx) === frame.hiBucket);
+  });
+
+  // Chains: lines from bucket → first item, item → next item
+  chainsG.innerHTML = '';
+  const byBucket = {};
+  frame.items.forEach(it => {
+    (byBucket[it.bi] = byBucket[it.bi] || []).push(it);
+  });
+  Object.entries(byBucket).forEach(([bi, list]) => {
+    list.sort((a, b) => a.ci - b.ci);
+    // first edge: bucket to item 0
+    const y = yBucket(Number(bi));
+    let prevX = PAD + BUCKET_W;
+    list.forEach((it, k) => {
+      const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1', prevX);
+      ln.setAttribute('y1', y);
+      ln.setAttribute('x2', xChain(it.ci) - ITEM_W/2);
+      ln.setAttribute('y2', y);
+      chainsG.appendChild(ln);
+      prevX = xChain(it.ci) + ITEM_W/2;
+    });
+  });
+
+  rafStart = {}; rafTarget = target;
+  Object.keys(target).forEach(id => { rafStart[id] = pos[id] || target[id]; });
+  curFrame = frame;
+
+  if (animate){ animT0 = performance.now(); requestAnimationFrame(tick); }
+  else { Object.keys(target).forEach(id => pos[id] = target[id]); paint(frame); }
+
+  document.getElementById('msg').textContent = frame.message;
+  document.getElementById('counter').textContent =
+    `${opName} — paso ${idx + 1} / ${FRAMES.length}`;
+}
+
+function paint(frame){
+  Object.keys(els).forEach(id => {
+    const p = pos[id]; if (!p) return;
+    els[id].g.setAttribute('transform', `translate(${p.x},${p.y})`);
+  });
+}
+
+function tick(now){
+  const t = Math.min(1, (now - animT0) / 400), e = ease(t);
+  Object.keys(rafTarget).forEach(id => {
+    const s = rafStart[id], d = rafTarget[id];
+    pos[id] = { x: s.x + (d.x - s.x) * e, y: s.y + (d.y - s.y) * e };
+  });
+  paint(curFrame);
+  if (t < 1) requestAnimationFrame(tick);
+}
+
+function goto(i, animate){
+  idx = Math.max(0, Math.min(FRAMES.length - 1, i));
+  render(FRAMES[idx], animate); updateButtons();
+}
+function updateButtons(){
+  first.disabled = prev.disabled = (idx === 0);
+  last.disabled  = next.disabled = (idx === FRAMES.length - 1);
+}
+function play(){
+  if (FRAMES.length <= 1) return;
+  if (idx >= FRAMES.length - 1) goto(0, false);
+  playing = true; playBtn.innerHTML = '&#10074;&#10074; Pausa'; schedule();
+}
+function pause(){ playing = false; playBtn.innerHTML = '&#9654; Reproducir'; clearTimeout(timer); }
+function schedule(){
+  clearTimeout(timer); if (!playing) return;
+  const delay = Number(document.getElementById('speed').value);
+  timer = setTimeout(() => {
+    if (idx < FRAMES.length - 1){ goto(idx + 1, true); schedule(); } else pause();
+  }, delay);
+}
+function runOp(name, fn){
+  pause();
+  REC = []; fn();
+  if (REC.length === 0) REC.push({ items:[], message:'(sin cambios)', states:{} });
+  FRAMES = REC; idx = 0; opName = name;
+  render(FRAMES[0], false); updateButtons(); play();
+}
+
+let tabla = new HashTable(NUM_BUCKETS);
+
+function buildInitial(){
+  if (INITIAL_KEYS.length === 0){
+    REC = [{ items:[], message:'Tabla vacia. Usa "Insertar" para agregar claves.', states:{} }];
+    FRAMES = REC; idx = 0; opName = 'Inicio';
+    render(FRAMES[0], false); updateButtons(); return;
+  }
+  runOp('Construccion', () => INITIAL_KEYS.forEach(k => tabla.put(k)));
+}
+
+function parseInput(raw){
+  raw = raw.trim();
+  if (raw === '') return null;
+  const n = Number(raw);
+  return (!isNaN(n)) ? n : raw;
+}
+
+function resetTree(){
+  pause();
+  itemsG.innerHTML = ''; chainsG.innerHTML = '';
+  for (const k in els) delete els[k];
+  pos = {}; NEXT_ID = 0; MAX_CHAIN = 4;
+  setViewBox();
+  tabla = new HashTable(NUM_BUCKETS);
+  buildInitial();
+}
+
+INITIAL_KEYS.forEach(v => {
+  const s = document.createElement('span'); s.className = 'chip';
+  s.textContent = v; seqEl.appendChild(s);
+});
+
+const first = document.getElementById('first');
+const prev  = document.getElementById('prev');
+const next  = document.getElementById('next');
+const last  = document.getElementById('last');
+const playBtn = document.getElementById('play');
+const opval = document.getElementById('opval');
+
+first.onclick = () => { pause(); goto(0, true); };
+prev.onclick  = () => { pause(); goto(idx - 1, true); };
+next.onclick  = () => { pause(); goto(idx + 1, true); };
+last.onclick  = () => { pause(); goto(FRAMES.length - 1, false); };
+playBtn.onclick = () => playing ? pause() : play();
+
+document.getElementById('insertBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Insertar ${v}`, () => tabla.put(v)); opval.value = '';
+};
+document.getElementById('searchBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Buscar ${v}`, () => tabla.get(v));
+};
+document.getElementById('deleteBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Eliminar ${v}`, () => tabla.remove(v)); opval.value = '';
+};
+document.getElementById('traverseBtn').onclick = () => {
+  runOp('Recorrido', () => tabla.traverse());
+};
+document.getElementById('resetBtn').onclick = resetTree;
+
+opval.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('insertBtn').click();
+});
+document.addEventListener('keydown', e => {
+  if (document.activeElement === opval) return;
+  if (e.key === 'ArrowRight'){ pause(); goto(idx + 1, true); }
+  if (e.key === 'ArrowLeft'){ pause(); goto(idx - 1, true); }
+  if (e.key === ' '){ e.preventDefault(); playing ? pause() : play(); }
+});
+
+buildInitial();
+</script>
+</body>
+</html>
