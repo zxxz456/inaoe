@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Pila</title>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --box:#3b82f6; --hi:#f59e0b;
+          --new:#22c55e; --found:#06b6d4; --del:#ef4444; --edge:#64748b;
+          --text:#e2e8f0; --muted:#94a3b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom:1px solid #334155; }
+  header h1 { margin:0; font-size: 18px; }
+  header p { margin:4px 0 0; color: var(--muted); font-size: 13px; }
+  .seq { padding: 10px 20px; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; border-bottom:1px solid #334155; }
+  .seq .lbl { color: var(--muted); font-size:13px; margin-right:6px; }
+  .chip { padding:4px 10px; border-radius:6px; background:#334155;
+          font-variant-numeric: tabular-nums; font-size:14px; }
+
+  .ops { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+         flex-wrap:wrap; border-bottom:1px solid #334155; }
+  .ops input { background:#0b1220; color:var(--text); border:1px solid #475569;
+               border-radius:8px; padding:8px 12px; font-size:15px; width:120px; }
+  .ops .ins { border-color:#15803d; }
+  .ops .bus { border-color:#0e7490; }
+  .ops .del { border-color:#b91c1c; }
+
+  #stage { width:100%; height: 56vh; background:
+           radial-gradient(circle at 50% 0%, #16233f, var(--bg)); }
+  .msg { padding: 12px 20px; min-height: 24px; font-size: 15px;
+         border-top:1px solid #334155; border-bottom:1px solid #334155; }
+  .controls { padding: 12px 20px; display:flex; gap:10px; align-items:center;
+              flex-wrap:wrap; }
+  button { background: var(--panel); color: var(--text); border:1px solid #475569;
+           border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { background:#334155; }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .speed { display:flex; align-items:center; gap:8px; margin-left:auto;
+           color: var(--muted); font-size:13px; }
+
+  .box rect { fill: var(--box); stroke:#1e3a8a; stroke-width:2;
+              transition: fill .25s, stroke .25s; }
+  .box text { fill:#fff; font-size:15px; font-weight:600; text-anchor:middle;
+              dominant-baseline:central; pointer-events:none; }
+  .box.hi    rect { fill: var(--hi);    stroke:#b45309; }
+  .box.new   rect { fill: var(--new);   stroke:#15803d; }
+  .box.found rect { fill: var(--found); stroke:#155e75; }
+  .box.remove rect{ fill: var(--del);   stroke:#7f1d1d; }
+  .anchor-label { fill: var(--muted); font-size: 13px; }
+  .base-line   { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 4 4; }
+  .legend { display:flex; gap:16px; padding:0 20px 16px; color:var(--muted);
+            font-size:13px; flex-wrap:wrap; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de Pila (Stack, LIFO)</h1>
+</header>
+
+<div class="seq"><span class="lbl">Secuencia inicial:</span><span id="seq"></span></div>
+
+<div class="ops">
+  <input id="opval" type="text" placeholder="valor" autocomplete="off">
+  <button id="pushBtn" class="ins">Push</button>
+  <button id="popBtn" class="del">Pop</button>
+  <button id="peekBtn">Peek</button>
+  <button id="searchBtn" class="bus">Buscar</button>
+  <button id="traverseBtn">Recorrer</button>
+  <button id="resetBtn" title="Reconstruye la pila inicial">Reiniciar</button>
+</div>
+
+<svg id="stage" preserveAspectRatio="xMidYMid meet">
+  <g id="items"></g>
+  <line id="baseLine" class="base-line"></line>
+  <text id="topLabel" class="anchor-label">&#8593; tope</text>
+  <text id="baseTxt" class="anchor-label">base</text>
+</svg>
+
+<div class="msg" id="msg"></div>
+
+<div class="controls">
+  <button id="first" title="Inicio">&#9198;</button>
+  <button id="prev"  title="Anterior">&#9664;</button>
+  <button id="play"  title="Reproducir">&#9654; Reproducir</button>
+  <button id="next"  title="Siguiente">&#9654;</button>
+  <button id="last"  title="Fin">&#9197;</button>
+  <span class="counter" id="counter"></span>
+  <label class="speed">Velocidad
+    <input id="speed" type="range" min="150" max="1600" value="700" step="50">
+  </label>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--box)"></i>Elemento</span>
+  <span><i class="dot" style="background:var(--hi)"></i>Comparando / visitando</span>
+  <span><i class="dot" style="background:var(--new)"></i>Nuevo / resultado</span>
+  <span><i class="dot" style="background:var(--found)"></i>Encontrado / tope</span>
+  <span><i class="dot" style="background:var(--del)"></i>A eliminar</span>
+</div>
+
+<script>
+const INITIAL_KEYS = __KEYS__;
+
+// =======================================================================
+//  Estructura de la Pila en JavaScript (refleja la de pila.py)
+// =======================================================================
+let NEXT_ID = 0;
+
+class Pila {
+  constructor(){ this.items = []; }   // cada elemento: {id, value}
+
+  _snap(message, states){
+    const items = this.items.map((it, i) => ({ id:it.id, value:String(it.value), slot:i }));
+    REC.push({ items, message, states: states || {} });
+  }
+
+  push(v){
+    this._snap(`Push: agregaremos ${v} al TOPE.`, {});
+    const it = { id: ++NEXT_ID, value: v };
+    this.items.push(it);
+    this._snap(`${v} colocado en el tope (indice ${this.items.length - 1}).`,
+               { [it.id]: 'new' });
+  }
+
+  pop(){
+    if (this.items.length === 0){
+      this._snap(`La pila esta vacia: no hay nada que sacar. ✗`, {});
+      return null;
+    }
+    const top = this.items[this.items.length - 1];
+    this._snap(`Tope actual: ${top.value}. Lo retiraremos.`,
+               { [top.id]: 'remove' });
+    this.items.pop();
+    this._snap(`${top.value} retirado de la pila. Nuevo tamano: ${this.items.length}.`, {});
+    return top.value;
+  }
+
+  peek(){
+    if (this.items.length === 0){
+      this._snap(`Pila vacia: no hay tope. ✗`, {});
+      return null;
+    }
+    const top = this.items[this.items.length - 1];
+    this._snap(`El tope es ${top.value}. (peek no modifica la pila)`,
+               { [top.id]: 'found' });
+    return top.value;
+  }
+
+  search(v){
+    if (this.items.length === 0){
+      this._snap(`Pila vacia: ${v} no se encuentra. ✗`, {});
+      return -1;
+    }
+    for (let i = this.items.length - 1; i >= 0; i--){
+      const it = this.items[i];
+      this._snap(`Comparando ${it.value} con ${v}.`, { [it.id]: 'hi' });
+      if (it.value === v){
+        const dist = this.items.length - 1 - i;
+        this._snap(`¡Encontrado ${v}! ✓ (a ${dist} del tope)`,
+                   { [it.id]: 'found' });
+        return dist;
+      }
+    }
+    this._snap(`${v} NO se encuentra en la pila. ✗`, {});
+    return -1;
+  }
+
+  traverse(){
+    if (this.items.length === 0){
+      this._snap(`Pila vacia: nada que recorrer.`, {});
+      return;
+    }
+    this._snap(`Recorrido desde el TOPE hacia la BASE.`, {});
+    for (let i = this.items.length - 1; i >= 0; i--){
+      const it = this.items[i];
+      this._snap(`Visitando ${it.value} (indice ${i}).`, { [it.id]: 'hi' });
+    }
+    this._snap(`Recorrido completo: ${this.items.length} elementos.`, {});
+  }
+}
+
+// =======================================================================
+//  Motor de animacion (reproductor de fotogramas)
+// =======================================================================
+const BOX_W = 140, BOX_H = 46, GAP = 6, PAD = 50, LEFT_LBL = 60;
+
+const stage  = document.getElementById('stage');
+const itemsG = document.getElementById('items');
+const seqEl  = document.getElementById('seq');
+const topLabel = document.getElementById('topLabel');
+const baseTxt  = document.getElementById('baseTxt');
+const baseLine = document.getElementById('baseLine');
+
+let MAX_SLOTS = Math.max(4, INITIAL_KEYS.length + 2);
+function setViewBox(){
+  const W = BOX_W + PAD * 2 + LEFT_LBL + 60;
+  const H = MAX_SLOTS * (BOX_H + GAP) + PAD * 2;
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  // base line y = bottom slot's bottom edge
+  const yBaseBottom = PAD + MAX_SLOTS * (BOX_H + GAP);
+  baseLine.setAttribute('x1', LEFT_LBL + 20);
+  baseLine.setAttribute('x2', LEFT_LBL + 20 + BOX_W);
+  baseLine.setAttribute('y1', yBaseBottom);
+  baseLine.setAttribute('y2', yBaseBottom);
+  baseTxt.setAttribute('x', LEFT_LBL + 20 + BOX_W + 12);
+  baseTxt.setAttribute('y', yBaseBottom + 5);
+}
+setViewBox();
+
+const cx = () => LEFT_LBL + 20 + BOX_W / 2;
+function ySlot(slot, n){
+  // slot 0 = base; slot n-1 = tope (arriba). El TOPE queda anclado al fondo
+  // que indica la linea de base.
+  const yBaseBottom = PAD + MAX_SLOTS * (BOX_H + GAP);
+  return yBaseBottom - (slot + 1) * (BOX_H + GAP) + GAP / 2 + BOX_H / 2;
+}
+
+let REC = [], FRAMES = [], idx = 0, opName = '';
+let playing = false, timer = null;
+let pos = {}, rafStart = {}, rafTarget = {}, animT0 = 0;
+const els = {};
+let curFrame = null;
+
+function ease(t){ return t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+function render(frame, animate){
+  const n = frame.items.length;
+  if (n > MAX_SLOTS){ MAX_SLOTS = n + 1; setViewBox(); }
+
+  const target = {}; const present = new Set();
+  frame.items.forEach(it => {
+    target[it.id] = { x: cx(), y: ySlot(it.slot, n) };
+    present.add(it.id);
+  });
+
+  frame.items.forEach(it => {
+    let e = els[it.id];
+    if (!e){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','box');
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x', -BOX_W/2); r.setAttribute('y', -BOX_H/2);
+      r.setAttribute('width', BOX_W); r.setAttribute('height', BOX_H);
+      r.setAttribute('rx', 6);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      g.appendChild(r); g.appendChild(t); itemsG.appendChild(g);
+      e = els[it.id] = { g, rect:r, text:t };
+      // entra desde arriba (se desliza hacia su posicion)
+      pos[it.id] = { x: cx(), y: -BOX_H };
+    }
+    e.text.textContent = it.value;
+    const st = frame.states[it.id];
+    e.g.setAttribute('class', st ? 'box ' + st : 'box');
+  });
+
+  Object.keys(els).forEach(id => {
+    if (!present.has(Number(id))){
+      els[id].g.remove(); delete els[id]; delete pos[id];
+    }
+  });
+
+  rafStart = {}; rafTarget = target;
+  Object.keys(target).forEach(id => { rafStart[id] = pos[id] || target[id]; });
+
+  curFrame = frame;
+  if (animate){ animT0 = performance.now(); requestAnimationFrame(tick); }
+  else { Object.keys(target).forEach(id => pos[id] = target[id]); paint(frame); }
+
+  document.getElementById('msg').textContent = frame.message;
+  document.getElementById('counter').textContent =
+    `${opName} — paso ${idx + 1} / ${FRAMES.length}`;
+
+  topLabel.style.display = n > 0 ? '' : 'none';
+  if (n > 0){
+    topLabel.setAttribute('x', cx() + BOX_W/2 + 12);
+    topLabel.setAttribute('y', ySlot(n - 1, n) + 5);
+  }
+}
+
+function paint(frame){
+  Object.keys(els).forEach(id => {
+    const p = pos[id]; if (!p) return;
+    els[id].g.setAttribute('transform', `translate(${p.x},${p.y})`);
+  });
+}
+
+function tick(now){
+  const t = Math.min(1, (now - animT0) / 400), e = ease(t);
+  Object.keys(rafTarget).forEach(id => {
+    const s = rafStart[id], d = rafTarget[id];
+    pos[id] = { x: s.x + (d.x - s.x) * e, y: s.y + (d.y - s.y) * e };
+  });
+  paint(curFrame);
+  if (t < 1) requestAnimationFrame(tick);
+}
+
+function goto(i, animate){
+  idx = Math.max(0, Math.min(FRAMES.length - 1, i));
+  render(FRAMES[idx], animate); updateButtons();
+}
+function updateButtons(){
+  first.disabled = prev.disabled = (idx === 0);
+  last.disabled  = next.disabled = (idx === FRAMES.length - 1);
+}
+function play(){
+  if (FRAMES.length <= 1) return;
+  if (idx >= FRAMES.length - 1) goto(0, false);
+  playing = true; playBtn.innerHTML = '&#10074;&#10074; Pausa'; schedule();
+}
+function pause(){ playing = false; playBtn.innerHTML = '&#9654; Reproducir'; clearTimeout(timer); }
+function schedule(){
+  clearTimeout(timer); if (!playing) return;
+  const delay = Number(document.getElementById('speed').value);
+  timer = setTimeout(() => {
+    if (idx < FRAMES.length - 1){ goto(idx + 1, true); schedule(); } else pause();
+  }, delay);
+}
+
+function runOp(name, fn){
+  pause();
+  REC = []; fn();
+  if (REC.length === 0) REC.push({ items:[], message:'(sin cambios)', states:{} });
+  FRAMES = REC; idx = 0; opName = name;
+  render(FRAMES[0], false); updateButtons(); play();
+}
+
+// =======================================================================
+//  Construccion inicial e interaccion del usuario
+// =======================================================================
+let pila = new Pila();
+
+function buildInitial(){
+  if (INITIAL_KEYS.length === 0){
+    REC = [{ items:[], message:'Pila vacia. Usa "Push" para agregar valores.', states:{} }];
+    FRAMES = REC; idx = 0; opName = 'Inicio';
+    render(FRAMES[0], false); updateButtons(); return;
+  }
+  runOp('Construccion', () => INITIAL_KEYS.forEach(k => pila.push(k)));
+}
+
+function parseInput(raw){
+  raw = raw.trim();
+  if (raw === '') return null;
+  const n = Number(raw);
+  return (!isNaN(n)) ? n : raw;
+}
+
+function resetTree(){
+  pause();
+  itemsG.innerHTML = '';
+  for (const k in els) delete els[k];
+  pos = {}; NEXT_ID = 0; MAX_SLOTS = Math.max(4, INITIAL_KEYS.length + 2);
+  setViewBox();
+  pila = new Pila();
+  buildInitial();
+}
+
+INITIAL_KEYS.forEach(v => {
+  const s = document.createElement('span'); s.className = 'chip';
+  s.textContent = v; seqEl.appendChild(s);
+});
+
+const first = document.getElementById('first');
+const prev  = document.getElementById('prev');
+const next  = document.getElementById('next');
+const last  = document.getElementById('last');
+const playBtn = document.getElementById('play');
+const opval = document.getElementById('opval');
+
+first.onclick = () => { pause(); goto(0, true); };
+prev.onclick  = () => { pause(); goto(idx - 1, true); };
+next.onclick  = () => { pause(); goto(idx + 1, true); };
+last.onclick  = () => { pause(); goto(FRAMES.length - 1, false); };
+playBtn.onclick = () => playing ? pause() : play();
+
+document.getElementById('pushBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Push ${v}`, () => pila.push(v)); opval.value = '';
+};
+document.getElementById('popBtn').onclick = () => {
+  runOp('Pop', () => pila.pop());
+};
+document.getElementById('peekBtn').onclick = () => {
+  runOp('Peek', () => pila.peek());
+};
+document.getElementById('searchBtn').onclick = () => {
+  const v = parseInput(opval.value); if (v === null) return;
+  runOp(`Buscar ${v}`, () => pila.search(v));
+};
+document.getElementById('traverseBtn').onclick = () => {
+  runOp('Recorrido', () => pila.traverse());
+};
+document.getElementById('resetBtn').onclick = resetTree;
+
+opval.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('pushBtn').click();
+});
+document.addEventListener('keydown', e => {
+  if (document.activeElement === opval) return;
+  if (e.key === 'ArrowRight'){ pause(); goto(idx + 1, true); }
+  if (e.key === 'ArrowLeft'){ pause(); goto(idx - 1, true); }
+  if (e.key === ' '){ e.preventDefault(); playing ? pause() : play(); }
+});
+
+buildInitial();
+</script>
+</body>
+</html>
