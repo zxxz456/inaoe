@@ -30,3 +30,7 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     orientado a objetos de un sistema bancario en C++ (clientes y cuentas de
     ahorro/cheques), con herencia, polimorfismo y un singleton para los
     identificadores de cuenta.
+  - [tarea2_parte2/](progra_ds/tarea2_parte2/) — Tarea 2 (parte 2): jerarquía de
+    empleados (`Employee`) en C++ con el método `ganancias()`/`earnings()`
+    polimórfico por subclase (asalariado, por hora, por comisiones y base más
+    comisiones).
