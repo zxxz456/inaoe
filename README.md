@@ -26,3 +26,7 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [Arbol/](progra_ds/Arbol/) — Simulador interactivo de un Árbol n-ario
     (general): inserción como hijo de un padre, búsqueda, eliminación de
     subárbol y recorridos pre/post/level.
+  - [tarea1_parte2/](progra_ds/tarea1_parte2/) — Tarea 1 (parte 2): modelado
+    orientado a objetos de un sistema bancario en C++ (clientes y cuentas de
+    ahorro/cheques), con herencia, polimorfismo y un singleton para los
+    identificadores de cuenta.
