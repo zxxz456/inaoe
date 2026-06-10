@@ -34,3 +34,9 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     empleados (`Employee`) en C++ con el método `ganancias()`/`earnings()`
     polimórfico por subclase (asalariado, por hora, por comisiones y base más
     comisiones).
+  - [actividad1_parte2_linkedlist/](progra_ds/actividad1_parte2_linkedlist/) —
+    Lista ligada simple de enteros en C puro (structs, sin clases), con menú
+    interactivo para agregar y eliminar.
+  - [actividad2_parte2_queuestack/](progra_ds/actividad2_parte2_queuestack/) —
+    Cola (FIFO) y pila (LIFO) sobre lista ligada en C, reutilizando el nodo de la
+    actividad anterior. Ejercicio 3 de las diapositivas de listas y colas.
