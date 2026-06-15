@@ -40,3 +40,6 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [actividad2_parte2_queuestack/](progra_ds/actividad2_parte2_queuestack/) —
     Cola (FIFO) y pila (LIFO) sobre lista ligada en C, reutilizando el nodo de la
     actividad anterior. Ejercicio 3 de las diapositivas de listas y colas.
+  - [tarea3_parte2_postfix_calc/](progra_ds/tarea3_parte2_postfix_calc/) — Tarea 3
+    (parte 2): calculadora de notación posfija (postfix) en C, evaluada con una
+    pila de enteros sobre lista ligada. Solo se versiona la solución (`solucion.c`).
