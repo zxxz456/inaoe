@@ -46,3 +46,7 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [actividad3_parte2_avl/](progra_ds/actividad3_parte2_avl/) — Actividad 3
     (parte 2): árbol binario con control de altura (estilo AVL) en C. Sobre el
     código base se implementaron los tres recorridos (pre/in/postorden)
+  - [tarea4_parte2_arbol/](progra_ds/tarea4_parte2_arbol/) — Tarea 4 (parte 2):
+    dos funciones para árboles binarios en C: `insertar` (inserción por niveles
+    con BFS) y `construir` (reconstrucción del árbol a partir de sus recorridos
+    preorden e inorden). Solo se versiona la solución.
