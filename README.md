@@ -50,3 +50,7 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     dos funciones para árboles binarios en C: `insertar` (inserción por niveles
     con BFS) y `construir` (reconstrucción del árbol a partir de sus recorridos
     preorden e inorden). Solo se versiona la solución.
+  - [tarea5_parte2_booleanas/](progra_ds/tarea5_parte2_booleanas/) — Tarea 5
+    (parte 2): árbol de expresión booleana en C. `construir` arma el árbol desde
+    una expresión en notación postfija usando una pila, `evaluar`, 
+    y se agregan los tres recorridos (pre/in/postorden).
