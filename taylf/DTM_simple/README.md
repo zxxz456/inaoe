@@ -1,4 +1,4 @@
-# Simulador de Maquina de TUring Determinista Simple
+# Simulador de Maquina de Turing Determinista Simple
 
 Simulador de una **Máquina de Turing (MT)** determinista de una sola cinta 
 basado en la definicion del capitulo 8, seccion 8.2.2 - Introduccion a las Maquinas
