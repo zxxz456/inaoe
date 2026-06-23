@@ -185,6 +185,7 @@ Esa misma traza, escrita a mano como descripciones instantáneas:
 ![Traza de la entrada 0011 como descripciones instantáneas](imgs/traza.png)
 
 **Nota**: Para este proyecto se uso IA generativa exclusivamente para el formateo
-de las tablas y de info para la visualizacion, asi como para debuggear. Para la logica
+de las tablas y de info para la visualizacion, asi como para debuggear y las rutinas 
+para el parseo de los text files. Para la logica, diseño
 y planteamiento de la solucion no se utilizo esta herramienta.
 
