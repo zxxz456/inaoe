@@ -1,7 +1,10 @@
 """
 alfabeto_potencia.py
-====================
+========================
 
+
+Description:
+------------
 Script para generar la k-ésima potencia de un alfabeto (en el sentido
 de teoría de autómatas y lenguajes formales) y calcular la cardinalidad
 del conjunto resultante.
@@ -29,6 +32,20 @@ Ejemplo de uso:
     ['aa', 'ab', 'ba', 'bb']
     >>> cardinalidad(alfabeto, 2)
     4
+
+
+Metadata:
+----------
+* Author: zxxz6 (Bryan Violante Arriaga)
+* Version: 1.0.0
+
+
+History:
+------------
+Author      Date            Description
+zxxz6       06/05/2026      Creation
+
+
 """
 
 from itertools import product

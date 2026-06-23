@@ -1,13 +1,15 @@
 """
 alfabeto_potencias_hasta_k.py
-=============================
+========================
 
+
+Description:
+------------
 Variante de ``alfabeto_potencia.py`` que, dado un alfabeto Sigma y un
 exponente máximo k, genera todas las potencias del alfabeto desde
 Sigma^0 hasta Sigma^k y muestra cada una junto con su cardinalidad.
 
-Recordatorio teórico
---------------------
+Recordatorio teórico:
 Para un alfabeto Sigma y un entero i >= 0:
 
     Sigma^i = { a_1 a_2 ... a_i | a_j pertenece a Sigma, 1 <= j <= i }
@@ -23,6 +25,20 @@ Ejemplo de uso:
     {''}
     >>> sorted(potencias[2])
     ['aa', 'ab', 'ba', 'bb']
+
+
+Metadata:
+----------
+* Author: zxxz6 (Bryan Violante Arriaga)
+* Version: 1.0.0
+
+
+History:
+------------
+Author      Date            Description
+zxxz6       06/05/2026      Creation
+
+
 """
 
 from typing import Dict, Iterable, Set
