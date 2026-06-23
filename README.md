@@ -6,6 +6,13 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 ## Estructura 
 
 - [taylf/](taylf/) — Teoría de Autómatas y Lenguajes Formales.
+  - [DTM_simple/](taylf/DTM_simple/) — Simulador de una Máquina de Turing
+    determinista de una sola cinta
+  - [alfabeto_potencia.py](taylf/alfabeto_potencia.py) — genera la k-ésima
+    potencia de un alfabeto 
+  - [alfabeto_potencias_hasta_k.py](taylf/alfabeto_potencias_hasta_k.py) —
+    variante que genera todas las potencias desde `Σ⁰` hasta `Σᵏ` y muestra cada
+    una con su cardinalidad
 - [progra_ds/](progra_ds/) — Programación y Estructuras de Datos.
   - [actividad_1/](progra_ds/actividad_1/) — Historia de las computadoras (documento LaTeX).
   - [actividad_3/](progra_ds/actividad_3/) — Tipos de algoritmos (documento LaTeX).
