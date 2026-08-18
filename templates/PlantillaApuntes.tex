@@ -5,198 +5,64 @@
 %
 %  Descripción:
 %  ------------
-%  Plantilla para los apuntes de clase de cualquier materia. A
-%  diferencia de los reportes de actividad, esta es informal y está
-%  pensada para llenarse sesión por sesión desde la laptop: se cambian
-%  los cuatro datos del bloque DATOS DE LA MATERIA y a partir de ahí
-%  solo se agregan bloques \clase.
+%  Plantilla para los apuntes de clase de cualquier materia, y de paso
+%  el ejemplo de uso de cada herramienta que trae Preambulo.tex. Para
+%  empezar una libreta se copia este archivo, se cambian los cuatro
+%  datos de la materia y a partir de ahí solo se agregan bloques
+%  \clase.
 %
-%  Trae entornos listos para definición, teorema, ejemplo y ejercicio,
-%  tres cajas de color para lo que se relee antes de un examen (idea
-%  clave, cuidado, pendiente) y un estilo de listings para pegar código
-%  en C, C++ o Python.
+%  El preámbulo no está aquí: vive en Preambulo.tex y se carga con
+%  \input. Todo lo que sigue del \begin{document} es muestra y se
+%  borra al empezar una libreta de verdad.
 %
 %
 %  Considerations:
 %  ------------
 %  - Compila con pdflatex sin shell-escape. Dos pasadas para el índice
-%  - babel se carga con es-noshorthands porque en español el " queda
-%    activo y se come el texto que le sigue, además de romper listings
+%  - Los cuatro datos de la materia van ANTES del \input, porque
+%    hyperref expande \materia al cargarse
+%  - La ruta del \input es relativa al documento. Este archivo vive
+%    junto a Preambulo.tex; una libreta en ada/apuntes/ escribe
+%    ../../templates/Preambulo.tex
 %  - Los entornos de teorema comparten contador con las secciones, así
 %    que la numeración reinicia en cada clase
-%  - Los nombres de los entornos van sin acento (\begin{definicion})
-%    aunque el rótulo impreso sí lo lleve
 %
 %
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.1.0
+%   * Version: 2.0.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/08/2026      Saque el preambulo a Preambulo.tex
+%  zxxz6       18/08/2026      Agregue pseudocodigo en espanol
 %  zxxz6       18/08/2026      Creation
 %
 %
 % =====================================================================
 \documentclass[11pt,letterpaper]{article}
 
-% ==================== IDIOMA Y CODIFICACIÓN ====================
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[spanish,es-tabla,es-noshorthands]{babel}
-\usepackage{lmodern}
-\usepackage{microtype}
-
-% ==================== PÁGINA ====================
-\usepackage[letterpaper,margin=2.3cm,headheight=14pt]{geometry}
-\usepackage{parskip}
-\usepackage{fancyhdr}
-\usepackage{enumitem}
-
-% ==================== MATEMÁTICAS ====================
-\usepackage{amsmath,amssymb,amsthm,mathtools}
-
-% ==================== FIGURAS, TABLAS, CÓDIGO ====================
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{xcolor}
-\usepackage{listings}
-\usepackage[most]{tcolorbox}
-\usepackage{hyperref}
-
 % =====================================================================
 %  DATOS DE LA MATERIA
-%  Lo único que hay que cambiar al empezar una libreta nueva.
+%  Lo único que hay que cambiar al empezar una libreta nueva. Van antes
+%  del \input porque el preámbulo los usa al cargarse.
 % =====================================================================
 \newcommand{\materia}{Nombre de la materia}
 \newcommand{\profesor}{Nombre del profesor}
 \newcommand{\periodo}{Otoño 2026}
 \newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
 
-% =====================================================================
-%  ESTILO
-% =====================================================================
-
-% --- encabezado y pie de cada página ---
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[L]{\small\textsc{\materia}}
-\fancyhead[R]{\small\periodo}
-\fancyfoot[C]{\small\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-
-% --- enlaces ---
-\hypersetup{
-  colorlinks=true,
-  linkcolor=black,
-  urlcolor=blue,
-  citecolor=black,
-  pdftitle={Apuntes de \materia},
-  pdfauthor={\alumno}
-}
-
-% --- paleta ---
-\definecolor{acento}{HTML}{1F4E79}
-\definecolor{fondoIdea}{HTML}{EAF2FB}
-\definecolor{fondoOjo}{HTML}{FDF0E6}
-\definecolor{fondoPend}{HTML}{F2F0F7}
-\definecolor{comentario}{HTML}{5A7D5A}
-\definecolor{cadena}{HTML}{A03030}
-\definecolor{fondoCodigo}{HTML}{F7F7F7}
-
-% --- entornos de teorema; numeran por sección, o sea por clase ---
-\theoremstyle{definition}
-\newtheorem{definicion}{Definición}[section]
-\newtheorem{ejemplo}[definicion]{Ejemplo}
-\newtheorem{ejercicio}[definicion]{Ejercicio}
-
-\theoremstyle{plain}
-\newtheorem{teorema}[definicion]{Teorema}
-\newtheorem{lema}[definicion]{Lema}
-\newtheorem{corolario}[definicion]{Corolario}
-\newtheorem{proposicion}[definicion]{Proposición}
-
-\theoremstyle{remark}
-\newtheorem*{observacion}{Observación}
-
-% --- cajas de color para lo que se relee antes del examen ---
-\newtcolorbox{idea}[1][]{
-  colback=fondoIdea, colframe=acento, boxrule=0.6pt,
-  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
-  title={Idea clave}, fonttitle=\bfseries\small, #1
-}
-\newtcolorbox{ojo}[1][]{
-  colback=fondoOjo, colframe=orange!70!black, boxrule=0.6pt,
-  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
-  title={Cuidado}, fonttitle=\bfseries\small, #1
-}
-\newtcolorbox{pendiente}[1][]{
-  colback=fondoPend, colframe=violet!60!black, boxrule=0.6pt,
-  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
-  title={Pendiente por resolver}, fonttitle=\bfseries\small, #1
-}
-
-% --- código ---
-\lstdefinestyle{codigo}{
-  backgroundcolor=\color{fondoCodigo},
-  basicstyle=\ttfamily\footnotesize,
-  keywordstyle=\color{acento}\bfseries,
-  commentstyle=\color{comentario}\itshape,
-  stringstyle=\color{cadena},
-  numbers=left, numberstyle=\tiny\color{gray}, numbersep=8pt,
-  frame=single, rulecolor=\color{gray!40},
-  breaklines=true, showstringspaces=false,
-  tabsize=4, captionpos=b,
-  extendedchars=true, inputencoding=utf8,
-  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1
-           {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
-           {Ü}{{\"U}}1 {ü}{{\"u}}1 {¿}{{?`}}1
-           {¡}{{!`}}1
-}
-\lstset{style=codigo}
-\renewcommand{\lstlistingname}{Código}
-\renewcommand{\lstlistlistingname}{Índice de código}
-
-% --- abreviaturas que se usan a cada rato ---
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\Q}{\mathbb{Q}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\C}{\mathbb{C}}
-\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
-\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
-\newcommand{\set}[1]{\left\{ #1 \right\}}
-\newcommand{\Ord}[1]{\mathcal{O}\!\left(#1\right)}
-
-% --- encabezado de cada sesión: título a la izquierda, fecha a la
-%     derecha. El argumento corto es el que sale en el índice ---
-\newcommand{\clase}[2]{%
-  \section[#1]{#1 \hfill \normalfont\small\textit{#2}}%
-}
+\input{Preambulo.tex}
 
 % =====================================================================
 \begin{document}
 % =====================================================================
 
-% ==================== PORTADILLA ====================
-\begin{center}
-  {\LARGE\bfseries Apuntes de \materia\par}
-  \vspace{0.4em}
-  {\large \profesor \par}
-  \vspace{0.2em}
-  {\small \periodo \quad$\cdot$\quad \alumno\par}
-  \vspace{0.3em}
-  \rule{\linewidth}{0.5pt}
-\end{center}
-
-\vspace{0.5em}
-\tableofcontents
-\vspace{1em}
-\rule{\linewidth}{0.5pt}
+\portadilla
+\newpage
 
 % =====================================================================
 %  A PARTIR DE AQUÍ VAN LOS APUNTES.
@@ -288,6 +154,41 @@ int buscar(int arr[], int n, int objetivo) {
     return -1;
 }
 \end{lstlisting}
+
+Y cuando lo que se copia del pizarrón es el algoritmo y no el
+programa, va como pseudocódigo. Se numera por sesión igual que los
+teoremas, así que se puede referir con \verb|\ref|:
+
+\begin{algorithm}[htbp]
+  \caption{Búsqueda binaria}
+  \label{alg:ejemplo}
+  \begin{algorithmic}[1]
+    \Require arreglo ordenado $A[1 \ldots n]$, valor $x$
+    \Ensure el índice de $x$ en $A$, o $-1$ si no está
+    \Procedure{BusquedaBinaria}{$A, n, x$}
+      \State $\mathit{izq} \gets 1$
+      \State $\mathit{der} \gets n$
+      \While{$\mathit{izq} \le \mathit{der}$}
+        \State $m \gets \lfloor (\mathit{izq} + \mathit{der}) / 2
+               \rfloor$ \Comment{no desborda}
+        \If{$A[m] = x$}
+          \State \Return $m$
+        \ElsIf{$A[m] < x$}
+          \State $\mathit{izq} \gets m + 1$
+        \Else
+          \State $\mathit{der} \gets m - 1$
+        \EndIf
+      \EndWhile
+      \State \Return $-1$
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+El algoritmo~\ref{alg:ejemplo} corta el espacio de búsqueda a la mitad
+en cada vuelta. Las palabras clave se escriben en inglés
+(\verb|\While|, \verb|\If|, \verb|\Return|) y salen impresas en
+español; las dos que no trae el paquete son \verb|\Hasta|, para el
+\verb|\For|, y \verb|\Intercambiar|.
 
 Una tabla, cuando conviene comparar:
 
