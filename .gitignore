@@ -68,3 +68,7 @@ progra_ds/Arbol/arbol_animacion.html
 *.ind
 *.bcf
 *.run.xml
+
+.claude/
+CLAUDE.md
+docs/
