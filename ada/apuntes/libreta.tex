@@ -1,0 +1,266 @@
+% =====================================================================
+%  libreta.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Apuntes de clase del curso de Análisis y Diseño de Algoritmos
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 2.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       18/08/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Análisis y Diseño de Algoritmos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\portadilla
+\newpage
+
+% =====================================================================
+%  Clase 1 - Intro al curso 
+% =====================================================================
+
+\clase{Introducción al Curso}{18 de agosto de 2026}
+
+\begin{quick_sum}
+  Sesión inicial: temario, criterios de evaluación y datos de
+  contacto. El profesor comparó bubble sort contra quick sort a partir
+  del video de Obama y de ahí saltó a por qué sigue valiendo la pena
+  estudiar estructuras de datos y algoritmos en la era de la IA. Cerró
+  con computable, decidible e indecidible, y con P contra NP.
+\end{quick_sum}
+
+
+\subsection{Info general}
+
+\textbf{Temario:}
+\begin{enumerate}[itemsep=0.1em]
+    \item Introducción
+    \item Notación asintótica
+    \item Recurrencias
+    \item Ordenamiento
+    \item Algoritmos voraces
+    \item Divide y vencerás
+    \item Programación dinámica
+    \item \textit{(falta anotar este tema)}
+    \item Algoritmos aleatorizados
+    \item Teoría de complejidad
+\end{enumerate}
+
+\textbf{Criterios de evaluación:}
+\begin{itemize}[itemsep=0.1em]
+    \item 90\% exámenes, tres parciales de 30\% cada uno
+    \item 10\% asistencia
+\end{itemize}
+
+\textbf{Contacto y material:}
+\begin{itemize}[itemsep=0.1em]
+    \item Sitio del curso:
+          \url{http://ccc.inaoep.mx/~carranza/alg.html}
+    \item Correo: \texttt{carranza@inaoep.mx}
+\end{itemize}
+
+\begin{ojo}
+  Todo correo al profesor lleva \texttt{ALG2026} en el asunto. Si no,
+  se pierde en el SPAM.
+\end{ojo}
+
+El objetivo del curso es desarrollar pensamiento computacional para
+resolver problemas. No se trata tanto de programar sino de analizar y
+diseñar algoritmos eficientes.
+
+\newpage
+
+% =====================================================================
+
+\subsection{Ordenamiento (por arribita)}
+
+A raíz del vídeo de Obama, en el cual le preguntan cómo ordenar un
+millón de enteros, se da una embarradita de algoritmos de
+ordenamiento. Son los dos ejemplos con los que el profesor mostró que
+dos algoritmos correctos para el mismo problema no cuestan lo mismo.
+
+\subsubsection*{Bubble sort}
+
+La idea es ir burbujeando los elementos. Se recorre el arreglo
+comparando pares vecinos y se intercambian cuando están en desorden,
+así que en cada pasada el mayor de los que quedan sube hasta su
+posición final.
+Se caracteriza por usar 2 ciclos anidados, lo que denota su complejidad
+cuadrática.
+
+
+Mejor caso, caso promedio y peor caso son los tres $\Ord{n^2}$. La
+versión simple recorre los dos ciclos anidados completos sin importar
+cómo venga el arreglo, así que un arreglo ya ordenado le cuesta lo
+mismo que uno al revés.
+
+\subsubsection*{Quick sort}
+
+Parte el problema. Elige un pivote, acomoda a la izquierda lo menor y a
+la derecha lo mayor, y se llama a sí mismo sobre cada mitad. Como las
+dos mitades ya no dependen una de la otra, el algoritmo es
+paralelizable.
+
+\vspace{2em}
+
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Mejor} & \textbf{Promedio}
+      & \textbf{Peor} & \textbf{Memoria} \\
+    \midrule
+    Bubble sort & $\Ord{n^2}$      & $\Ord{n^2}$
+                & $\Ord{n^2}$      & $\Ord{1}$      \\
+    Quick sort  & $\Ord{n \log n}$ & $\Ord{n \log n}$
+                & $\Ord{n^2}$      & $\Ord{\log n}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Costo de los dos algoritmos vistos en clase.}
+  \label{tab:ordenamiento}
+\end{table}
+
+\begin{idea}
+  Dos algoritmos igual de correctos para el mismo problema pueden
+  diferir en órdenes de magnitud. Escoger el algoritmo es una decisión
+  de diseño, no un detalle de implementación.
+\end{idea}
+
+\newpage
+
+% =====================================================================
+
+\subsection{Por qué estudiar DSA}
+
+Saber como funcionan los algoritos y como usar las estructuras de datos
+nos permite
+\begin{itemize}[itemsep=0.1em]
+    \item Romper problemas en pasos pequeños.
+    \item Elegir la estructura de datos correcta.
+    \item Analizar la complejidad en tiempo y en memoria, porque
+          siempre se busca la solución óptima.
+    \item Comparar diseños y sus trade-offs.
+\end{itemize}
+
+Se espera que al terminar el curso uno pueda determinar la estrategia
+correcta para resolver un problema y dar soluciones óptimas, escalables
+y eficientes en tiempo y espacio.
+
+% =====================================================================
+
+\subsection{Conceptos clave}
+
+\begin{itemize}
+    \item \textbf{Algoritmo:} secuencia finita y no ambigua de pasos que, a
+          partir de una entrada, produce una salida en un número finito
+          de operaciones.
+    \item \textbf{Problema computable:} el problema para el que sí se puede estructurar un programa que obtenga un resultado. Saber
+          cuál es el último número natural no lo es: no hay tal número, así que no hay programa que lo devuelva.
+    \item \textbf{Problema decidible:} existe un algoritmo que, para cualquier entrada, se detiene y entrega una respuesta.
+    \item \textbf{Problema indecidible:} no existe tal algoritmo. Ninguna solución general lo resuelve.
+\end{itemize}
+
+
+\subsubsection*{Verificación}
+
+Si desarrollo un algoritmo que va a resolver un problema, la pregunta
+inmediata es cómo sé que esa solución es válida. Esa es la
+verificación, y es un paso aparte de escribir el código.
+
+% =====================================================================
+
+\subsection{DSA en tiempos de la IA}
+
+Conocer estructuras de datos y algoritmos sirve para analizar el código
+que la IA genera. El vibe coding sirve para prototipar rápido, pero
+\textit{abstraction eventually leaks}: tarde o temprano hay que bajar
+al detalle que la abstracción escondía. Los dos sirven mejor en
+conjunto.
+
+\begin{ojo}
+  El código generado siempre lo juzga un humano, para detectar áreas de
+  oportunidad y cosas por optimizar. Sin ese criterio no hay forma de
+  saber si lo que salió es bueno.
+\end{ojo}
+
+% =====================================================================
+
+\subsection{Cómo convertirse en experto en DSA}
+
+Antes era a la antigua: tirar código hasta que la intuición apareciera
+sola y uno supiera qué estructura de datos usar en cada caso. Eso ya
+cambió. Ahora se aprende la teoría primero, se entienden los
+fundamentos, se estudian las matemáticas detrás de DSA y luego se
+practica con ejemplos.
+
+El ciclo de trabajo que espera el profesor:
+
+\begin{enumerate}[itemsep=0.1em]
+    \item Intentarlo por mi cuenta.
+    \item Pedir una pista, no la solución.
+    \item Implementar y probar.
+    \item Preguntarle a la IA por mi razonamiento.
+    \item Explicarle la solución a la IA.
+    \item Resolver un problema similar sin IA.
+\end{enumerate}
+
+\begin{idea}
+  La práctica hace al maestro. La IA entra como quien revisa, no como
+  quien resuelve.
+\end{idea}
+
+% =====================================================================
+
+\subsection{El santo grial: P contra NP}
+
+P es la clase de los problemas que se resuelven en tiempo polinomial.
+NP es la de los problemas cuya solución propuesta se \emph{verifica} en
+tiempo polinomial, aunque encontrarla parezca costar tiempo
+exponencial. Todo problema de P está en NP, porque resolverlo ya es una
+forma de verificarlo. La pregunta abierta es la contraria: si algo se
+verifica rápido, ¿también se resuelve rápido?
+
+Demostrar $P = NP$ implicaría que miles de problemas que hoy se atacan
+por aproximación tienen algoritmo eficiente y nadie lo ha encontrado.
+Demostrar $P \neq NP$ cerraría la puerta de una vez. Nadie ha hecho
+ninguna de las dos.
+
+\newpage
+
+% =====================================================================
+%  Clase 2
+% =====================================================================
+
+
+
+
+\end{document}
+
+%############################# END OF LIBRETA.TEX ##############################
+%###############################################################################

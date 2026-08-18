@@ -1,0 +1,90 @@
+intro
+notacion asintocia
+recurrencias
+ordenamient
+voraces
+dicide y vence
+programcon dinamica
+
+algoritmos aleatroizados
+teoria de complejdidad
+
+3 examenes -30% cada uno
+aistencia 10%
+http://ccc.inaoep.mx/carranza/alg.html
+carranza@inaoep.mx
+ASUNTO ALG2026
+
+desarrollar pensamiento cmputacional para analisis de algoritmos
+
+
+Bubble sort
+
+La idea es ir burbujeando los elementos
+
+{algo burgbuja}
+
+peor caso, caso base y caso promedio -> O(n2)
+
+Quiqck sort
+
+paralelizable, parte el problema 
+
+{algo quick sort}
+
+pq estudiar dsa y algoritmos?
+rompoer problemas en pasos peuqneos
+elegir estructura de datos correca
+analizar complejidad de tiempo y memoria (es importante pq simpre queremos ser optimo)
+comparar disenos y trade offs
+
+se espera que al final se puedan determinar correctamente estrategias para resolver problemas, dano sulociones optimas, escalables y eficientes en espacio y timepo 
+
+conceptos clvae
+-algoritmo: 
+-computalble: el problema es computable? se puede estructurar un programa para obtener un resltado? cosas no computables, saber el ultimo numero natural
+-decidible: si existe el algoritmo eventualmente se va a detener y dar una respuesta
+-indecidible: que no hay solcion
+
+
+como se formaliza saber si un problemas es computable?
+{flata}
+
+verificacion
+si yo desarolllo un algrimo que va a solucionar un prolbema como saber si esa solucion es valida? con verificacion
+
+
+dsa en tiempos de la IA
+
+dsa nos sirve para analizar el codigo que la IA genera
+
+vibe coding sirve para prototipar
+abstraction eventually leaks
+sirven mejor en conjunto
+
+siemre dbe ser juzgado por un humano, para ver si hay areas de oportunidad o cosas para optimizar
+
+
+como convertirse experto en dsa?
+
+antes era a la atiwa, tirando codigo, esto generaba intuicion para saber estructuras de datos a utilizar y asi
+
+pero ya cambio eso,
+ahora se aprende la teoria, se entienden los fundamentos, aprender las matematicas detras de DSA y aprender con ejemplos
+
+
+el ciclo qeu espera el profe 
+
+1 intentar por mi mismo
+2 preguntar por un hint
+3 implementar y probar
+4 preguntar a la ia mi razonamiento
+5 explicar la solucion a la ia
+6 resolver un problema similar sin ia
+
+basicamente la pratica hace al maestro
+
+santo grial de dsa es demostrar que P = NP 
+{agregar explicacion de q es eso}
+
+
