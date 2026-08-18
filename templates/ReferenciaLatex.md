@@ -8,8 +8,8 @@ Descripción:
 Chuleta de LaTeX para tomar apuntes: los comandos y las fórmulas que
 salen a cada rato, con el resultado descrito en palabras para no tener
 que compilar solo por ver qué hace uno. Acompaña a
-PlantillaApuntes.tex, y las secciones de entornos y cajas asumen ese
-preámbulo.
+PlantillaApuntes.tex, y las secciones de entornos, cajas y
+pseudocódigo asumen el preámbulo de Preambulo.tex.
 
 
 Considerations:
@@ -26,13 +26,15 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.1.0
+* Version: 1.3.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       18/08/2026      Documente el preambulo compartido
+zxxz6       18/08/2026      Agregue la seccion de pseudocodigo
 zxxz6       18/08/2026      Creation
 
 
@@ -41,6 +43,38 @@ zxxz6       18/08/2026      Creation
 # Referencia rápida de LaTeX
 
 Chuleta para llenar [`PlantillaApuntes.tex`](PlantillaApuntes.tex). Lo que se usa seguido está arriba; lo que se consulta una vez al mes, abajo.
+
+## Empezar una libreta
+
+El preámbulo no se copia: vive en [`Preambulo.tex`](Preambulo.tex) y cada documento lo carga con `\input`. Un arreglo ahí llega a todas las libretas de una vez.
+
+```latex
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Analisis y Diseno de Algoritmos}
+\newcommand{\profesor}{Dr. Jose Martinez Carranza}
+\newcommand{\periodo}{Otono 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+\portadilla
+\newpage
+
+\clase{Tema de la sesion}{18 de agosto de 2026}
+...
+\end{document}
+```
+
+Dos cosas que truenan si se hacen al revés:
+
+- **Los cuatro datos van antes del `\input`.** hyperref expande `\materia` al cargarse; si todavía no existe, la compilación falla con `Undefined control sequence`.
+- **La ruta del `\input` es relativa al documento**, no a la raíz del repo. Desde `ada/apuntes/` son `../../templates/`. `\usepackage` no sirve aquí: solo busca en la carpeta del documento y en el árbol de TeX.
+
+`latexmk` se da cuenta de que `Preambulo.tex` es una dependencia, así que recompila solo cuando cambia.
+
+---
 
 ## Compilar
 
@@ -359,7 +393,67 @@ def factorial(n):
 
 ---
 
-## 14. Referencias cruzadas
+## 14. Pseudocódigo
+
+Cuando lo del pizarrón es el algoritmo y no el programa. El flotante lo pone `algorithm` y el cuerpo `algorithmicx`; se numera por sesión, igual que los teoremas.
+
+```latex
+\begin{algorithm}[htbp]
+  \caption{Busqueda binaria}
+  \label{alg:binaria}
+  \begin{algorithmic}[1]
+    \Require arreglo ordenado $A[1 \ldots n]$, valor $x$
+    \Ensure el indice de $x$ en $A$, o $-1$ si no esta
+    \Procedure{BusquedaBinaria}{$A, n, x$}
+      \State $\mathit{izq} \gets 1$
+      \State $\mathit{der} \gets n$
+      \While{$\mathit{izq} \le \mathit{der}$}
+        \State $m \gets \lfloor (\mathit{izq} + \mathit{der}) / 2 \rfloor$
+        \If{$A[m] = x$}
+          \State \Return $m$
+        \ElsIf{$A[m] < x$}
+          \State $\mathit{izq} \gets m + 1$
+        \Else
+          \State $\mathit{der} \gets m - 1$
+        \EndIf
+      \EndWhile
+      \State \Return $-1$
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+```
+
+Las palabras clave se escriben en inglés y salen impresas en español, porque el preámbulo las renombra una por una:
+
+| Se escribe | Sale impreso |
+|---|---|
+| `\Require` / `\Ensure` | **Entrada:** / **Salida:** |
+| `\If{...}` ... `\ElsIf{...}` ... `\Else` ... `\EndIf` | **si** ... **entonces** / **si no** / **fin si** |
+| `\For{...}` ... `\EndFor` | **para** ... **hacer** / **fin para** |
+| `\ForAll{...}` ... `\EndFor` | **para todo** ... **hacer** / **fin para** |
+| `\While{...}` ... `\EndWhile` | **mientras** ... **hacer** / **fin mientras** |
+| `\Repeat` ... `\Until{...}` | **repetir** / **hasta que** |
+| `\Procedure{Nombre}{args}` ... `\EndProcedure` | **procedimiento** Nombre(args) / **fin procedimiento** |
+| `\Function{Nombre}{args}` ... `\EndFunction` | **función** Nombre(args) / **fin función** |
+| `\Return` | **devolver** |
+| `\Hasta` | **hasta**, para el `\For` |
+| `\Intercambiar` | **intercambiar** |
+
+Lo demás que hace falta:
+
+```latex
+\State  ...          % una linea suelta del algoritmo
+\Statex ...          % linea sin numero, sirve para separar procedimientos
+\Comment{por que}   % comentario a la derecha, en verde
+\Call{Nombre}{args} % llamada a otro procedimiento, en versalitas
+$a \gets b$          % la flecha de asignacion
+```
+
+`\Hasta` e `\Intercambiar` no vienen en el paquete, las define la plantilla. Los nombres de variable de más de una letra van en `\mathit{...}`, si no LaTeX los lee como un producto y los separa.
+
+---
+
+## 15. Referencias cruzadas
 
 ```latex
 \label{eq:cuadratica}     % justo despues del caption o dentro del entorno
@@ -373,7 +467,7 @@ Los prefijos `eq:`, `fig:`, `tab:`, `sec:` no son obligatorios, pero cuando hay 
 
 ---
 
-## 15. Acentos y español
+## 16. Acentos y español
 
 Con `\usepackage[utf8]{inputenc}` se escriben directo desde el teclado: más, niño, acción. Los comandos solo hacen falta si algo se rompe:
 
@@ -390,7 +484,7 @@ La plantilla carga babel con `es-noshorthands`. Sin esa opción, el español dej
 
 ---
 
-## 16. Lo que suele romper la compilación
+## 17. Lo que suele romper la compilación
 
 | Síntoma | Causa casi siempre |
 |---|---|
