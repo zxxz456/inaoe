@@ -1,0 +1,327 @@
+% =====================================================================
+%  PlantillaApuntes.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Plantilla para los apuntes de clase de cualquier materia. A
+%  diferencia de los reportes de actividad, esta es informal y está
+%  pensada para llenarse sesión por sesión desde la laptop: se cambian
+%  los cuatro datos del bloque DATOS DE LA MATERIA y a partir de ahí
+%  solo se agregan bloques \clase.
+%
+%  Trae entornos listos para definición, teorema, ejemplo y ejercicio,
+%  tres cajas de color para lo que se relee antes de un examen (idea
+%  clave, cuidado, pendiente) y un estilo de listings para pegar código
+%  en C, C++ o Python.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas para el índice
+%  - babel se carga con es-noshorthands porque en español el " queda
+%    activo y se come el texto que le sigue, además de romper listings
+%  - Los entornos de teorema comparten contador con las secciones, así
+%    que la numeración reinicia en cada clase
+%  - Los nombres de los entornos van sin acento (\begin{definicion})
+%    aunque el rótulo impreso sí lo lleve
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.1.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       18/08/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% ==================== IDIOMA Y CODIFICACIÓN ====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla,es-noshorthands]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ==================== PÁGINA ====================
+\usepackage[letterpaper,margin=2.3cm,headheight=14pt]{geometry}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% ==================== MATEMÁTICAS ====================
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+
+% ==================== FIGURAS, TABLAS, CÓDIGO ====================
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+%  Lo único que hay que cambiar al empezar una libreta nueva.
+% =====================================================================
+\newcommand{\materia}{Nombre de la materia}
+\newcommand{\profesor}{Nombre del profesor}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+% =====================================================================
+%  ESTILO
+% =====================================================================
+
+% --- encabezado y pie de cada página ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textsc{\materia}}
+\fancyhead[R]{\small\periodo}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- enlaces ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black,
+  pdftitle={Apuntes de \materia},
+  pdfauthor={\alumno}
+}
+
+% --- paleta ---
+\definecolor{acento}{HTML}{1F4E79}
+\definecolor{fondoIdea}{HTML}{EAF2FB}
+\definecolor{fondoOjo}{HTML}{FDF0E6}
+\definecolor{fondoPend}{HTML}{F2F0F7}
+\definecolor{comentario}{HTML}{5A7D5A}
+\definecolor{cadena}{HTML}{A03030}
+\definecolor{fondoCodigo}{HTML}{F7F7F7}
+
+% --- entornos de teorema; numeran por sección, o sea por clase ---
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}[section]
+\newtheorem{ejemplo}[definicion]{Ejemplo}
+\newtheorem{ejercicio}[definicion]{Ejercicio}
+
+\theoremstyle{plain}
+\newtheorem{teorema}[definicion]{Teorema}
+\newtheorem{lema}[definicion]{Lema}
+\newtheorem{corolario}[definicion]{Corolario}
+\newtheorem{proposicion}[definicion]{Proposición}
+
+\theoremstyle{remark}
+\newtheorem*{observacion}{Observación}
+
+% --- cajas de color para lo que se relee antes del examen ---
+\newtcolorbox{idea}[1][]{
+  colback=fondoIdea, colframe=acento, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Idea clave}, fonttitle=\bfseries\small, #1
+}
+\newtcolorbox{ojo}[1][]{
+  colback=fondoOjo, colframe=orange!70!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Cuidado}, fonttitle=\bfseries\small, #1
+}
+\newtcolorbox{pendiente}[1][]{
+  colback=fondoPend, colframe=violet!60!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Pendiente por resolver}, fonttitle=\bfseries\small, #1
+}
+
+% --- código ---
+\lstdefinestyle{codigo}{
+  backgroundcolor=\color{fondoCodigo},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{acento}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{cadena},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=8pt,
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+  tabsize=4, captionpos=b,
+  extendedchars=true, inputencoding=utf8,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1
+           {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+           {Ü}{{\"U}}1 {ü}{{\"u}}1 {¿}{{?`}}1
+           {¡}{{!`}}1
+}
+\lstset{style=codigo}
+\renewcommand{\lstlistingname}{Código}
+\renewcommand{\lstlistlistingname}{Índice de código}
+
+% --- abreviaturas que se usan a cada rato ---
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\Ord}[1]{\mathcal{O}\!\left(#1\right)}
+
+% --- encabezado de cada sesión: título a la izquierda, fecha a la
+%     derecha. El argumento corto es el que sale en el índice ---
+\newcommand{\clase}[2]{%
+  \section[#1]{#1 \hfill \normalfont\small\textit{#2}}%
+}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+% ==================== PORTADILLA ====================
+\begin{center}
+  {\LARGE\bfseries Apuntes de \materia\par}
+  \vspace{0.4em}
+  {\large \profesor \par}
+  \vspace{0.2em}
+  {\small \periodo \quad$\cdot$\quad \alumno\par}
+  \vspace{0.3em}
+  \rule{\linewidth}{0.5pt}
+\end{center}
+
+\vspace{0.5em}
+\tableofcontents
+\vspace{1em}
+\rule{\linewidth}{0.5pt}
+
+% =====================================================================
+%  A PARTIR DE AQUÍ VAN LOS APUNTES.
+%  Se copia el bloque de abajo por cada sesión y se borra el contenido
+%  de muestra. Todo lo que sigue es un ejemplo de cada herramienta.
+% =====================================================================
+
+\clase{Tema de la primera sesión}{12 de agosto de 2026}
+
+Texto normal del apunte. Un párrafo suelto, tal como se escribe en
+clase, sin mayor ceremonia. Para resaltar se usa \textbf{negrita} o
+\emph{cursiva}, y para nombrar un símbolo en medio de la frase se
+escribe matemática en línea: $f(n) = \Ord{n \log n}$.
+
+\begin{definicion}[Nombre de lo que se define]
+  Lo que dijo el profesor, redactado con las propias palabras. Los
+  entornos se numeran por sesión, así que esta es la 1.1.
+\end{definicion}
+
+\begin{teorema}[Nombre del teorema]
+  El enunciado. Si $A$ y $B$ son conjuntos finitos, entonces
+  \[
+    \abs{A \cup B} = \abs{A} + \abs{B} - \abs{A \cap B}.
+  \]
+\end{teorema}
+
+\begin{proof}
+  La demostración, cuando se alcanza a copiar. El rótulo lo pone babel
+  en español y el cuadrito del final lo cierra solo.
+\end{proof}
+
+\begin{idea}
+  Lo que hay que recordar si solo se relee esto antes del examen.
+\end{idea}
+
+\begin{ojo}
+  El detalle donde siempre se falla. Por ejemplo: el caso base va
+  antes del paso inductivo, no después.
+\end{ojo}
+
+\begin{pendiente}
+  Lo que no se entendió en clase y hay que preguntar o buscar.
+\end{pendiente}
+
+\subsection{Un subtema dentro de la sesión}
+
+Ecuación numerada, para poder referirla después:
+\begin{equation}\label{eq:ejemplo}
+  \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+\end{equation}
+
+En la ecuación~\eqref{eq:ejemplo} la suma es cuadrática en $n$.
+
+Varios pasos alineados por el signo igual:
+\begin{align}
+  T(n) &= 2\,T\!\left(\frac{n}{2}\right) + n \\
+       &= 2\left(2\,T\!\left(\frac{n}{4}\right)
+          + \frac{n}{2}\right) + n \nonumber \\
+       &= 4\,T\!\left(\frac{n}{4}\right) + 2n
+\end{align}
+
+\begin{ejemplo}
+  Un ejemplo resuelto en el pizarrón.
+  \begin{enumerate}[label=\arabic*., itemsep=0.2em]
+    \item Primer paso.
+    \item Segundo paso.
+  \end{enumerate}
+\end{ejemplo}
+
+\begin{ejercicio}
+  El que dejó de tarea, para no perderlo entre las hojas.
+\end{ejercicio}
+
+\begin{observacion}
+  Un comentario al margen, sin número.
+\end{observacion}
+
+Código pegado tal cual, con el lenguaje que sea:
+
+\begin{lstlisting}[language=C,caption={Búsqueda binaria}]
+int buscar(int arr[], int n, int objetivo) {
+    int izq = 0, der = n - 1;
+    while (izq <= der) {
+        int medio = izq + (der - izq) / 2;   /* evita desbordar */
+        if (arr[medio] == objetivo) return medio;
+        if (arr[medio] < objetivo) izq = medio + 1;
+        else der = medio - 1;
+    }
+    return -1;
+}
+\end{lstlisting}
+
+Una tabla, cuando conviene comparar:
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Promedio} & \textbf{Peor caso} \\
+    \midrule
+    Búsqueda lineal   & $\Ord{n}$        & $\Ord{n}$   \\
+    Búsqueda binaria  & $\Ord{\log n}$   & $\Ord{\log n}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Costo de las dos búsquedas.}
+  \label{tab:ejemplo}
+\end{table}
+
+% Una figura, cuando se fotografía el pizarrón. Descomentar y poner el
+% archivo en la misma carpeta.
+%
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.7\linewidth]{pizarron.png}
+%   \caption{Diagrama que dibujó el profesor.}
+%   \label{fig:ejemplo}
+% \end{figure}
+
+% =====================================================================
+
+\clase{Tema de la segunda sesión}{14 de agosto de 2026}
+
+Se copia este bloque por cada clase nueva y listo.
+
+\end{document}
+
+%######################### END OF PLANTILLAAPUNTES.TEX #########################
+%###############################################################################
