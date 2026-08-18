@@ -1,3 +1,41 @@
+<!--
+README.md
+========================
+
+
+Descripción:
+------------
+Índice del repositorio: qué materia vive en cada carpeta y qué hace
+cada proyecto. Es lo primero que se lee al abrir el repo, así que se
+queda en el nivel de una línea por entrada; el detalle vive en el
+README de cada carpeta.
+
+
+Considerations:
+------------
+- Cada carpeta nueva se agrega aquí en el mismo commit que la crea, si
+  no el índice se desincroniza y nadie lo nota hasta meses después
+- El orden dentro de cada materia es cronológico, no alfabético: lo
+  más reciente queda abajo
+
+
+Metadata:
+----------
+* Author: zxxz6 (Bryan Violante Arriaga)
+* Version: 1.2.0
+* License: Copyright (c) 2026 Bryan Violante Arriaga.
+
+
+History:
+------------
+Author      Date            Description
+zxxz6       18/08/2026      Agregue fundamentos_aal/ al indice
+zxxz6       18/08/2026      Agregue ada/ y templates/ al indice
+zxxz6       09/08/2026      Creation
+
+
+-->
+
 # inaoe 
 
 
@@ -7,13 +45,20 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 
 ## Estructura 
 
+- [ada/](ada/) - Análisis y Diseño de Algoritmos.
+  - [apuntes/](ada/apuntes/) - Libreta de clase en LaTeX (`libreta.tex`),
+    una sección por sesión, más la toma cruda en `.txt`.
+- [fundamentos_aal/](fundamentos_aal/) - Fundamentos para el Análisis
+  Automático de Lenguaje.
+  - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
+    (`libreta.tex`), una sección por sesión.
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
   - [alfabeto_potencia.py](taylf/alfabeto_potencia.py) - genera la k-ésima
     potencia de un alfabeto 
   - [alfabeto_potencias_hasta_k.py](taylf/alfabeto_potencias_hasta_k.py) -
-    variante que genera todas las potencias desde `Σ⁰` hasta `Σᵏ` y muestra cada
+    variante que genera todas las potencias desde `Σ^0` hasta `Σ^k` y muestra cada
     una con su cardinalidad
 - [progra_ds/](progra_ds/) - Programación y Estructuras de Datos.
   - [actividad_1/](progra_ds/actividad_1/) - Historia de las computadoras (documento LaTeX).
@@ -63,3 +108,21 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     (parte 2): árbol de expresión booleana en C. `construir` arma el árbol desde
     una expresión en notación postfija usando una pila, `evaluar`, 
     y se agregan los tres recorridos (pre/in/postorden).
+
+## Plantillas
+
+- [templates/](templates/) - Lo que comparten los documentos de LaTeX.
+  - [Preambulo.tex](templates/Preambulo.tex) - Preámbulo compartido de los
+    apuntes: paquetes, estilo de página, entornos de teorema, cajas de
+    color, listings y pseudocódigo en español. Cada documento lo carga
+    con `\input` en vez de copiarlo, así que un arreglo ahí llega a
+    todas las libretas de una vez.
+  - [PlantillaApuntes.tex](templates/PlantillaApuntes.tex) - Punto de
+    partida para una libreta nueva, y ejemplo de uso de cada entorno.
+  - [ReferenciaLatex.md](templates/ReferenciaLatex.md) - Chuleta de los
+    comandos y las fórmulas que salen a cada rato.
+
+<!--
+############################### END OF README.MD ###############################
+################################################################################
+-->
