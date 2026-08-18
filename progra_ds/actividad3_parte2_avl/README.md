@@ -9,14 +9,14 @@ insertaba) e implementar los tres recorridos: preorden, inorden y postorden.
 
 ## Cosas implementadas
 
-- Los tres recorridos (pre/in/postorden) — lo pedido.
+- Los tres recorridos (pre/in/postorden) - lo pedido.
 - El árbol se dibuja vertical y con aristas, y se actualiza en cada inserción.
 - Arreglé dos bugs del original: el menú se colgaba al salir con una tecla no numérica, y la altura se calculaba como un contador en vez de la altura real. Esos estan fixed
 
 ## Parámetros
 
-- `-tree v1,v2,...` — precarga el árbol (el primero es la raíz). También `-tree=v1,v2,...`.
-- `-v` — muestra la altura de cada nodo, p. ej. `50 (h=2)`.
+- `-tree v1,v2,...` - precarga el árbol (el primero es la raíz). También `-tree=v1,v2,...`.
+- `-v` - muestra la altura de cada nodo, p. ej. `50 (h=2)`.
 
 ## Compilar y correr
 

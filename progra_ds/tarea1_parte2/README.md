@@ -1,4 +1,4 @@
-# Tarea 1 — Modelado de un sistema bancario (POO en C++)
+# Tarea 1 - Modelado de un sistema bancario (POO en C++)
 
 Este ejercicio corresponde a la **Tarea 1** de la segunda parte del curso 
 **propedéutico de Programación y Estructuras de Datos**, impartido por el 
@@ -15,7 +15,7 @@ requerimientos:
   de 5 dígitos que empieza en `1`, `mm` es el mes actual y `yy` el año. Por
   ejemplo, la primera cuenta será `2-09-16-00001`, la siguiente `2-09-16-00002`,
   y así sucesivamente.
-- Existen dos tipos de cuenta —**ahorro** y **cheques**— y el diseño debe
+- Existen dos tipos de cuenta -**ahorro** y **cheques**- y el diseño debe
   permitir incorporar otros tipos en el futuro.
 - Ambas permiten al cliente **depositar** y **retirar** dinero en cualquier
   momento; el cliente siempre tiene acceso a la totalidad de su dinero.
@@ -55,23 +55,23 @@ A continuacion se muestra el *diagrama de clases* propuesto:
 Las **interfaces** (declaraciones de clase) viven en `if/` y las
 **implementaciones** (`.cpp`) en la raíz.
 
-### `if/` — headers
-- `Utils.h` — constantes del proyecto: tipos de cuenta, máximo de retiros y
+### `if/` - headers
+- `Utils.h` - constantes del proyecto: tipos de cuenta, máximo de retiros y
   saldo mínimo de ahorro.
-- `UUID.h` — singleton generador de identificadores `2-mm-yy-id`.
-- `Cliente.h` — clase `Cliente` (nombre del titular).
-- `Cuenta.h` — clase base con saldo, id, cliente y tipo; métodos virtuales.
-- `CuentaDeAhorro.h` — subclase con interés, límite de retiros y saldo mínimo.
-- `CuentaDeCheques.h` — subclase de cuenta simple, sin interés.
-- `Banco.h` — administra clientes y cuentas.
+- `UUID.h` - singleton generador de identificadores `2-mm-yy-id`.
+- `Cliente.h` - clase `Cliente` (nombre del titular).
+- `Cuenta.h` - clase base con saldo, id, cliente y tipo; métodos virtuales.
+- `CuentaDeAhorro.h` - subclase con interés, límite de retiros y saldo mínimo.
+- `CuentaDeCheques.h` - subclase de cuenta simple, sin interés.
+- `Banco.h` - administra clientes y cuentas.
 
-### Raíz — fuentes
-- `main.cpp` — programa de prueba: crea un banco y un cliente, abre una cuenta
+### Raíz - fuentes
+- `main.cpp` - programa de prueba: crea un banco y un cliente, abre una cuenta
   de cada tipo y ejercita todas las reglas (IDs, depósito/retiro, interés,
   límite de retiros y saldo mínimo).
-- `Cuenta.cpp`, `CuentaDeAhorro.cpp`, `Banco.cpp` — implementación de los
+- `Cuenta.cpp`, `CuentaDeAhorro.cpp`, `Banco.cpp` - implementación de los
   métodos no triviales.
-- `Cliente.cpp`, `CuentaDeCheques.cpp` — sin implementación externa (sus métodos
+- `Cliente.cpp`, `CuentaDeCheques.cpp` - sin implementación externa (sus métodos
   son sencillos y van *inline* en el header).
 
 **Nota**: Todo es in-mem, no se tiene persistencia on-disk. No es interactivo.

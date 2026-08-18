@@ -25,26 +25,26 @@ Esta maquina no determina el lenguaje de la TM
 Las interfaces (declaraciones) viven en `if/` y las implementaciones
 (`.cpp`) en la raíz
 
-### `if/` — headers
-- `Utils.h` — `enum class Mov { L, R }` y el `struct Transicion`
-- `Cinta.h` — declaración de la cinta (cabeza, lectura/escritura/movimiento)
-- `MaquinaTuring.h` — declaración del cascaron de la MT
-- `LectorMT.h` — declaración del lector/constructor de MT desde texto
+### `if/` - headers
+- `Utils.h` - `enum class Mov { L, R }` y el `struct Transicion`
+- `Cinta.h` - declaración de la cinta (cabeza, lectura/escritura/movimiento)
+- `MaquinaTuring.h` - declaración del cascaron de la MT
+- `LectorMT.h` - declaración del lector/constructor de MT desde texto
 
-### Raíz — fuentes
-- `main.cpp` — carga la MT desde el archivo de definición recibido como argumento y la
+### Raíz - fuentes
+- `main.cpp` - carga la MT desde el archivo de definición recibido como argumento y la
   corre en modo interactivo paso a paso
-- `Cinta.cpp` — implementación de la cinta
-- `MaquinaTuring.cpp` — implementación del cascaron 
-- `LectorMT.cpp` — parser de la definición y construcción de la MT
+- `Cinta.cpp` - implementación de la cinta
+- `MaquinaTuring.cpp` - implementación del cascaron 
+- `LectorMT.cpp` - parser de la definición y construcción de la MT
 
-### `ejemplos/` — definiciones de MT (cárgalas con `./tm ejemplos/<archivo>`)
-- `0n1n.tm` — acepta `L = { 0ⁿ1ⁿ | n ≥ 1 }` (mismo número de `0`s y `1`s, en
+### `ejemplos/` - definiciones de MT (cárgalas con `./tm ejemplos/<archivo>`)
+- `0n1n.tm` - acepta `L = { 0ⁿ1ⁿ | n ≥ 1 }` (mismo número de `0`s y `1`s, en
   ese orden). Pruébala con `01`, `0011`, `000111`.
-- `palindromos_ab.tm` — acepta los **palíndromos** sobre `{a,b}`,
+- `palindromos_ab.tm` - acepta los **palíndromos** sobre `{a,b}`,
   `L = { w | w = wᴿ }` (incluye un solo símbolo). Pruébala con `aba`, `abba`,
   `aabaa`.
-- `anbncn.tm` — acepta `L = { aⁿbⁿcⁿ | n ≥ 1 }` (mismo número de `a`s, `b`s y
+- `anbncn.tm` - acepta `L = { aⁿbⁿcⁿ | n ≥ 1 }` (mismo número de `a`s, `b`s y
   `c`s, en ese orden); lenguaje **no libre de contexto**. Pruébala con `abc`,
   `aabbcc`, `aaabbbccc`.
 
@@ -86,7 +86,7 @@ q1 1 -> q2 Y L
 El lector valida la definición y aborta indicando la línea del error si:
 falta `q_ini`; un movimiento no es `L`/`R`; hay **dos transiciones para el mismo
 `(estado, símbolo)`** (debe ser determinista); o —cuando se declaran `Q`, `Σ` o
-`Γ`— una transición usa un estado o símbolo que no pertenece a esos conjuntos
+`Γ`- una transición usa un estado o símbolo que no pertenece a esos conjuntos
 En la tabla, los estados de aceptación se marcan con `*`
 
 Para ejecutar con el archivo de una TM, suponiendo que el ejecutable se llama

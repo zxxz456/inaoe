@@ -1,4 +1,4 @@
-# Tarea 4 — Árbol binario en C
+# Tarea 4 - Árbol binario en C
 
 Tarea 4 de la segunda parte del curso propedéutico de **Programación y
 Estructuras de Datos** (Dr. Miguel Morales Sandoval).
@@ -29,9 +29,9 @@ Nodo *construir(const int *pre, const int *in, int n);
 
 En la solucion `solucion_Bryan_Violante_Arriaga.c` se implemento lo requerido:
 
-- **`insertar`** — inserción **por niveles**: llena un nivel completo antes de
+- **`insertar`** - inserción **por niveles**: llena un nivel completo antes de
   pasar al siguiente, de izquierda a derecha
-- **`construir`** — reconstruye el árbol a partir de sus recorridos **preorden**
+- **`construir`** - reconstruye el árbol a partir de sus recorridos **preorden**
   e **inorden**
 
 No tiene `main`, son solo las dos funciones, pensadas para compilarse junto con
@@ -116,7 +116,7 @@ tests.c:12533:28: warning: format not a string literal and no format arguments [
 12533 |     printf((char const   *)(_TIG_EL_iN0d_3_encodeStrings_litStr51));
       |                            ^
 ╔══════════════════════════════════════════════════╗
-║  Ejercicio — Arboles binarios                    ║
+║  Ejercicio - Arboles binarios                    ║
 ║  insertar por niveles y construir pre+in         ║
 ╚══════════════════════════════════════════════════╝
 

@@ -15,12 +15,12 @@ Así se pueden tener varias listas a la vez. El nodo está aparte, en `Nodo.h`.
 
 ## Archivos
 
-- `if/Nodo.h` — el nodo: un int y el puntero al siguiente.
-- `if/Lista.h` — la lista y las firmas de las operaciones.
-- `if/Utils.h` — `limpiarPantalla()` (también se reutiliza en la
+- `if/Nodo.h` - el nodo: un int y el puntero al siguiente.
+- `if/Lista.h` - la lista y las firmas de las operaciones.
+- `if/Utils.h` - `limpiarPantalla()` (también se reutiliza en la
   [actividad2](../actividad2_parte2_queuestack/)).
-- `Lista.c` — agregar (al inicio o al final), eliminar, buscar, mostrar, liberar, etc.
-- `main.c` — menú interactivo: `0` agrega, `1` elimina, cualquier otra tecla sale.
+- `Lista.c` - agregar (al inicio o al final), eliminar, buscar, mostrar, liberar, etc.
+- `main.c` - menú interactivo: `0` agrega, `1` elimina, cualquier otra tecla sale.
 
 ## Compilar y correr
 

@@ -1,4 +1,4 @@
-# Tarea 2 — Jerarquía de empleados y polimorfismo (POO en C++)
+# Tarea 2 - Jerarquía de empleados y polimorfismo (POO en C++)
 
 Este ejercicio corresponde a la **Tarea 2** de la segunda parte del curso 
 **propedéutico de Programación y Estructuras de Datos**, impartido por el 
@@ -18,11 +18,11 @@ definición de `earnings()` de cada una:
 
 Cada clase calcula sus ganancias de forma distinta:
 
-- **`SalariedEmployee`** — regresa el salario semanal.
-- **`HourlyEmployee`** — paga las horas normales y, a partir de la hora 40,
+- **`SalariedEmployee`** - regresa el salario semanal.
+- **`HourlyEmployee`** - paga las horas normales y, a partir de la hora 40,
   paga las horas extra a 1.5x: `40 * wage + (hours-40) * 1.5 * wage`.
-- **`CommissionEmployee`** — regresa `commissionRate * grossSales`.
-- **`BasePlusCommissionEmployee`** — lo mismo que el de comisiones más un salario
+- **`CommissionEmployee`** - regresa `commissionRate * grossSales`.
+- **`BasePlusCommissionEmployee`** - lo mismo que el de comisiones más un salario
   base: `commissionRate * grossSales + baseSalary`.
 
 ## Solución propuesta (modelado)
@@ -43,23 +43,23 @@ a través de un puntero `Empleado*`:
 Las **interfaces** (declaraciones de clase) viven en `if/` y las
 **implementaciones** (`.cpp`) en la raíz.
 
-### `if/` — headers
-- `Utils.h` — constantes del proyecto: umbral de horas extra (40) y factor de
+### `if/` - headers
+- `Utils.h` - constantes del proyecto: umbral de horas extra (40) y factor de
   pago de horas extra (1.5).
-- `Empleado.h` — clase base con `salario`; métodos virtuales `ganancias()` e
+- `Empleado.h` - clase base con `salario`; métodos virtuales `ganancias()` e
   `imprimir()` y destructor virtual.
-- `EmpleadoAsalariado.h` — subclase con `salarioSemanal`.
-- `EmpleadoPorHora.h` — subclase con `horasTrabajadas` y `tarifaPorHora`.
-- `EmpleadoPorComisiones.h` — subclase con `comisionPorVenta` y `ventasTotales`.
-- `EmpleadoBaseMasComisiones.h` — subclase de `EmpleadoPorComisiones` que agrega
+- `EmpleadoAsalariado.h` - subclase con `salarioSemanal`.
+- `EmpleadoPorHora.h` - subclase con `horasTrabajadas` y `tarifaPorHora`.
+- `EmpleadoPorComisiones.h` - subclase con `comisionPorVenta` y `ventasTotales`.
+- `EmpleadoBaseMasComisiones.h` - subclase de `EmpleadoPorComisiones` que agrega
   `salarioBase`.
 
-### Raíz — fuentes
-- `main.cpp` — programa de prueba: crea un `std::vector<Empleado*>` con un
+### Raíz - fuentes
+- `main.cpp` - programa de prueba: crea un `std::vector<Empleado*>` con un
   empleado de cada tipo y lo recorre con dos `for each`, uno que muestra
   `ganancias()` y otro que llama a `imprimir()`; al final libera la memoria.
 - `Empleado.cpp`, `EmpleadoAsalariado.cpp`, `EmpleadoPorHora.cpp`,
-  `EmpleadoPorComisiones.cpp`, `EmpleadoBaseMasComisiones.cpp` — implementación
+  `EmpleadoPorComisiones.cpp`, `EmpleadoBaseMasComisiones.cpp` - implementación
   de `ganancias()` e `imprimir()` de cada clase.
 
 **Nota**: Todo es in-mem, no se tiene persistencia on-disk. No es interactivo.

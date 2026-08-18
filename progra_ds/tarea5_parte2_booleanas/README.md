@@ -1,4 +1,4 @@
-# Tarea 5 — Árbol de expresión booleana en C
+# Tarea 5 - Árbol de expresión booleana en C
 
 Tarea 5 de la segunda parte del curso propedéutico de **Programación y
 Estructuras de Datos** (Dr. Miguel Morales Sandoval).

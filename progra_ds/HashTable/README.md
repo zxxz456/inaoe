@@ -13,10 +13,10 @@ ejecutar **Insertar, Buscar, Eliminar y Recorrer**.
 `M` = número de cubetas (configurable con `-m`, por defecto 7).
 
 ## Archivos
-- `hash_table.py` — estructura base en Python: clase `HashTable`.
-- `simulador_hash.py` — CLI que carga la plantilla e inyecta claves y `M`.
-- `plantilla.html` — HTML/CSS/JS del simulador (lógica reflejada en JS).
-- `hash_animacion.html` — archivo generado por el script (no editar a mano).
+- `hash_table.py` - estructura base en Python: clase `HashTable`.
+- `simulador_hash.py` - CLI que carga la plantilla e inyecta claves y `M`.
+- `plantilla.html` - HTML/CSS/JS del simulador (lógica reflejada en JS).
+- `hash_animacion.html` - archivo generado por el script (no editar a mano).
 
 ## Uso
 ```bash
@@ -28,17 +28,17 @@ python3 simulador_hash.py manzana pera uva kiwi -m 5
 ```
 
 ### Opciones
-- `-m N` / `--cubetas N` — número de cubetas (por defecto 7).
-- `--no-open` — solo genera el HTML, sin abrir el navegador.
-- `-o RUTA` / `--output RUTA` — ruta del HTML de salida.
+- `-m N` / `--cubetas N` - número de cubetas (por defecto 7).
+- `--no-open` - solo genera el HTML, sin abrir el navegador.
+- `-o RUTA` / `--output RUTA` - ruta del HTML de salida.
 
 ## Operaciones interactivas (en la página)
-- **Insertar** — calcula el hash, viaja a la cubeta y agrega al final de la
+- **Insertar** - calcula el hash, viaja a la cubeta y agrega al final de la
   cadena (o actualiza si la clave ya existía).
-- **Buscar** — calcula el hash y recorre la cadena de esa cubeta comparando.
-- **Eliminar** — busca y, si está, lo retira de la cadena.
-- **Recorrer** — visita cubeta por cubeta, mostrando todas sus claves.
-- **Reiniciar** — reconstruye la tabla con la secuencia inicial.
+- **Buscar** - calcula el hash y recorre la cadena de esa cubeta comparando.
+- **Eliminar** - busca y, si está, lo retira de la cadena.
+- **Recorrer** - visita cubeta por cubeta, mostrando todas sus claves.
+- **Reiniciar** - reconstruye la tabla con la secuencia inicial.
 
 ## Controles de reproducción
 Idénticos a los demás simuladores (⏮ / ◀ / ▶ / ⏭ + barra de velocidad +

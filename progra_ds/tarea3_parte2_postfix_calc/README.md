@@ -1,4 +1,4 @@
-# Tarea 3 — Calculadora de notación posfija (postfix) en C
+# Tarea 3 - Calculadora de notación posfija (postfix) en C
 
 Tarea 3 de la segunda parte del curso propedéutico de **Programación y
 Estructuras de Datos** (Dr. Miguel Morales Sandoval)
