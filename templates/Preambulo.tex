@@ -1,0 +1,235 @@
+% =====================================================================
+%  Preambulo.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Preámbulo compartido de los apuntes de clase: paquetes, estilo de
+%  página, entornos de teorema, las tres cajas de color, el estilo de
+%  listings y el pseudocódigo en español. Se carga con \input desde
+%  cada documento en lugar de copiarlo, para que un arreglo aquí llegue
+%  a todas las libretas de una vez.
+%
+%
+%  Considerations:
+%  ------------
+%  - Se carga con \input y ruta relativa, no con \usepackage, porque
+%    \usepackage solo busca en la carpeta del documento y en el árbol
+%    de TeX. Un .sty instalado en TEXMFHOME evitaría la ruta, pero vive
+%    fuera del repo y una clona nueva no compilaría
+%  - Los cuatro datos de la materia se declaran en el documento ANTES
+%    del \input. hyperref expande \materia al cargarse, así que si no
+%    existe todavía la compilación truena
+%  - algorithmicx no tiene opción de idioma y babel no lo traduce, así
+%    que las palabras clave del pseudocódigo se renombran a mano
+%  - Los nombres de los entornos van sin acento (\begin{definicion})
+%    aunque el rótulo impreso sí lo lleve
+%  - babel se carga con es-noshorthands porque en español el " queda
+%    activo y se come el texto que le sigue, además de romper listings
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       18/08/2026      Creation
+%
+%
+% =====================================================================
+%  USO
+%  ---
+%  \documentclass[11pt,letterpaper]{article}
+%  \newcommand{\materia}{...}      % los cuatro datos van arriba
+%  \newcommand{\profesor}{...}
+%  \newcommand{\periodo}{...}
+%  \newcommand{\alumno}{...}
+%  \input{../../templates/Preambulo.tex}
+%  \begin{document}
+%  \portadilla
+% =====================================================================
+
+
+% ==================== IDIOMA Y CODIFICACIÓN ====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla,es-noshorthands]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ==================== PÁGINA ====================
+\usepackage[letterpaper,margin=2.3cm,headheight=14pt]{geometry}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% ==================== MATEMÁTICAS ====================
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+
+% ==================== FIGURAS, TABLAS, CÓDIGO ====================
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[ruled,section]{algorithm}
+\usepackage{algpseudocode}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% =====================================================================
+%  ESTILO
+% =====================================================================
+
+% --- encabezado y pie de cada página ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textsc{\materia}}
+\fancyhead[R]{\small\periodo}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- enlaces ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black,
+  pdftitle={Apuntes de \materia},
+  pdfauthor={\alumno}
+}
+
+% --- paleta ---
+\definecolor{acento}{HTML}{1F4E79}
+\definecolor{fondoIdea}{HTML}{EAF2FB}
+\definecolor{fondoOjo}{HTML}{FDF0E6}
+\definecolor{fondoPend}{HTML}{F2F0F7}
+\definecolor{comentario}{HTML}{5A7D5A}
+\definecolor{cadena}{HTML}{A03030}
+\definecolor{fondoCodigo}{HTML}{F7F7F7}
+
+% --- entornos de teorema; numeran por sección, o sea por clase ---
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}[section]
+\newtheorem{ejemplo}[definicion]{Ejemplo}
+\newtheorem{ejercicio}[definicion]{Ejercicio}
+
+\theoremstyle{plain}
+\newtheorem{teorema}[definicion]{Teorema}
+\newtheorem{lema}[definicion]{Lema}
+\newtheorem{corolario}[definicion]{Corolario}
+\newtheorem{proposicion}[definicion]{Proposición}
+
+\theoremstyle{remark}
+\newtheorem*{observacion}{Observación}
+\newtheorem*{quick_sum}{Resumen rápido}
+
+% --- cajas de color para lo que se relee antes del examen ---
+\newtcolorbox{idea}[1][]{
+  colback=fondoIdea, colframe=acento, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Idea clave}, fonttitle=\bfseries\small, #1
+}
+\newtcolorbox{ojo}[1][]{
+  colback=fondoOjo, colframe=orange!70!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Ojito...}, fonttitle=\bfseries\small, #1
+}
+\newtcolorbox{pendiente}[1][]{
+  colback=fondoPend, colframe=violet!60!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Pendiente por resolver}, fonttitle=\bfseries\small, #1
+}
+
+% --- código ---
+\lstdefinestyle{codigo}{
+  backgroundcolor=\color{fondoCodigo},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{acento}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{cadena},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=8pt,
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+  tabsize=4, captionpos=b,
+  extendedchars=true, inputencoding=utf8,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1
+           {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+           {Ü}{{\"U}}1 {ü}{{\"u}}1 {¿}{{?`}}1
+           {¡}{{!`}}1
+}
+\lstset{style=codigo}
+\renewcommand{\lstlistingname}{Código}
+\renewcommand{\lstlistlistingname}{Índice de código}
+% --- pseudocódigo; algorithmicx arma el cuerpo y algorithm el
+%     flotante que lo numera y lo pone en el índice. Las palabras
+%     clave vienen en inglés de fábrica y babel no las toca, así que
+%     se renombran una por una ---
+\floatname{algorithm}{Algoritmo}
+\renewcommand{\listalgorithmname}{Índice de algoritmos}
+
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicensure{\textbf{Salida:}}
+\algrenewcommand\algorithmicend{\textbf{fin}}
+\algrenewcommand\algorithmicif{\textbf{si}}
+\algrenewcommand\algorithmicthen{\textbf{entonces}}
+\algrenewcommand\algorithmicelse{\textbf{si no}}
+\algrenewcommand\algorithmicfor{\textbf{para}}
+\algrenewcommand\algorithmicforall{\textbf{para todo}}
+\algrenewcommand\algorithmicdo{\textbf{hacer}}
+\algrenewcommand\algorithmicwhile{\textbf{mientras}}
+\algrenewcommand\algorithmicrepeat{\textbf{repetir}}
+\algrenewcommand\algorithmicuntil{\textbf{hasta que}}
+\algrenewcommand\algorithmicloop{\textbf{ciclo}}
+\algrenewcommand\algorithmicprocedure{\textbf{procedimiento}}
+\algrenewcommand\algorithmicfunction{\textbf{función}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
+\algrenewcomment[1]{\hfill{\color{comentario}\itshape // #1}}
+
+% Las dos que algorithmicx no trae. El \ del final es obligatorio: sin
+% el TeX se come el espacio y sale "hastan-1" en vez de "hasta n-1"
+\algnewcommand\Hasta{\textbf{hasta}\ }
+\algnewcommand\Intercambiar{\textbf{intercambiar}\ }
+
+% --- abreviaturas que se usan a cada rato ---
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\Ord}[1]{\mathcal{O}\!\left(#1\right)}
+
+% --- encabezado de cada sesión: título a la izquierda, fecha a la
+%     derecha. El argumento corto es el que sale en el índice ---
+\newcommand{\clase}[2]{%
+  \section[#1]{#1 \hfill \normalfont\small\textit{#2}}%
+}
+
+% --- portadilla y tabla de contenidos. Se llama una vez, justo
+%     despues de \begin{document} ---
+\newcommand{\portadilla}{%
+  \begin{center}
+    {\LARGE\bfseries\materia\par}
+    \vspace{0.4em}
+    {\large \profesor \par}
+    \vspace{0.2em}
+    {\small \periodo\quad-\quad\alumno\par}
+    \vspace{0.3em}
+    \rule{\linewidth}{0.5pt}
+  \end{center}
+  \vspace{0.5em}
+  \tableofcontents
+  \vspace{1em}
+  \rule{\linewidth}{0.5pt}%
+}
+
+%############################ END OF PREAMBULO.TEX #############################
+%###############################################################################
