@@ -6,8 +6,8 @@ implementación en los `.c`.
 
 La actividad que se dejó en clase era modificar el programa para agregar la
 opción de eliminar con la tecla `1` (el original solo agregaba elementos).
-Aproveché para cambiar la estructura del proyecto —separándolo en varios
-archivos—, pero en esencia sigue siendo lo mismo: la misma lista ligada.
+Aproveché para cambiar la estructura del proyecto, separándolo en varios
+archivos, pero en esencia sigue siendo lo mismo: la misma lista ligada.
 
 La lista vive en un struct `Lista` (guarda la cabeza y el tamaño) que se pasa por
 puntero a cada función, en vez de la variable global `head` del código original.

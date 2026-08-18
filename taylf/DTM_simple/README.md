@@ -85,8 +85,8 @@ q1 1 -> q2 Y L
 
 El lector valida la definición y aborta indicando la línea del error si:
 falta `q_ini`; un movimiento no es `L`/`R`; hay **dos transiciones para el mismo
-`(estado, símbolo)`** (debe ser determinista); o —cuando se declaran `Q`, `Σ` o
-`Γ`- una transición usa un estado o símbolo que no pertenece a esos conjuntos
+`(estado, símbolo)`** (debe ser determinista); o, cuando se declaran `Q`, `Σ` o
+`Γ`, una transición usa un estado o símbolo que no pertenece a esos conjuntos
 En la tabla, los estados de aceptación se marcan con `*`
 
 Para ejecutar con el archivo de una TM, suponiendo que el ejecutable se llama
