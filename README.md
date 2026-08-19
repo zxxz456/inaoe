@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.2.0
+* Version: 1.3.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       19/08/2026      Agregue matcomp/ al indice
 zxxz6       18/08/2026      Agregue fundamentos_aal/ al indice
 zxxz6       18/08/2026      Agregue ada/ y templates/ al indice
 zxxz6       09/08/2026      Creation
@@ -51,7 +52,10 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 - [fundamentos_aal/](fundamentos_aal/) - Fundamentos para el Análisis
   Automático de Lenguaje.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
-    (`libreta.tex`), una sección por sesión.
+    (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
+- [matcomp/](matcomp/) - Matemáticas para Computación.
+  - [apuntes/](matcomp/apuntes/) - Por ahora solo la toma cruda en `.txt`;
+    falta pasarla a la libreta de LaTeX.
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
