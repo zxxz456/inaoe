@@ -1,0 +1,59 @@
+-- sesion de introduccion
+
+el objetivo no es como hacerce expertos en mate sino como entender los concetos y saber usarlos, las herrmientas en las
+que se basa la compu 
+
+- algebra
+es la parte de las matematicas quese relaciona operaciones, signos, leyes y asi
+
+- conjuntos
+nos permite agrupar elementos similares (patrones y asi) y realizar operaciones entre conjuntos 
+es la forma mas basica de describir que objetos esamos estudiando o trabajando
+
+intuitivamente es una coleccion, un grupo bien definidos que comparten caracteristicas similares, es finito o infinito
+, si los elementos son distintos esta bien, si estan duplicados solo se toma uno 
+por ejemmplo los entereos 
+
+X = {x | algo}
+
+pertenencia es con la.e chiquita
+
+cardinalidad es el numero de elementos de un conjunto 
+
+U es todo el universo de posibilidades sobre la cual yo defino la regla para definir un conjunto particular 
+
+conjunto vacio no tiene elementos y es subconjunto de todo conjunto y la cardinalidad es 0 
+
+los conjuntos iguales son aquellos que son iguales elemento a elemento 
+
+un subconjunto propio es
+
+todo conjunto a es subconjunto de si mismo 
+
+pertenece a - refiere elementos de manera individual
+incluido en - wz
+
+conjunto potencia es el conjunto formado por todos los subconjuntos 
+
+[explicacion de donde viene 2 a la n del conjunto potencia]
+
+- operciones con conjuntos
+existen varias, operaciones binarias, o sea que hay 2 operandos en la operaciones
+
+a y b si las opero es binaria pero suponinedo que a y b pertenecen a los enteros 
+entonces si la resultado de la operacion pertenee a los enteros, entonces es cerrada en los enteros
+(sirve para definir una etiqueta y darle un nombre al algebra en la que estamos trabajando)
+
+esta la:
+
+*union 
+*interseccion
+*diferencia 
+*diferencia simetrica
+*complemento
+
+
+-Producto cartesiano
+es una conjunto donde todos los elementos son pares donde el primer elemento pertenece al primer conjunto 
+y el segundo son los del segundo, todos los pares de los elementos de a con todos los de b
+la cardinalidad es la cardinalidad de a x b 
