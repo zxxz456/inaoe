@@ -1,0 +1,36 @@
+continuacion de clase pasada
+
+{linea del tiempo de la evlolucion de los algoritmos de aprendizaje y nlp}
+
+al principio se usaban solo textos escritos 
+
+-Multinodal NLP
+pero por los avances de la tecnologia se llega al multinodal IA, no solo texto sino video, audio, imagenes
+
+estos modelos permiten que no sea aise info importante como por ejemplo extraer el texto de un audio, perdindo la info
+corporal de hablar, las expresiones faciale y ais
+
+cuando se trabaja de una sola manra es unimodal
+
+-nlp en la vida diaria 
+
+un ejemplo es la traduccion automatica, esto tiene muchos problemas como que los diferentes lenguajes tienen diferentes
+estructuras gramaticales y asi, palabras que no significan lo mismo. El NPL hace esta tarea bien y lo usamos al dia a dia
+
+otro ejemplo es el spam filter, los asistentes virtuales, autocompletado y texto predictio (modelos de lenguaje)
+otra es el grammarly, motores de busqueda (rettrieval de info)
+
+que es un modelo de lenguaje?
+
+--- areas de investigacion de nlp, problemas de nlp 
+- deteccion de fake news 
+- perfilado de autoria 
+- deteccion de discurso de odio: el discurso de odio no siempre es grosero o asi, pero es discuro de odio sin ser explicito 
+- deteccion de humor 
+- analisis de sentimiento 
+- question answering 
+- rag
+- resumen de textos
+- generacion de texto
+- text to image 
+- image to text (captioning)
