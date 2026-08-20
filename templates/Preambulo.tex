@@ -6,7 +6,7 @@
 %  Descripción:
 %  ------------
 %  Preámbulo compartido de los apuntes de clase: paquetes, estilo de
-%  página, entornos de teorema, las tres cajas de color, el estilo de
+%  página, entornos de teorema, las cuatro cajas de color, el estilo de
 %  listings y el pseudocódigo en español. Se carga con \input desde
 %  cada documento en lugar de copiarlo, para que un arreglo aquí llegue
 %  a todas las libretas de una vez.
@@ -32,12 +32,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.0.0
+%   * Version: 1.1.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       19/08/2026      Agregue la caja Idea Random
 %  zxxz6       18/08/2026      Creation
 %
 %
@@ -144,6 +145,11 @@
   colback=fondoPend, colframe=violet!60!black, boxrule=0.6pt,
   arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
   title={Pendiente por resolver}, fonttitle=\bfseries\small, #1
+}
+\newtcolorbox{idear}[1][]{
+  colback=fondoPend, colframe=pink!60!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Idea Random}, fonttitle=\bfseries\small, #1
 }
 
 % --- código ---
