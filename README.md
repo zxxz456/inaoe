@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.3.0
+* Version: 1.4.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       19/08/2026      matcomp ya tiene libreta, no solo el crudo
 zxxz6       19/08/2026      Agregue matcomp/ al indice
 zxxz6       18/08/2026      Agregue fundamentos_aal/ al indice
 zxxz6       18/08/2026      Agregue ada/ y templates/ al indice
@@ -54,8 +55,8 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
 - [matcomp/](matcomp/) - Matemáticas para Computación.
-  - [apuntes/](matcomp/apuntes/) - Por ahora solo la toma cruda en `.txt`;
-    falta pasarla a la libreta de LaTeX.
+  - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
+    (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
