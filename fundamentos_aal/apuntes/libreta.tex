@@ -12,12 +12,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.0.0
+%   * Version: 2.1.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       19/08/2026      Apuntes de la clase del 19 de agosto
+%  zxxz6       19/08/2026      Registre a los cuatro profesores
 %  zxxz6       17/08/2026      Creation
 %
 %
@@ -28,7 +30,10 @@
 %  DATOS DE LA MATERIA
 % =====================================================================
 \newcommand{\materia}{Fundamentos para el Análisis Automático de Lenguaje}
-\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías}
+\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías \\
+                       Dr. Luis Villaseñor Pineda \\
+                       Dr. Manuel Montes y Gómez \\
+                       Dr. Aurelio López López}
 \newcommand{\periodo}{Otoño 2026}
 \newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
 
@@ -54,15 +59,15 @@
     natural.
 \end{quick_sum}
 
-\subsection{Qué es un lenguaje natural?}
+\subsection*{Qué es un lenguaje natural?}
 Un lenguaje natural es un sistema de comunicación que permite a los
 seres humanos expresar ideas, emociones y conceptos a través de signos
 y símbolos.
 
-\begin{idea}
+\begin{idear}
     Un sistema de comunicación entre dos animales puede ser conciderado lenguaje?
     O entre seres interespecíficos? Por ejemplo, entre un humano y un perro.
-\end{idea}
+\end{idear}
 
 Un lenguaje puede ser influenciado por:
 
@@ -87,7 +92,7 @@ el análisis de sentimientos, la generación de texto y la comprensión del leng
 
 \vspace{2em}
 
-\subsection{Conceptos importantes}
+\subsection*{Conceptos importantes}
 
 \begin{itemize}
     \item \textbf{Lingüística}: Estudio científico del lenguaje, incluyendo su estructura, evolución y uso en la sociedad.
@@ -108,9 +113,86 @@ Para entender el PNL hay varias areas como:
     \item \textbf{Fonología}: Estudio de los sistemas de sonidos en un idioma y cómo se organizan para formar palabras y oraciones
 \end{itemize}
 
+\vspace{2em}
 
+\newpage
 
+\clase{Continuación (Lenguaje)}{19 de agosto de 2026}
 
+\begin{quick_sum}
+    En esta sesión continuamos con la introduccion al curso, como ha evolucionado el NLP
+    que es el NLP multinodal y los modelos de lenguaje, todos estos conceptos asi muy por 
+    encima, nada super formal, solo para tener una idea de lo que es el curso y a donde vamos a llegar.
+    Igual vimos las areas o problemas de investigacion en PLN.
+\end{quick_sum}
+
+\vspace{2em}
+
+\begin{itemize}
+    \item \textbf{1950}: Alan Turing propone el test de Turing.
+    \item \textbf{1957}: Chomsky publica su gramática generativa.
+    \item \textbf{1966}: ELIZA, el primer chatbot basado en reglas.
+    \item \textbf{1980s}: Auge de los métodos estadísticos sobre corpus.
+    \item \textbf{1990s}: Modelos ocultos de Márkov y traducción
+    automática estadística.
+    \item \textbf{2013}: word2vec populariza los embeddings de palabras.
+    \item \textbf{2017}: Llega la arquitectura Transformer.
+    \item \textbf{2018}: BERT y GPT inician los modelos preentrenados a
+    gran escala.
+    \item \textbf{2020s}: Modelos de lenguaje grandes de uso masivo.
+\end{itemize}
+
+Al inicio se utilizaban solo textos y reglas para los algoritmos de
+NLP pero con el avance de la tecnología surgió el \textbf{NLP multinodal} (cuando usa solo texto se llama mono nodal), que a demas
+de texto, también utiliza imágenes, audio y video para el procesamiento del lenguaje natural.
+
+En nuestra vida diaria el NLP se usa en muchas cosas como:
+
+\begin{itemize}
+    \item Asistentes virtuales (Siri, Alexa, Google Assistant)
+    \item Traducción automática (Google Translate, DeepL)
+    \item Análisis de sentimientos en redes sociales
+    \item Chatbots y atención al cliente automatizada (aunque a veces es deficiente)
+    \item Resumen automático de textos
+    \item Reconocimiento de voz y transcripción
+\end{itemize}
+
+\subsection*{Modelos de Lenguaje}
+
+\begin{idea}
+    Un modelo de lenguaje es un modelo probabilístico/estadístico que asigna una probabilidad a una secuencia de palabras (o tokens)
+\end{idea}
+
+Como curiosidad, la formula que usualmente se utiliza para predecir la siguiente dado un contexto anterior
+es
+
+\begin{equation}
+    P(w_n | w_1, w_2, ..., w_{n-1}) = \frac{P(w_1, w_2, ..., w_n)}{P(w_1, w_2, ..., w_{n-1})}
+\end{equation}
+
+Y pues se parece mucho a la formula de Bayes o a la de probabilidad condicional.
+Hay dos grandes famililias de modelos de lenguaje
+
+\begin{itemize}
+    \item \textbf{Basados en n-gramas}: Estiman esa probabilidad contando frecuencias de secuencias de n palabras en un corpus. Simples pero limitados por la escasez de datos (data sparsity) para n grande.
+    \item \textbf{Basados en ANNs}: Aprenden una representación continua del contexto y generalizan mejor a secuencias no vistas. Los LLM actuales (GPT, BERT, etc.) son modelos de lenguaje neuronales entrenados sobre enormes corpus.
+\end{itemize}
+
+\subsection*{Areas de investigación en PLN}
+Hay varias áreas de investigación y/o problemas en PLN:
+\begin{itemize}
+    \item Detección de fake news 
+    \item Perfilado de autoría 
+    \item Detección de discurso de odio (el discurso de odio no siempre es grosero o así, pero es discurso de odio sin ser explícito)
+    \item Detección de humor 
+    \item Análisis de sentimiento 
+    \item Question answering 
+    \item RAG
+    \item Resumen de textos
+    \item Generación de texto
+    \item Text to image 
+    \item Image to text (captioning)
+\end{itemize}
 
 \end{document}
 
