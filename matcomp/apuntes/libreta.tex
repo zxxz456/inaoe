@@ -1,0 +1,244 @@
+% =====================================================================
+%  libreta.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Apuntes de clase del curso de Matemáticas para Computación.
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 2.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       19/08/2026      Pase a LaTeX la toma cruda del 19/08
+%  zxxz6       19/08/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Matemáticas para Computación}
+\newcommand{\profesor}{Dra. Hayde Peregrina Barreto \\
+                       Dr. Luis Villaseñor Pineda}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\portadilla
+\newpage
+
+% =====================================================================
+%  Clase 1 - Intro al curso 
+% =====================================================================
+
+\clase{Introducción}{17 de agosto de 2026}
+
+\begin{quick_sum}
+    En esta sesión vimos una intro... que es lo que se espera de nosotros en la
+    materia, cómo se va a evaluar y qué temas se van a ver. Nos dijeron que
+    no es tanto como para hacer demostraciones sino como para entender los 
+    conceptos y saber usar esas herramientas en la computación.
+\end{quick_sum}
+
+\newpage
+
+% =====================================================================
+%  Clase 2 - Repaso 
+% =====================================================================
+
+\clase{Repaso}{19 de agosto de 2026}
+
+\begin{quick_sum}
+    En esta clase iniciamos con el repaso de algunos conceptos
+    matemáticos en los que se basa la materia y en general las mates
+    para compu. Los conceptos que vimos son el de algebra, conjuntos,
+    subconjuntos, operaciones con conjuntos y producto cartesiano.
+\end{quick_sum}
+
+
+\subsection{Álgebra}
+
+El álgebra es la parte de las matemáticas que estudia las operaciones,
+sus signos y las leyes que las rigen.
+
+% =====================================================================
+
+\subsection{Conjuntos}
+
+Los conjuntos permiten agrupar elementos que comparten algo y operar
+entre esos grupos. Son la forma más básica de describir qué objetos
+estamos estudiando.
+
+\begin{definicion}[Conjunto]
+    Colección bien definida de objetos que comparten alguna
+    característica. Puede ser finito o infinito.
+\end{definicion}
+
+Los elementos de un conjunto son distintos entre sí. Si al escribirlo
+se repite uno, cuenta una sola vez. Los enteros son el ejemplo de
+conjunto infinito.
+
+\subsubsection*{Notación}
+
+Un conjunto se describe por comprensión dando la regla que cumplen sus
+elementos:
+\[
+    X = \set{x \mid \text{regla que cumple } x}
+\]
+
+O por extensión listando sus elementos:
+\[
+    X = \set{x_1, x_2, x_3, \ldots, x_n}
+\]
+
+Los tres símbolos que se usan a cada rato:
+
+\begin{itemize}[itemsep=0.1em]
+    \item \textbf{Pertenencia} ($x \in X$): dice que $x$ es uno de los
+          elementos de $X$.
+    \item \textbf{Cardinalidad} ($\abs{X}$): el número de elementos que
+          tiene el conjunto.
+    \item \textbf{Universo} ($U$): todas las posibilidades sobre las
+          que se define la regla. Sin fijar $U$, la regla no delimita
+          nada.
+\end{itemize}
+
+\subsubsection*{Conjunto vacío e igualdad}
+
+El conjunto vacío $\emptyset$ no tiene elementos, su cardinalidad es
+$0$ y es subconjunto de cualquier conjunto.
+
+Dos conjuntos son iguales cuando lo son elemento a elemento.
+
+\subsubsection*{Subconjuntos}
+
+$A \subseteq B$ cuando todo elemento de $A$ está también en $B$. Todo
+conjunto es subconjunto de sí mismo, $A \subseteq A$.
+
+El subconjunto es \textbf{propio}, $A \subset B$, cuando además
+$A \neq B$: la contención se cumple pero $B$ tiene al menos un elemento
+que $A$ no tiene.
+
+\subsubsection*{Ejercicio clase}
+La Dra dejo un ejercicio de que así:
+
+Sea
+\[
+    \mathcal{U} = \set{1, 2, 3, 4, \set{1, 2}, \set{3, 5},
+                       \set{1, 2, 3, 4}}
+    \qquad
+    A = \set{1, 2, 3, 4}
+\]
+Determinar si lo siguiente es verdadero o falso:
+\begin{enumerate}[label=\alph*)]
+    \item $\abs{\mathcal{U}} = 7$ \textbf{Verdadero}, pq tiene 7
+          elementos distintos
+    \item $A \subseteq \mathcal{U}$ \textbf{Verdadero}, pq todos los
+          elementos de $A$ están en $\mathcal{U}$
+    \item $A \in \mathcal{U}$ \textbf{Verdadero}, pq $A$ es un elemento
+          de $\mathcal{U}$
+    \item $\abs{A} = 4$ \textbf{Verdadero}, pq tiene 4 elementos
+          distintos
+\end{enumerate}
+
+\subsubsection*{Conjunto potencia}
+
+\begin{definicion}[Conjunto potencia]
+    El conjunto formado por todos los subconjuntos de $A$, incluidos
+    $\emptyset$ y el propio $A$. Se escribe $\mathcal{P}(A)$.
+\end{definicion}
+
+Su cardinalidad es $\abs{\mathcal{P}(A)} = 2^{\abs{A}}$. De dónde sale
+el $2^n$: armar un subconjunto es decidir, para cada uno de los $n$
+elementos, si entra o no entra. Son dos opciones independientes por
+elemento, así que salen $2 \times 2 \times \cdots \times 2 = 2^n$
+combinaciones, y cada una da un subconjunto distinto.
+
+\begin{ejemplo}
+    Con $A = \set{1, 2}$ hay $n = 2$ elementos y $2^2 = 4$
+    subconjuntos:
+    \[
+        \mathcal{P}(A) = \set{\ \emptyset,\ \set{1},\ \set{2},\
+                              \set{1, 2}\ }
+    \]
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection{Operaciones con conjuntos}
+
+Todas las que vimos son \textbf{binarias}: toman dos operandos.
+
+\subsubsection*{Cerradura}
+
+Si $a$ y $b$ pertenecen a los enteros y el resultado de operarlos
+también es un entero, la operación es \textbf{cerrada} en los enteros.
+La cerradura sirve para ponerle etiqueta y nombre al álgebra en la que
+se está trabajando.
+
+\subsubsection*{Las cinco operaciones}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{llp{6cm}}
+        \toprule
+        \textbf{Operación} & \textbf{Símbolo} & \textbf{Qué devuelve}\\
+        \midrule
+        Unión                & $A \cup B$
+          & Lo que está en $A$, en $B$ o en ambos \\
+        Intersección         & $A \cap B$
+          & Lo que está en los dos a la vez \\
+        Diferencia           & $A \setminus B$
+          & Lo de $A$ que no está en $B$ \\
+        Diferencia simétrica & $A \mathbin{\triangle} B$
+          & Lo que está en uno de los dos, pero no en ambos \\
+        Complemento          & $A^{c}$
+          & Lo de $U$ que no está en $A$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Las cinco operaciones vistas en clase.}
+    \label{tab:operaciones}
+\end{table}
+
+% =====================================================================
+
+\subsection{Producto cartesiano}
+
+\begin{definicion}[Producto cartesiano]
+    $A \times B$ es el conjunto de todos los pares ordenados cuyo
+    primer elemento sale de $A$ y cuyo segundo sale de $B$:
+    \[
+        A \times B = \set{(a, b) \mid a \in A,\ b \in B}
+    \]
+\end{definicion}
+
+Se emparejan todos los elementos de $A$ con todos los de $B$, así que
+la cardinalidad es $\abs{A \times B} = \abs{A} \cdot \abs{B}$.
+
+\newpage
+
+% =====================================================================
+%  Clase 3
+% =====================================================================
+
+
+
+
+\end{document}
+%############################## END OF LIBRETA.TEX #############################
+%###############################################################################
