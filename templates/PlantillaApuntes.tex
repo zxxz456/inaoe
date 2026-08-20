@@ -31,12 +31,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.0.0
+%   * Version: 2.1.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       19/08/2026      Documente \profesor con varios nombres
 %  zxxz6       18/08/2026      Saque el preambulo a Preambulo.tex
 %  zxxz6       18/08/2026      Agregue pseudocodigo en espanol
 %  zxxz6       18/08/2026      Creation
@@ -51,6 +52,9 @@
 %  del \input porque el preámbulo los usa al cargarse.
 % =====================================================================
 \newcommand{\materia}{Nombre de la materia}
+% Con dos o más profesores se declara UN solo \profesor y los nombres
+% se separan con \\, uno por renglón. Repetir el \newcommand truena.
+% \newcommand{\profesor}{Dra. Fulana de Tal \\ Dr. Mengano de Cual}
 \newcommand{\profesor}{Nombre del profesor}
 \newcommand{\periodo}{Otoño 2026}
 \newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}

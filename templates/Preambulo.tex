@@ -21,6 +21,10 @@
 %  - Los cuatro datos de la materia se declaran en el documento ANTES
 %    del \input. hyperref expande \materia al cargarse, así que si no
 %    existe todavía la compilación truena
+%  - Cuando la materia la imparte más de un profesor, los nombres van
+%    en un solo \profesor separados por \\. La portadilla los imprime
+%    dentro de un center, que es donde \\ sí corta renglón. Repetir
+%    \newcommand{\profesor} no es opción: truena con "already defined"
 %  - algorithmicx no tiene opción de idioma y babel no lo traduce, así
 %    que las palabras clave del pseudocódigo se renombran a mano
 %  - Los nombres de los entornos van sin acento (\begin{definicion})
@@ -32,12 +36,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.1.0
+%   * Version: 1.2.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       19/08/2026      Documente \profesor con varios nombres
 %  zxxz6       19/08/2026      Agregue la caja Idea Random
 %  zxxz6       18/08/2026      Creation
 %
@@ -53,6 +58,12 @@
 %  \input{../../templates/Preambulo.tex}
 %  \begin{document}
 %  \portadilla
+%
+%  Con dos o mas profesores se declara UN solo \profesor y los nombres
+%  se separan con \\, uno por renglon:
+%
+%  \newcommand{\profesor}{Dra. Fulana de Tal \\
+%                         Dr. Mengano de Cual}
 % =====================================================================
 
 
@@ -220,7 +231,9 @@
 }
 
 % --- portadilla y tabla de contenidos. Se llama una vez, justo
-%     despues de \begin{document} ---
+%     despues de \begin{document}. El renglon del profesor va dentro
+%     del center, asi que \profesor puede traer varios nombres
+%     separados por \\ y salen apilados y centrados sin tocar nada ---
 \newcommand{\portadilla}{%
   \begin{center}
     {\LARGE\bfseries\materia\par}

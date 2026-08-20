@@ -33,6 +33,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       19/08/2026      Documente \profesor con varios nombres
 zxxz6       18/08/2026      Documente el preambulo compartido
 zxxz6       18/08/2026      Agregue la seccion de pseudocodigo
 zxxz6       18/08/2026      Creation
@@ -67,10 +68,22 @@ El preámbulo no se copia: vive en [`Preambulo.tex`](Preambulo.tex) y cada docum
 \end{document}
 ```
 
-Dos cosas que truenan si se hacen al revés:
+Tres cosas que truenan si se hacen al revés:
 
 - **Los cuatro datos van antes del `\input`.** hyperref expande `\materia` al cargarse; si todavía no existe, la compilación falla con `Undefined control sequence`.
 - **La ruta del `\input` es relativa al documento**, no a la raíz del repo. Desde `ada/apuntes/` son `../../templates/`. `\usepackage` no sirve aquí: solo busca en la carpeta del documento y en el árbol de TeX.
+- **Un `\newcommand` por dato, nunca dos.** El segundo falla con `Command \profesor already defined`.
+
+### Materias con dos o más profesores
+
+Los nombres van en un solo `\profesor`, separados por `\\`:
+
+```latex
+\newcommand{\profesor}{Dra. Delia Irazu Hernandez Farias \\
+                       Dr. Manuel Montes y Gomez}
+```
+
+Salen apilados y centrados debajo del título, uno por renglón. Funciona porque la portadilla imprime ese renglón dentro de un `center`, que es donde `\\` corta línea. No hay límite de nombres y el caso de un solo profesor no cambia.
 
 `latexmk` se da cuenta de que `Preambulo.tex` es una dependencia, así que recompila solo cuando cambia.
 
