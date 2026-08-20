@@ -1,0 +1,73 @@
+Continuacion intro
+
+La ia agentica vamos para alla...
+IA que expermiente sola y asi, pero eso nos podria hacer tratar todo como una caja negra... pero eso no es lo ideal
+siempre queremos entender como funcionan las cosas
+
+-- Funciones asintoticas -- 
+
+FUNCION: Una funcion es una relacion entre dos conjuntos en el cual a cada elemento del dominio se le asigna un solo elemento de 
+la imagen 
+
+concepdo de 
+- dominio
+- imagen
+- codominio
+- rango
+
+en el analisis del ordeamineto de burbuja se puede hacer el analisis de como crece el tiempo al aumentar la entrada
+si observvamos el comportamiento de la grafica parece a n2. Y se puede decir que n2 es una cota superior de del algoritmo
+
+{ejemplo de burbuja}
+
+Como dijimos la seleccion de algoritmos eicientes es lo que no interesa
+
+{ejemplo de quick sort}
+
+La funcion acota y se escribe O de 
+
+Muhcas funciones pueden ser acotadas asintoticamente comp polinoms, logaritmos y exponenciales
+
+Un algoirmo puede tner varias oeraciones... por ejemplo l a suma de matrices
+
+principio de invarianza
+
+hay mejor caso, peor caso y caso promedio
+
+simpre es buneo optimizar para poder llegar a los limites de las arquitecturas actuales
+
+operacion elemental: {que es}
+
+creciemitneo de funciones... los algoritmos tenemos que modelarlos para determinar su eficiencia asintotica
+
+
+--NOtacion o
+
+Se hace la medicion empirica f(n) y lo que queremos modelar es c g(n)
+
+dada esta funcion g(n) denotamos O(g(n)) al conjunto de funciones tales que {def}
+
+lo que dice basicamente es qye f(n) esta dentro del conjunto de funciones O(g(n))
+
+{ejemplo bubble}
+
+medimos en la vida real, 
+luego por intuicion, interpolacion, evolutivos, ajuste de curvas (podemos usar interpolacion y decir parece una funcion de grado 3, o sea un polinimio)
+vemos que se parece a la cuadrada pero ahora
+como sabesmo si es cota infferior o superior
+
+la analitica es mas grande o igual que la empirica
+
+{parte del n0 en las dispoitivas}
+
+{definicion formal de o grande}
+
+Importante... es un conjunto de funciones, la analitica que define que esta debajo de ella y la constante, y los empiricos si devimos que esta
+acotado en la notasion asintotica, significa que esta dentro
+
+Big o sirve para generar un conjunto de fuciones , familia de funciones
+
+y la burbuja con su funcion que medimos empiricamente (funcion deiscreta que se puede interpolar para hacer continua), pertenece a esa familia de funciones
+
+
+{hacer ejercicio de O grande}
