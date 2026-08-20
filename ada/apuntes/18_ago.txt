@@ -5,12 +5,23 @@ ordenamient
 voraces
 dicide y vence
 programcon dinamica
-
+elementary graph algoritmos
 algoritmos aleatroizados
 teoria de complejdidad
 
+--- evaluacion - examenes para evaluar si dominamos los conceptos
 3 examenes -30% cada uno
 aistencia 10%
+
+primer examen
+de intro a ordenamiento
+
+segundo 
+de greedy a dynamic
+
+tercero
+los ultimos tres
+
 http://ccc.inaoep.mx/carranza/alg.html
 carranza@inaoep.mx
 ASUNTO ALG2026
