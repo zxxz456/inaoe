@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.4.0
+* Version: 1.5.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       20/08/2026      Agregue ada/dummy/ al indice
 zxxz6       19/08/2026      matcomp ya tiene libreta, no solo el crudo
 zxxz6       19/08/2026      Agregue matcomp/ al indice
 zxxz6       18/08/2026      Agregue fundamentos_aal/ al indice
@@ -50,6 +51,11 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 - [ada/](ada/) - Análisis y Diseño de Algoritmos.
   - [apuntes/](ada/apuntes/) - Libreta de clase en LaTeX (`libreta.tex`),
     una sección por sesión, más la toma cruda en `.txt`.
+  - [dummy/](ada/dummy/) - Experimentos que alimentan los apuntes.
+    `ComparaOrdenamientos.c` cronometra bubble sort contra quick sort
+    sobre los mismos arreglos aleatorios, de 2^1 hasta 2^25 elementos, y
+    deja los tiempos en `.txt` separados por comas para graficarlos en
+    la libreta.
 - [fundamentos_aal/](fundamentos_aal/) - Fundamentos para el Análisis
   Automático de Lenguaje.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
