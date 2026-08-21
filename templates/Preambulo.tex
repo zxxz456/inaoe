@@ -36,12 +36,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.2.0
+%   * Version: 1.4.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       20/08/2026      Cargue pgfplots para graficas de datos
+%  zxxz6       20/08/2026      Cargue tikz para diagramas de conjuntos
 %  zxxz6       19/08/2026      Documente \profesor con varios nombres
 %  zxxz6       19/08/2026      Agregue la caja Idea Random
 %  zxxz6       18/08/2026      Creation
@@ -88,6 +90,14 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{xcolor}
+% tikz ya viene arrastrado por tcolorbox[most], pero se carga
+% explicito para no depender de ese detalle; la libreria babel
+% protege a tikz de los caracteres activos del español
+\usepackage{tikz}
+\usetikzlibrary{babel}
+% pgfplots dibuja graficas de datos (ejes, escalas log) sobre tikz
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{listings}
 \usepackage[ruled,section]{algorithm}
 \usepackage{algpseudocode}
