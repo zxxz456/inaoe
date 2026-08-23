@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.5.0
+* Version: 1.6.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       22/08/2026      Agregue fundamentos_aal/material_apoyo/
 zxxz6       20/08/2026      Agregue ada/dummy/ al indice
 zxxz6       19/08/2026      matcomp ya tiene libreta, no solo el crudo
 zxxz6       19/08/2026      Agregue matcomp/ al indice
@@ -60,6 +61,11 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   Automático de Lenguaje.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
+  - [material_apoyo/](fundamentos_aal/material_apoyo/) - Desarrollos de
+    fondo para repasar, generados con Claude y aparte de la toma de clase.
+    - [modelos_n_gramas.tex](fundamentos_aal/material_apoyo/modelos_n_gramas.tex) -
+      modelos de lenguaje de n-gramas: regla de la cadena, supuesto de
+      Markov, estimación por máxima verosimilitud, suavizado y perplejidad.
 - [matcomp/](matcomp/) - Matemáticas para Computación.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.

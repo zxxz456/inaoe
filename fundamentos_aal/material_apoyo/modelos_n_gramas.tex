@@ -1,0 +1,925 @@
+% =====================================================================
+%  modelos_n_gramas.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Material de apoyo sobre modelos de lenguaje de n-gramas: la regla de
+%  la cadena, el supuesto de Markov, la estimación por máxima
+%  verosimilitud, el suavizado y la perplejidad. Va aparte de la
+%  libreta porque no es toma de clase sino desarrollo de fondo para
+%  repasar antes del examen.
+%
+%
+%  Considerations:
+%  ------------
+%  - El texto lo generó Claude, no salió de la clase. Lo que quedó sin
+%    verificar contra el material del curso va marcado como tal en el
+%    propio documento, en los bloques de Observación
+%  - Carga el preámbulo compartido, así que usa los mismos entornos de
+%    teorema y las mismas cajas de color que las libretas. Las cajas de
+%    intuición son la caja idea con su título propio
+%  - Los macros de notación (\Count, \Vocab, \bos, \eos, \unk) se
+%    declaran después del \input porque solo los usa este archivo
+%  - No lleva portadilla: el documento no es de autoría propia, así que
+%    no se firma como las libretas
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : claude
+%   * Version: 1.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  claude       22/08/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Fundamentos para el Análisis Automático de Lenguaje}
+\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías \\
+                       Dr. Luis Villaseñor Pineda \\
+                       Dr. Manuel Montes y Gómez \\
+                       Dr. Aurelio López López}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+% =====================================================================
+%  NOTACIÓN PROPIA DE ESTE DOCUMENTO
+% =====================================================================
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\Count}{\mathrm{C}}
+\newcommand{\Vocab}{\mathcal{V}}
+\newcommand{\bos}{\texttt{<s>}}
+\newcommand{\eos}{\texttt{</s>}}
+\newcommand{\unk}{\texttt{<UNK>}}
+
+\title{\textbf{Modelos de lenguaje de $n$-gramas}\\[2pt]
+  \large Factorización, supuesto de Markov, estimación, suavizado y
+  perplejidad (ref.\ J\&M SLP \S3)}
+\author{Material de apoyo para \materia, INAOE}
+\date{}
+
+% =====================================================================
+\begin{document}
+\maketitle
+
+\section{Qué objeto es un modelo de lenguaje}
+
+Antes de escribir cualquier fórmula conviene fijar qué se está modelando, porque
+la mayor parte de las confusiones posteriores vienen de perder de vista el
+objeto primario.
+
+\begin{definicion}
+Un \emph{modelo de lenguaje} (language model) es una distribución de
+probabilidad sobre $\Vocab^*$, el conjunto de todas las cadenas finitas sobre un
+vocabulario finito $\Vocab$. Asigna a cada secuencia $w_1\cdots w_N$ un número
+$P(w_1\cdots w_N)\ge 0$ sujeto a
+\[
+\sum_{s\in\Vocab^*} P(s) = 1 .
+\]
+\end{definicion}
+
+\begin{idea}[title={Lo que hay que retener de entrada}]
+El objeto primario es la \textbf{conjunta sobre secuencias completas}, no las
+probabilidades condicionales. Las condicionales aparecerán enseguida, pero como
+una \emph{manera de parametrizar} esa conjunta, no como el objeto que se define.
+Esta distinción es la que se pierde cuando se afirma que ``el modelo está
+normalizado'' sin decir sobre qué espacio.
+\end{idea}
+
+Nótese que $\Vocab^*$ es infinito numerable: contiene cadenas de toda longitud
+finita. Una distribución sobre un conjunto infinito puede perfectamente sumar
+menos que $1$ si parte de la masa se escapa hacia objetos que no pertenecen al
+conjunto; a este fenómeno volveremos en la sección \ref{sec:fuga}, porque no es
+una patología teórica sino algo que un modelo mal construido produce con
+facilidad.
+
+\section{La regla de la cadena: factorización exacta}
+
+\subsection{Enunciado}
+
+La regla de la cadena de la probabilidad (chain rule) no es más que la
+definición de probabilidad condicional aplicada repetidamente. Para dos eventos
+con $P(B)>0$,
+\[
+P(A\mid B)=\frac{P(A\cap B)}{P(B)}
+\quad\Longrightarrow\quad
+P(A\cap B) = P(B)\,P(A\mid B),
+\]
+y al iterar sobre $N$ eventos se obtiene
+\[
+P(A_1\cap\cdots\cap A_N)
+= P(A_1)\,P(A_2\mid A_1)\,P(A_3\mid A_1\cap A_2)\cdots P(A_N\mid
+A_1\cap\cdots\cap A_{N-1}).
+\]
+
+En el caso del modelo de lenguaje, $A_i$ es el evento ``la $i$-ésima palabra es
+$w_i$'', y la intersección de todos ellos es el evento ``la secuencia es
+$w_1\cdots w_N$''. Se obtiene entonces
+\begin{equation}\label{eq:chain}
+P(w_1\cdots w_N) \;=\; \prod_{i=1}^{N} P(w_i \mid w_1\cdots w_{i-1}).
+\end{equation}
+
+\begin{idea}[title={La factorización no aproxima nada}]
+La ecuación \eqref{eq:chain} es una identidad, no un modelo. No se ha
+introducido ningún supuesto sobre el lenguaje. El único problema que queda es de
+\emph{estimación}: el condicionante $w_1\cdots w_{i-1}$ crece sin cota, de modo
+que habría un número no acotado de distribuciones distintas que estimar, una por
+cada historial posible.
+\end{idea}
+
+\subsection{Verificación por telescopio y por inducción}
+
+Conviene ver la cancelación explícitamente antes de aceptar la fórmula general.
+Para $N=3$, reescribiendo cada factor con la definición de condicional:
+\[
+P(w_1)\cdot\frac{P(w_1w_2)}{P(w_1)}\cdot\frac{P(w_1w_2w_3)}{P(w_1w_2)} \;=\;
+P(w_1w_2w_3),
+\]
+donde $P(w_1)$ cancela con el denominador del segundo factor y $P(w_1w_2)$ con
+el del tercero.
+
+\begin{proposicion}
+La identidad \eqref{eq:chain} vale para todo $N\ge 1$ siempre que $P(w_1\cdots
+w_{i-1})>0$ para cada $i\le N$.
+\end{proposicion}
+
+\begin{proof}
+Inducción sobre $N$, la longitud de la secuencia.
+
+\emph{Base} ($N=1$): ambos lados son $P(w_1)$, tomando como convención que el
+producto sobre el historial vacío vale $1$.
+
+\emph{Paso inductivo}: supóngase la identidad válida para $N-1$. Aplíquese la
+regla de dos eventos con $A=\{X_N=w_N\}$ y
+$B=\{X_1=w_1,\dots,X_{N-1}=w_{N-1}\}$, lo cual es lícito porque $P(B)>0$ por
+hipótesis:
+\[
+P(w_1\cdots w_N) = P(w_1\cdots w_{N-1})\cdot P(w_N\mid w_1\cdots w_{N-1}).
+\]
+Sustituyendo la hipótesis inductiva en el primer factor se obtiene el producto
+de $N$ términos. \qedhere
+\end{proof}
+
+\begin{observacion}
+\textbf{Puntos a verificar contra el material del curso.} Primero, la convención
+sobre el producto vacío en el caso base. Segundo, y más importante, qué se hace
+cuando algún prefijo tiene probabilidad cero: la convención usual es declarar
+que la conjunta es cero, pero eso es una convención y no un teorema, ya que el
+factor correspondiente sencillamente no está definido.
+\end{observacion}
+
+\subsection{El orden de la factorización es una elección}
+
+La regla de la cadena vale para \emph{cualquier} orden de los eventos: la
+demostración anterior funciona igual reetiquetando índices, y la conjunta
+resultante es idéntica. Factorizar de izquierda a derecha es una decisión de
+modelado, no una necesidad matemática.
+
+Esto tiene una consecuencia que se aprecia mejor en la sección siguiente: la
+factorización exacta es simétrica respecto al orden, pero el supuesto de Markov
+\emph{no} lo es. Truncar el historial a los $n-1$ símbolos anteriores no es lo
+mismo que truncarlo a los $n-1$ posteriores. La aproximación rompe una simetría
+que la identidad preservaba.
+
+\section{Cadenas de Markov y el supuesto de Markov}
+
+\subsection{Tres objetos distintos}
+
+Conviene separar tres cosas que suelen mezclarse.
+
+Un \emph{proceso estocástico} es simplemente una secuencia de variables
+aleatorias $X_1,X_2,\dots$ sobre un espacio de estados $S$. En un modelo de
+lenguaje sobre palabras, $X_i$ es la palabra en la posición $i$ y $S=\Vocab$; en
+un etiquetador morfosintáctico, $X_i$ es la etiqueta y $S$ el conjunto de
+categorías. Sin supuesto alguno, describir la conjunta de un proceso arbitrario
+de longitud $N$ requiere del orden de $|S|^N$ números.
+
+\begin{definicion}
+Un proceso es \emph{markoviano de orden $k$} si para todo $i$ y toda asignación
+de valores
+\[
+P(X_i \mid X_1,\dots,X_{i-1}) \;=\; P(X_i \mid X_{i-k},\dots,X_{i-1}).
+\]
+Cuando se dice ``cadena de Markov'' sin calificar, se sobreentiende $k=1$.
+\end{definicion}
+
+\begin{definicion}
+Una \emph{cadena de Markov} (de orden $1$) sobre un espacio finito es la
+tripleta $(S,\pi,A)$ donde $S$ es el conjunto de estados, $\pi$ es la
+distribución inicial con $\sum_{s}\pi(s)=1$, y $A$ es la matriz de transición
+con $A_{ss'}=P(X_{i+1}=s'\mid X_i=s)$, sujeta a
+\[
+\sum_{s'\in S} A_{ss'} = 1 \qquad\text{para cada } s\in S .
+\]
+La cadena es \emph{homogénea} si $A$ no depende de la posición $i$.
+\end{definicion}
+
+Obsérvese con cuidado la condición sobre $A$: lo que suma $1$ es cada
+\emph{renglón}, no cada columna. Es exactamente la misma observación sobre el
+espacio de normalización que reaparecerá en la sección \ref{sec:mle}, ahora en
+forma matricial.
+
+\begin{ejemplo}[Un ejemplo mínimo, para fijar la mecánica]
+Estados $S=\{\text{Sol},\text{Lluvia}\}$ con
+\[
+A=\begin{pmatrix} 0.8 & 0.2 \\ 0.4 & 0.6 \end{pmatrix},
+\]
+donde el renglón indica el estado de hoy y la columna el de mañana. Cada renglón
+suma $1$; las columnas no suman nada en particular ($0.8+0.4=1.2$). Con
+$\pi(\text{Sol})=1$,
+\[
+P(\text{Sol},\text{Sol},\text{Lluvia}) = \pi(\text{Sol})\cdot
+A_{\text{Sol},\text{Sol}}\cdot A_{\text{Sol},\text{Lluvia}} = 1\cdot 0.8\cdot
+0.2 = 0.16 .
+\]
+La probabilidad de una secuencia es el producto de las transiciones a lo largo
+del camino, multiplicado por la inicial.
+\end{ejemplo}
+
+\subsection{El supuesto aplicado al lenguaje}
+
+Un modelo de $n$-gramas resulta de imponer la propiedad de Markov de orden $n-1$
+sobre la factorización \eqref{eq:chain}:
+\begin{equation}\label{eq:markov}
+P(w_i \mid w_1\cdots w_{i-1}) \;\approx\; P(w_i \mid w_{i-n+1}\cdots w_{i-1}).
+\end{equation}
+Con $n=1$ se tiene el unigrama (historial de cero palabras), con $n=2$ el
+bigrama (historial de una), con $n=3$ el trigrama (historial de dos). Nótese que
+$n$ cuenta el bloque completo, historial \emph{más} la palabra predicha; el
+historial tiene longitud $n-1$.
+
+\begin{idea}[title={Qué se pierde, exactamente}]
+El modelo induce una relación de equivalencia sobre el conjunto de historiales:
+\[
+u \sim u' \iff \text{los últimos } n-1 \text{ símbolos de } u \text{ y de } u'
+\text{ coinciden,}
+\]
+y opera sobre las clases de equivalencia, no sobre los historiales. Toda
+distinción interna a una clase es \textbf{inaccesible}: no atenuada ni
+aproximada, sino irrecuperable. La contrapartida es que la conjunta pasa de
+requerir $|\Vocab|^N$ parámetros a requerir $|\Vocab|^{n}$, cifra independiente
+de $N$.
+\end{idea}
+
+\subsection{El orden depende de cómo se defina el estado}
+
+Un trigrama es markoviano de orden $2$ sobre palabras, lo cual parece salirse
+del marco de las cadenas de orden $1$. No es así, y la construcción que lo
+resuelve es estándar.
+
+\begin{proposicion}\label{prop:orden}
+Todo proceso markoviano de orden $k$ sobre $S$ es equivalente a una cadena de
+Markov de orden $1$ sobre $S^k$, tomando como estado la tupla de los últimos $k$
+símbolos.
+\end{proposicion}
+
+Para el trigrama el estado es el par $(w_{i-2},w_{i-1})$ y la transición
+$(u,v)\to(v,w)$ tiene probabilidad $P(w\mid u,v)$. Obsérvese la restricción
+estructural: desde el estado $(u,v)$ sólo son alcanzables estados cuya primera
+componente es $v$, de modo que la matriz resultante es enormemente dispersa.
+
+\begin{idea}[title={Consecuencia conceptual}]
+El orden \textbf{no es una propiedad del proceso} sino de cómo se definió el
+espacio de estados. ``Orden $1$'' no significa ``memoria de un paso'' en ningún
+sentido absoluto: una cadena de orden $1$ cuyos estados son tuplas de diez
+palabras recuerda diez palabras. La memoria está codificada en el estado. Lo
+único que no es gratis es el tamaño: el espacio pasa de $|\Vocab|$ a
+$|\Vocab|^{k}$.
+\end{idea}
+
+\subsection{El lenguaje no es markoviano de ningún orden finito}
+
+La afirmación precisa es la siguiente: no existe ningún $k$ finito tal que, para
+toda oración del español, $w_i$ sea condicionalmente independiente de $w_1\cdots
+w_{i-k-1}$ dado $w_{i-k}\cdots w_{i-1}$.
+
+Su forma operativa es un cuantificador universal con contraejemplo constructivo:
+\emph{para todo $k$ que se proponga, existe un par de oraciones que comparten
+sus últimos $k$ tokens y exigen continuaciones distintas}. El procedimiento de
+construcción, en español, puede basarse en la selección de modo verbal:
+\begin{center}
+\begin{tabular}{ll}
+\emph{Espero que mañana} \underline{\hspace{1.6cm}} & $\to$ \emph{llueva}
+(subjuntivo)\\
+\emph{Sé que mañana} \underline{\hspace{1.6cm}} & $\to$ \emph{lloverá}
+(indicativo)
+\end{tabular}
+\end{center}
+Dado cualquier $k$, basta insertar material intermedio hasta empujar el
+disparador (\emph{espero} frente a \emph{sé}) fuera de la ventana: \emph{Espero
+que mañana por la tarde, si el clima no cambia demasiado y las condiciones se
+mantienen como hasta ahora,} \underline{\hspace{1.6cm}}. La concordancia de
+número admite construcciones análogas (\emph{El libro que compré para mis
+hermanas} frente a \emph{Los libros que compré para mis hermanas}).
+
+Es importante ver por qué el argumento debe tener esta forma. Observar que ``una
+sola palabra de contexto no basta'' descarta únicamente $k=1$; por la
+proposición \ref{prop:orden}, eso se arreglaría redefiniendo el estado como una
+tupla más larga. Lo que hay que descartar es todo $k$ finito simultáneamente.
+
+\begin{observacion}
+\textbf{Punto a verificar.} Este argumento está emparentado con la demostración
+clásica de que el inglés no es un lenguaje regular (dependencias anidadas
+arbitrariamente profundas), pero son afirmaciones distintas: una es sobre
+generación entendida como conjunto de cadenas, la otra sobre independencia
+condicional en una distribución. Conviene contrastar la formulación exacta con
+el material del curso antes de usarla.
+\end{observacion}
+
+Tres precisiones sobre lo que la afirmación \emph{no} dice. Primero, no dice que
+el modelo sea inútil: un trigrama captura buena parte de la estructura local y
+la pregunta relevante no es si el supuesto es verdadero sino cuánto cuesta la
+aproximación en cada tarea. Segundo, y este es el punto central, no dice que más
+datos lo arreglen: con corpus infinito el estimador converge a la verdadera
+$P(w_i\mid \text{últimos } n-1)$, que existe y está bien definida, pero \emph{no
+es igual} a $P(w_i\mid \text{todo el historial})$, sino su marginal, y la
+marginal ha borrado el disparador. Se trata de error de \textbf{especificación},
+sesgo irreducible, y hay que distinguirlo con cuidado del error de
+\emph{estimación} por dispersión de la sección \ref{sec:dispersion}, que sí
+mejora con datos y es el que justifica el suavizado. Tercero, no dice que las
+arquitecturas neuronales escapen: su ventana de contexto también es finita,
+aunque el $k$ efectivo sea de órdenes de magnitud mayor y los historiales
+compartan parámetros en vez de ser símbolos atómicos.
+
+\section{Estimación por máxima verosimilitud}\label{sec:mle}
+
+\subsection{El criterio y su solución}
+
+En el criterio aparecen cuatro objetos que se escriben parecido y
+significan cosas distintas. Conviene fijar los cuatro antes de la
+fórmula, porque casi todo lo que sigue es manipulación algebraica una
+vez que se sabe qué es cada cual.
+
+\textbf{Los parámetros $\theta_{v\mid u}$.} Un modelo de bigramas no es
+más que una tabla de números, uno por cada par (historial $u$, palabra
+$v$). A ese número lo llamamos $\theta_{v\mid u}$. Es el mismo objeto
+que $P(v\mid u)$, y el cambio de nombre es deliberado: al escribir $P$
+se habla de una probabilidad dada, mientras que al escribir $\theta$ se
+la trata como una incógnita que hay que determinar a partir del corpus.
+Estimar el modelo es exactamente eso, llenar la tabla. El subíndice se
+lee ``la palabra $v$ dado el historial $u$'', de modo que cada renglón
+de la tabla corresponde a un historial fijo y debe sumar $1$ sobre
+todas las palabras posibles.
+
+\textbf{Los conteos $\Count(\cdot)$.} $\Count(x)$ es el número de veces
+que la cadena $x$ aparece en el corpus de entrenamiento. No tiene nada
+de estadístico: se recorre el corpus una vez y se lleva una cuenta con
+lápiz y papel, o con un diccionario. Así, $\Count(uv)$ cuenta las
+apariciones del bigrama $uv$, y $\Count(u)$ las del unigrama $u$. La
+sección siguiente hace ese conteo a mano sobre un corpus de tres
+oraciones. Los conteos son lo único que el corpus aporta: son un
+resumen del corpus y, una vez calculados, el corpus ya no se vuelve a
+mirar.
+
+\textbf{La verosimilitud $L(\theta)$.} Es la probabilidad que el modelo
+asigna al corpus de entrenamiento, leída como función de los parámetros
+y no de los datos. Los datos están fijos, ya se observaron; lo que
+varía es la tabla, y $L$ mide qué tan bien cada llenado posible de esa
+tabla explica lo que se vio. La probabilidad del corpus, por la regla
+de la cadena, es el producto de un factor $\theta_{v\mid u}$ por cada
+posición del corpus. Al agrupar las posiciones que comparten el mismo
+par $(u,v)$, ese factor idéntico se repite $\Count(uv)$ veces y el
+producto se vuelve una potencia. De ahí sale el exponente:
+\[
+L(\theta) = \prod_{u,v} \theta_{v\mid u}^{\,\Count(uv)} .
+\]
+
+\textbf{La log-verosimilitud $\ell(\theta)$.} Es simplemente
+$\log L(\theta)$, y el logaritmo convierte el producto en suma:
+\[
+\ell(\theta) = \sum_{u}\sum_{v} \Count(uv)\,\log\theta_{v\mid u} .
+\]
+Se trabaja con $\ell$ y no con $L$ por dos razones. La primera es
+práctica: $L$ es un producto de miles de números menores que $1$ y se
+desborda por defecto en cualquier aritmética de punto flotante, cosa
+que a una suma de logaritmos no le pasa. La segunda es que el logaritmo
+es estrictamente creciente, así que $L$ y $\ell$ alcanzan su máximo en
+el mismo punto, y derivar una suma es mucho más cómodo que derivar un
+producto.
+
+Con eso, el criterio se enuncia en un renglón: el estimador de máxima
+verosimilitud es el valor de $\theta$ que maximiza $\ell$ sin salirse
+de la restricción de normalización,
+\[
+\hat\theta=\argmax_\theta \ell(\theta)
+\qquad\text{sujeto a}\qquad
+\sum_v \theta_{v\mid u}=1 \ \text{ para cada } u .
+\]
+El sombrero de $\hat\theta$ distingue el valor estimado a partir de un
+corpus concreto del parámetro $\theta$ como incógnita.
+
+\begin{teorema}\label{thm:mle}
+El máximo de $\ell$ sobre el símplex se alcanza en las frecuencias relativas:
+\[
+\hat{P}(w_i \mid w_{i-n+1}\cdots w_{i-1}) \;=\; \frac{\Count(w_{i-n+1}\cdots
+w_{i})}{\Count(w_{i-n+1}\cdots w_{i-1})},
+\]
+y en particular, para el bigrama, $\hat{P}(v\mid u) = \Count(uv)/\Count(u)$.
+\end{teorema}
+
+\begin{proof}
+\emph{Paso 1 (separabilidad).} La log-verosimilitud se descompone como
+$\ell(\theta)=\sum_u \ell_u(\theta)$ con $\ell_u=\sum_v
+\Count(uv)\log\theta_{v\mid u}$. Cada término involucra parámetros disjuntos y
+su restricción de normalización es independiente de las demás; por lo tanto
+maximizar $\ell$ equivale a maximizar cada $\ell_u$ por separado. Esto no es
+evidente a priori: se sigue de la estructura de la factorización
+\eqref{eq:chain}. Fíjese un $u$ en adelante.
+
+\emph{Paso 2 (condición de primer orden).} Con multiplicador de Lagrange para la
+restricción $\sum_v\theta_{v\mid u}=1$,
+\[
+\mathcal{L}=\sum_v \Count(uv)\log\theta_{v\mid
+u}-\lambda\Big(\sum_v\theta_{v\mid u}-1\Big),
+\qquad
+\frac{\partial\mathcal{L}}{\partial\theta_{v\mid
+u}}=\frac{\Count(uv)}{\theta_{v\mid u}}-\lambda=0,
+\]
+de donde $\theta_{v\mid u}=\Count(uv)/\lambda$.
+
+\emph{Paso 3 (despeje del multiplicador).} Imponiendo la restricción,
+\[
+\sum_v \theta_{v\mid u} = \frac{1}{\lambda}\sum_v \Count(uv) = 1
+\quad\Longrightarrow\quad
+\lambda = \sum_v \Count(uv) = \Count(u),
+\]
+donde la última igualdad usa el lema \ref{lem:conteos}. Sustituyendo,
+$\hat\theta_{v\mid u}=\Count(uv)/\Count(u)$.
+
+\emph{Paso 4 (que es máximo).} La segunda derivada es
+$\partial^2\ell_u/\partial\theta_{v\mid u}^2=-\Count(uv)/\theta_{v\mid u}^2<0$,
+y las cruzadas son nulas: la hessiana es diagonal con entradas negativas, luego
+$\ell_u$ es estrictamente cóncava en $\theta>0$ y el punto crítico es máximo
+global sobre el símplex. \qedhere
+\end{proof}
+
+\begin{lema}\label{lem:conteos}
+$\sum_{v\in\Vocab}\Count(uv)=\Count(u)$ para todo $u$ que sea seguido por algún
+símbolo en cada una de sus apariciones.
+\end{lema}
+
+La justificación es directa: cada aparición de $u$ va seguida por exactamente
+una palabra, de modo que las apariciones de $u$ quedan particionadas según cuál
+sea esa palabra. La hipótesis restrictiva no es cosmética, y la sección
+siguiente exhibe dónde falla.
+
+\begin{idea}[title={La fórmula es consecuencia, no punto de partida}]
+La estimación por frecuencias relativas no es una regla \emph{ad hoc} que
+resulte razonable; es la solución del problema de optimización planteado arriba.
+Reconocerlo importa porque el suavizado, más adelante, será un \textbf{abandono
+deliberado} de este criterio: se acepta peor ajuste al entrenamiento a cambio de
+no asignar cero a lo no visto.
+\end{idea}
+
+\section{Trazado completo sobre un corpus juguete}
+
+Se toma el corpus de tres oraciones
+\begin{center}
+\texttt{<s> el perro ladra </s>} \qquad
+\texttt{<s> el gato duerme </s>} \qquad
+\texttt{<s> el perro duerme </s>}
+\end{center}
+y se estima el bigrama por máxima verosimilitud, llenando las tablas a mano.
+
+\subsection{Conteos}
+
+Los unigramas, que actuarán como denominadores:
+
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+$u$ & \bos & el & perro & gato & ladra & duerme & \eos \\
+\midrule
+$\Count(u)$ & 3 & 3 & 2 & 1 & 1 & 2 & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Los bigramas, enumerados por oración: de la primera, (\bos, el), (el, perro),
+(perro, ladra), (ladra, \eos); de la segunda, (\bos, el), (el, gato), (gato,
+duerme), (duerme, \eos); de la tercera, (\bos, el), (el, perro), (perro,
+duerme), (duerme, \eos). Agrupando:
+
+\begin{center}
+\begin{tabular}{lc@{\qquad}lc}
+\toprule
+$uv$ & $\Count(uv)$ & $uv$ & $\Count(uv)$\\
+\midrule
+(\bos, el)      & 3 & (perro, duerme) & 1\\
+(el, perro)     & 2 & (gato, duerme)  & 1\\
+(el, gato)      & 1 & (ladra, \eos)   & 1\\
+(perro, ladra)  & 1 & (duerme, \eos)  & 2\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Condicionales y verificación de la normalización}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Historial $u$ & Distribución sobre $v$ & $\sum_v \hat P(v\mid u)$\\
+\midrule
+\bos    & $\hat P(\text{el}\mid \bos)=3/3=1$ & $1$\\
+el      & $\hat P(\text{perro}\mid\text{el})=2/3$, \quad $\hat
+P(\text{gato}\mid\text{el})=1/3$ & $2/3+1/3=1$\\
+perro   & $\hat P(\text{ladra}\mid\text{perro})=1/2$, \quad $\hat
+P(\text{duerme}\mid\text{perro})=1/2$ & $1$\\
+gato    & $\hat P(\text{duerme}\mid\text{gato})=1/1=1$ & $1$\\
+ladra   & $\hat P(\eos\mid\text{ladra})=1/1=1$ & $1$\\
+duerme  & $\hat P(\eos\mid\text{duerme})=2/2=1$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cada renglón suma $1$, como exige la condición sobre la matriz de transición. La
+verificación del lema \ref{lem:conteos}, renglón por renglón, da
+$\Count(\text{el})=3=2+1$, $\Count(\text{perro})=2=1+1$,
+$\Count(\text{duerme})=2=2$, todos correctos; pero para $u=\eos$ se tiene
+$\Count(\eos)=3$ mientras que $\sum_v \Count(\eos\,v)=0$. Ahí falla la
+identidad.
+
+\begin{idea}[title={Los símbolos de frontera son asimétricos}]
+El lema falla exactamente para los tokens que nunca son seguidos por nada, que
+tratando cada oración por separado es únicamente \eos. El arreglo estándar
+consiste en no tratar \eos\ como historial: es un estado absorbente y se excluye
+del dominio de la matriz de transición. Simétricamente, \bos\ nunca aparece como
+segundo elemento de un bigrama. Por lo tanto \textbf{el vocabulario de emisión y
+el conjunto de historiales no son el mismo conjunto}, y confundirlos al contar
+parámetros o al normalizar es una de las causas más frecuentes de reportar una
+distribución que no suma $1$.
+\end{idea}
+
+Vale la pena precisar para qué sirve cada símbolo. \bos\ existe para dar
+historial a las primeras posiciones: sin él, $\hat P(w_1)$ carecería de
+condicionante y el primer factor de la cadena sería de naturaleza distinta a los
+demás; para un modelo de orden $n$ se anteponen $n-1$ copias. \eos\ existe
+porque es el símbolo emitible que permite que el proceso termine, y sin él la
+conjunta no queda definida sobre $\Vocab^*$ sino sobre secuencias de longitud
+fija.
+
+\subsection{Probabilidad de las oraciones y qué revela la suma}
+
+Multiplicando a lo largo de cada camino:
+\begin{align*}
+\hat P(\text{el perro ladra})  &= 1\cdot\tfrac{2}{3}\cdot\tfrac{1}{2}\cdot 1 =
+\tfrac13,\\
+\hat P(\text{el gato duerme})  &= 1\cdot\tfrac{1}{3}\cdot 1\cdot 1 = \tfrac13,\\
+\hat P(\text{el perro duerme}) &= 1\cdot\tfrac{2}{3}\cdot\tfrac{1}{2}\cdot 1 =
+\tfrac13,
+\end{align*}
+cuya suma es exactamente $1$.
+
+La lectura ingenua sería que el modelo está bien normalizado y por tanto es
+correcto. Es la lectura equivocada. Que las tres oraciones del entrenamiento
+agoten toda la masa significa que el modelo \textbf{no asigna probabilidad
+positiva a ninguna otra cadena}. La oración \emph{el gato ladra}, perfectamente
+gramatical y compuesta sólo de palabras del vocabulario, recibe
+\[
+\hat P(\text{el gato ladra}) = 1\cdot\tfrac{1}{3}\cdot 0\cdot 1 = 0,
+\]
+porque $\Count(\text{gato ladra})=0$. El modelo genera exactamente tres cadenas
+con probabilidad positiva, las tres vistas. Es un caso extremo pero limpio de lo
+que hace la máxima verosimilitud: maximizar la probabilidad del entrenamiento
+hasta dejar todo lo demás en cero.
+
+Obsérvese que aquí la normalización global sí se cumple; lo que está mal no es
+cuánta masa hay sino \emph{dónde} se colocó.
+
+\subsection{Contraste con el trigrama}
+
+Sobre el mismo corpus, $\hat P(\text{duerme}\mid\text{el perro}) =
+\Count(\text{el perro duerme})/\Count(\text{el perro}) = 1/2$, que coincide con
+el bigrama $\hat P(\text{duerme}\mid\text{perro})=1/2$. La coincidencia es un
+accidente del corpus: \emph{perro} siempre viene precedido de \emph{el}, así que
+el contexto adicional no aporta información alguna.
+
+Más ilustrativo es el conteo de historiales. Los pares con conteo positivo son
+(\bos, el), (el, perro), (el, gato), (perro, ladra), (perro, duerme) y (gato,
+duerme): seis observados frente a $6^2=36$ posibles con seis tipos de palabra.
+Es decir, más del ochenta por ciento de la tabla está vacía en un corpus de tres
+oraciones.
+
+\section{Dispersión: por qué la estimación se rompe}\label{sec:dispersion}
+
+Un modelo de $n$-gramas tiene del orden de $|\Vocab|^{n-1}(|\Vocab|-1)$
+parámetros libres. Con $|\Vocab|=10^4$ y $n=3$ eso asciende a unos $10^{12}$
+valores, cifra que ningún corpus cubre. La consecuencia es inmediata: en el
+conjunto de prueba aparecen $n$-gramas con conteo cero, la conjunta se anula por
+ser un producto y la log-verosimilitud se va a $-\infty$.
+
+\begin{idea}[title={Dos limitaciones distintas que conviene no mezclar}]
+El sesgo por el supuesto de Markov (sección 3) es error de \emph{especificación}
+y no mejora con más datos. La dispersión es error de \emph{estimación} y sí
+mejora con más datos, aunque nunca lo suficiente. El suavizado ataca la segunda,
+no la primera.
+\end{idea}
+
+\section{Fuga de masa: normalización local frente a global}\label{sec:fuga}
+
+Que cada renglón de la matriz sume $1$ no garantiza que la conjunta sume $1$
+sobre $\Vocab^*$. El siguiente par de ejemplos lo muestra sobre el modelo más
+pequeño posible.
+
+\begin{ejemplo}[Con fuga]
+Vocabulario de emisión $\{a,\eos\}$, historiales $\{\bos, a\}$, con
+\[
+P(a\mid\bos)=1,\qquad P(a\mid a)=1,\qquad P(\eos\mid a)=0 .
+\]
+Cada renglón suma $1$: hay un único evento con masa en cada uno. Sin embargo,
+toda cadena finita $a^k\eos$ tiene probabilidad $1\cdot 1^{k-1}\cdot 0 = 0$, de
+modo que
+\[
+\sum_{s\in\Vocab^*} P(s) = 0 \neq 1 .
+\]
+Toda la masa se fue a la cadena infinita $aaa\cdots$, que no es elemento de
+$\Vocab^*$.
+\end{ejemplo}
+
+\begin{ejemplo}[Sin fuga]
+El mismo modelo con $P(a\mid a)=0.9$ y $P(\eos\mid a)=0.1$ asigna
+$P(a^k\eos)=0.9^{\,k-1}\cdot 0.1$ para $k\ge1$, y por serie geométrica
+\[
+\sum_{k\ge1} 0.9^{\,k-1}(0.1) = \frac{0.1}{1-0.9} = 1 .
+\]
+La diferencia con el caso anterior es que el ciclo tiene probabilidad de escape
+estrictamente positiva.
+\end{ejemplo}
+
+\begin{observacion}
+\textbf{Punto a verificar, y lo señalo como incertidumbre real.} La condición
+general que caracteriza cuándo un modelo de $n$-gramas es \emph{estricto}
+(tight, es decir, cuando la conjunta suma $1$ sobre $\Vocab^*$) involucra el
+radio espectral de la matriz de transición restringida a los estados no
+terminales, y no la enuncio aquí porque no la tengo verificada con la precisión
+necesaria. Existe además la \emph{intuición}, no verificada, de que un modelo
+estimado por máxima verosimilitud a partir de un corpus de oraciones completas
+resulta siempre estricto, ya que todo estado alcanzable tiene un camino
+observado hacia \eos; suena razonable y hay resultados análogos para gramáticas
+probabilísticas, pero no debe darse por cierto sin contrastarlo. El ejemplo con
+fuga de arriba fue construido a mano y no proviene de ninguna estimación por
+máxima verosimilitud.
+\end{observacion}
+
+\section{Suavizado}
+
+El problema, en una línea: la máxima verosimilitud asigna cero a lo no visto, y
+el cero es letal porque la conjunta es un producto. La solución siempre tiene la
+misma forma, quitar masa a lo visto y dársela a lo no visto; las familias de
+métodos se distinguen en cuánta masa se quita y a dónde se manda.
+
+\subsection{Add-$k$ (Laplace)}
+
+\[
+\hat{P}_{\text{add-}k}(v\mid u) = \frac{\Count(uv)+k}{\Count(u)+k|\Vocab|} .
+\]
+El término $k|\Vocab|$ del denominador es exactamente lo que se necesita para
+compensar el $k$ sumado a cada uno de los $|\Vocab|$ numeradores; esa es la
+condición de normalización, y verificarla consiste en sumar sobre $v$. Con $k=1$
+se obtiene el suavizado de Laplace.
+
+Sobre el corpus juguete, con $|\Vocab|=6$ y $k=1$, resulta $\hat
+P(\text{perro}\mid\text{el})=(2+1)/(3+6)=1/3$ frente a $2/3$ de la máxima
+verosimilitud, es decir la mitad de la masa original; y $\hat
+P(\text{ladra}\mid\text{gato})=(0+1)/(1+6)=1/7$, que antes era cero. El defecto
+es visible en esos números: cuando $|\Vocab|$ es grande, el término $k|\Vocab|$
+domina el denominador y la estimación se aplana. Add-$k$ redistribuye demasiada
+masa, lo cual resulta aceptable en clasificación de texto pero es malo para
+modelado de lenguaje.
+
+\subsection{Descuento absoluto}
+
+Se resta una cantidad fija $d\in(0,1)$ a cada conteo positivo:
+\[
+\hat{P}_d(v\mid u) = \frac{\max\{\Count(uv)-d,\;0\}}{\Count(u)} .
+\]
+Esto ya no suma $1$. La masa liberada en el contexto $u$ es
+\[
+\gamma(u) = \frac{d\cdot N_{1+}(u)}{\Count(u)},
+\qquad
+N_{1+}(u) = |\{v : \Count(uv)>0\}| ,
+\]
+y es precisamente esa $\gamma(u)$ lo que los métodos siguientes reparten entre
+lo no visto, cada uno a su manera.
+
+\begin{observacion}
+La justificación empírica del descuento fijo proviene de la observación de que
+el conteo esperado en un corpus de prueba de un bigrama que apareció $r$ veces
+en entrenamiento es aproximadamente $r-0.75$ para valores medianos de $r$, de
+donde el valor típico $d=0.75$. El resultado es estándar (Church y Gale), pero
+la cifra conviene verificarla en el material del curso.
+\end{observacion}
+
+\subsection{Back-off}
+
+Se recurre al orden menor \emph{sólo} cuando el $n$-grama no se observó:
+\[
+\hat{P}_{\text{bo}}(v\mid u) =
+\begin{cases}
+\dfrac{\max\{\Count(uv)-d,0\}}{\Count(u)} & \text{si } \Count(uv)>0,\\[10pt]
+\alpha(u)\,\hat{P}_{\text{bo}}(v) & \text{si } \Count(uv)=0 .
+\end{cases}
+\]
+El coeficiente $\alpha(u)$ no se elige sino que se calcula: es la constante que
+hace que la masa $\gamma(u)$ liberada por el descuento se reparta exactamente
+entre los no vistos, en proporción a la distribución de orden menor, es decir
+\[
+\alpha(u) = \frac{\gamma(u)}{\sum_{v\,:\,\Count(uv)=0} \hat P_{\text{bo}}(v)} .
+\]
+
+\subsection{Interpolación}
+
+Se mezclan los órdenes \emph{siempre}, se haya visto o no el $n$-grama:
+\[
+\hat{P}_{\text{int}}(w_i \mid w_{i-2}w_{i-1}) = \lambda_1 \hat P(w_i\mid
+w_{i-2}w_{i-1}) + \lambda_2 \hat P(w_i\mid w_{i-1}) + \lambda_3 \hat P(w_i),
+\qquad \sum_j \lambda_j = 1 .
+\]
+Los $\lambda_j$ se ajustan sobre un conjunto de desarrollo (held-out) y no sobre
+el entrenamiento, donde el óptimo sería $\lambda_1=1$, es decir volver a la
+máxima verosimilitud. Una variante estándar los hace depender del contexto,
+$\lambda_j(u)$, para confiar más en el orden alto cuando $\Count(u)$ es grande.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+ & Back-off & Interpolación \\
+\midrule
+Cuándo usa el orden menor & sólo si $\Count(uv)=0$ & siempre \\
+$\hat P$ de un $n$-grama visto & depende sólo del orden alto & mezcla los
+órdenes \\
+Normalización & vía $\alpha(u)$ calculada & automática si $\sum_j\lambda_j=1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}[title={La distinción operativa}]
+En interpolación, dos $n$-gramas vistos con el mismo conteo pueden recibir
+probabilidades distintas si sus órdenes menores difieren, porque el orden menor
+siempre participa. En back-off no ocurre: si el $n$-grama se vio, el orden menor
+no interviene en absoluto.
+\end{idea}
+
+\subsection{Kneser-Ney: la idea que lo distingue}
+
+El problema que resuelve puede enunciarse con un ejemplo. La palabra
+\emph{Francisco} puede ser frecuente como unigrama y sin embargo aparecer casi
+siempre dentro de \emph{San Francisco}. Al hacer back-off tras un contexto no
+visto, un unigrama basado en frecuencia le asignaría mucha masa, cuando es un
+mal candidato en contexto libre.
+
+La corrección consiste en que la distribución de respaldo no mida frecuencia
+sino \emph{versatilidad de contextos}:
+\[
+P_{\text{cont}}(v) = \frac{|\{u : \Count(uv)>0\}|}{|\{(u',v') :
+\Count(u'v')>0\}|},
+\]
+donde el numerador cuenta cuántos contextos distintos preceden a $v$ y el
+denominador el número total de tipos de bigrama. Una palabra con frecuencia alta
+pero un único contexto queda penalizada. Kneser-Ney combina esta idea con
+descuento absoluto e interpolación, y es el mejor suavizado de $n$-gramas
+conocido.
+
+\begin{observacion}
+\textbf{Punto a verificar.} La fórmula de $P_{\text{cont}}$ se da con confianza
+razonable, pero la versión interpolada y modificada de Kneser-Ney, con
+descuentos distintos $d_1, d_2, d_{3+}$ según el conteo, tiene detalles de
+normalización que conviene revisar directamente en J\&M antes de usarla
+formalmente.
+\end{observacion}
+
+\subsection{Dónde puede salir mal}
+
+El descuento absoluto con $d>1$ aplicado sin el $\max\{\cdot,0\}$ produce
+numeradores negativos para los $n$-gramas de conteo $1$, es decir masa negativa.
+Y cualquier esquema en que $\alpha(u)$ o los $\lambda_j$ se fijen a ojo en lugar
+de calcularse rompe la normalización sin que resulte evidente en el código. La
+verificación es siempre la misma: fijar un $u$, sumar sobre todo $v$ y comprobar
+que da $1$.
+
+\section{Perplejidad}
+
+\subsection{Para qué sirve}
+
+Para comparar modelos de lenguaje entre sí sin ejecutarlos en ninguna
+tarea. Es la métrica de evaluación estándar: se entrenan dos modelos,
+se evalúan sobre el mismo texto de prueba, y el de menor perplejidad
+ajusta mejor.
+
+\subsection{Qué mide}
+
+Cuán sorprendido queda el modelo ante texto que no vio. Concretamente,
+el número efectivo de opciones que considera en cada posición.
+
+\begin{itemize}[itemsep=0.1em]
+  \item Perplejidad $100$: el modelo duda entre unas $100$ palabras en
+        cada paso.
+  \item Perplejidad $10$: duda entre unas $10$. Mejor modelo.
+  \item Modelo uniforme sobre $|\Vocab|$ palabras: perplejidad
+        exactamente $|\Vocab|$. Ese es el piso trivial.
+\end{itemize}
+
+\subsection{Definición y forma de cálculo}
+
+\begin{definicion}
+La \emph{perplejidad} (perplexity) de un texto de prueba $W=w_1\cdots w_N$ bajo
+un modelo $P$ es
+\[
+\mathrm{PP}(W) = P(w_1\cdots w_N)^{-1/N}
+= \Bigg(\prod_{i=1}^{N} P(w_i\mid \text{historial})\Bigg)^{-1/N} .
+\]
+\end{definicion}
+
+En la práctica se calcula en forma logarítmica para evitar desbordamiento por
+defecto (underflow):
+\[
+\mathrm{PP}(W) = \exp\Bigg(-\frac{1}{N}\sum_{i=1}^{N}\ln
+P(w_i\mid\text{historial})\Bigg).
+\]
+
+\subsection{Relación con la entropía cruzada}
+
+Definiendo la entropía cruzada por token (cross-entropy) como
+\[
+H(W) = -\frac{1}{N}\sum_{i=1}^{N} \log_2 P(w_i\mid\text{historial}),
+\]
+se tiene $\mathrm{PP}(W) = 2^{H(W)}$.
+
+\begin{idea}[title={La base debe ser consistente}]
+Si $H$ se mide en bits (logaritmo base $2$), la perplejidad es $2^{H}$; si en
+nats (base $e$), es $e^{H}$. La perplejidad resultante es la misma en ambos
+casos: lo que cambia es el número al que se llama entropía. Mezclar bases
+produce cifras que parecen plausibles y son incorrectas, y es de los errores más
+frecuentes.
+\end{idea}
+
+\subsection{Interpretación y baseline trivial}
+
+La perplejidad es el factor de ramificación promedio ponderado: el número
+efectivo de opciones que el modelo considera en cada posición. El caso de
+control lo fija: si el modelo es uniforme sobre $|\Vocab|$ palabras, entonces
+$P(w_i\mid\cdot)=1/|\Vocab|$ para todo $i$ y
+\[
+\mathrm{PP} = \big(|\Vocab|^{-N}\big)^{-1/N} = |\Vocab| .
+\]
+Es decir, \textbf{la perplejidad de un modelo uniforme es el tamaño del
+vocabulario}, y ése es el baseline trivial contra el cual debe compararse
+cualquier cifra reportada. Menor perplejidad indica mejor modelo.
+
+\subsection{Los detalles donde se rompe}
+
+Respecto a qué cuenta $N$: si \eos\ se incluye en el producto, y debe incluirse
+porque forma parte de la probabilidad de la oración, entonces debe incluirse
+también en $N$; incluirlo en uno y no en el otro sesga sistemáticamente la
+cifra. En cambio \bos\ normalmente no se cuenta en $N$, porque no se predice
+sino que condiciona.
+
+Respecto a $\unk$: dos modelos con vocabularios distintos no son comparables por
+perplejidad. Un vocabulario pequeño manda muchas palabras a $\unk$, y $\unk$
+resulta fácil de predecir precisamente porque acumula masa, de modo que es
+posible bajar la perplejidad de forma arbitraria reduciendo el vocabulario. La
+comparación sólo tiene sentido con vocabulario idéntico y el mismo tratamiento
+de las palabras fuera de vocabulario.
+
+Finalmente, la perplejidad es una métrica intrínseca: mide ajuste probabilístico
+al texto de prueba, no utilidad en ninguna tarea concreta. Suele correlacionar
+con el desempeño en traducción o reconocimiento de voz, pero no lo implica. Y si
+algún $P(w_i\mid\cdot)$ vale cero, la perplejidad es infinita; por eso
+perplejidad y suavizado son inseparables, y no puede evaluarse sobre datos
+reales un modelo estimado por máxima verosimilitud sin suavizar.
+
+\section{Resumen del esquema}
+
+Un modelo de lenguaje es una distribución sobre $\Vocab^*$. La regla de la
+cadena la factoriza en condicionales sin pérdida alguna, y el orden de la
+factorización es una elección. El supuesto de Markov trunca el historial a $n-1$
+símbolos: es falso para el lenguaje natural, y no lo arreglan más datos porque
+se trata de sesgo de especificación, distinto del error de estimación por
+dispersión. La máxima verosimilitud estima las condicionales por frecuencias
+relativas, resultado que se deriva y no se postula, y asigna cero a todo lo no
+observado. El suavizado abandona deliberadamente ese criterio moviendo masa de
+lo visto a lo no visto, y las familias de métodos difieren en cuánta masa y
+hacia dónde. La perplejidad evalúa el resultado: es $2^{H}$ con $H$ la entropía
+cruzada por token, y sólo resulta comparable bajo vocabulario y segmentación
+idénticos.
+
+Quedan como puntos explícitamente pendientes de verificación contra el material
+del curso: la condición de estrictez del modelo, la constante del descuento
+absoluto y los detalles de normalización de Kneser-Ney modificado.
+
+\end{document}
+
+%######################### END OF MODELOS_N_GRAMAS.TEX #########################
+%###############################################################################
