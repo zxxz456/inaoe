@@ -1,0 +1,84 @@
+
+-- Relaciones --
+
+def: Una relacion binaria R d un conjunto X en un conjunto Y es un subconjunto del producto cartesonao X x Y
+
+Si (x,y) pertenece a R, escribimos xRy para denotar que x esta relacionada ocn Y
+
+Si X = Y DECIMOS QUE R EN UNA RELACION BINARIA SOBRE X
+
+El dominio de una relacion sta formado por los elementos del primer conjunto del que estamos hablando 
+
+    Dom(R) = {}
+
+El codominio esta formado por los elementos del segundo conjunto
+
+Rango o imagen son los elementos del Dominio que si se usan, es decir los que si participen de forma efectiva
+
+{ejemplo de relacion biaria entre dos conjuntos distintos}
+
+
+- relacion n aria -
+
+Una relacion n aria es un subconjunto del producto cartesiano de n conjuntos A x B x ... x Y
+
+sON LOS CONNJUNTOS DOMINIO,
+N ES EL GRADO DE LA RELACION
+R consiste en un conjunto de n tuplas, tal que el i esimo elemento de la tupla proviene del conjunto Ai
+
+(a1, a2, a3,...an)
+
+Propiedades de las relaciones
+
+- Reflexividad; Una relacion es reflexiva si para todo x la tupla (x,x) esta en la relacion, Es decir x se relaciona consigo mismo para todo X
+
+-Simetrica, Una relacion es simetrica si para todo x, y en X, si (x,y) esta en la relacion, entonces (y,x) esta en la relacion
+
+-antisimetrica: una relacon es antisimetrica si para todo x,y perteneicentes al conjunto, si (x,y) no esta en la relacion, etonces (y,x) no esta en la relacion
+                Es mas facil de verlo opuesto... si x,y esta en la relacion, x=y
+
+- transitiva: Una relacion es transitiva si para todo x,y,z pertenecientes al conjunto si xRy y yRz, entonces xRz
+
+-- Funciones --
+
+Son un tipo especial de relaciones. Es una relacion pero con la restricin de que cada elemento de A debe tener un elemento de Salida, o sea solo debe aparecer una vez en el dominio
+
+mapear es una funcion, un mapa es una forma de asociar objetos unicoas a cada elemento de u conjunto dado 
+
+- tipos de funciones 
+
+    - inyectiva: la relacion se da 1 a 1, un elemento de a no se puede relacionar con dos de b 
+    - sobreyectiva: tODOS LOS elementos de B participan, ninguno se queda solo
+    - biyectiva: ambas inyectiva y sobreyectiva, rango igual a codominio
+
+Dado todo lo que hemos visto hasta ahora todo eso se define dentrod e una estructura alge
+
+-- Estructura Algebraica --
+Estructura sobre un conjunto: conjunto de funciones, reglas restricciones que dan significado a na coleccion de objetos
+
+Se dice que una composoicon en un conjunto no vacio S, si un elemento de S esta asifnfado unicamente a un par de elementos de S en cierta forma 
+
+De acuerdo al numerod e argumentos requeridos para que un operador peuda realizar el calculo (aridad), las operaciones pueden ser
+
+nularias
+unarias
+binarias
+ternarias
+N-arias
+
+Las operacion elgebraicas basicas son 
+    -Adicion
+    -Multiplicaion 
+
+
+Propiedades de una operacin binaria
+    - cerradura 
+    El conjunto de los naturales, la suma es cerrada en los naturales pero la resta no es cerrada en los naturales 
+
+    - asociatividad
+    - identidad 
+    - conmutatividad
+    - distributividad 
+    - idempotencia 
+
+
