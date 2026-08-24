@@ -1,0 +1,70 @@
+Recuperacion de informacion
+
+-----
+Contenido de la seccion 
+
+Definicion de la tarea
+The vetor space model
+Modelos de lenguaje para IR
+EVALUACION DE PERFORMANCE
+Problemas principales y solucones basicas
+    - query expansion
+    -relevance feedback
+    - Clustering
+
+-------
+
+Intro
+
+Que es un sistema de recuperacion de info? 
+
+Que objetivo tiene?
+
+Que hay dentro de el? Algun sb proceso?
+
+Como valuar su desempeño?
+
+Pq los resultados no siempre son relevantes? (polisemia, sinonimia)
+
+La recuperacion de info embraces the intellectual aspects of the description of info and its specification for search
+
+al. inicio el proceso de ir se planteo era de esta forma
+
+1) la persona tiene una tarea
+2) ve que necesita info todo en su cabeza
+3) formula la query
+4) la query busca en un corpus de documentos
+5) da resultados
+
+Los resultados son los documentos relevantes para la consulta. El usuario ve los resultados y de ahi checa si le sirve. Dependionedo de si le sirve o no
+Puede re hacer la query y refinir sus necesidades de info 
+
+IR deals with the representation, storage, organization of, and access to information items 
+
+La tarea de un sistema de IR es to recuperar documetnos o textos con contenids de informacion que es relevante para la necesidad de info de un user
+
+Un sistema tipica de IR, Un modelo de recuperacion de info tiene dos elementos basicos, como se indexa (se organiza) y como se recupera
+
+{diagrama de sistema IR}
+
+Es bien importante como se represnta la info, el indexing, porque lo que no se indexe, va a ser coo si no existiera
+
+indexing + retrieval = IR
+
+coleccion -> procesing -> stoing -> se hace index  <- querying retriving 
+
+
+-Preprocessing-
+
+tipicamente en procesing, el limpiado se quitan como pluarles, signos de puntuacion, formating, stpo words como articulos, conjuntciones, preposiciones.
+se hace stemming or lemmatization, hablar como cavernicola, quitar diminutivos. hacer stemming es truncar la palabras estadisticamente
+
+- vector space model -
+Un modelo tiene dos cosas, como se guarda la info y como se recupera... Salton ideo representar a los documentos como vectores, y desde entonces losdocumentos son representados como
+vectores en espacio N dimensional. Donde N es la numero de terminos en la coleccion (termino es diferente de palabra)
+
+Query es tratada como cualquier otro documentos
+
+La relevancia es medida como similaridad, el documento es relevante si el vector del doc es similar al de la query
+
+{representacion de tabla}
