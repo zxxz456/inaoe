@@ -1,0 +1,314 @@
+% =====================================================================
+%  libreta.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Apuntes de clase del curso de Aprendizaje Computacional
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       25/08/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Aprendizaje Computacional}
+\newcommand{\profesor}{Dr. José Francisco Martínez Trinidad}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\portadilla
+\newpage
+
+% =====================================================================
+%  Clase 1 - Intro al curso
+% =====================================================================
+
+\clase{Introducción al Curso}{25 de agosto de 2026}
+
+\begin{quick_sum}
+  Sesión inicial: contenido y dinámica del curso, temario, criterios
+  de evaluación y el calendario del proyecto. La segunda mitad fue la
+  introducción propiamente dicha: qué es aprender, por qué generalizar
+  no es memorizar, de qué disciplinas se alimenta el área y la
+  formalización de la función $f$ que se quiere aprender contra la
+  hipótesis $h$.
+\end{quick_sum}
+
+\subsection*{Info general}
+
+\textbf{Contacto:}
+\begin{itemize}[itemsep=0.1em]
+    \item \profesor
+    \item Correo: \texttt{fmartine@inaoep.mx}
+\end{itemize}
+
+\textbf{Temario:}
+\begin{enumerate}[itemsep=0.1em]
+    \item Introducción y clasificadores lineales
+    \item Perceptrón
+    \item SVM
+    \item Clasificadores basados en distancia
+    \item ANNs
+    \item Evaluación, validación y overfitting
+    \item Métodos bayesianos
+    \item Árboles de decisión
+    \item Reglas de clasificación
+    \item Reglas de asociación
+    \item Selección de atributos
+    \item Clustering (K-means, gaussian mixture, jerárquicos)
+\end{enumerate}
+
+\begin{idea}
+  No se trata de usar las herramientas como una caja negra. El
+  objetivo es, como investigadores, saber cómo usarlas para generar
+  nuevo conocimiento, y por eso hay que conocerlas a detalle: para
+  poder innovar y proponer alternativas.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Evaluación}
+
+\textbf{80\% proyecto:}
+\begin{itemize}[itemsep=0.1em]
+    \item Equipo de dos personas
+    \item Seleccionar un artículo reciente
+    \item Proponer una solución alternativa
+    \item Tres presentaciones
+    \item Reporte final
+\end{itemize}
+
+\textbf{20\% examen oral}, a la entrega del proyecto, sobre un tema
+aleatorio del temario.
+
+% =====================================================================
+
+\subsection*{Calendario}
+
+\begin{itemize}[itemsep=0.4em]
+    \item \textbf{25 de agosto.} Buscar un artículo publicado en 2026
+          que sea de interés, en una revista JCR.
+    \item \textbf{3 de septiembre.} Entregar por correo una lista que
+          indique cuál artículo seleccionó cada estudiante o equipo.
+    \item \textbf{29 de septiembre o 1 de octubre.} Primera
+          presentación:
+          \begin{itemize}[itemsep=0.1em]
+              \item Descripción del problema abordado en el artículo
+              \item Breve descripción del trabajo relacionado que
+                    menciona el artículo
+              \item Breve descripción de la solución propuesta en el
+                    artículo
+              \item Descripción de los experimentos que soportan dicha
+                    solución, incluyendo tablas y gráficas tomadas del
+                    artículo
+              \item Conclusiones a las que llegan los autores
+              \item Análisis de debilidades y posibles modificaciones
+                    para mejorar la propuesta de los autores
+          \end{itemize}
+    \item \textbf{27 o 29 de octubre.} Segunda presentación: resumen
+          del problema abordado.
+    \item \textbf{24 o 26 de noviembre.} Presentación final: resumen
+          del problema abordado y de la solución final.
+    \item \textbf{30 de noviembre.} Entrega del reporte final. Se
+          entrega en forma de artículo, con formato de
+          \url{https://www.springer.com/}.
+\end{itemize}
+
+El reporte debe tener más o menos 12 páginas e incluir título,
+resumen, introducción, trabajo relacionado, solución propuesta,
+experimentos, conclusiones y trabajo futuro, y referencias.
+
+% =====================================================================
+
+\subsection*{Revistas JCR}
+
+\begin{itemize}[itemsep=0.1em]
+    \item Expert Systems with Applications
+    \item Knowledge-Based Systems
+    \item Journal of Machine Learning Research
+\end{itemize}
+
+Buscador: \url{https://www.webofscience.com/wos/woscc/basic-research}
+
+\subsection*{Recursos}
+
+\begin{itemize}[itemsep=0.1em]
+    \item Weka 3
+    \item scikit-learn
+\end{itemize}
+
+\begin{ojo}
+  Hay que tratar de contactar al autor del artículo para que nos dé
+  sus recursos y poder compararnos.
+\end{ojo}
+
+\newpage
+
+% =====================================================================
+%  Intro al aprendizaje
+% =====================================================================
+
+\section{Aprendizaje}
+
+\subsection*{Que es el aprendizaje?}
+
+Es una disciplina dentro de las ciencias de la computación que surge
+como motivación de hacer que las computadoras realicen tareas
+complejas como las que hacen los humanos.
+
+Aprender significa adquirir conocimiento, entendimiento o una
+habilidad de manera empírica o por estudio. La pregunta que queda
+abierta es cómo determinamos el éxito o el fracaso de la tarea.
+
+Se busca que se logre un proceso de aprendizaje para que el sistema
+sea capaz de generalizar.
+
+\begin{idea}
+  Generalizar no es memorizar. Aprender permite responder a problemas
+  nuevos con el conocimiento adquirido.
+\end{idea}
+
+Al inicio hubo varias tendencias. Una de ellas fue ver cómo aprenden
+los animales y de ahí trasladarlo a la máquina, con la premisa de que
+quizá el aprendizaje en un animal es diferente al de un ser humano,
+pero no resultó cierto.
+
+\begin{ojo}
+  No hay una demostración universal de lo que es el aprendizaje. Hay
+  muchas definiciones y muchas escuelas.
+\end{ojo}
+
+\subsubsection*{Tipos de aprendizaje}
+
+\begin{itemize}[itemsep=0.1em]
+    \item Supervisado
+    \item No supervisado
+    \item Por refuerzo
+\end{itemize}
+
+\subsubsection*{Tareas relacionadas con el aprendizaje}
+
+\begin{itemize}[itemsep=0.1em]
+    \item Reconocimiento
+    \item Diagnóstico
+    \item Planeación
+    \item Control de robots
+    \item Predicción
+\end{itemize}
+
+Aprender puede ser percibir cambios en el comportamiento gracias a la
+experiencia. En nuestro contexto serían mejoras en actividades ya
+conocidas, y aprender tareas nuevas.
+
+Hacer que las máquinas aprendan es muy útil, ya que nos simplifica la
+vida en muchos contextos: nos ayuda a hacer tareas complejas más
+rápido y a analizar datos masivos de una manera rápida.
+
+% =====================================================================
+
+\subsection*{Disciplinas relacionadas}
+
+\begin{itemize}[itemsep=0.1em]
+    \item Estadística
+    \item Lógica
+    \item Matemáticas discretas
+    \item Y muchas más
+\end{itemize}
+
+Todas las teorías que hay sobre cómo funciona el cerebro han ayudado
+bastante, ya que se trata de emular lo que se cree que ocurre en el
+cerebro humano cuando ocurre el aprendizaje, y trasladarlo a la
+computadora.
+
+Otra disciplina que se vincula mucho con el ML es el control, la
+teoría de control. Igual los modelos psicológicos y los modelos
+evolutivos, entre muchos más.
+
+% =====================================================================
+
+\subsection*{Qué es lo que se aprende?}
+
+Diferentes estructuras computacionales: funciones, programas lógicos,
+máquinas de estado finito, gramáticas y sistemas para la resolución de
+problemas.
+
+La idea es que tengo mi problema y tengo algunos ejemplos de él. Le
+doy a la computadora los ejemplos y la computadora me da como
+resultado el programa que me ayuda a generalizar cómo son esos
+ejemplos, de tal manera que cuando llegue un dato nuevo pueda
+clasificarlo, identificarlo y reconocerlo correctamente.
+
+Más formalmente, se tiene una función $f$, que es la que queremos
+aprender, y otra función $h$, la hipótesis. Ambas reciben un vector de
+valores con $N$ componentes. Queremos encontrar la función $h$ cuya
+salida sea $h(X)$, y que sea capaz de reconocer un dato nuevo.
+
+\subsubsection*{Supervisado y no supervisado}
+
+Hay dos tipos de aprendizaje, bueno tres, pero estos son los más
+comunes.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Supervisado.} Los datos de entrenamiento están
+          etiquetados. A la función $h$, que es la que voy a aprender,
+          le voy a dar un dato $x$, y esa función tiene que ser capaz
+          de reconocer la nueva entrada.
+    \item \textbf{No supervisado.} Los datos de entrenamiento no están
+          etiquetados, y el algoritmo encuentra la relación entre los
+          datos.
+\end{itemize}
+
+\subsubsection*{Vector de entrada}
+
+Al vector de entrada se le llama patrón, feature vector, instancia o
+ejemplo. Sus componentes son las variables o características, y esas
+variables pueden tomar valores reales, discretos o categóricos.
+
+La salida puede ser un valor real, y entonces se trata de un
+predictor, o discreto, y entonces se trata de un clasificador.
+
+\subsubsection*{Modos de entrenamiento}
+
+Hay varios modos de entrenamiento, dependiendo de los datos:
+
+\begin{itemize}[itemsep=0.1em]
+    \item Por batch
+    \item De manera incremental
+    \item En línea
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Evaluación}
+
+Cuando ya tengo mi función $h$, ¿cómo la evalúo? ¿Cómo sé que está
+bien? Para eso se necesita un conjunto de prueba, que nos ayuda a ver
+qué tan bien la función $h$ realiza su tarea, midiendo el error de $h$
+sobre ese conjunto. El conjunto de prueba es una partición del dataset
+original.
+
+\end{document}
+
+%############################# END OF LIBRETA.TEX ##############################
+%###############################################################################

@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.7.0
+* Version: 1.8.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       25/08/2026      machine_learning ya tiene libreta
 zxxz6       25/08/2026      Agregue machine_learning/ al indice
 zxxz6       25/08/2026      La toma cruda ahora vive en raw_notes/
 zxxz6       22/08/2026      Agregue fundamentos_aal/material_apoyo/
@@ -71,9 +72,9 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
       modelos de lenguaje de n-gramas: regla de la cadena, supuesto de
       Markov, estimación por máxima verosimilitud, suavizado y perplejidad.
 - [machine_learning/](machine_learning/) - Aprendizaje Computacional.
-  - [apuntes/](machine_learning/apuntes/) - `libreta.tex` todavía está
-    vacío; por ahora solo hay toma cruda en
-    [raw_notes/](machine_learning/apuntes/raw_notes/).
+  - [apuntes/](machine_learning/apuntes/) - Libreta de clase en LaTeX
+    (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
+    queda en [raw_notes/](machine_learning/apuntes/raw_notes/).
 - [matcomp/](matcomp/) - Matemáticas para Computación.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
