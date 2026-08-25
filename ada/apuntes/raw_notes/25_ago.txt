@@ -1,0 +1,45 @@
+Contniauucon de nfunciones asintoticas
+
+
+Lo que hace es definiir la familia de funciones (big-o)
+
+Propiedades de O 
+{anotar las propiedades}
+
+-- Notacion Omega --
+La notacion omega es para notacion asintotica inferior, se dice cota inferior
+
+{definicion formal}
+
+{propiedades imega}
+
+-- Notacion Theta --
+Se establece una cota superior y una inferior, se establece una region donde el algoritmo se mueve
+
+{Propiedades theta}
+
+Teorema 2.1... probarlo a ver si se puede 
+f(n) = Theta(g(n)) <==> 
+
+ejemplo theta 
+ejemplo big O
+
+orden de complejidad
+las famiilias de funciones definen orden de complejidad, se elije la funcion mas senculla
+
+dependiendo del analisis del algoritmo, se seleccona la familia de funciones que queremos 
+
+no hay algoritmo mas rapido que la cota inferior omega 
+
+O -> how fast can it grow at most
+Omega - at least
+Theta - orden asintotuco
+
+- notacion o chica 
+
+- ntocion omega chiquita
+
+-- ordenes de complejedad 
+
+
+-- Tiepmpose de ejecucion -- 
