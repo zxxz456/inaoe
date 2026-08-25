@@ -17,6 +17,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/08/2026      Pase a LaTeX la toma cruda del 24/08
 %  zxxz6       19/08/2026      Pase a LaTeX la toma cruda del 19/08
 %  zxxz6       19/08/2026      Creation
 %
@@ -233,11 +234,181 @@ la cardinalidad es $\abs{A \times B} = \abs{A} \cdot \abs{B}$.
 \newpage
 
 % =====================================================================
-%  Clase 3
+%  Clase 3 - Relaciones y funciones y Álgebras
 % =====================================================================
 
+\clase{Relaciones y funciones}{24 de agosto de 2026}
 
+\begin{quick_sum}
+    En esta clase vimos un repaso de relaciones y funciones, tambien vimos
+    una intro a las álgebras.
+\end{quick_sum}
 
+\subsection{Relaciones}
+
+\begin{definicion}[Relación binaria]
+    Una relación binaria $R$ de un conjunto $X$ en un conjunto $Y$ es
+    un subconjunto del producto cartesiano $X \times Y$.
+\end{definicion}
+
+Si $(x, y) \in R$, escribimos $xRy$ para denotar que $x$ está
+relacionada con $y$. Si $X = Y$ decimos que $R$ es una relación
+binaria \textbf{sobre} $X$.
+
+Como una relación es un subconjunto de $X \times Y$, todo lo de
+conjuntos aplica: $\emptyset$ es una relación, y hay
+$2^{\abs{X} \cdot \abs{Y}}$ relaciones distintas entre $X$ y $Y$.
+
+\subsubsection*{Dominio, codominio y rango}
+
+El \textbf{dominio} está formado por los elementos del primer conjunto
+del que estamos hablando, y el \textbf{codominio} por los del segundo.
+El \textbf{rango} o imagen son los elementos que sí se usan, o sea los
+que participan de forma efectiva:
+\[
+    \mathrm{Dom}(R) = \set{x \in X \mid \exists\, y \in Y,\ (x,y) \in R}
+    \qquad
+    \mathrm{Ran}(R) = \set{y \in Y \mid \exists\, x \in X,\ (x,y) \in R}
+\]
+
+La diferencia entre codominio y rango es que el codominio se declara y
+el rango se calcula: $Y$ es lo que la relación podría alcanzar,
+$\mathrm{Ran}(R)$ es lo que de verdad alcanza.
+
+\begin{ejemplo}
+    Sean $X = \set{1, 2, 3}$ y $Y = \set{a, b}$, con
+    $R = \set{(1,a),\ (1,b),\ (3,a)}$. Entonces
+    $\mathrm{Dom}(R) = \set{1, 3}$ y $\mathrm{Ran}(R) = \set{a, b}$.
+    El $2$ no participa y el codominio sigue siendo todo $Y$.
+\end{ejemplo}
+
+\subsubsection*{Relación n-aria}
+
+Una relación n-aria es un subconjunto del producto cartesiano de $n$
+conjuntos $A_1 \times A_2 \times \cdots \times A_n$. Esos son los
+conjuntos dominio y $n$ es el \textbf{grado} de la relación.
+
+$R$ consiste en un conjunto de n-tuplas $(a_1, a_2, a_3, \ldots, a_n)$
+tales que el $i$-ésimo elemento de la tupla proviene del conjunto
+$A_i$. La relación binaria es el caso $n = 2$.
+
+\subsubsection*{Propiedades de las relaciones}
+
+Se definen sobre una relación $R$ en un conjunto $X$.
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Reflexividad}: para todo $x$, la tupla $(x,x)$ está
+          en la relación. Es decir, $x$ se relaciona consigo mismo
+          para todo $x \in X$.
+    \item \textbf{Simetría}: para todo $x, y \in X$, si $(x,y)$ está
+          en la relación, entonces $(y,x)$ también.
+    \item \textbf{Antisimetría}: para todo $x, y \in X$, si $(x,y)$ y
+          $(y,x)$ están en la relación, entonces $x = y$. Dicho al
+          revés, que es más fácil de ver: los únicos pares que pueden
+          ir y venir son los de un elemento consigo mismo.
+    \item \textbf{Transitividad}: para todo $x, y, z \in X$, si $xRy$
+          y $yRz$, entonces $xRz$.
+\end{itemize}
+
+\begin{ojo}
+    Simetría y antisimetría no son opuestas, se pueden cumplir las dos
+    a la vez. La igualdad es el caso: si $x = y$ entonces $y = x$
+    (simétrica), y si ambas se cumplen entonces $x = y$
+    (antisimétrica).
+\end{ojo}
+
+% =====================================================================
+
+\subsection{Funciones}
+
+Son un tipo especial de relaciones. Es una relación pero con la
+restricción de que cada elemento de $A$ debe tener un elemento de
+salida, o sea que solo debe aparecer una vez en el dominio.
+
+\begin{definicion}[Función]
+    $f: A \to B$ es una relación de $A$ en $B$ tal que para cada
+    $a \in A$ existe exactamente un $b \in B$ con $(a,b) \in f$.
+\end{definicion}
+
+\textbf{Mapear} es una función: un mapa es una forma de asociar
+objetos únicos a cada elemento de un conjunto dado.
+
+\subsubsection*{Tipos de funciones}
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Inyectiva}: la relación se da $1$ a $1$, un elemento
+          de $A$ no se puede relacionar con dos de $B$. Formalmente,
+          si $f(x) = f(y)$ entonces $x = y$.
+    \item \textbf{Sobreyectiva}: todos los elementos de $B$ participan,
+          ninguno se queda solo. O sea, el rango es todo el codominio.
+    \item \textbf{Biyectiva}: ambas, inyectiva y sobreyectiva. Rango
+          igual a codominio, y cada elemento de $B$ le toca a exactamente
+          un elemento de $A$.
+\end{itemize}
+
+La biyección es la que importa porque es la única que se puede
+invertir: existe $f^{-1}: B \to A$ y también es función.
+
+Dado todo lo que hemos visto hasta ahora, todo eso se define dentro de
+una estructura algebraica.
+
+\newpage
+
+\clase{Algebras}{24 de agosto de 2026}
+
+\subsection{Estructura algebraica}
+
+\begin{definicion}[Estructura sobre un conjunto]
+    Conjunto de funciones, reglas y restricciones que dan significado a
+    una colección de objetos.
+\end{definicion}
+
+Se dice que hay una \textbf{composición} en un conjunto no vacío $S$
+si a cada par de elementos de $S$ se le asigna, de cierta forma y de
+manera única, un elemento de $S$.
+
+\subsubsection*{Aridad}
+
+De acuerdo al número de argumentos requeridos para que un operador
+pueda realizar el cálculo (aridad), las operaciones pueden ser:
+
+\begin{itemize}[itemsep=0.05em]
+    \item Nularias
+    \item Unarias
+    \item Binarias
+    \item Ternarias
+    \item N-arias
+\end{itemize}
+
+Las operaciones algebraicas básicas son la \textbf{adición} y la
+\textbf{multiplicación}.
+
+\subsubsection*{Propiedades de una operación binaria}
+
+Sea $*$ una operación binaria sobre un conjunto $S$.
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Cerradura}: $a * b$ sigue estando en $S$. En los
+          naturales la suma es cerrada, pero la resta no lo es:
+          $3 - 5$ ya no es natural.
+    \item \textbf{Asociatividad}: $(a * b) * c = a * (b * c)$, o sea
+          que el orden de agrupar no cambia el resultado.
+    \item \textbf{Identidad}: existe $e \in S$ tal que
+          $a * e = e * a = a$. El $0$ para la suma, el $1$ para el
+          producto.
+    \item \textbf{Conmutatividad}: $a * b = b * a$.
+    \item \textbf{Distributividad}: relaciona dos operaciones,
+          $a * (b + c) = (a * b) + (a * c)$.
+    \item \textbf{Idempotencia}: $a * a = a$. La unión y la
+          intersección de conjuntos la cumplen.
+\end{itemize}
+
+\begin{idea}
+    La cerradura es la que decide de qué álgebra estamos hablando. Es
+    la misma idea que ya salió con los conjuntos: si la operación se
+    sale del conjunto, el conjunto no alcanza para describir lo que se
+    está haciendo.
+\end{idea}
 
 \end{document}
 %############################## END OF LIBRETA.TEX #############################
