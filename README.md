@@ -22,13 +22,15 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.6.0
+* Version: 1.7.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       25/08/2026      Agregue machine_learning/ al indice
+zxxz6       25/08/2026      La toma cruda ahora vive en raw_notes/
 zxxz6       22/08/2026      Agregue fundamentos_aal/material_apoyo/
 zxxz6       20/08/2026      Agregue ada/dummy/ al indice
 zxxz6       19/08/2026      matcomp ya tiene libreta, no solo el crudo
@@ -51,7 +53,8 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 
 - [ada/](ada/) - Análisis y Diseño de Algoritmos.
   - [apuntes/](ada/apuntes/) - Libreta de clase en LaTeX (`libreta.tex`),
-    una sección por sesión, más la toma cruda en `.txt`.
+    una sección por sesión. La toma cruda de cada clase queda en
+    [raw_notes/](ada/apuntes/raw_notes/).
   - [dummy/](ada/dummy/) - Experimentos que alimentan los apuntes.
     `ComparaOrdenamientos.c` cronometra bubble sort contra quick sort
     sobre los mismos arreglos aleatorios, de 2^1 hasta 2^25 elementos, y
@@ -60,15 +63,21 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 - [fundamentos_aal/](fundamentos_aal/) - Fundamentos para el Análisis
   Automático de Lenguaje.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
-    (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
+    (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
+    queda en [raw_notes/](fundamentos_aal/apuntes/raw_notes/).
   - [material_apoyo/](fundamentos_aal/material_apoyo/) - Desarrollos de
     fondo para repasar, generados con Claude y aparte de la toma de clase.
     - [modelos_n_gramas.tex](fundamentos_aal/material_apoyo/modelos_n_gramas.tex) -
       modelos de lenguaje de n-gramas: regla de la cadena, supuesto de
       Markov, estimación por máxima verosimilitud, suavizado y perplejidad.
+- [machine_learning/](machine_learning/) - Aprendizaje Computacional.
+  - [apuntes/](machine_learning/apuntes/) - `libreta.tex` todavía está
+    vacío; por ahora solo hay toma cruda en
+    [raw_notes/](machine_learning/apuntes/raw_notes/).
 - [matcomp/](matcomp/) - Matemáticas para Computación.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
-    (`libreta.tex`), una sección por sesión, más la toma cruda en `.txt`.
+    (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
+    queda en [raw_notes/](matcomp/apuntes/raw_notes/).
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
