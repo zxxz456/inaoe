@@ -18,6 +18,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/08/2026      Clase 24 Ago, IR
 %  zxxz6       19/08/2026      Apuntes de la clase del 19 de agosto
 %  zxxz6       19/08/2026      Registre a los cuatro profesores
 %  zxxz6       17/08/2026      Creation
@@ -193,6 +194,220 @@ Hay varias áreas de investigación y/o problemas en PLN:
     \item Text to image 
     \item Image to text (captioning)
 \end{itemize}
+
+% =====================================================================
+%  Clase 3 - Recuperación de información (IR) 
+% =====================================================================
+
+\clase{Recuperación de información (IR)}{24 de agosto de 2026}
+
+\begin{quick_sum}
+    En esta sesión comenzamos con un concepto, que al menos para mi es nuevo, el de la
+    recuperacion de informacion. Vimos que es, para que sirve y un par de ejemplos.
+    El contenido de esta seccion de IR es el siguiente
+    \begin{itemize}
+        \item Definicion de la tarea
+        \item The Vector Space Model
+        \item Modelos de lenguaje para IR
+        \item Evaluacion de IR (Performance)
+        \item Problemas principales y soluciones basicas (Indexing, Query Expansion, Relevance Feedback, Clustering, Diversification)
+    \end{itemize}
+\end{quick_sum}
+
+\subsection*{Introduccion}
+
+Para entender de manera intuitiva que es un Sistema de Recuperación de Informacion (IRS), responderemos las preguntas que el Dr planteo en clase...
+
+\begin{itemize}
+    \item \textbf{Qué es un sistema de recuperación de información (IR)?} Es un sistema que busca dentro de una colección grande de documentos no estructurados o semiestructurados
+    \item \textbf{Que objetivo tiene?} Su objetivo esrecuperar documentos reelevantes para satisfacer una neceidad de informacion del usuario
+    \item \textbf{Que hay dentro de el? Algun sub-proceso?} Pues si, un SRI se descompone tipicamente en sus fases de; Adqisicion, Preprocesamiento del texto, Indexacion, Procesamiento de la query, Recuperacion, Ranking Presentacion de resultados, Retroalimentacion.
+    \item \textbf{Como evaular su desempeno?} Se busca maximizar dos cosas a la vez, la presicion (devolver lo que sea relevante), exhaustividad o recall (que no se le escape info relevante que si exista)
+    \item \textbf{Poruqe los resultados no siempre son relevantes?} Porque el matching lexico no siempre es lo mismo que el matching semantico
+\end{itemize}
+
+UN ejemplo de SRI es el motor de busqueda de Google, o el buscador dentro de una biblioteca digital.
+Es importante notar que un SRI es diferente de un sistema de BDD por tres simples razones
+\begin{itemize}
+    \item NO hay una respuesta exacta ni unica
+    \item El objeto de trabajo es texto no estructurado
+    \item La consulta no describe formalmente lo que se busca, sino que lo insinua
+\end{itemize}
+
+\subsection*{Componentes de un SRI}
+
+Los componentes de un SRI son los siguientes:
+\begin{itemize}
+    \item Adquisición: Recopilación de documentos y construcción de la colección
+    \item Preprocesamiento del texto: Limpieza, normalización, tokenización, stemming, eliminación de stopwords
+    \item Indexación: Construcción de índices invertidos u otras estructuras de búsqueda. ESte paso es de vital importancia porque lo que no se indexa, es como si no existiera.
+    \item Procesamiento de la consulta: Transformación de la consulta del usuario en una forma que pueda ser comparada con los documentos
+    \item Recuperación: Búsqueda de documentos candidatos en el índice
+    \item Ranking: Ordenación de los documentos recuperados según su relevancia
+    \item Presentación de resultados: Mostrar los documentos al usuario
+    \item Retroalimentación: Ajuste de la consulta basado en la relevancia de los documentos mostrados
+\end{itemize}
+
+\subsection*{Cómo se conectan las fases?}
+
+Las fases no forman una sola fila, se dividen en dos ramas que corren
+por separado y convergen en el matching:
+
+\begin{itemize}
+    \item \textbf{Rama de la colección (offline)}: Adquisición,
+    Preprocesamiento e Indexación construyen el índice invertido antes
+    de que llegue ninguna consulta.
+    \item \textbf{Rama de la consulta (online)}: el usuario escribe su
+    consulta y el sistema le aplica el mismo preprocesamiento que a
+    los documentos, para que ambos lados queden en la misma forma y
+    se puedan comparar.
+\end{itemize}
+
+Ambas ramas se encuentran en la Recuperación (matching), que usa el
+índice para hallar los documentos candidatos. De ahí en adelante el
+flujo es único: Ranking los ordena y Presentación de resultados se
+los muestra al usuario. La Retroalimentación, cuando existe, cierra
+el ciclo regresando al Procesamiento de la consulta para ajustarla
+con lo que el usuario marcó como relevante.
+
+\begin{center}
+\begin{tikzpicture}[
+  caja/.style={rectangle, rounded corners, draw=acento, thick,
+    fill=fondoIdea, align=center, minimum width=3.3cm,
+    minimum height=1.05cm, font=\footnotesize, inner sep=3pt},
+  flecha/.style={->, thick, acento},
+  fb/.style={->, thick, violet!60!black}
+]
+
+\node[font=\scriptsize\itshape] at (0,0.85) {Fase offline};
+\node[font=\scriptsize\itshape] at (6.4,0.85) {Fase online};
+
+\node[caja] (adq) at (0,0) {Adquisición};
+\node[caja] (pre) at (0,-1.6) {Preprocesamiento\\ del texto};
+\node[caja] (idx) at (0,-3.2) {Indexación};
+
+\node[caja] (con) at (6.4,0) {Consulta del\\ usuario};
+\node[caja] (ppq) at (6.4,-1.6) {Procesamiento\\ de la consulta};
+
+\node[caja] (rec) at (3.2,-4.9) {Recuperación\\ (matching)};
+\node[caja] (ran) at (3.2,-6.5) {Ranking};
+\node[caja] (pre2) at (3.2,-8.1) {Presentación\\ de resultados};
+
+\draw[flecha] (adq) -- (pre);
+\draw[flecha] (pre) -- (idx);
+\draw[flecha] (con) -- (ppq);
+\draw[flecha] (idx) -- (rec);
+\draw[flecha] (ppq) -- (rec);
+\draw[flecha] (rec) -- (ran);
+\draw[flecha] (ran) -- (pre2);
+
+\draw[fb, dashed] (pre2.east) -| (ppq.south);
+\node[font=\scriptsize, align=left, anchor=west,
+  text=violet!60!black] at (6.6,-5) {Retroalimentación\\ (opcional)};
+
+\end{tikzpicture}
+
+
+\end{center}
+
+\subsection*{Preprocesamiento del texto}
+
+El preprocesamiento es la fase de limpieza que corre antes de indexar.
+Típicamente se quitan:
+
+\begin{itemize}
+    \item Plurales
+    \item Signos de puntuación
+    \item Formato
+    \item Stop words, o sea artículos, conjunciones y preposiciones
+\end{itemize}
+
+Después se hace \textbf{stemming} o \textbf{lematización}, que es
+básicamente dejar el texto hablando como cavernícola: se quitan
+diminutivos y terminaciones hasta quedarse con la raíz.
+
+\begin{idea}
+    Hacer stemming es truncar las palabras estadísticamente. No se
+    consulta ningún diccionario, se corta según reglas que en promedio
+    funcionan, así que el pedazo que queda no siempre es una palabra
+    real. \textit{Corriendo}, \textit{corrió} y \textit{correremos}
+    terminan los tres en \textit{corr}.
+\end{idea}
+
+La lematización hace el mismo trabajo pero por el camino caro: usa
+diccionario y análisis morfológico, así que devuelve el lema
+(\textit{correr}, una palabra que sí existe) en lugar de un truncado.
+
+Todo esto se hace por dos razones. La primera es que reduce el
+vocabulario, y el vocabulario es el que define el tamaño del índice.
+La segunda es que sin esto el matching falla por pura forma: la
+consulta dice \textit{corrió} y el documento dice \textit{corriendo},
+que para una comparación de cadenas son dos cosas distintas.
+
+\subsection*{Vector Space Model}
+
+\begin{idea}
+    Todo modelo de recuperación define dos cosas: como se guarda la
+    información y como se recupera. El modelo de espacio vectorial
+    contesta las dos con la misma herramienta, un vector.
+\end{idea}
+
+Salton ideó representar los documentos como vectores, y desde entonces
+los documentos se representan como vectores en un espacio de $N$
+dimensiones, donde $N$ es el número de términos de la colección.
+
+\begin{ojo}
+    Término no es lo mismo que palabra. Un término es lo que quedó
+    después del preprocesamiento, o sea la raíz o el lema, así que
+    varias palabras del texto original pueden colapsar en un solo
+    término y contar como una sola dimensión.
+\end{ojo}
+
+La representación queda como una tabla donde cada renglón es un
+documento y cada columna un término. La celda guarda el peso de ese
+término en ese documento, que puede ser la frecuencia cruda o algo
+como TF-IDF.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+      & \textbf{corr} & \textbf{perr} & \textbf{cas} & \textbf{com} \\
+\midrule
+$d_1$ & 3 & 0 & 4 & 0 \\
+$d_2$ & 0 & 2 & 0 & 4 \\
+$d_3$ & 1 & 1 & 2 & 0 \\
+\midrule
+$q$   & 1 & 1 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La consulta se trata como cualquier otro documento: se preprocesa
+igual y se convierte en un vector del mismo espacio. Por eso $q$
+aparece como un renglón más de la tabla y no como algo aparte.
+
+\begin{idea}
+    Aquí la relevancia se mide como similaridad. Un documento es
+    relevante si su vector se parece al vector de la consulta.
+\end{idea}
+
+La medida usual es la similitud coseno, que compara la dirección de
+los dos vectores e ignora su magnitud. Eso importa porque si no, un
+documento largo ganaría solo por ser largo:
+
+\begin{equation}
+    \mathrm{sim}(d, q) =
+    \frac{\vec{d} \cdot \vec{q}}{\norm{\vec{d}} \, \norm{\vec{q}}}
+    = \frac{\sum_{i=1}^{N} d_i \, q_i}
+           {\sqrt{\sum_{i=1}^{N} d_i^2} \sqrt{\sum_{i=1}^{N} q_i^2}}
+\end{equation}
+
+Con la tabla de arriba, $q$ pide \textit{corr} y \textit{perr}. Sale
+primero $d_3$ con $0.58$, luego $d_1$ con $0.42$ y al final $d_2$ con
+$0.32$. Gana $d_3$ porque cubre los dos términos de la consulta,
+aunque $d_1$ mencione \textit{corr} tres veces: lo que $d_1$ tiene de
+más es \textit{cas}, que a la consulta no le importa y solo le alarga
+el vector.
 
 \end{document}
 
