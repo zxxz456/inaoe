@@ -1,0 +1,170 @@
+-- Intro --
+
+Dr Jose Francisco Martinez Tinidad (fmartine@inaoep.mx)
+
+Contenido y dinamica lo vemos esta sesion
+
+
+Temario
+Intro Clasificador lineas
+Perceptron
+SVM
+Clasificadores basados en distancia
+ANNs
+Evaluacion-Validacion-Overfit
+Metodos bayesianos
+Arboles de decision
+Reglas de clasificacion
+Regals de asociasion
+Seleccion de atributos
+Cluesering (K-mans, gasussia mixture, jerarquicos)
+
+(No se trata de solo usar las errainetas como una caja negra. El objetivo es, como investigaores como podemos usar estas herramientas para generar
+nuevo conocimiiento, por eso tenemos que conocerlo a detalle para poder innovar, proponer alternativas y asi)
+
+
+- Evaluacion
+
+80% proyecto
+    2 person team
+    Seleccionar articulo reciente
+    Promponer solucion alternativa
+    Tres presentaciones
+    Reporte final
+
+20% Examen oral a la entrega de proyecto
+    Tema aleatorio (del temario)
+
+
+Calendario
+
+25 Ago - Buscar un articulo publicado en 2026 que sea de interes en una revista JCR
+
+03 Sep - Entregar por email una lista que inique cual articulo fue seleccionado por cada estudiante y/o equipo
+
+29 Sep/ 01 Oct - Primera Presentación
+
+    Descripcion del problema abordado en el articulo
+    Breve descripcion del trabajo relacionado mencionado en el articulo
+    Breve descripcion de la solucion propuesta en el articulo
+    Descripccion de los experimentos que soportan dicha solucion, incluyendo tablas y/o graficas tomadas del articuloConclusiones a las que llegan los autores
+    Analisis de debilidades y/o posibles modificaciones para mejorar la prompuesa de los autores
+
+27 Oct/ 29 Oct - Segunda presentacion
+
+    Resumen del problema abordado
+
+24/26 Nov - Presentacion final
+
+    Resumen del probelam aordado y de la solucion final
+
+30 Nov - Entrega del reporte final, debe entregarse en forma de articulo con formato (https://www.springer.com/)
+
+Debe tener mas o menos 12 pags y debe incluir
+    Titulo
+    Resumen
+    Introduccion
+    Trabajo relacionado
+    SOLUCION propuesta
+    experimentosConclusiones y trabajo futuro
+    Referencias
+
+JCR
+
+    - Expert system with applications
+    - Knowdledge-Based Systems
+    - Journal of Machine Learning Reserch
+
+https://www.webofscience.com/wos/woscc/basic-research
+
+
+Recursos 
+    Weka 3
+    scikit-learn
+
+Notas:
+    Hay que tratar de contactar al autor para que nos de sus recursos y poder compararnos
+
+
+
+-- Intro --
+
+Que es el aprendizaje? Disciplina denro de CS que surje como motivacion de hacer que las compus realicen tareas complejas como las que hacen los humanos
+
+
+Tipos de aprendizaje
+    Supervisado
+    No Supervisado
+    Por refuerzo
+
+que significa aprender? Adquirir conociemiento, entendiiento, o una habilidad de manera empirica o por estudio
+como detrminamos el exito o fracaso de la tarea?
+
+Se busca que se logre un proceso de aprendizaje para que el sistema sea capaz de generalizar
+
+Generalizar no es memeorizar, aprender permite responder a problemas nuevos con el conocimiento adquirirdo
+
+al inicio hubo varias tendencias, una de ellas, ver como los animales aprende y de ahi trasladarlo a la maquina, con la premisa de que quiza el aprendizaje en un animal es diferente al de un 
+ser humano, pero pues no fue cierto
+
+Pero no hay una demostracion universal de lo que es el aprendizaje, hay muchas definiciones y muchas escuelas
+
+Las tareas relacionadas con el aprendizaje son
+    Reonocimiento
+    Diagnostico
+    Planeacion
+    Control de robost
+    Prediccion
+
+Aprender puede ser percibir cambios en el comportamento gracias en la experiencia, en nuestro contexto seaia mejoras en actividades ya conocidas, aprender nuevas tareas
+
+
+Hacer que las maquinas aprendan es muy util ya que nos simplifica la vida en muchos contextos, nos ayuda a hacer tareas comlejas mas rapido, analizar datos masivos de una manera rapida 
+
+Disciplinas relacionadas
+    Estadistica
+    logica
+    mates discretas
+    y muchs mas
+
+Todas las teorias de lo que hay sobre como funciona el cerebro han ayudado bastante, ya que se trata de emular lo que se cree que ocurre en el cerebro humano 
+cuando ocurre en el aprendizaje y trasladarlo a la computadora
+
+Otra disciplina que se viculma mucho con el ML es el Control, la teoria de control 
+Igual los modelos psicologicos 
+Modelos evolutivos 
+y muchos mas
+
+- Que es lo que se aprende? Diferentes estructuras computacinnales (funciones, programas logicos, MEF, Gramaticas, Sistems para la resolucion de problemas)
+L a idea es que yo tengo mi problema y tengo mi problema con algunos ejemplos, yo le doy a la compu los ejemplos y la compu me da como resultado el programa que me ayuda a
+ generalizar como son esos ejemplos, de tal manera de que cuando llegue un nuevo dato, la computadora pueda clasificarlo, identificarlo, generalizarlo correctamente, que lo pueda reconocer
+
+ Mas formalmente se tiene una funcion que es la que queremos aprender f
+
+ y otra funcion, la hipotesis h
+
+ y ambas van a recibir un vector de valores, el cual tiene N componentes
+
+ queremso encontrar la funcion h que su salida sea h(X)
+
+ quieremos que h sea capaz de reconocer un nuevo dato 
+
+ hay dos tipos de aprendizaje (bueno tres pero las mas comunes)
+
+    -Supervisado; Para los datos de entrenamiento, los datos estan etiquetados. La funcion h que es la que voy a aprender le voy a dar un dato x y esa funcion h tiene que ser capaz de de reconocer la nueva entrada
+    -No supervisado: Los datos de entrenainet no estan etiquetados, el algoritmo encuentra la relacion enre los datos 
+
+Vector de entrada es el patron, ft vector, instancia, ejemplo, sus componentes son las variables o caracteristicas y esas variables pueden tomar valores, reales, discretos o categoricos
+Y la salida puede ser un valor real (predictor) o discreto (clasificador)
+
+Hay varios modos de entrenamiento dependiendo de los datos
+    - Por batch
+    - de manera incremental 
+    - en linea
+
+
+Evaluacion ---
+Cuanod ya tengo mi funcion h, ahora como la evaluo? como se que esta bien?
+Para eso se necesita un conjunto de prueba, este nos ayuda a ver que tan bien la funcion h realiza su tarea
+y midiendo el error de h sobre este conjunto de prueba, pues el conjunto de prueba es una aprticin del dataset original
+
