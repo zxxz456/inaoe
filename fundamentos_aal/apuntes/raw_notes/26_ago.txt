@@ -1,0 +1,62 @@
+
+
+continuacion vetr space model
+
+antes de los vector sape model eran las consulttas booleanas, era como la primera forma de
+recuperar info, se usaban operadores booleanos, como
+quiero esto y esto y asi 
+
+El vector space model se basa en que ya no reprsenta en expresiones logicas sino en 
+vectores a los documentos
+
+al inicio fue con algebra vectorial simple pero despues se extendio a cosas mas 
+complejas
+
+termino no es lo mismo que palabra
+
+    por ejemplo
+        casa blanca es un solo termino
+
+(esto ya lo habiamos mensionado)
+
+La forma en la que se llenan los vectores sirven para describir la importancia de un termino en el documentos
+puede ser el numero de palabras o asi 
+
+la importancia general de un termino, decrece proporcionalemnte a la ocurrencia de este en la coleccion entera 
+hay atributos, palabras terminos, que son tan frecuentes que no sirven para discriminar pero esto no se elimina
+en el procesamiento
+
+hay muchos metodos para llnar una matriz , pero todos se basan en la ponderacion de veces y en la importancia que decrece
+
+bianry wights
+term frecuency (frequencia normalizada)
+tx x idf weighting scheme (term freq x index documen frequency)
+
+{ver explicacion de las 3}
+
+okapi-BM25 - investigar sobre eso
+
+la similitud entre dos vectores, la medida de similitud es la similitud coseno 
+
+Esta representacion no considera la semantica de los documentos
+
+algunos pros de este enfoque 
+    es facil de explicar
+    matematicamente bien estructurado
+    permitio approximate query matching
+
+y muchas contras
+    no puede entender siniomia
+    no entiende semantica
+    queries structuradas dificiles de modelar
+    normalizacion auumenta el coste computacional
+    hay que pear los terminos 
+
+Ir models
+{investigarlos brevemente}
+modelo booleanosprobabilistic indexing
+vector space modelprobabilistic retrieval
+fuzzy set models
+inference networks
+languaje models
+word enbedings y enfoques neuronales
