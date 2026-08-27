@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.1.0
+%   * Version: 2.2.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       26/08/2026      Clase 26 Ago, continuacion del VSM
 %  zxxz6       24/08/2026      Clase 24 Ago, IR
 %  zxxz6       19/08/2026      Apuntes de la clase del 19 de agosto
 %  zxxz6       19/08/2026      Registre a los cuatro profesores
@@ -408,6 +409,202 @@ $0.32$. Gana $d_3$ porque cubre los dos términos de la consulta,
 aunque $d_1$ mencione \textit{corr} tres veces: lo que $d_1$ tiene de
 más es \textit{cas}, que a la consulta no le importa y solo le alarga
 el vector.
+
+\newpage
+
+% =====================================================================
+%  Clase 26 Ago - Continuacion del Vector Space Model
+% =====================================================================
+
+\clase{Continuación (Vector Space Model)}{26 de agosto de 2026}
+
+\begin{quick_sum}
+    Continuación del modelo de espacio vectorial. Primero de dónde
+    viene, o sea las consultas booleanas que había antes. Luego el
+    tema central de la sesión: cómo se llenan los vectores, con los
+    tres esquemas de ponderación y el principio de que la importancia
+    de un término decrece conforme aparece en más documentos. Cerramos
+    con los pros y contras del enfoque y con un repaso de los otros
+    modelos de recuperación.
+\end{quick_sum}
+
+\subsection*{De dónde viene: las consultas booleanas}
+
+Antes del modelo de espacio vectorial estaban las consultas
+booleanas, que fueron la primera forma de recuperar información. La
+consulta se armaba con operadores booleanos: quiero esto \textbf{y}
+esto, esto \textbf{o} lo otro, esto pero \textbf{no} aquello.
+
+El vector space model rompe con eso: ya no representa la consulta ni
+los documentos como expresiones lógicas, sino como vectores. Al
+inicio fue con álgebra vectorial simple, y después se extendió a
+cosas más complejas.
+
+\begin{idea}
+    El cambio de fondo no es la notación sino el resultado. Una
+    consulta booleana parte la colección en dos, los documentos que
+    cumplen y los que no. Un vector permite ordenar por qué tanto se
+    parecen, y eso es lo que da el ranking.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Cómo se llenan los vectores}
+
+La forma en que se llenan los vectores sirve para describir la
+importancia de un término en el documento. Puede ser el número de
+veces que aparece la palabra, o alguna variante de eso.
+
+El principio que rige todo el pesado es este: la importancia general
+de un término decrece proporcionalmente a su ocurrencia en la
+colección entera. Hay atributos, palabras y términos que son tan
+frecuentes que no sirven para discriminar.
+
+\begin{ojo}
+    Esos términos tan frecuentes no se eliminan en el
+    procesamiento. No hace falta: el esquema de pesado se encarga de
+    dejarlos en un peso cercano a cero, así que se anulan solos.
+\end{ojo}
+
+Hay muchos métodos para llenar la matriz, pero todos se basan en lo
+mismo, la ponderación por número de veces y la importancia que
+decrece.
+
+\subsubsection*{Binary weights}
+
+El peso vale $1$ si el término aparece en el documento y $0$ si no.
+Solo registra presencia, así que un término que sale una vez pesa lo
+mismo que uno que sale cincuenta.
+
+\subsubsection*{Term frequency}
+
+Se usa la frecuencia, pero normalizada. Con $f_{i,j}$ el número de
+veces que el término $i$ aparece en el documento $j$,
+\[
+    \mathrm{tf}_{i,j} = \frac{f_{i,j}}{\max_k f_{k,j}} ,
+\]
+donde el denominador es la frecuencia del término más frecuente de
+ese documento. Se normaliza porque si no, un documento largo tendría
+pesos más grandes solo por ser largo.
+
+\subsubsection*{TF-IDF}
+
+Es el esquema estándar, y combina las dos mitades del principio: qué
+tan seguido sale el término en \emph{este} documento, contra en
+cuántos documentos de la colección sale. Con $N$ el total de
+documentos y $n_i$ cuántos contienen al término $i$,
+\[
+    w_{i,j} = \mathrm{tf}_{i,j} \times \mathrm{idf}_i ,
+    \qquad
+    \mathrm{idf}_i = \log \frac{N}{n_i} .
+\]
+
+\begin{idea}
+    El $\mathrm{idf}$ es la formalización de que la importancia
+    decrece. Un término que aparece en todos los documentos tiene
+    $n_i = N$, así que $\log(N/n_i) = \log 1 = 0$ y su peso se anula
+    sin que nadie lo haya quitado a mano.
+\end{idea}
+
+\subsubsection*{Okapi BM25}
+
+Es un refinamiento de TF-IDF, y viene del sistema Okapi. Arregla dos
+cosas que TF-IDF hace mal.
+
+La primera es que en TF-IDF la frecuencia entra de forma lineal, así
+que un término que aparece cien veces pesa cien veces más que uno que
+aparece una. Eso no corresponde a cómo funciona la evidencia: que una
+palabra pase de aparecer una vez a dos dice muchísimo sobre el tema
+del documento, pero que pase de cincuenta a cincuenta y uno ya no
+dice casi nada.
+
+La segunda es que la normalización por longitud de TF-IDF es fija.
+BM25 la vuelve ajustable, porque no siempre conviene normalizar
+igual: un documento puede ser largo por tratar más temas, o por ser
+verboso sobre el mismo.
+
+Con $|d|$ la longitud del documento en términos y
+$\mathrm{avgdl}$ la longitud promedio de la colección,
+\[
+    \mathrm{BM25}(d, q) = \sum_{i \in q} \mathrm{idf}_i \cdot
+    \frac{f_{i,d}\,(k_1 + 1)}
+         {f_{i,d} + k_1\left(1 - b + b\,\dfrac{|d|}{\mathrm{avgdl}}\right)} .
+\]
+
+Los dos parámetros son los que se ajustan:
+
+\begin{itemize}[itemsep=0.2em]
+    \item $k_1$ controla qué tan rápido satura la frecuencia. Con
+          $k_1 = 0$ el modelo se vuelve binario, solo importa que el
+          término esté; conforme $k_1$ crece se parece más a la
+          frecuencia cruda. Lo típico es entre $1.2$ y $2.0$.
+    \item $b$ controla la normalización por longitud. Con $b = 0$ no
+          normaliza nada y con $b = 1$ normaliza por completo. Lo
+          típico es $0.75$.
+\end{itemize}
+
+\begin{idea}
+    La saturación es la idea central. Cuando $f_{i,d}$ crece sin
+    límite, la fracción tiende a $k_1 + 1$ y ahí se queda, así que la
+    contribución de un término está acotada por más veces que
+    aparezca. TF-IDF no tiene tope.
+\end{idea}
+
+A pesar de ser de los noventa, BM25 sigue siendo el baseline fuerte
+contra el que se comparan los métodos neuronales de recuperación, y
+es lo que usan por defecto motores como Lucene y Elasticsearch.
+
+% =====================================================================
+
+\subsection*{Qué no captura el modelo}
+
+Esta representación no considera la semántica de los documentos. El
+vector solo sabe qué términos hay y con qué peso, no qué significan.
+
+\textbf{A favor:}
+\begin{itemize}[itemsep=0.1em]
+    \item Es fácil de explicar
+    \item Está matemáticamente bien estructurado
+    \item Permitió el \textit{approximate query matching}, o sea
+          recuperar documentos que no calzan exacto con la consulta
+\end{itemize}
+
+\textbf{En contra:}
+\begin{itemize}[itemsep=0.1em]
+    \item No entiende la sinonimia: \textit{carro} y \textit{auto}
+          son dos dimensiones distintas y ortogonales
+    \item No entiende la semántica
+    \item Las consultas estructuradas son difíciles de modelar
+    \item La normalización aumenta el costo computacional
+    \item Hay que pesar los términos, y de ahí salen los esquemas de
+          arriba
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Otros modelos de recuperación}
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Modelos booleanos.} Consulta con operadores
+          lógicos, sin ranking: un documento cumple o no cumple.
+    \item \textbf{Probabilistic indexing.} Pesa los términos del
+          índice por su probabilidad de ser relevantes.
+    \item \textbf{Vector space model.} El que estamos viendo.
+    \item \textbf{Probabilistic retrieval.} Ordena los documentos por
+          la probabilidad de que sean relevantes para la consulta.
+    \item \textbf{Fuzzy set models.} La pertenencia al conjunto de
+          documentos relevantes es gradual y no de todo o nada.
+    \item \textbf{Inference networks.} Modelan la recuperación como
+          inferencia sobre una red bayesiana.
+    \item \textbf{Language models.} Cada documento define un modelo
+          de lenguaje, y se ordena por la probabilidad de que ese
+          modelo genere la consulta.
+    \item \textbf{Word embeddings y enfoques neuronales.} Representan
+          términos y documentos en un espacio denso aprendido, que sí
+          captura sinonimia y semántica. Es la respuesta directa a
+          las dos contras de arriba.
+\end{itemize}
+
 
 \end{document}
 
