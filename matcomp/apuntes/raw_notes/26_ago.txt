@@ -1,0 +1,76 @@
+continuacxion estructuras algebraicas
+
+definicion... un conjunto no vacio S es llamado estructura algebraica
+si al menos una composicion o mas exactamente un ntupla de composiciones
+estan definidos dentro de ella
+
+SIRVEN PARA diferenciar que elementos se estan utilizanod que q operacioens son validas 
+entre ellos
+por ejemplo si el conjunto S contiene a los enteros, no se puede aplicar un producto vectorial
+
+Una estructura algebraica esta compuesta por un conjunto S y operaciones que pueden aplicarse
+sobre S q satisfacen siertas propiedades
+
+    - OPeracion cerrada o interna (clausura)
+    - asociativa
+    - conmuitativa
+    - elemento neutro
+    - elemento inverso (simetria)
+    - distributividad
+
+EStructuras algebraicas
+
+- Magma
+    hace referencia a un conjunto equpiado ocn un operador binario
+
+    Es una estructura algebraica basica, especificamente consta de un 
+    conjunto M y una unica operacion binaria cerrada sin que se imponga alguna otra propiedad
+
+    - semigrupo
+    es un conjunto no vacio en el cual esta definida una operacion binaria asociativa
+    (S,*)
+
+    - monoide
+    estructura algebraica formada por un conjunto no vacio S y una operacion binaria asociativa que ademas
+    tiene elemento neutro
+
+    (N, +) -> ES ASOCIATIVA, elemento neutro es 0 por lo tanto el tipo de estructura es monoide
+    (N, *) -> asociattiva, neutro es 1 por lo tanto es monoide
+    (Z+, +) -> asociativa, no tiene neutro, es semigrupo
+
+
+    - grupo
+    Si S es conjunto no vacio, y * una operacion binaria en S, entonces (S, *) es un grupo que si cuimple
+    las propiedeades de ser
+    Asociativo
+    Tener elemento neutro
+    Tener inversos
+
+    Tambien se puede decir que un grupo es un monoide en el que cada elemento tiene un inverso
+
+
+
+    - Grupo abeliano o conmutativo
+    es una estructura de tipo grupo que ademas cumple son ser conmutativo
+
+
+EStructuras algebraicas con dos operaciones
+
+- Anillo 
+    Es una estructura algebraica formada po un conjunto no vacio S y dos poperaciones internas llamadas usualmente
+    SUma y producto (S, +, *) que cumplen ciertas propiedadews
+
+    REspecto a la operacon suma es 
+        cerrado
+        Asociativo
+        tiene elemento neutro
+        tiene elemento inversp
+        es conmutativo
+
+    respecto ala operacion producto es 
+        cerrado
+        Asociativo
+        distributivo
+        conmutativo
+
+{tabla de todas las estructuras}

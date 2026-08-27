@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.0.0
+%   * Version: 2.1.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       26/08/2026      Pase a LaTeX la toma cruda del 26/08
 %  zxxz6       24/08/2026      Pase a LaTeX la toma cruda del 24/08
 %  zxxz6       19/08/2026      Pase a LaTeX la toma cruda del 19/08
 %  zxxz6       19/08/2026      Creation
@@ -72,14 +73,14 @@
 \end{quick_sum}
 
 
-\subsection{Álgebra}
+\subsection*{Álgebra}
 
 El álgebra es la parte de las matemáticas que estudia las operaciones,
 sus signos y las leyes que las rigen.
 
 % =====================================================================
 
-\subsection{Conjuntos}
+\subsection*{Conjuntos}
 
 Los conjuntos permiten agrupar elementos que comparten algo y operar
 entre esos grupos. Son la forma más básica de describir qué objetos
@@ -181,7 +182,7 @@ combinaciones, y cada una da un subconjunto distinto.
 
 % =====================================================================
 
-\subsection{Operaciones con conjuntos}
+\subsection*{Operaciones con conjuntos}
 
 Todas las que vimos son \textbf{binarias}: toman dos operandos.
 
@@ -218,7 +219,7 @@ se está trabajando.
 
 % =====================================================================
 
-\subsection{Producto cartesiano}
+\subsection*{Producto cartesiano}
 
 \begin{definicion}[Producto cartesiano]
     $A \times B$ es el conjunto de todos los pares ordenados cuyo
@@ -244,7 +245,7 @@ la cardinalidad es $\abs{A \times B} = \abs{A} \cdot \abs{B}$.
     una intro a las álgebras.
 \end{quick_sum}
 
-\subsection{Relaciones}
+\subsection*{Relaciones}
 
 \begin{definicion}[Relación binaria]
     Una relación binaria $R$ de un conjunto $X$ en un conjunto $Y$ es
@@ -319,7 +320,7 @@ Se definen sobre una relación $R$ en un conjunto $X$.
 
 % =====================================================================
 
-\subsection{Funciones}
+\subsection*{Funciones}
 
 Son un tipo especial de relaciones. Es una relación pero con la
 restricción de que cada elemento de $A$ debe tener un elemento de
@@ -356,7 +357,7 @@ una estructura algebraica.
 
 \clase{Algebras}{24 de agosto de 2026}
 
-\subsection{Estructura algebraica}
+\subsection*{Estructura algebraica}
 
 \begin{definicion}[Estructura sobre un conjunto]
     Conjunto de funciones, reglas y restricciones que dan significado a
@@ -409,6 +410,165 @@ Sea $*$ una operación binaria sobre un conjunto $S$.
     sale del conjunto, el conjunto no alcanza para describir lo que se
     está haciendo.
 \end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 26 Ago - Continuacion de estructuras algebraicas
+% =====================================================================
+
+\clase{Continuación (Estructuras algebraicas)}{26 de agosto de 2026}
+
+\subsection*{Definición y para qué sirven}
+
+\begin{definicion}[Estructura algebraica]
+    Un conjunto no vacío $S$ es llamado estructura algebraica si al
+    menos una composición, o más exactamente una $n$-tupla de
+    composiciones, está definida dentro de ella.
+\end{definicion}
+
+Sirven para diferenciar qué elementos se están utilizando y qué
+operaciones son válidas entre ellos. Por ejemplo, si el conjunto $S$
+contiene a los enteros, no se puede aplicar un producto vectorial.
+
+Una estructura algebraica está compuesta por un conjunto $S$ y las
+operaciones que pueden aplicarse sobre $S$, que satisfacen ciertas
+propiedades:
+
+\begin{itemize}[itemsep=0.05em]
+    \item Operación cerrada o interna (clausura)
+    \item Asociativa
+    \item Conmutativa
+    \item Elemento neutro
+    \item Elemento inverso (simetría)
+    \item Distributividad
+\end{itemize}
+
+El elemento inverso es el que no había salido antes: para cada
+$a \in S$ existe $a^{-1} \in S$ tal que $a * a^{-1} = e$, con $e$ el
+neutro. En $(\Z, +)$ el inverso de $3$ es $-3$; en $(\Z, \cdot)$ el
+$3$ no tiene inverso, porque $1/3$ ya no es entero.
+
+% =====================================================================
+
+\subsection*{Estructuras con una operación}
+
+\subsubsection*{Magma}
+
+Hace referencia a un conjunto equipado con un operador binario. Es la
+estructura algebraica más básica: consta de un conjunto $M$ y una
+única operación binaria cerrada, sin que se imponga ninguna otra
+propiedad.
+
+\subsubsection*{Semigrupo}
+
+Es un conjunto no vacío en el cual está definida una operación
+binaria asociativa, $(S, *)$.
+
+\subsubsection*{Monoide}
+
+Estructura algebraica formada por un conjunto no vacío $S$ y una
+operación binaria asociativa que además tiene elemento neutro.
+
+\begin{ejemplo}
+    $(\N, +)$ es asociativa y su elemento neutro es el $0$, así que
+    es un monoide.
+
+    $(\N, \cdot)$ es asociativa y su neutro es el $1$, así que
+    también es un monoide.
+
+    $(\Z^{+}, +)$ es asociativa pero no tiene neutro, porque el $0$
+    no está en $\Z^{+}$, así que solo llega a semigrupo.
+\end{ejemplo}
+
+\subsubsection*{Grupo}
+
+Si $S$ es un conjunto no vacío y $*$ una operación binaria en $S$,
+entonces $(S, *)$ es un grupo si cumple con ser asociativo, tener
+elemento neutro y tener inversos.
+
+\begin{idea}
+    Dicho de otro modo, un grupo es un monoide en el que cada
+    elemento tiene un inverso. Cada estructura de la lista es la
+    anterior más una propiedad, y por eso el orden en que se
+    presentan no es arbitrario.
+\end{idea}
+
+\subsubsection*{Grupo abeliano o conmutativo}
+
+Es una estructura de tipo grupo que además cumple con ser
+conmutativa.
+
+% =====================================================================
+
+\subsection*{Estructuras con dos operaciones}
+
+\subsubsection*{Anillo}
+
+Es una estructura algebraica formada por un conjunto no vacío $S$ y
+dos operaciones internas, llamadas usualmente suma y producto,
+$(S, +, \cdot)$, que cumplen ciertas propiedades.
+
+Respecto a la operación suma es cerrado, asociativo, tiene elemento
+neutro, tiene elemento inverso y es conmutativo. Respecto a la
+operación producto es cerrado, asociativo, distributivo y
+conmutativo.
+
+\begin{ojo}
+    Lo del producto conmutativo hay que revisarlo. En la tabla de
+    abajo, que es la que dio el profesor, la conmutatividad del
+    producto es justo lo que separa al anillo del anillo conmutativo:
+    el anillo la tiene solo en la suma. Es probable que esa última
+    propiedad de la lista corresponda al anillo conmutativo.
+\end{ojo}
+
+\subsubsection*{Tabla de todas las estructuras}
+
+En la tabla, \textbf{S} quiere decir que la propiedad se cumple
+respecto a la suma y \textbf{M} respecto a la multiplicación. Las
+primeras cuatro son magmas, o sea de una sola operación, y las
+últimas cuatro son semianillos.
+
+Cada renglón de la tabla es el anterior más una propiedad:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Semianillo}: las dos operaciones son asociativas y
+          el producto distribuye sobre la suma.
+    \item \textbf{Subanillo}: además la suma tiene neutro e inverso.
+    \item \textbf{Anillo}: además la suma es conmutativa.
+    \item \textbf{Anillo conmutativo}: además el producto también es
+          conmutativo.
+    \item \textbf{Campo}: además el producto tiene neutro e inverso.
+\end{itemize}
+
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Magma} & \textbf{Asociativo} & \textbf{Neutro ($e$)}
+      & \textbf{Inverso} & \textbf{Conmutativo}
+      & \textbf{Distributivo} \\
+    \midrule
+    Semigrupo           & X   &     &     &     &   \\
+    Monoide             & X   & X   &     &     &   \\
+    Grupo               & X   & X   & X   &     &   \\
+    Grupo abeliano      & X   & X   & X   & X   &   \\
+    \midrule
+    \textbf{Semianillo} & S,M &     &     &     & M \\
+    \midrule
+    Subanillo           & S,M & S   & S   &     & M \\
+    Anillo              & S,M & S   & S   & S   & M \\
+    Anillo conmutativo  & S,M & S   & S   & S,M & M \\
+    Campo               & S,M & S,M & S,M & S,M & M \\
+    \bottomrule
+  \end{tabular}
+  \caption{Propiedades que cumple cada estructura. Todas son
+    operaciones cerradas.}
+  \label{tab:estructuras}
+\end{table}
+
+
 
 \end{document}
 %############################## END OF LIBRETA.TEX #############################
