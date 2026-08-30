@@ -1,0 +1,55 @@
+el seminario es como para dar las nociones basicas de lo que es la investigacion
+
+
+en genarl
+
+fortalece capacidades de investigacion
+fomentar pensamiento critico 
+como leer literatura ceinitfica
+
+se espera 
+que todos desarrollmos copetencias para desarrollar literatura, analizar, seleccionar
+
+no cuenta promedio pero si hay que pasarlo
+
+los laboratoios q hay son 
+
+-- LABORATORIO DE TECNOLOGIAS DEL LENGUAJE --
+NLP. tecnologias que permiten modelar lenguaje a travez de la coputadora y comunicarnos con ellxs 
+INTEGRAN DISCIPLINAS COMO 
+    Linguitica computacional
+    ML
+    DL
+    Estadistiac
+    Ciencia cognitiva
+
+principales areas de focus
+    modelo semantica
+    arqs ttransformers 
+    reconocimiento automatico el habla 
+    miomarcadores linguisticos e salud
+    analisis multimodal del discurso
+    evaluacion y explicabilidad
+
+se quiere trabajar en 
+    modelos mutimodales
+    IA explicable
+    Adaptacion cultural
+    Integracion con neurociencia
+    Modelos eficientes y especiailzados
+
+
+Proyectos en curso
+
+    - Voz y cognicion
+        - Detectan deterioro cognitivo a travez de biomarcadoes en la voz
+
+
+Cursos 
+    Fundamentos para el analisis automaticos del lenguaje   
+    Mineria de textos
+    Deep learning para NLP
+    Aplicaciones en tecnologias del lenguaje
+
+
+salon 8305 - martes a las 12 seminario de NLP
