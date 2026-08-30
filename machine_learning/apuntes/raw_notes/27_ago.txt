@@ -1,0 +1,89 @@
+
+recap
+ml se trata de encontrar una funcion que fitee unos datos de entrenamiento para que sea capaz de generalizar
+
+suponemos una funcion f que modela lo que queremos
+construimos hipotesis
+queremos construri la funcion h que emule a f
+entrenamos a h para que sea apaz de generalizar
+testeamos
+
+Supongamos q queremos constuir un sistema que permita pasar a personas cuyos rostros sean conocidos
+para entrar al instituto 
+
+tenemos los datos de las caras
+
+una iagen es un arreglo de bits
+
+tenemos que onstruir una funcion f: Rd -> (-1, 1)
+
+Es discreta pq es una tarea de clasificacion
+
+El clasificador tendra un conjunto de vectores de entrenamiento con etiqeutas, estos vectores
+nos ayudaran a entrenar la funcion
+
+Entonces queeremos construir la funcion solo con los datos de entrenaminto, nuestra experiencia empirica 
+
+Una manera seria ver un pixel de la imagen, de tal forma que al estar presente acepta a esa personas
+y los rechaza en otro caso... pero esto tiene varias limitaciones...
+
+pero la funcion es util para otras imagenes que no esten en el dataset? es capaz de generalizar?
+
+lo que se trata es encontrar un modelo, una funcion que nos resuelva esa tarea de aprendizaje... no queremos
+funciones que fiteen perfectamente al conjunto de datos, ni sper general, queremos algo en mdio
+
+-- claificadoes lineales
+
+Lo que hacemos es definir una funcion lineal
+
+f(x;T) = sign(T1x1 + ... + Tdxd) = sign (Ttx)
+
+se toma el signo para nuestro problema porq solo estamo conciderando el caso binario, acepta o 
+rechaza la anetrada al edificio
+
+el modelo enconrara una linea, un plano que permita separar a las personas que pueden o no
+entrar al edificio 
+
+el chiste es encontrar la funcnion a partir de las entradas que tengo en el entrenamietno 
+cuando no es posible construir la funcion, queremos entonces descubrir otra que cometa el menor error posible
+
+en nuestro problema que planteamos, el clasificador lineal no guarda info de los pixeles vecinos
+solo evaluaria el pixel individual 
+
+
+mencionamos que queremos encontrar el error, esto se mide con la diferencia del dato esperado con el dato
+obtenido, hay diferentes medidas de error
+
+a las funciones de error se les llama loss, funcion de eror, o funcion de perdida
+y hacen lo que mencinoaab, dicen que tanta diferencia hay entre el dato observaod y el esperado
+
+y son esas funciones las qu se traatan de optimizar
+
+-- El perceptron (algoritmo de aprendizaje)
+
+Queremos encontrar unu clasificado lineal que minimise el error, queremos encontrar theta que minimice el error de entrenameinto
+
+E(Theta) = 1/n sum_1aN(1-deltaerror)
+
+pero como constrir ahora esa funcion lineal? como ajustar los parametros?
+hay alguna maera razonable de setear los parametros de theta?
+
+una opcion es ajustar icrementalmente cada parametro para que veamos que esta bien
+
+un algoritmo simple de este tipo es el perceptron update rule 
+
+{regla}
+
+en otras palabaras los parametros son actualizados solo si hay error, estos updates tienden a corregir errores
+
+
+en nuestro caso (calsificacion de caras) cuando hay un error, cuando el modelo hace un error, el signo no coincide con el de la etiqueta
+
+supongamos que hacemos un eror, los parametros updated estan dados por Theta´
+si concideramos clasificar la misma imagen after the update 
+
+{formula con regla del percepron }
+
+esto da origen al reconocedor del perceptron y este reconocedor es util para problemas lineales
+solo puede separa con una linea, un plano, pero jamas podra separar datos que no sean linealmene
+separables 
