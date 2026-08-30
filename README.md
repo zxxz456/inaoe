@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.8.0
+* Version: 1.9.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       29/08/2026      Agregue seminario1/ al indice
 zxxz6       25/08/2026      machine_learning ya tiene libreta
 zxxz6       25/08/2026      Agregue machine_learning/ al indice
 zxxz6       25/08/2026      La toma cruda ahora vive en raw_notes/
@@ -79,6 +80,9 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](matcomp/apuntes/raw_notes/).
+- [seminario1/](seminario1/) - Seminario de Metodología.
+  - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
+    solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
