@@ -1,0 +1,20 @@
+-- Presentacion estructuras --
+por Sergio, Carlos y Areli
+
+el objetivo es identificar una estructura algebraica y como se usa
+en cosa
+
+que es una estructura? {def}
+
+que es un magma? {def}
+
+que es un grupo abeliano? {def}
+
+aplicacion documentada: se hace en un paper, link between the diferential Cryiptonalisis...
+
+duda... el elemento inverso es a?
+
+
+Otra presentacion de Doris y Sara, la aplicacion es Dilatacion morfologica
+
+
