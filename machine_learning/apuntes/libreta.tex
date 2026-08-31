@@ -17,6 +17,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       27/08/2026      Pase a LaTeX la toma cruda del 27/08
 %  zxxz6       25/08/2026      Creation
 %
 %
@@ -307,6 +308,166 @@ bien? Para eso se necesita un conjunto de prueba, que nos ayuda a ver
 qué tan bien la función $h$ realiza su tarea, midiendo el error de $h$
 sobre ese conjunto. El conjunto de prueba es una partición del dataset
 original.
+
+\newpage
+
+% =====================================================================
+%  Clase 2 - Clasificadores lineales y perceptrón
+% =====================================================================
+
+\clase{Clasificadores lineales y perceptrón}{27 de agosto de 2026}
+
+\begin{quick_sum}
+  Retomamos la idea de aprender una función que generalice y la
+  aterrizamos en un ejemplo de control de acceso por rostro. De ahí
+  salieron los clasificadores lineales, las funciones de pérdida y el
+  perceptrón como algoritmo para ajustar los parámetros.
+\end{quick_sum}
+
+\subsection*{Recap}
+
+ML se trata de encontrar una función que fitee unos datos de
+entrenamiento para que sea capaz de generalizar. El proceso es:
+
+\begin{enumerate}[itemsep=0.1em]
+    \item Suponemos una función $f$ que modela lo que queremos
+    \item Construimos hipótesis
+    \item Queremos construir la función $h$ que emule a $f$
+    \item Entrenamos a $h$ para que sea capaz de generalizar
+    \item Testeamos
+\end{enumerate}
+
+% =====================================================================
+
+\subsection*{Ejemplo: control de acceso por rostro}
+
+Supongamos que queremos construir un sistema que permita pasar a
+personas cuyos rostros sean conocidos para entrar al instituto.
+Tenemos los datos de las caras, y una imagen es un arreglo de bits.
+
+Tenemos que construir una función
+\[
+    f: \R^d \to \set{-1, 1}
+\]
+
+Es discreta porque es una tarea de clasificación. El clasificador
+tendrá un conjunto de vectores de entrenamiento con etiquetas, y estos
+vectores nos ayudarán a entrenar la función. Entonces queremos
+construir la función solo con los datos de entrenamiento, o sea con
+nuestra experiencia empírica.
+
+Una manera sería ver un píxel de la imagen, de tal forma que al estar
+presente acepta a esa persona y la rechaza en otro caso, pero esto
+tiene varias limitaciones. ¿La función es útil para otras imágenes que
+no estén en el dataset? ¿Es capaz de generalizar?
+
+\begin{idea}
+  Lo que se trata es de encontrar un modelo, una función que nos
+  resuelva esa tarea de aprendizaje. No queremos funciones que fiteen
+  perfectamente al conjunto de datos, ni súper generales, queremos
+  algo en medio.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Clasificadores lineales}
+
+Lo que hacemos es definir una función lineal:
+\[
+    f(x; \theta) = \mathrm{sign}(\theta_1 x_1 + \cdots + \theta_d x_d)
+                 = \mathrm{sign}(\theta^{\mathsf{T}} x)
+\]
+
+Se toma el signo para nuestro problema porque solo estamos
+considerando el caso binario: acepta o rechaza la entrada al edificio.
+
+El modelo encontrará una línea, un plano que permita separar a las
+personas que pueden o no entrar al edificio. Ese plano es justo el
+lugar donde $\theta^{\mathsf{T}} x = 0$, y $\theta$ es el vector
+normal a él, así que ajustar $\theta$ es girar y mover el plano.
+
+El chiste es encontrar la función a partir de las entradas que tengo
+en el entrenamiento. Cuando no es posible construir la función,
+queremos entonces descubrir otra que cometa el menor error posible.
+
+\begin{ojo}
+  En nuestro problema el clasificador lineal no guarda info de los
+  píxeles vecinos, solo evaluaría el píxel individual.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Funciones de pérdida}
+
+Mencionamos que queremos encontrar el error. Esto se mide con la
+diferencia del dato esperado con el dato obtenido, y hay diferentes
+medidas de error.
+
+A las funciones de error se les llama \textbf{loss}, función de error
+o función de pérdida, y hacen lo que mencionábamos: dicen qué tanta
+diferencia hay entre el dato observado y el esperado. Son esas
+funciones las que se tratan de optimizar.
+
+% =====================================================================
+
+\subsection*{El perceptrón}
+
+Queremos encontrar un clasificador lineal que minimice el error, o sea
+encontrar $\theta$ que minimice el error de entrenamiento:
+\[
+    E(\theta) = \frac{1}{n} \sum_{i=1}^{n}
+                \left[\, 1 - \delta\big(y^{(i)},\,
+                f(x^{(i)}; \theta)\big) \right]
+\]
+
+Donde $\delta$ vale $1$ si sus dos argumentos coinciden y $0$ si no,
+así que $1 - \delta$ vale $1$ exactamente cuando el ejemplo quedó mal
+clasificado. Dicho de otra forma, $E(\theta)$ es la fracción de
+ejemplos de entrenamiento en los que el modelo se equivoca.
+
+¿Pero cómo construir ahora esa función lineal? ¿Cómo ajustar los
+parámetros? ¿Hay alguna manera razonable de setear los parámetros de
+$\theta$?
+
+Una opción es ajustar incrementalmente cada parámetro para que veamos
+que está bien. Un algoritmo simple de este tipo es el
+\textbf{perceptron update rule}:
+\[
+    \text{si } y^{(i)} \big(\theta^{\mathsf{T}} x^{(i)}\big) \leq 0
+    \quad\text{entonces}\quad
+    \theta' = \theta + y^{(i)} x^{(i)}
+\]
+
+En otras palabras, los parámetros son actualizados solo si hay error, y
+estos updates tienden a corregir errores. En nuestro caso, la
+clasificación de caras, cuando el modelo hace un error el signo no
+coincide con el de la etiqueta.
+
+Supongamos que hacemos un error, y que los parámetros actualizados
+están dados por $\theta'$. Si consideramos clasificar la misma imagen
+después del update:
+
+\begin{align*}
+    y^{(i)} \big({\theta'}^{\mathsf{T}} x^{(i)}\big)
+      &= y^{(i)} \big(
+         (\theta + y^{(i)} x^{(i)})^{\mathsf{T}} x^{(i)} \big) \\
+      &= y^{(i)} \big(\theta^{\mathsf{T}} x^{(i)}\big)
+         + \big(y^{(i)}\big)^{2} \norm{x^{(i)}}^{2} \\
+      &= y^{(i)} \big(\theta^{\mathsf{T}} x^{(i)}\big)
+         + \norm{x^{(i)}}^{2}
+\end{align*}
+
+Como $y^{(i)} \in \set{-1, 1}$ su cuadrado siempre es $1$, y
+$\norm{x^{(i)}}^{2} > 0$. O sea que el update le suma algo positivo,
+empujando ese ejemplo hacia el lado correcto del plano. Eso es lo que
+quiere decir que los updates tienden a corregir errores.
+
+\begin{ojo}
+  Esto da origen al reconocedor del perceptrón, y este reconocedor es
+  útil para problemas lineales: solo puede separar con una línea o un
+  plano, pero jamás podrá separar datos que no sean linealmente
+  separables.
+\end{ojo}
 
 \end{document}
 
