@@ -17,6 +17,8 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       30/08/2026      Unifique las cinco definiciones, quite ejemplos
+%  zxxz6       30/08/2026      Anexo de caracterizacion por limites
 %  zxxz6       26/08/2026      Complete la clase 3 con las diapositivas
 %  zxxz6       25/08/2026      Clase 3 - Omega, Theta y ordenes
 %  zxxz6       20/08/2026      Clase 2 - Funciones asintoticas
@@ -811,9 +813,9 @@ completos sin importar cómo venga el arreglo
     Continuación de la clase anterior. Las propiedades de las tres
     notaciones, con la regla del límite que las decide de un jalón.
     $\Omg{\cdot}$ como cota inferior, $\Tht{\cdot}$ como las dos a la
-    vez y el teorema que las relaciona, más los dos ejemplos
-    completos. Cerramos con las notaciones chicas, los órdenes de
-    complejidad y los consejos para contar operaciones elementales.
+    vez y el teorema que las relaciona. Cerramos con las notaciones
+    chicas, los órdenes de complejidad y los consejos para contar
+    operaciones elementales.
 \end{quick_sum}
 
 \subsection*{Propiedades de $\Ord{\cdot}$}
@@ -861,13 +863,18 @@ $f(n) = \Omg{g(n)}$ quiere decir que $g(n)$ es una cota asintótica
 inferior de $f(n)$.
 
 \begin{definicion}
-    Dada una función $g(n)$, denotamos al conjunto de funciones
-    $\Omg{g(n)}$ de la siguiente forma:
-    \[
-        \Omg{g(n)} = \{\, f : \N \to \R^{+} \mid
-        \exists\, c \text{ constante positiva y } n_0 :\;
-        0 < c\,g(n) \leq f(n),\ \forall\, n \geq n_0 \,\}.
-    \]
+  Sea $g(n)$ una función positiva. Decimos que una función $f(n)$
+  pertenece a $\Omg{g(n)}$ si existen constantes positivas $c$ y $n_0$
+  tales que
+  \[
+    0 \leq c \cdot g(n) \leq f(n) \qquad \text{para todo } n \geq n_0 .
+  \]
+  Equivalentemente,
+  \[
+    \Omg{g(n)} = \{\, f(n) : \exists\, c > 0,\; \exists\, n_0 > 0
+    \ \text{tales que}\ 0 \leq c \cdot g(n) \leq f(n)
+    \ \ \forall\, n \geq n_0 \,\}.
+  \]
 \end{definicion}
 
 \begin{ojo}
@@ -932,12 +939,20 @@ Diremos que $f(n) \in \Tht{g(n)}$ si $f(n)$ pertenece tanto a
 $\Ord{g(n)}$ como a $\Omg{g(n)}$.
 
 \begin{definicion}
-    \[
-        \Tht{g(n)} = \{\, f : \N \to \R^{+} \mid
-        \exists\, c_1, c_2 \text{ constantes positivas},\ n_0 :\;
-        0 < c_1 g(n) \leq f(n) \leq c_2 g(n),\ \forall\, n \geq n_0
-        \,\}.
-    \]
+  Sea $g(n)$ una función positiva. Decimos que una función $f(n)$
+  pertenece a $\Tht{g(n)}$ si existen constantes positivas $c_1$,
+  $c_2$ y $n_0$ tales que
+  \[
+    0 < c_1 \cdot g(n) \leq f(n) \leq c_2 \cdot g(n)
+    \qquad \text{para todo } n \geq n_0 .
+  \]
+  Equivalentemente,
+  \[
+    \Tht{g(n)} = \{\, f(n) : \exists\, c_1 > 0,\; \exists\, c_2 > 0,\;
+    \exists\, n_0 > 0 \ \text{tales que}\
+    0 < c_1 \cdot g(n) \leq f(n) \leq c_2 \cdot g(n)
+    \ \ \forall\, n \geq n_0 \,\}.
+  \]
 \end{definicion}
 
 \subsubsection*{Propiedades de $\Tht{\cdot}$}
@@ -983,53 +998,6 @@ $\Ord{g(n)}$ como a $\Omg{g(n)}$.
 
 % =====================================================================
 
-\subsection*{Ejemplos completos}
-
-\begin{ejemplo}[Theta]
-    Considere $f(n) = \tfrac{1}{2}n^2 - 3n$. Como es un polinomio
-    cuadrático, su estructura general es $an^2 + bn + c$, y para $n$
-    muy grande el término $an^2$ domina al resto. Se propone entonces
-    $g(n) = n^2$ y se demuestra que $f(n) \in \Tht{n^2}$.
-
-    Hay que encontrar $c_1$, $c_2$ y $n_0$ tales que
-    \[
-        0 < c_1 n^2 \leq \tfrac{1}{2}n^2 - 3n \leq c_2 n^2 ,
-        \qquad\text{y dividiendo entre } n^2,\qquad
-        0 < c_1 \leq \tfrac{1}{2} - \tfrac{3}{n} \leq c_2 .
-    \]
-
-    Se analiza por casos. Para $c_1 \leq \tfrac{1}{2} - \tfrac{3}{n}$,
-    como $c_1$ es constante positiva se necesita
-    $0 < \tfrac{1}{2} - \tfrac{3}{n}$, lo que da $n > 6$. Con
-    $n_0 = 7$ queda $c_1 \leq \tfrac{1}{2} - \tfrac{3}{7}
-    = \tfrac{1}{14}$, así que se toma $c_1 = \tfrac{1}{14}$.
-
-    Para $\tfrac{1}{2} - \tfrac{3}{n} \leq c_2$, cuando
-    $n \to \infty$ el lado izquierdo tiende a $\tfrac{1}{2}$, así que
-    $c_2 = \tfrac{1}{2}$.
-
-    Con $c_1 = \tfrac{1}{14}$, $c_2 = \tfrac{1}{2}$ y $n_0 = 7$ se
-    cumple que $f(n) \in \Tht{n^2}$.
-\end{ejemplo}
-
-\begin{ejemplo}[Big O]
-    Considere $f(n) = 2n^2 + 3n + 1$, otra vez un polinomio cuadrático
-    donde $an^2$ domina, así que se propone $g(n) = n^2$.
-
-    Hay que encontrar $c$ y $n_0$ tales que
-    \[
-        0 < 2n^2 + 3n + 1 \leq c\,n^2 ,
-        \qquad\text{o sea}\qquad
-        0 < 2 + \tfrac{3}{n} + \tfrac{1}{n^2} \leq c .
-    \]
-
-    Si $n \to \infty$ el lado izquierdo tiende a $2$, y si $n = 1$
-    vale $6$. Por tanto, con $c = 6$ y $n_0 = 1$ se demuestra que
-    $f(n) \in \Ord{n^2}$.
-\end{ejemplo}
-
-% =====================================================================
-
 \subsection*{Una cota puede ser correcta y a la vez imprecisa}
 
 Sea $T(n) = 3n^2 + 7n + 20$. Todas estas afirmaciones son
@@ -1064,6 +1032,36 @@ $f(n) = \ord{g(n)}$ quiere decir que $g(n)$ es una cota superior de
 $f(n)$ que no es asintóticamente justa (\textit{tight}). Y
 $f(n) = \omg{g(n)}$, que $g(n)$ es una cota inferior de $f(n)$ que
 tampoco lo es.
+
+\begin{definicion}
+  Sea $g(n)$ una función positiva. Decimos que una función $f(n)$
+  pertenece a $\ord{g(n)}$ si para toda constante positiva $c$ existe
+  $n_0 > 0$ tal que
+  \[
+    0 \leq f(n) < c \cdot g(n) \qquad \text{para todo } n \geq n_0 .
+  \]
+  Equivalentemente,
+  \[
+    \ord{g(n)} = \{\, f(n) : \forall\, c > 0,\; \exists\, n_0 > 0
+    \ \text{tales que}\ 0 \leq f(n) < c \cdot g(n)
+    \ \ \forall\, n \geq n_0 \,\}.
+  \]
+\end{definicion}
+
+\begin{definicion}
+  Sea $g(n)$ una función positiva. Decimos que una función $f(n)$
+  pertenece a $\omg{g(n)}$ si para toda constante positiva $c$ existe
+  $n_0 > 0$ tal que
+  \[
+    0 \leq c \cdot g(n) < f(n) \qquad \text{para todo } n \geq n_0 .
+  \]
+  Equivalentemente,
+  \[
+    \omg{g(n)} = \{\, f(n) : \forall\, c > 0,\; \exists\, n_0 > 0
+    \ \text{tales que}\ 0 \leq c \cdot g(n) < f(n)
+    \ \ \forall\, n \geq n_0 \,\}.
+  \]
+\end{definicion}
 
 La distinción precisa no es tanto lo justo o no justo, sino el
 cuantificador sobre la constante:
@@ -1241,6 +1239,212 @@ cuerpo de la función:
 El tiempo de ejecución de una función recursiva se calcula a través de
 la solución de funciones de recurrencia, que es el tema que sigue.
 
+\newpage
+
+% =====================================================================
+%  Anexo - Caracterizacion por limites
+% =====================================================================
+
+\section{Anexo: caracterización por límites}
+
+Herramienta de diagnóstico para $\Ord{\cdot}$, $\Omg{\cdot}$,
+$\Tht{\cdot}$, $\ord{\cdot}$ y $\omg{\cdot}$.
+
+\subsection*{La idea que hay detrás}
+
+Todas estas notaciones comparan el tamaño de dos funciones, y la
+manera natural de comparar tamaños es dividir. Si $f$ y $g$ son
+positivas para $n$ suficientemente grande, toda la información
+relevante está en el cociente $f(n)/g(n)$.
+
+\begin{idea}[title={Traducción de cada notación al cociente}]
+    $f \in \Ord{g}$ significa que el cociente está \emph{acotado por
+    arriba} en la cola. $f \in \Omg{g}$ significa que está
+    \emph{acotado lejos de cero}. $f \in \Tht{g}$ significa ambas
+    cosas. Las versiones minúsculas son las variantes estrictas:
+    $\ord{\cdot}$ pide que el cociente \emph{colapse} a cero, y
+    $\omg{\cdot}$ que \emph{explote} a infinito.
+\end{idea}
+
+Conviene ver por qué la definición de $\Ord{\cdot}$ es exactamente un
+enunciado de acotación. La condición $f(n) \leq c\,g(n)$ para todo
+$n \geq n_0$ equivale, dividiendo entre $g(n) > 0$, a
+$f(n)/g(n) \leq c$ para todo $n \geq n_0$. Es decir: la constante $c$
+de la definición es literalmente una cota superior del cociente, y el
+umbral $n_0$ es el permiso para ignorar un tramo inicial finito. Esa
+lectura es la que hace transparente todo lo demás.
+
+% =====================================================================
+
+\subsection*{Criterio con el límite ordinario}
+
+Este es el caso cómodo y cubre la gran mayoría de los ejercicios,
+porque polinomios, logaritmos y exponenciales son funciones bien
+portadas cuyos cocientes convergen.
+
+Supóngase que existe
+\[
+    L \;=\; \LM \frac{f(n)}{g(n)}
+\]
+admitiendo el valor $+\infty$. Entonces se tiene la clasificación
+siguiente.
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Valor de $L$} & \textbf{Relación más fuerte}
+      & \textbf{Relaciones implicadas} \\
+    \midrule
+    $L = 0$          & $f \in \ord{g}$ & $f \in \Ord{g}$ \\
+    $0 < L < \infty$ & $f \in \Tht{g}$
+      & $f \in \Ord{g}$ y $f \in \Omg{g}$ \\
+    $L = \infty$     & $f \in \omg{g}$ & $f \in \Omg{g}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Clasificación según el límite del cociente.}
+  \label{tab:criterio-limite}
+\end{table}
+
+En el primer renglón fallan $\Omg{\cdot}$, $\Tht{\cdot}$ y
+$\omg{\cdot}$. En el segundo fallan $\ord{\cdot}$ y $\omg{\cdot}$. En
+el tercero fallan $\Ord{\cdot}$, $\Tht{\cdot}$ y $\ord{\cdot}$. Y si
+el límite no existe, el criterio no dice nada y hay que pasar a la
+sección siguiente.
+
+\begin{observacion}
+    El primer renglón es la fuente de un error frecuente. Que $L = 0$
+    no excluye a $\Ord{\cdot}$: como $\ord{g} \subsetneq \Ord{g}$, la
+    afirmación $n \in \Ord{n^2}$ es perfectamente cierta, solo que
+    floja. Simétricamente, $L = \infty$ no excluye a $\Omg{\cdot}$.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Criterio general: límite superior e inferior}
+
+Cuando el cociente oscila, el límite ordinario no existe y hace falta
+una herramienta que siempre esté definida. Esa herramienta es el par
+$\limsup$, $\liminf$.
+
+\subsubsection*{Definición}
+
+Dada una sucesión $a_n$, para cada entero $N$ se considera el supremo
+de la cola que empieza en $N$:
+\[
+    s_N \;=\; \sup\,\set{\,a_n \;:\; n \geq N\,},
+    \qquad
+    i_N \;=\; \inf\,\set{\,a_n \;:\; n \geq N\,}.
+\]
+Al aumentar $N$ se le quitan elementos al conjunto, de modo que su
+supremo no puede crecer y su ínfimo no puede decrecer: la sucesión
+$s_N$ es no creciente y la sucesión $i_N$ es no decreciente. Toda
+sucesión monótona tiene límite en la recta extendida, y por eso las
+dos definiciones siguientes tienen sentido siempre, sin hipótesis
+adicionales:
+\[
+    \LS a_n \;=\; \lim_{N \to \infty} s_N,
+    \qquad
+    \LI a_n \;=\; \lim_{N \to \infty} i_N.
+\]
+
+\begin{idea}[title={Lectura informal}]
+    El límite superior es el valor más alto al que la sucesión regresa
+    infinitas veces; el límite inferior, el más bajo. Coinciden si y
+    solo si la sucesión converge, y en ese caso su valor común es el
+    límite ordinario.
+\end{idea}
+
+\subsubsection*{Los criterios}
+
+Con $f, g > 0$ eventualmente y $a_n = f(n)/g(n)$:
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Relación} & \textbf{Criterio equivalente} \\
+    \midrule
+    $f \in \Ord{g}$ & $\LS a_n < \infty$ \\
+    $f \in \Omg{g}$ & $\LI a_n > 0$ \\
+    $f \in \Tht{g}$ & $\LI a_n > 0$ \; y \; $\LS a_n < \infty$ \\
+    $f \in \ord{g}$ & $\LM a_n = 0$ \\
+    $f \in \omg{g}$ & $\LM a_n = \infty$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Criterios con límite superior e inferior.}
+  \label{tab:criterio-limsup}
+\end{table}
+
+Nótese la asimetría de los dos últimos renglones: ahí aparece el
+límite ordinario y no el superior o el inferior. La razón está en la
+forma de las definiciones. Las de $\Ord{\cdot}$ y $\Omg{\cdot}$
+empiezan con \emph{existe} una constante, y basta con controlar la
+cola por un lado, lo cual es justamente lo que mide un $\limsup$ o un
+$\liminf$. Las de $\ord{\cdot}$ y $\omg{\cdot}$ empiezan con
+\emph{para toda} constante, y esa cuantificación universal obliga a
+que la cola entera se comprima, no solo una subsucesión. Comprimirse
+entera es exactamente converger.
+
+% =====================================================================
+
+\subsection*{Relaciones estructurales}
+
+Las inclusiones siguientes son útiles para no reportar una relación
+más débil de la que se tiene.
+
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+    \item $\ord{g} \subsetneq \Ord{g}$ y
+          $\omg{g} \subsetneq \Omg{g}$: las minúsculas son las cotas
+          estrictas.
+    \item $\Tht{g} = \Ord{g} \cap \Omg{g}$.
+    \item $f \in \Ord{g}$ si y solo si $g \in \Omg{f}$; la misma
+          dualidad relaciona $\ord{\cdot}$ con $\omg{\cdot}$.
+    \item $\Ord{\cdot}$ y $\Omg{\cdot}$ pueden fallar ambos a la vez, y
+          entonces las funciones son incomparables.
+    \item $\ord{\cdot}$ y $\omg{\cdot}$ nunca se cumplen
+          simultáneamente.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Un ejemplo donde el límite ordinario no sirve}
+
+Sea $f(n) = n^2$ y sea
+\[
+    g(n) \;=\;
+    \begin{cases}
+        n   & \text{si $n$ es impar},\\
+        n^3 & \text{si $n$ es par}.
+    \end{cases}
+\]
+El cociente vale $n$ en los impares y $1/n$ en los pares. Fijado
+cualquier $N$, la cola contiene impares arbitrariamente grandes, de
+modo que no está acotada superiormente y $s_N = \infty$; y contiene
+pares con $1/n$ tan pequeño como se quiera, todos positivos, de modo
+que $i_N = 0$. Por lo tanto
+\[
+    \LS \frac{f(n)}{g(n)} = \infty,
+    \qquad
+    \LI \frac{f(n)}{g(n)} = 0,
+\]
+y aplicando los criterios se concluye que $f \notin \Ord{g}$ y
+$f \notin \Omg{g}$. Las dos funciones son incomparables.
+
+El punto que conviene retener del cálculo anterior es que quitar una
+cantidad finita de términos iniciales no cambia nada, porque siempre
+sobran infinitos impares e infinitos pares. Esa es la misma idea que
+expresa el umbral $n_0$ de la definición original: $n_0$ concede el
+derecho a ignorar el principio de la sucesión, y aquí se ve que
+ejercer ese derecho no ayuda.
+
+\begin{idea}[title={Señal de alarma}]
+    Una función definida por casos, típicamente por paridad o por
+    rangos, casi siempre está construida para romper la monotonía. El
+    reflejo correcto ante ella es evaluar cada rama por separado antes
+    de intentar probar nada, porque el desenlace habitual es la
+    incomparabilidad.
+\end{idea}
 
 \end{document}
 
