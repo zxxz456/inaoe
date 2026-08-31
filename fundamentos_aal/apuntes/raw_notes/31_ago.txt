@@ -1,0 +1,85 @@
+-- IR models basados en modelos de lenguaje --
+
+Un modelo de lenguaje estadistico asigna una probabilidad a una secuencia de m palabras
+por means de una deistribucon de probabilidad
+
+    p(t1,t2,t3,t4) = p(t1)p(t2|t1)P(t3|t1t2)...
+
+La forma mas simple de que un ML deseche un contesto probabilistico es 
+tratar cada termino de manera independiente, esto sirve por si no hay mucho
+contexto, se llama secuencia de unigramas
+
+Pero de donde se sacan esas probabilidades?
+
+Antes de entrar a como se usan en recuperacion de info... un ML se usa en el dia a dia
+como en los autocompletados, traducion de texto, correccion otrografica, reconocimeinto de habla
+
+pero como s usan los ML en IR?
+
+La ide principal es que los documentos pueden ser rannkeados en su similitud de generar
+la query
+
+a cada doc lo voy a ver como si fuese un mundo... algo independinete y sobre ese doc s calcula
+o se construye un LM. Y cuando llega un query se hace la pregunta de, cual es la probabilidad de
+generar la secuencia de la query a partir de cada modelo de lenguaje
+
+    P(Q|Mdi)
+
+El objetivo es rankear docs by P(d|Q), donde la probabilidad de un docuento es interpreteada como 
+la similitud que es relevante a la query
+
+    p(di|Q) = P(Q|di)p(di)/p(Q) aprox p(Q|Mdi)
+
+Pero que pasa cunado veo un termino nuevo... la probabilidad se iria a cero
+
+Para solucionar esto, se asume que los termino no vistos se vieron 1 vez 
+
+pero una forma mas robustas es agregar un modelo de lenguaje para toda la coleccion 
+completa, es una mezcla entre el documento y la coleccion 
+
+{formula p(d|q) alpha p(d)...}
+
+P(d) s la confiaanza - como la probabilidad de ser recuperado
+
+
+-- Evaluacion de IR
+
+eficiencia - que tanto tiempo se tarda el modelo y asi
+otra cosa que se puede medir es cuantos relevantes trajo y cuantos relevantes olvido
+se puede decir que el IR es subjetivo, porque la relevancia de algo es subjeiva pero se
+hace el etiquetado con muchas personas para poder llegar a un consenso 
+
+como funciona el sistema?
+    procesamiento, que tanto tiempo se tardo, el espacio que yso
+    busqueda, que tan bueno osn los resultados*
+    system, satisfaccion del usuario
+
+nos enfocaremos en evaluar la efectividad de recuperacion*
+
+el problema de la efectividad es q esta relacionada con la relevancia de los items recuperados
+    la relevancia no es binaria, es un valor continuo
+    incluso si fuese binaria, podria ser muy dificil de juzgar
+
+la relevancia depende de
+    la necesidad de un user
+    situacional, relacionado a las necesidades del usuario
+    cognitiva, depende de la percepcion humana y comportamieto
+    dinamica, cambia en el tiempo
+
+la relevancia es subjetiva y depende de muchos valores
+
+- crantfield paradigm (test collection)
+
+    es necesario tener muchos documnetos, entre mas mejor, muchas queries, relevance judments para todas las queries
+
+    ponene a una dama de sistemas a recuperar, y los resultados se van evaluenado
+
+Standard test collections
+    TREC
+    LEF
+    NTCIR
+
+hay dos tipos de medidas:
+
+medidas basadas en conjuntos - tenia que recuperar estos, pero me dio estos
+rank based - cual es mas importante que este, el ranking
