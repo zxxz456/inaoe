@@ -42,6 +42,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       30/08/2026      Macros de lim, limsup y liminf sobre n
 %  zxxz6       25/08/2026      Macros de Omega, Theta, o y omega chicas
 %  zxxz6       20/08/2026      Cargue pgfplots para graficas de datos
 %  zxxz6       20/08/2026      Cargue tikz para diagramas de conjuntos
@@ -239,6 +240,11 @@
 \newcommand{\Tht}[1]{\Theta\!\left(#1\right)}
 \newcommand{\ord}[1]{o\!\left(#1\right)}
 \newcommand{\omg}[1]{\omega\!\left(#1\right)}
+% Los tres limites sobre n, que salen en cada renglon del criterio
+% del cociente para la notacion asintotica
+\newcommand{\LM}{\lim_{n \to \infty}}
+\newcommand{\LS}{\limsup_{n \to \infty}}
+\newcommand{\LI}{\liminf_{n \to \infty}}
 
 % --- encabezado de cada sesión: título a la izquierda, fecha a la
 %     derecha. El argumento corto es el que sale en el índice ---
