@@ -18,6 +18,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       31/08/2026      Clase 31 Ago, modelos de lenguaje y evaluacion
 %  zxxz6       26/08/2026      Clase 26 Ago, continuacion del VSM
 %  zxxz6       24/08/2026      Clase 24 Ago, IR
 %  zxxz6       19/08/2026      Apuntes de la clase del 19 de agosto
@@ -603,6 +604,233 @@ vector solo sabe qué términos hay y con qué peso, no qué significan.
           términos y documentos en un espacio denso aprendido, que sí
           captura sinonimia y semántica. Es la respuesta directa a
           las dos contras de arriba.
+\end{itemize}
+
+\newpage
+
+% =====================================================================
+%  Clase 31 Ago - Modelos de lenguaje para IR y evaluacion
+% =====================================================================
+
+\clase{Modelos de lenguaje para IR}{31 de agosto de 2026}
+
+\begin{quick_sum}
+    En esta sesion vimos como se utilizan los modelos de lenguaje para la
+    Info Retrieval y como se evalua el desempeno de un sistema de IR, nos quedamos
+    deduciendo una formula de evaluacion de desempeno... la "Arturiana" y se
+    quedo de tarea como desarrollarla completamente.
+\end{quick_sum}
+
+\subsection*{Modelos de lenguaje estadísticos}
+
+Un modelo de lenguaje estadístico asigna una probabilidad a una
+secuencia de $m$ palabras por medio de una distribución de
+probabilidad. La secuencia se descompone con la regla de la cadena:
+\[
+    P(t_1, t_2, \ldots, t_m) = P(t_1)\, P(t_2 \mid t_1)\,
+    P(t_3 \mid t_1 t_2) \cdots
+    = \prod_{i=1}^{m} P(t_i \mid t_1, \ldots, t_{i-1}) .
+\]
+
+Cada término se condiciona a todo lo que vino antes, que es justo lo
+que vuelve el cálculo impráctico: para contextos largos casi ninguna
+secuencia se repite en el corpus.
+Lo que dice es, \[ P(t_1, t_2, \ldots, t_m)\] la probabilidad de que aparezca la secuencia de palabras en ese orden $t_1, t_2, \ldots, t_m$.
+
+Es igual a \[P(t_1)\, P(t_2 \mid t_1)P(t_3 \mid t_1 t_2) \cdots P(t_m \mid t_1 \ldots t_{m-1})\]
+
+La probablidad de que salga la primer palabra, por la probabilidad de que salga la segunda dado la primera y asi\dots
+Pero desarrollando los terminos con la definicion de probablidad condicional, resulta
+
+\[
+    P(t_1, t_2, \ldots, t_m) = P(t_1) \frac{P(t_1, t_2)}{P(t_1)} \frac{P(t_1, t_2, t_3)}{P(t_1, t_2)} \cdots \frac{P(t_1, \ldots, t_m)}{P(t_1, \ldots, t_{m-1})} = \prod_{i=1}^{m} P(t_i \mid t_1, \ldots, t_{i-1}) .
+\]
+\subsubsection*{Secuencia de unigramas}
+
+La forma más simple de que un modelo de lenguaje deseche el contexto
+probabilístico es tratar cada término de manera independiente. Esto
+sirve por si no hay mucho contexto, y se llama secuencia de unigramas:
+\[
+    P(t_1, t_2, \ldots, t_m) = \prod_{i=1}^{m} P(t_i) .
+\]
+
+\subsubsection*{De dónde se sacan esas probabilidades?}
+
+Se estiman contando sobre el texto. Para el modelo $M_d$ construido
+sobre el documento $d$, la estimación por máxima verosimilitud es la
+frecuencia relativa del término:
+\[
+    P(t \mid M_d) = \frac{\mathrm{tf}_{t,d}}{|d|} ,
+\]
+o sea las veces que $t$ aparece en $d$ entre el total de términos de
+$d$.
+
+Antes de entrar a cómo se usan en recuperación de información, vale
+notar que un modelo de lenguaje se usa en el día a día: en los
+autocompletados, traducción de texto, corrección ortográfica y
+reconocimiento de habla.
+
+% =====================================================================
+
+\subsection*{Cómo se usan los LM en IR}
+
+La idea principal es que los documentos pueden ser rankeados por su
+similitud de generar la consulta.
+
+A cada documento lo voy a ver como si fuese un mundo, algo
+independiente, y sobre ese documento se calcula o se construye un
+modelo de lenguaje. Cuando llega una consulta se hace la pregunta de
+cuál es la probabilidad de generar la secuencia de la consulta a
+partir de cada modelo de lenguaje:
+\[
+    P(Q \mid M_{d_i}) = \prod_{t \in Q} P(t \mid M_{d_i}) .
+\]
+
+El objetivo es rankear los documentos por $P(d \mid Q)$, donde la
+probabilidad de un documento se interpreta como qué tan similar o
+relevante es a la consulta. Aplicando Bayes:
+\[
+    P(d_i \mid Q) = \frac{P(Q \mid d_i)\, P(d_i)}{P(Q)}
+    \;\propto\; P(Q \mid d_i)\, P(d_i)
+    \;\approx\; P(Q \mid M_{d_i}) .
+\]
+
+\begin{ojo}
+    $P(Q)$ se puede tirar porque es la misma para todos los
+    documentos: divide a todos por igual y no cambia el orden. Por eso
+    la igualdad se vuelve proporcionalidad. Y si además se toma
+    $P(d_i)$ uniforme, rankear por $P(d \mid Q)$ es lo mismo que
+    rankear por $P(Q \mid M_{d_i})$.
+\end{ojo}
+
+$P(d)$ es la confianza, algo así como la probabilidad de que ese
+documento sea recuperado antes de ver la consulta. Ahí es donde entra
+información que no depende de la consulta, por ejemplo qué tan citado
+o qué tan reciente es el documento.
+
+\subsubsection*{Qué pasa cuando veo un término nuevo}
+
+Si un término de la consulta no aparece en el documento, su
+$\mathrm{tf}$ es cero, y como el producto multiplica todos los
+términos, la probabilidad entera se va a cero. Un solo término no
+visto descarta el documento aunque los demás calcen perfecto.
+
+Para solucionar esto se asume que los términos no vistos se vieron una
+vez:
+\[
+    P(t \mid M_d) = \frac{\mathrm{tf}_{t,d} + 1}{|d| + |V|} ,
+\]
+con $|V|$ el tamaño del vocabulario.
+
+Pero una forma más robusta es agregar un modelo de lenguaje para toda
+la colección completa, o sea hacer una mezcla entre el documento y la
+colección. Con $M_C$ el modelo de la colección y
+$\lambda \in (0,1)$ el peso que se le da al documento, la fórmula de
+ranking queda:
+\[
+    P(d \mid Q) \;\propto\; P(d) \prod_{t \in Q}
+    \Big[\, \lambda\, P(t \mid M_d)
+    + (1 - \lambda)\, P(t \mid M_C) \,\Big] .
+\]
+
+\begin{idea}
+    La mezcla nunca deja un factor en cero, porque si el término no
+    está en el documento el segundo sumando lo rescata con lo que sabe
+    la colección. Y de paso pesa mejor: un término raro en la
+    colección tiene $P(t \mid M_C)$ chica, así que encontrarlo en el
+    documento cuenta más. Es el mismo efecto del $\mathrm{idf}$, pero
+    saliendo de la probabilidad en lugar de estar puesto a mano.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Evaluación de IR}
+
+Lo primero que se puede medir es la \textbf{eficiencia}: qué tanto
+tiempo se tarda el modelo. Otra cosa que se puede medir es cuántos
+relevantes trajo y cuántos relevantes olvidó.
+
+Se puede decir que el IR es subjetivo, porque la relevancia de algo es
+subjetiva, pero se hace el etiquetado con muchas personas para poder
+llegar a un consenso.
+
+\subsubsection*{Cómo funciona el sistema?}
+
+La pregunta se contesta en tres niveles:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Procesamiento.} Qué tanto tiempo se tardó y el
+          espacio que usó.
+    \item \textbf{Búsqueda.} Qué tan buenos son los resultados.
+    \item \textbf{Sistema.} La satisfacción del usuario.
+\end{itemize}
+
+Nos enfocaremos en evaluar la \textbf{efectividad} de recuperación, o
+sea el segundo nivel.
+
+\subsubsection*{El problema de la relevancia}
+
+El problema de la efectividad es que está relacionada con la
+relevancia de los ítems recuperados, y la relevancia es escurridiza:
+
+\begin{itemize}[itemsep=0.1em]
+    \item No es binaria, es un valor continuo
+    \item Incluso si fuese binaria, podría ser muy difícil de juzgar
+\end{itemize}
+
+Además depende de varias cosas a la vez:
+
+\begin{itemize}[itemsep=0.2em]
+    \item La \textbf{necesidad} de información del usuario
+    \item \textbf{Situacional}, relacionado con esa necesidad y con el
+          contexto en el que busca
+    \item \textbf{Cognitiva}, depende de la percepción humana y del
+          comportamiento
+    \item \textbf{Dinámica}, cambia en el tiempo
+\end{itemize}
+
+\begin{ojo}
+    La relevancia es subjetiva y depende de muchos valores. Por eso no
+    se evalúa preguntándole a una sola persona, sino juntando juicios
+    de varias hasta que haya consenso.
+\end{ojo}
+
+\subsubsection*{Paradigma de Cranfield}
+
+Es la forma estándar de evaluar, y consiste en armar una colección de
+prueba (\textit{test collection}). Para que sirva hace falta:
+
+\begin{itemize}[itemsep=0.1em]
+    \item Muchos documentos, entre más mejor
+    \item Muchas consultas
+    \item \textit{Relevance judgments} para todas las consultas
+\end{itemize}
+
+Se pone a una persona a hacer la recuperación sobre esa colección y
+sus resultados se van evaluando contra los juicios de relevancia. Como
+la colección, las consultas y los juicios quedan fijos, dos sistemas
+distintos se pueden comparar de forma justa.
+
+\subsubsection*{Colecciones de prueba estándar}
+
+\begin{itemize}[itemsep=0.1em]
+    \item TREC
+    \item CLEF
+    \item NTCIR
+\end{itemize}
+
+\subsubsection*{Tipos de medidas}
+
+Hay dos tipos:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Basadas en conjuntos.} Tenía que recuperar estos,
+          pero me dio estos. Solo miran qué documentos salieron, no en
+          qué orden.
+    \item \textbf{Basadas en ranking.} Cuál es más importante que
+          cuál. Aquí sí importa la posición, porque no es lo mismo que
+          el relevante salga primero a que salga en el lugar
+          cincuenta.
 \end{itemize}
 
 
