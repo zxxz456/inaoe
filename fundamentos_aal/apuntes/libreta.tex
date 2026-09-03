@@ -12,7 +12,7 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.2.0
+%   * Version: 2.3.0
 %
 %
 %  History:
@@ -833,6 +833,311 @@ Hay dos tipos:
           cincuenta.
 \end{itemize}
 
+
+\newpage
+
+% =====================================================================
+%  Clase 02 Sep - Medidas de evaluacion en IR
+% =====================================================================
+
+\clase{Medidas de evaluación en IR}{2 de septiembre de 2026}
+
+\begin{quick_sum}
+    En esta clase vimos de q las medidas basadas en conjuntos mas en profundidad
+    y las basadas en ranking. Comenzamos desde la arturiana, presente mi 
+    modificacion pero no fue tan buena, despues pasamos a las métricas basadas en ranking
+    igual tratando de deducirlas y vemis la diferencia entre presicion y recall
+\end{quick_sum}
+
+\subsection*{Métricas basadas en conjuntos}
+
+Todo parte de partir la colección en dos por dos criterios a la vez:
+qué documentos son relevantes para la consulta, y cuáles devolvió el
+sistema. La intersección es lo que salió bien (pero estos no tienen un orden en
+especifico, tampoco los del conjunto de train)
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    % La coleccion completa
+    \draw[gray, thick, fill=gray!5] (-3.7,-2.2) rectangle (3.7,2.2);
+    \node[font=\footnotesize, text=gray!60!black, anchor=south west]
+      at (-3.6,-2.1) {Colección};
+
+    % Los dos conjuntos
+    \begin{scope}[opacity=0.55]
+      \draw[acento, thick, fill=fondoIdea] (-0.9,0) ellipse (2 and 1.6);
+      \draw[orange!70!black, thick, fill=fondoOjo]
+        (0.9,0) ellipse (2 and 1.6);
+    \end{scope}
+
+    \node[font=\small\bfseries, text=acento] at (-2.2,1.9)
+      {Relevantes};
+    \node[font=\small\bfseries, text=orange!70!black] at (2.2,1.9)
+      {Recuperados};
+    \node[font=\footnotesize, align=center] at (0,0)
+      {relevantes\\recuperados};
+  \end{tikzpicture}
+  \caption{La intersección es lo que el sistema hizo bien. Recall
+    mide qué tanto cubre del círculo izquierdo, precisión qué tanto
+    del derecho}
+  \label{fig:conjuntos-ir}
+\end{figure}
+
+De ahí salen las dos medidas:
+\[
+    \mathrm{recall} =
+    \frac{\text{relevantes recuperados}}
+         {\text{número de documentos relevantes}} ,
+    \qquad
+    \mathrm{precision} =
+    \frac{\text{relevantes recuperados}}
+         {\text{total de recuperados}} .
+\]
+
+\begin{ojo}
+    Cuando el sistema devuelve cero documentos, la precisión queda
+    como una división entre cero, que no está determinada. En IR eso
+    no es un problema: un sistema que no devuelve nada no está
+    diciendo algo, pero tampoco está diciendo tonterías ni cosas
+    equivocadas, entonces se toma como 1, el principio de "En boca cerrada no entran
+    moscas"
+\end{ojo}
+
+\subsubsection*{F1}
+
+Una medida más robusta es $F_1$, que es la media armónica de precisión y
+recall:
+\[
+    F_1 = \frac{2 \cdot P \cdot R}{P + R} .
+\]
+
+\begin{idea}
+    Media armonica es el inverso del promedio de los inversos. Para dos números $a$ y $b$:
+\[
+    H(a,b) = \frac{2}{\frac{1}{a} + \frac{1}{b}} = \frac{2ab}{a+b}.
+\]
+\end{idea}
+
+El $1$ del nombre de $F_1$ es el peso que se le da a cada una, y en este caso
+las pondera igual. La forma general es
+\[
+    F_\beta = (1 + \beta^2)\,
+    \frac{P \cdot R}{\beta^2 \cdot P + R} ,
+\]
+donde $\beta > 1$ favorece al recall y $\beta < 1$ a la precisión.
+
+\begin{idea}
+    La media armónica se usa en lugar del promedio simple porque
+    castiga los desbalances. Un sistema con $P = 1$ y $R = 0.01$ tiene
+    promedio $0.5$, que suena decente, pero $F_1 = 0.02$. Con el
+    promedio se puede hacer trampa devolviendo un solo documento
+    seguro; con la armónica no.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Métricas basadas en ranking}
+
+Las anteriores son métricas de conjunto: no les importa el orden en
+que salieron los documentos. Pero un sistema real devuelve un ranking,
+y ahí la posición importa.
+
+El orden es por relevancia, aunque puede haber otros criterios como el
+número de citas, la distancia o la calificación en estrellas de un
+lugar. Esos son independientes de la relevancia semántica.
+
+\subsubsection*{P@N}
+
+Precisión hasta la posición $N$: se corta el ranking en los primeros
+$N$ resultados y se calcula la precisión ahí nada más. $P@10$ es la
+típica, porque es lo que cabe en la primera página. No dice nada de lo
+que quedó más abajo.
+
+\subsubsection*{MRR}
+
+\emph{Mean reciprocal rank}. Se fija solo en la posición del primer
+documento relevante: si aparece en la posición $k$, el rango
+recíproco es $1/k$. Se promedia sobre el conjunto de consultas $Q$:
+\[
+    \mathrm{MRR} = \frac{1}{|Q|} \sum_{i=1}^{|Q|} \frac{1}{k_i} .
+\]
+
+Se usaba en \emph{question answering}, donde solo importa que la
+respuesta correcta salga hasta arriba y lo demás da igual.
+
+\subsubsection*{Curva de recall-precisión}
+
+En lugar de un número suelto, se grafica la precisión en función del
+recall. Cada punto es un corte distinto del ranking, y la curva se
+promedia sobre todas las consultas. Sirve para comparar sistemas: el
+que quede más arriba es mejor en todo el rango.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.75\linewidth, height=6cm,
+      xlabel={Recall}, ylabel={Precisión},
+      xmin=0, xmax=1.02, ymin=0, ymax=1.05,
+      xtick={0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1},
+      axis lines=left,
+      grid=major, grid style={gray!18},
+      tick label style={font=\small},
+      label style={font=\small},
+      legend pos=north east,
+      legend cell align=left,
+      legend style={font=\small, draw=gray!40},
+      domain=0:1, samples=11,
+    ]
+      \addplot[very thick, red!70!black, mark=*, mark size=1.6pt]
+        {1 - 0.35*x^2};
+      \addlegendentry{Sistema A}
+      \addplot[thick, blue!65!black, dashed, mark=square*,
+               mark size=1.6pt] {0.9 - 0.75*x^2};
+      \addlegendentry{Sistema B}
+    \end{axis}
+  \end{tikzpicture}
+
+  
+\end{figure}
+
+\begin{ojo}
+    La precisión casi siempre baja conforme sube el recall. Para
+    recuperar más documentos relevantes hay que bajar el umbral, y al
+    bajarlo entran también más irrelevantes. Ese compromiso es lo que
+    la curva dibuja.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{MAP}
+
+\emph{Mean average precision} es de las medidas más usadas. Para cada
+consulta se promedia la precisión medida justo en las posiciones donde
+apareció un documento relevante, y después se promedian esas
+consultas:
+\[
+    \mathrm{AP}(q) = \frac{1}{R} \sum_{k=1}^{n} P@k \cdot
+    \mathrm{rel}(k) ,
+    \qquad
+    \mathrm{MAP} = \frac{1}{|Q|} \sum_{q \in Q} \mathrm{AP}(q) ,
+\]
+donde $R$ es el número de documentos relevantes, $n$ el tamaño del
+ranking y $\mathrm{rel}(k)$ vale $1$ si el documento en la posición
+$k$ es relevante y $0$ si no.
+
+Esa suma es una aproximación discreta del área bajo la curva de
+recall-precisión: cada término aporta el pedazo que corresponde a un
+documento relevante.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.75\linewidth, height=6cm,
+      xlabel={Recall}, ylabel={Precisión},
+      xmin=0, xmax=1.02, ymin=0, ymax=1.05,
+      xtick={0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1},
+      axis lines=left,
+      grid=major, grid style={gray!18},
+      tick label style={font=\small},
+      label style={font=\small},
+      domain=0:1, samples=11,
+    ]
+      \addplot[draw=none, fill=fondoIdea, opacity=0.9]
+        {1 - 0.35*x^2} \closedcycle;
+      \addplot[very thick, red!70!black, mark=*, mark size=1.6pt]
+        {1 - 0.35*x^2};
+      \node[font=\small, text=acento] at (axis cs:0.45,0.4)
+        {área $\approx$ AP};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{La average precision de una consulta es el área bajo su
+    curva de recall-precisión.}
+  \label{fig:area-map}
+\end{figure}
+
+\subsubsection*{AP como suma de Riemann}
+
+La correspondencia con el área no es una analogía suelta, la suma que
+define AP es literalmente una suma de Riemann. Si la consulta tiene
+$R$ documentos relevantes, cada uno que aparece sube el recall en
+exactamente $1/R$, así que le toca un rectángulo de ese ancho y de
+altura $P@k$. Sumar las áreas de los rectángulos es calcular
+\[
+    \mathrm{AP}(q) = \sum_{k=1}^{n}
+    \underbrace{\vphantom{\frac{1}{R}} P@k \cdot \mathrm{rel}(k)}
+               _{\text{altura}} \cdot
+    \underbrace{\frac{1}{R}}_{\text{ancho}} .
+\]
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.75\linewidth, height=6cm,
+      xlabel={Recall}, ylabel={Precisión},
+      xmin=0, xmax=1.02, ymin=0, ymax=1.05,
+      xtick={0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1},
+      axis lines=left,
+      grid=major, grid style={gray!18},
+      tick label style={font=\small},
+      label style={font=\small},
+      domain=0:1, samples=11,
+    ]
+      \addplot[ybar interval, fill=fondoIdea, draw=acento!55,
+               opacity=0.9] {1 - 0.35*x^2};
+      \addplot[very thick, red!70!black, mark=*, mark size=1.6pt]
+        {1 - 0.35*x^2};
+      % El ancho de un rectangulo es 1/R
+      \draw[<->, acento, thin]
+        (axis cs:0.5,0.12) -- (axis cs:0.6,0.12);
+      \node[font=\footnotesize, text=acento, anchor=north]
+        at (axis cs:0.55,0.11) {$1/R$};
+      \node[font=\footnotesize, text=acento, anchor=west]
+        at (axis cs:0.62,0.45) {altura $= P@k$};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Cada documento relevante aporta un rectángulo de ancho
+    $1/R$ y altura $P@k$. La suma de sus áreas es AP, con $R = 10$
+    en el dibujo.}
+  \label{fig:riemann-ap}
+\end{figure}
+
+\begin{ojo}
+    Por eso AP no es el promedio de las precisiones de todo el
+    ranking, sino solo de las posiciones donde hubo un relevante. Las
+    demás posiciones no aportan rectángulo, porque no mueven el
+    recall.
+\end{ojo}
+
+\subsubsection*{Ventajas y desventajas}
+
+\textbf{A favor:}
+\begin{itemize}[itemsep=0.1em]
+    \item Es un solo valor, así que compara sistemas de un vistazo
+    \item Se ajusta muy bien y no se fija tanto en las colas del
+          ranking
+    \item Es muy buena para métricas binarias, o sea cuando un
+          documento simplemente es relevante o no lo es
+\end{itemize}
+
+\textbf{En contra:}
+\begin{itemize}[itemsep=0.1em]
+    \item No es tan buena para \emph{ratings} numéricos de grano
+          fino, porque asume que todos los relevantes son igualmente
+          relevantes, y eso no es cierto
+\end{itemize}
+
+\begin{pendiente}
+    Preguntas que dejo el Dr para la sig clase: 
+    \begin{itemize}
+        \item pq todo lo que recupera un sistema de IR no es relevante?
+        \item pq es difícil tener $100$ de recall?
+        \item ideas para solucionarlo?
+    \end{itemize}
+\end{pendiente}
 
 \end{document}
 
