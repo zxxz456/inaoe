@@ -1,0 +1,73 @@
+-- convergencia y generlaizacion (perceptron) --
+
+recordar que estamos tratando con clasificadores lineales que pasan por el origen 
+
+    f(x;0) = sign(Tetha^T x)
+
+donde theta denota los parametros que tenoms que estimae rn base a los ejemplos
+de entrenamiento (vector) xon ejemplos x y etiquetas y
+
+
+sea k el numero de parametros actualizafos y thta^k el vector de parametrosd espues de k actaulizacioes
+
+cada que se ekivoca hace un update cnon la regla del perceptron,ese update es un k mas
+
+aSUMIMOS QUE LA norma de mis vetores esta acotada 
+
+Y asumimos que el clasificador lineal existe 
+
+En nuestro ejemplo de las imagenes de las caras reconicidas para entrar al edificio, suponesmoo que ese
+classificador existe 
+
+igual suponemos que como existe, suponemos que el producto
+t_t (theta^*)^T x_t >= gamma, y esa gamma es el margen del clasificador, lo que nos dice que lo hace bien
+
+theta^* es el theta ideal 
+
+convergencia en un numero finito de udpates,
+ya tenemos nuestra regla, nuestro vector, la convergencia es demsotrada combinando dos resultados
+
+mostraremos que el inner product (theta^*) ^T por theta^k incrementa linealmente en cada update
+
+la noram cuadrada de thetak incrementa linealmente ||theta^k||^2 <= kR^2
+
+si combinamos esos dos resulatsod podemosos mosrar que ele coseno de angulos entre el vector de la actualizacion k
+y el ideal debe incrementar por in incrmeneto finito e cada update... como el coseno esta acotado por 1,
+es osignifica que solo podemos hacer a un paso finito de updates... o sea cada vez que hacemos el update se acerca a 1
+1 y asi muchas veces, convergeremos
+
+{demostracion y desarollo matematico ambas partes y la cambinacion de ambas analizando que pasa con
+el angulo, el cambio que hay entre el vector ideal y mi actualizacion, se concluye que k esta acotado
+y que converge... buscar ese desarrollo}
+
+esta acotado pero depende del valor de pesos, puede ser muy grande o muy pequeno, no sabesmos
+
+
+por lo tanto el cociente de ||theta^*||^2 / gamma nos dice que tan dificil es el problema, que tantas updates
+voy a tener q hacer y el inverso de eso, es la distancia mas chica que hay entre una istancia entre
+un conjunto de entrenamiento a mi region de desicion
+
+si la distancia es muy grande, hay una separacion grande entre mi sperficio que divide las 
+clases y mi instancias, es mas facil clasificar asi... pero si la distancia es muy chica es mas dificil
+ya que tengo menos chance de equivocarme (margen geometrico gamma^-1)
+
+como calcular el margen geometrico medimos la distancia de la medida de desicion a una de las datos de train
+{diagrama de distancia geometrica en dos dimensiones}
+
+{explicacion de la formula para encontrar la distancia x(e curly) = ...
+y_t theta^* x(e curly) = gamma - e curly ||theta^*|| = 0
+}
+
+por lo tanto el k, numero de veces que tengo que actualizar se puede expresar en terminos del 
+margen goemtrico 
+
+generlaizacion
+
+ahorita asumimos que mi conjunto de datos era linealmente separable... pero que pasa si ahora no 
+trabajo con mi conjunto de entrenaminto sino con datos que estan fuera de mi conjunto
+cuand llegue una nueva instancia, el clasificador lineal podra ser capaz de clasificar esa
+instania nueva ya que se tendra que poner en el plano y ver si la superficie separadora 
+separa correctamente a esta nueva instancia
+
+lo que queremos ahora es tener un clasificador lineal que nos de el maxicmo margen geometrico, ese
+clasificador son las makinas de vecores de sopote
