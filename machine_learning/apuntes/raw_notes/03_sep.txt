@@ -1,0 +1,80 @@
+-- SVM ---
+
+Se plantea el problema de encontrar la superficie de separacion entre los datos de na
+muestra de tal manerad de que el margen geometrico que vimos, sea el maximo posuble
+
+{dibujar diagrama SVM}
+
+Se plante al problema como un problema de optimizacion, la funcion que qiero
+optimizar son los parametros de mi vector, de tal manera que exista un margen al 
+rededor de mi superficie de separacion que sea lo mas grande posible
+
+una manera de lograr eso seria enconrar una superficio que separe bien las instancisas
+y luego tratar de hacer que ese clasificador tenga el mayor margen posible ...
+se busaca maximzar el margen geometrico gamma/||theta||
+
+el objetivo es cumplir las restriciones
+
+    y_t(theta^k-1) >= gamma para todos los t = 1,2,3...,N
+
+{explicar que significa eso}
+
+Maximizar el cociente que dijimos es lo mismo que minizar su inverso al caidrado
+
+   minimize  1/2 ||theta||^2 / gamma^2
+
+sujeto a qie todas las instancias del conjunto de entrenamiento queden correcamente clasificadad y_t theta^T x_t >= gamma para t=1,2,3...,n
+
+
+
+{rescribir solucion de tal forma que dependa de gamma y de que no dependa}
+
+
+pero hasta ahora nuestra funcion esta atada a que pase por el origen 
+pero no queremos eso, para lograr esto sumamos un vector de offset 
+
+{formula con el offset}
+
+esto ayuda a que podamos encontrar una superficie con mayor margen eometrico 
+
+los elementos que caen en la distancia geometrica son los llamados vectores de sopoerte
+y pues son elementod de la muertra 
+
+para evaluar este clasificado podemos hacer uso de la validacion cruzada
+consiste en ...
+tego mi conjnuto de entrenaineto y separo un cachito, hago el modelo y evaluo en el cachito... el cachito se llama fold
+y esto lo repito k veces 
+{dibujo de los kfolds}
+
+si dejams solo un elemento fuera es el leave-one-out cross validation
+pero eso se ahce n veces, con n el numero de elementos del training set
+
+{poner formula de leave one aout error y explicarlo}
+
+
+el leave one put error debe estar acotado por el numer o de vecotres de sopoerte
+porque cada que se quite uns instancia que sea un SV se va a cometer un error pq va a 
+mover la superficie
+
+uno de los problemas de este clasificador es que si las tags del conjunto de 
+estan mal, el clasificador va a estar incrorecto 
+
+pero tambien hay cassos en lo s que el dato tiene error, pero para solucionar esto
+se introducen variables de holgura, dando una simlpe relaxed optimization 
+
+nuestra funcion 
+minimize 1/2 ||heta||^2 + C sum_t=1 hasta^n(xhi_t)
+
+esta sujeta a y_t(theta^T x_t + theta_0) >= 1 - xhi_t y xhi_t >= 0 para t=1,2,3,4...,N
+
+C es un parametro de costo, que tanto le va a costar las restricciones
+
+si mi costo no es tan grande, le voy a dar mucho chance a que queden instancias dentro del margen geometrico y viceversa, que seria no permitir las violaciones 
+
+pero esto es solo para instancias linealmente separables, pero que pasa si las instancias no lo son?
+a alguien se le ocurio llevar las instancias que no son linealmente separables, a un espacio en el que si lo sean
+
+t entonces ahora en lugar de trabajar con la instancia del vector original, se trabaja en el nuevo espacio (se trabaja con la funcion)
+donde se puede construir el clasificador lineal y ahi se obtinene la respuesta 
+
+ y_t(theta^T f(x_t) + theta_0) 
