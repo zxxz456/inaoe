@@ -525,50 +525,104 @@ conmutativo.
 
 \subsubsection*{Tabla de todas las estructuras}
 
-En la tabla, \textbf{S} quiere decir que la propiedad se cumple
-respecto a la suma y \textbf{M} respecto a la multiplicación. Las
-primeras cuatro son magmas, o sea de una sola operación, y las
-últimas cuatro son semianillos.
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \begin{tabular}{lccccccl}
+    \toprule
+    \textbf{Estructura} & \textbf{Cerr.} & \textbf{Asoc.}
+      & \textbf{Neutro} & \textbf{Inv.} & \textbf{Conm.}
+      & & \textbf{Ejemplo} \\
+    \midrule
+    Magma          & \checkmark &            &            &            &            & & $(\Z, -)$ \\
+    Semigrupo      & \checkmark & \checkmark &            &            &            & & $(\N^{+}, +)$ \\
+    Monoide        & \checkmark & \checkmark & \checkmark &            &            & & $(\set{0,1}, \wedge)$, $(\Sigma^{*}, \cdot)$ \\
+    Grupo          & \checkmark & \checkmark & \checkmark & \checkmark &            & & $(S_3, \circ)$, $(GL_n, \cdot)$ \\
+    Grupo abeliano & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & & $(\Z, +)$, $(\set{0,1}, \oplus)$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Estructuras con una operación $(S, *)$.}
+  \label{tab:estructuras-una}
+\end{table}
 
-Cada renglón de la tabla es el anterior más una propiedad:
-
-\begin{itemize}[itemsep=0.2em]
-    \item \textbf{Semianillo}: las dos operaciones son asociativas y
-          el producto distribuye sobre la suma.
-    \item \textbf{Subanillo}: además la suma tiene neutro e inverso.
-    \item \textbf{Anillo}: además la suma es conmutativa.
-    \item \textbf{Anillo conmutativo}: además el producto también es
-          conmutativo.
-    \item \textbf{Campo}: además el producto tiene neutro e inverso.
-\end{itemize}
-\newpage
+\subsubsection*{Fuera de la cadena principal}
 
 \begin{table}[htbp]
   \centering
   \footnotesize
-  \begin{tabular}{lccccc}
+  \begin{tabular}{l p{5.2cm} p{5.2cm}}
     \toprule
-    \textbf{Magma} & \textbf{Asociativo} & \textbf{Neutro ($e$)}
-      & \textbf{Inverso} & \textbf{Conmutativo}
-      & \textbf{Distributivo} \\
+    \textbf{Estructura} & \textbf{Definición} & \textbf{Nota} \\
     \midrule
-    Semigrupo           & X   &     &     &     &   \\
-    Monoide             & X   & X   &     &     &   \\
-    Grupo               & X   & X   & X   &     &   \\
-    Grupo abeliano      & X   & X   & X   & X   &   \\
-    \midrule
-    \textbf{Semianillo} & S,M &     &     &     & M \\
-    \midrule
-    Subanillo           & S,M & S   & S   &     & M \\
-    Anillo              & S,M & S   & S   & S   & M \\
-    Anillo conmutativo  & S,M & S   & S   & S,M & M \\
-    Campo               & S,M & S,M & S,M & S,M & M \\
+    Cuasigrupo    & Magma más división única
+                  & \textbf{No} requiere asociatividad \\
+    Loop          & Cuasigrupo más neutro
+                  & Tampoco asociativo \\
+    Semirretícula & Semigrupo conmutativo e idempotente
+                    ($a * a = a$)
+                  & $(\set{0,1}, \wedge)$ lo es \\
     \bottomrule
   \end{tabular}
-  \caption{Propiedades que cumple cada estructura. Todas son
-    operaciones cerradas.}
-  \label{tab:estructuras}
+  \caption{Estructuras que no caen en la cadena de arriba.}
+  \label{tab:fuera-cadena}
 \end{table}
+
+\subsubsection*{Estructuras con dos operaciones}
+
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \begin{tabular}{l l p{4.3cm} c l}
+    \toprule
+    \textbf{Estructura} & $\boldsymbol{(S,+)}$ & $\boldsymbol{(S,\cdot)}$
+      & \textbf{Distrib.} & \textbf{Ejemplo} \\
+    \midrule
+    Semianillo         & Monoide conm. & Monoide
+                       & \checkmark
+                       & $(\N, +, \cdot)$, tropical $(\max, +)$ \\
+    Anillo             & Grupo abeliano & Semigrupo
+                       & \checkmark
+                       & $2\Z$, los pares \\
+    Anillo con unidad  & Grupo abeliano & Monoide
+                       & \checkmark
+                       & $(M_n(\R), +, \cdot)$ \\
+    Anillo conmutativo & Grupo abeliano & Monoide conm.
+                       & \checkmark
+                       & $(\Z, +, \cdot)$, $(\Z_6, +, \cdot)$ \\
+    Dominio entero     & Grupo abeliano & Monoide conm., sin
+                         divisores de $0$
+                       & \checkmark
+                       & $(\Z, +, \cdot)$ \\
+    Anillo de división & Grupo abeliano
+                       & $(S \setminus \set{0}, \cdot)$ grupo
+                       & \checkmark
+                       & Cuaterniones $\mathbb{H}$ \\
+    Campo              & Grupo abeliano
+                       & $(S \setminus \set{0}, \cdot)$ grupo
+                         abeliano
+                       & \checkmark
+                       & $\R$, $\Q$, $\Z_5$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Estructuras con dos operaciones $(S, +, \cdot)$.}
+  \label{tab:estructuras-dos}
+\end{table}
+
+\textbf{Notas sobre las tablas:}
+
+\begin{itemize}[itemsep=0.2em]
+    \item La distributividad es el único axioma que relaciona las dos
+          operaciones entre sí.
+    \item En el semianillo, la absorción $0 \cdot a = 0$ hay que
+          pedirla como axioma: sin inversos aditivos no se puede
+          demostrar. En el anillo sí se demuestra.
+    \item La definición de anillo que se usa aquí sigue la lámina 49
+          y a Grimaldi, o sea que \textbf{no} exige unidad. Muchos
+          textos modernos sí la exigen, y al que no la tiene le
+          llaman \textit{rng}.
+    \item Cuasigrupo y loop no van debajo de grupo. La jerarquía es
+          una retícula, no una cadena.
+\end{itemize}
 
 
 
