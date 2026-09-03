@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.0.0
+%   * Version: 1.2.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       01/09/2026      Pase a LaTeX la toma cruda del 01/09
 %  zxxz6       27/08/2026      Pase a LaTeX la toma cruda del 27/08
 %  zxxz6       25/08/2026      Creation
 %
@@ -468,6 +469,245 @@ quiere decir que los updates tienden a corregir errores.
   plano, pero jamás podrá separar datos que no sean linealmente
   separables.
 \end{ojo}
+
+\newpage
+
+% =====================================================================
+%  Clase 01 Sep - Convergencia y generalizacion del perceptron
+% =====================================================================
+
+\clase{Convergencia y generalización (perceptrón)}{1 de septiembre
+de 2026}
+
+\begin{quick_sum}
+    En esta sesion vimos la convergencia del perceptron, y la definicion
+    formal, q era el margen geometrico y cerramos con la intro a SVM
+\end{quick_sum}
+
+\subsection*{Punto de partida y supuestos}
+
+Seguimos con clasificadores lineales que pasan por el origen:
+\[
+    f(x; \theta) = \mathrm{sign}(\theta^{\mathsf{T}} x) ,
+\]
+donde $\theta$ denota los parámetros que tenemos que estimar en base a
+los ejemplos de entrenamiento, con ejemplos $x$ y etiquetas $y$
+
+Sea $k$ el número de parámetros actualizados y $\theta^{(k)}$ el
+vector de parámetros después de $k$ actualizaciones. Cada vez que el
+modelo se equivoca hace un update con la regla del perceptrón, y ese
+update es un $k$ más
+
+Para poder demostrar algo hacen falta dos supuestos:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item \textbf{Las normas están acotadas}: existe $R$ tal que
+          $\norm{x^{(t)}} \leq R$ para todo ejemplo.
+    \item \textbf{El clasificador lineal existe}: hay un
+          $\theta^{*}$, el $\theta$ ideal, que separa los datos con
+          margen. Formalmente,
+          \[
+              y^{(t)} \big(\theta^{*}\big)^{\mathsf{T}} x^{(t)}
+              \geq \gamma > 0
+              \qquad \text{para todo } t ,
+          \]
+          donde $\gamma$ es el margen del clasificador, que es lo que
+          nos dice que lo hace bien
+\end{enumerate}
+
+\begin{ojo}
+  En el ejemplo de las imágenes de las caras reconocidas para entrar
+  al edificio, el segundo supuesto es justamente suponer que ese
+  clasificador existe. Si los datos no son linealmente separables, no
+  hay $\theta^{*}$ y nada de lo que sigue aplica
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Convergencia en un número finito de updates}
+
+La convergencia se demuestra combinando dos resultados. El primero
+dice que el producto interno con el ideal crece linealmente, y el
+segundo que la norma cuadrada crece a lo más linealmente. Tomamos
+$\theta^{(0)} = 0$.
+
+\subsubsection*{Parte 1: el producto interno crece linealmente}
+
+Supongamos que el update $k$ se hizo sobre el ejemplo
+$(x^{(t)}, y^{(t)})$, o sea
+$\theta^{(k)} = \theta^{(k-1)} + y^{(t)} x^{(t)}$. Entonces
+\begin{align*}
+    \big(\theta^{*}\big)^{\mathsf{T}} \theta^{(k)}
+      &= \big(\theta^{*}\big)^{\mathsf{T}} \theta^{(k-1)}
+         + y^{(t)} \big(\theta^{*}\big)^{\mathsf{T}} x^{(t)} \\
+      &\geq \big(\theta^{*}\big)^{\mathsf{T}} \theta^{(k-1)}
+            + \gamma ,
+\end{align*}
+donde la desigualdad es el supuesto del margen. Cada update le suma
+al menos $\gamma$, así que aplicándolo $k$ veces desde
+$\theta^{(0)} = 0$:
+\[
+    \big(\theta^{*}\big)^{\mathsf{T}} \theta^{(k)} \geq k\,\gamma .
+\]
+
+\subsubsection*{Parte 2: la norma cuadrada crece a lo más linealmente}
+
+Con el mismo update,
+\begin{align*}
+    \norm{\theta^{(k)}}^{2}
+      &= \norm{\theta^{(k-1)} + y^{(t)} x^{(t)}}^{2} \\
+      &= \norm{\theta^{(k-1)}}^{2}
+         + 2\,y^{(t)} \big(\theta^{(k-1)}\big)^{\mathsf{T}} x^{(t)}
+         + \big(y^{(t)}\big)^{2} \norm{x^{(t)}}^{2} \\
+      &\leq \norm{\theta^{(k-1)}}^{2} + R^{2} .
+\end{align*}
+
+El término de en medio se va porque el update ocurre precisamente
+cuando el ejemplo estaba mal clasificado, o sea cuando
+$y^{(t)} \big(\theta^{(k-1)}\big)^{\mathsf{T}} x^{(t)} \leq 0$. Y el
+último se acota porque $\big(y^{(t)}\big)^{2} = 1$ y
+$\norm{x^{(t)}} \leq R$. Repitiendo $k$ veces:
+\[
+    \norm{\theta^{(k)}}^{2} \leq k\,R^{2} 
+\]
+
+\subsubsection*{Combinación: qué pasa con el ángulo}
+
+Si combinamos esos dos resultados podemos ver el coseno del ángulo
+entre el vector de la actualización $k$ y el ideal:
+\[
+    \cos\!\big(\theta^{*}, \theta^{(k)}\big) =
+    \frac{\big(\theta^{*}\big)^{\mathsf{T}} \theta^{(k)}}
+         {\norm{\theta^{*}}\,\norm{\theta^{(k)}}}
+    \geq \frac{k\,\gamma}{\norm{\theta^{*}}\,\sqrt{k}\,R}
+    = \sqrt{k}\;\frac{\gamma}{\norm{\theta^{*}}\,R} .
+\]
+
+El numerador se acotó por abajo con la parte 1 y el denominador por
+arriba con la parte 2. Como el coseno está acotado por $1$:
+\[
+    \sqrt{k}\;\frac{\gamma}{\norm{\theta^{*}}\,R} \leq 1
+    \qquad\Longrightarrow\qquad
+    k \leq \frac{R^{2}\,\norm{\theta^{*}}^{2}}{\gamma^{2}} .
+\]
+
+\begin{idea}
+  Cada update acerca el coseno a $1$ en una cantidad finita, o sea
+  acerca el vector actual al ideal. Como el coseno no puede pasar de
+  $1$, solo se puede hacer un número finito de updates. Ahí está la
+  convergencia
+\end{idea}
+
+\begin{ojo}
+  Está acotado, pero la cota depende del valor de los pesos: puede
+  ser muy grande o muy pequeña, y de antemano no sabemos cuál.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Margen geométrico}
+
+El cociente $\norm{\theta^{*}}^{2} / \gamma^{2}$ nos dice qué tan
+difícil es el problema, o sea cuántos updates voy a tener que hacer.
+Su inverso es la distancia más chica que hay entre una instancia del
+conjunto de entrenamiento y mi región de decisión
+
+Si esa distancia es grande hay bastante separación entre la
+superficie que divide las clases y las instancias, y es más fácil
+clasificar. Si es chica, es más difícil
+
+\subsubsection*{Cómo se calcula}
+
+Se mide la distancia de la superficie de decisión a uno de los datos
+de entrenamiento. Sea $\tilde{x}$ el punto de la frontera más cercano
+a $x^{(t)}$, y $\varepsilon$ esa distancia. Moverse de $x^{(t)}$ a la
+frontera es avanzar $\varepsilon$ en la dirección normal, que es la
+de $\theta^{*}$:
+\[
+    \tilde{x} = x^{(t)} - y^{(t)}\,\varepsilon\,
+                \frac{\theta^{*}}{\norm{\theta^{*}}} .
+\]
+
+Evaluando el clasificador ideal en ese punto:
+\[
+    y^{(t)} \big(\theta^{*}\big)^{\mathsf{T}} \tilde{x}
+    = \underbrace{y^{(t)}
+      \big(\theta^{*}\big)^{\mathsf{T}} x^{(t)}}_{=\;\gamma}
+      - \varepsilon\,\norm{\theta^{*}}
+    = \gamma - \varepsilon\,\norm{\theta^{*}} = 0 ,
+\]
+porque $\tilde{x}$ está sobre la frontera y ahí el clasificador vale
+cero. Despejando queda el \textbf{margen geométrico}:
+\[
+    \varepsilon = \frac{\gamma}{\norm{\theta^{*}}} .
+\]
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[>=stealth]
+    % Frontera de decision
+    \draw[acento, very thick] (-1.6,-1.6) -- (2.7,2.7);
+    \node[acento, font=\footnotesize, anchor=south east]
+      at (2.7,2.75) {$(\theta^{*})^{\mathsf{T}} x = 0$};
+
+    % Vector normal
+    \draw[->, red!70!black, thick] (0,0) -- (0.9,-0.9);
+    \node[red!70!black, font=\footnotesize, anchor=north west]
+      at (0.85,-0.85) {$\theta^{*}$};
+
+    % Punto de entrenamiento y su proyeccion
+    \coordinate (xt) at (2.6,-0.4);
+    \coordinate (xp) at (1.1,1.1);
+    \draw[dashed, gray!60!black] (xt) -- (xp);
+    \fill[red!70!black] (xt) circle (2.2pt);
+    \fill[acento] (xp) circle (1.8pt);
+    \node[font=\footnotesize, anchor=west] at (2.75,-0.4)
+      {$x^{(t)}$};
+    \node[font=\footnotesize, anchor=south east] at (1.05,1.15)
+      {$\tilde{x}$};
+    \node[font=\footnotesize, anchor=south west] at (1.9,0.25)
+      {$\varepsilon$};
+
+    % Ejemplos de las dos clases
+    \fill[red!70!black] (2.0,-1.2) circle (1.6pt);
+    \fill[red!70!black] (2.9,0.6) circle (1.6pt);
+    \fill[acento] (-0.6,1.2) circle (1.6pt);
+    \fill[acento] (0.4,2.3) circle (1.6pt);
+  \end{tikzpicture}
+\end{figure}
+
+Por lo tanto el $k$, el número de veces que tengo que actualizar, se
+puede expresar en términos del margen geométrico:
+\[
+    k \leq \frac{R^{2}}{\varepsilon^{2}} .
+\]
+
+\begin{idea}
+  Entre más ancho el pasillo que separa las clases, menos updates
+  necesita el perceptrón. La dificultad del problema no está en
+  cuántos datos hay ni en cuántas dimensiones, sino en qué tan
+  apretado quedó ese pasillo
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Generalización}
+
+Hasta ahorita asumimos que el conjunto de datos era linealmente
+separable, pero qué pasa si ahora no trabajo con mi conjunto de
+entrenamiento sino con datos que están fuera de él
+
+Cuando llegue una instancia nueva, el clasificador lineal tendrá que
+ser capaz de clasificarla: se pone en el plano y se ve si la
+superficie separadora la separa correctamente
+
+\begin{idea}
+  Lo que queremos ahora es un clasificador lineal que nos dé el
+  máximo margen geométrico. De todas las superficies que separan bien
+  el entrenamiento, la que deja el pasillo más ancho es la que tiene
+  más holgura para los datos nuevos. Ese clasificador son las
+  máquinas de vectores de soporte
+\end{idea}
 
 \end{document}
 
