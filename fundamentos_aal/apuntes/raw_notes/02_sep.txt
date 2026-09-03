@@ -1,0 +1,54 @@
+-- medidas de evaluacion en IR --
+
+{diagrama de conjuntos de interseccion}
+
+recall = relevantes recuperados/numero de documentso relevantes
+
+precision = numero de relevantes/total recuperados
+
+
+
+en IR cuando se devuelven cero doucmentos la division entre 0 no esta
+determinada pero en IR eso es perfecto, no dice algo pero tampoco dice
+tonterias, cosas equivocadas
+
+Una medida mas robusta es la F1 que es una media armonica
+el 1 es el peso diferente que le da a recall y presicion 
+la media armonica permite ponderar a las dos cosas 
+
+{poner formula F1}
+
+esos son las metricas basadas en conjuntos pero igual hay metricas basadas en 
+ranking
+
+orden de relevancia 
+pueden haber otrs criterios como
+numero de citas, distancia, calificacion de estrellas de lugar pero son
+independientes de la relevancia semantica 
+
+hay varias medidas 
+-P@N: preciscion hasta la posicion N
+-MMR: mean reciprocal rank, orden reciproco del primer documento relevante. Se usaba
+en question answering
+-Avg recall/precicion curve: 
+-MAP: mean average presicion 
+
+{explicar bien cada una}
+
+{comparacion de recall precision curve con grafica}
+
+una de las medidas mas usadas es MAP 
+
+{formula map con la sumatoria y la grafica de area bajo la curva y 
+suma}
+
+ventajas y desventaja de map
+
+ventaja que es un solo valor
+otra es que se ajusta muy bien, no se fija tanto en las colas
+es muy buena para metricas binarias, pero no es tan bueno para fine-grained
+rating numericos... asummimos todos igualmente relevants, eso no es cierto
+
+por que todo lo que recupera un IR no es relevante?
+Por que es dificil tener 100 de recall?
+Alguna idea para solucionar esto?
