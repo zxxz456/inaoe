@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.1.0
+%   * Version: 2.2.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       02/09/2026      Pase a LaTeX la toma cruda del 02/09
 %  zxxz6       26/08/2026      Pase a LaTeX la toma cruda del 26/08
 %  zxxz6       24/08/2026      Pase a LaTeX la toma cruda del 24/08
 %  zxxz6       19/08/2026      Pase a LaTeX la toma cruda del 19/08
@@ -540,6 +541,7 @@ Cada renglón de la tabla es el anterior más una propiedad:
           conmutativo.
     \item \textbf{Campo}: además el producto tiene neutro e inverso.
 \end{itemize}
+\newpage
 
 \begin{table}[htbp]
   \centering
@@ -569,6 +571,312 @@ Cada renglón de la tabla es el anterior más una propiedad:
 \end{table}
 
 
+
+\newpage
+
+
+% =====================================================================
+%  Clase 02 Sep - Matrices
+% =====================================================================
+
+\clase{Matrices}{2 de septiembre de 2026}
+
+\begin{quick_sum}
+    En esta clase vimos asi bn rapido que son los arreglos y las matrices,
+    con sus operaciones, propiedades y asi
+\end{quick_sum}
+
+\subsection{Arreglos y matrices}
+
+Un arreglo es una lista de listas donde la longitud de cada nivel es
+la misma. El tamaño de un arreglo $d$-dimensional se indica como
+$m \times n \times \cdots \times p$
+
+El caso más simple es el arreglo de una dimensión, o sea un vector.
+Sus elementos se escriben con un solo índice, y su tamaño es $n$:
+\[
+    u = (u_1,\, u_2,\, \ldots,\, u_n) ,
+    \qquad
+    v = (4,\, -2,\, 7,\, 0) \quad \text{de tamaño } 4 .
+\]
+
+Un vector también se puede escribir acostado o parado, y para las
+operaciones con matrices la diferencia sí importa:
+\[
+    \underbrace{\begin{pmatrix} 4 & -2 & 7 & 0 \end{pmatrix}}
+              _{\text{vector fila, } 1 \times 4}
+    \qquad\qquad
+    \underbrace{\begin{pmatrix} 4 \\ -2 \\ 7 \\ 0 \end{pmatrix}}
+              _{\text{vector columna, } 4 \times 1}
+\]
+
+Al subir una dimensión, cada elemento del arreglo es a su vez un
+arreglo, y ahí aparece la matriz
+
+Una matriz es un arreglo de arreglos, donde se tienen filas y
+columnas. El elemento en la fila $i$ y la columna $j$ se escribe
+$a_{ij}$:
+\[
+    A =
+    \begin{pmatrix}
+        a_{11} & a_{12} & a_{13} \\
+        a_{21} & a_{22} & a_{23} \\
+        a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        2 & -1 & 0 \\
+        4 &  3 & 5 \\
+        0 &  1 & 7
+    \end{pmatrix} .
+\]
+
+El orden de una matriz $m \times n$ quiere decir que tiene $m$ filas y
+$n$ columnas. Cuando $m = n$ es una matriz cuadrada.
+
+La \textbf{diagonal principal} son los elementos $a_{ij}$ donde
+$i = j$, o sea $2$, $3$ y $7$ en el ejemplo. La
+\textbf{diagonal secundaria} es la que va al revés, de la esquina
+superior derecha a la inferior izquierda: $0$, $3$ y $0$.
+
+% =====================================================================
+
+\subsection{Tipos de matrices}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Matriz cero}: todos sus elementos son $0$. Es el
+          neutro de la suma.
+    \item \textbf{Matriz diagonal}: $a_{ij} = 0$ para todo
+          $i \neq j$, o sea que solo la diagonal principal puede ser
+          distinta de cero.
+    \item \textbf{Matriz identidad} $I_n$: diagonal con puros unos en
+          la diagonal principal. Es el neutro del producto.
+    \item \textbf{Triangular superior}: $a_{ij} = 0$ para $i > j$,
+          todo lo de abajo de la diagonal es cero.
+          \textbf{Triangular inferior}: al revés, $a_{ij} = 0$ para
+          $i < j$.
+\end{itemize}
+
+Un ejemplo de cada uno, todos de orden $3 \times 3$:
+
+\[
+    \underbrace{\begin{pmatrix}
+        0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0
+    \end{pmatrix}}_{\text{cero}}
+    \qquad
+    \underbrace{\begin{pmatrix}
+        3 & 0 & 0 \\ 0 & 5 & 0 \\ 0 & 0 & 2
+    \end{pmatrix}}_{\text{diagonal}}
+    \qquad
+    \underbrace{\begin{pmatrix}
+        1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1
+    \end{pmatrix}}_{I_3}
+\]
+
+\[
+    \underbrace{\begin{pmatrix}
+        2 & 7 & 1 \\ 0 & 4 & 6 \\ 0 & 0 & 3
+    \end{pmatrix}}_{\text{triangular superior}}
+    \qquad\qquad
+    \underbrace{\begin{pmatrix}
+        2 & 0 & 0 \\ 7 & 4 & 0 \\ 1 & 6 & 3
+    \end{pmatrix}}_{\text{triangular inferior}}
+\]
+
+\begin{ojo}
+    La identidad es un caso particular de matriz diagonal, y la
+    diagonal es a la vez triangular superior e inferior. Los tipos no
+    son categorías separadas, se encajan unos dentro de otros.
+\end{ojo}
+
+% =====================================================================
+
+\subsection{Transpuesta, simetría y antisimetría}
+
+\subsubsection*{Matriz transpuesta}
+
+\begin{definicion}[Transpuesta]
+    La transpuesta $A^{T}$ de una matriz $A$ de orden $m \times n$ es
+    la matriz de orden $n \times m$ que se obtiene intercambiando
+    filas por columnas, o sea $(A^{T})_{ij} = a_{ji}$.
+\end{definicion}
+
+\[
+    A = \begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{pmatrix} ,
+    \qquad
+    A^{T} = \begin{pmatrix} 1 & 4 \\ 2 & 5 \\ 3 & 6 \end{pmatrix} .
+\]
+
+Propiedades, con $k$ un escalar:
+
+\begin{itemize}[itemsep=0.1em]
+    \item $(A^{T})^{T} = A$
+    \item $(A + B)^{T} = A^{T} + B^{T}$
+    \item $(k\,A)^{T} = k\,A^{T}$
+    \item $(A\,B)^{T} = B^{T} A^{T}$
+\end{itemize}
+
+\begin{ojo}
+    La del producto invierte el orden. No es $A^{T}B^{T}$, y de hecho
+    ese producto muchas veces ni siquiera está definido, porque las
+    dimensiones dejan de calzar.
+\end{ojo}
+
+\subsubsection*{Matriz simétrica}
+
+\begin{definicion}[Simétrica]
+    $A$ es simétrica si $A = A^{T}$, es decir $a_{ij} = a_{ji}$ para
+    todo $i$, $j$. Tiene que ser cuadrada, y se ve como un espejo
+    respecto a la diagonal principal.
+\end{definicion}
+
+\subsubsection*{Matriz antisimétrica}
+
+\begin{definicion}[Antisimétrica]
+    $A$ es antisimétrica si $A = -A^{T}$, es decir
+    $a_{ij} = -a_{ji}$.
+\end{definicion}
+
+\[
+    \underbrace{\begin{pmatrix}
+        1 & 2 & 0 \\ 2 & 3 & 5 \\ 0 & 5 & 4
+    \end{pmatrix}}_{\text{simétrica}}
+    \qquad
+    \underbrace{\begin{pmatrix}
+        0 & 2 & -1 \\ -2 & 0 & 5 \\ 1 & -5 & 0
+    \end{pmatrix}}_{\text{antisimétrica}}
+\]
+
+\begin{idea}
+    En una antisimétrica la diagonal principal siempre es cero.
+    Poniendo $i = j$ en la definición queda $a_{ii} = -a_{ii}$, y el
+    único número que cumple eso es el cero.
+\end{idea}
+
+% =====================================================================
+
+\subsection{Operaciones con matrices}
+
+Dos matrices son iguales si lo son elemento a elemento, o sea
+$a_{ij} = b_{ij}$ para todos los índices. Eso exige que sean del mismo
+orden.
+
+\subsubsection*{Suma y producto por escalar}
+
+La suma se hace elemento a elemento, $(A + B)_{ij} = a_{ij} + b_{ij}$,
+y solo está definida entre matrices del mismo orden. El producto por
+un escalar multiplica cada entrada, $(kA)_{ij} = k\,a_{ij}$.
+
+Propiedades:
+
+\begin{itemize}[itemsep=0.1em]
+    \item $A + B = B + A$, conmutativa
+    \item $(A + B) + C = A + (B + C)$, asociativa
+    \item $A + 0 = A$, la matriz cero es el neutro
+    \item $A + (-A) = 0$, cada matriz tiene inverso aditivo
+    \item $k(A + B) = kA + kB$ y $(k + l)A = kA + lA$, distributivas
+\end{itemize}
+
+\subsubsection*{Producto escalar o producto punto entre vectores}
+
+\begin{definicion}[Producto punto]
+    Para dos vectores $u, v \in \R^{n}$,
+    \[
+        u \cdot v = \sum_{i=1}^{n} u_i\,v_i
+        = u_1 v_1 + u_2 v_2 + \cdots + u_n v_n .
+    \]
+    El resultado es un escalar, no un vector.
+\end{definicion}
+
+Propiedades:
+
+\begin{itemize}[itemsep=0.1em]
+    \item $u \cdot v = v \cdot u$, conmutativo
+    \item $u \cdot (v + w) = u \cdot v + u \cdot w$, distributivo
+    \item $k(u \cdot v) = (k\,u) \cdot v = u \cdot (k\,v)$
+    \item $u \cdot u \geq 0$, y vale $0$ solo si $u$ es el vector cero
+\end{itemize}
+
+\subsubsection*{Multiplicación de matrices}
+
+\begin{definicion}[Producto de matrices]
+    Si $A$ es de orden $m \times p$ y $B$ de orden $p \times n$,
+    entonces $AB$ es de orden $m \times n$ y
+    \[
+        (AB)_{ij} = \sum_{k=1}^{p} a_{ik}\,b_{kj} ,
+    \]
+    o sea el producto punto de la fila $i$ de $A$ con la columna $j$
+    de $B$.
+\end{definicion}
+
+\begin{ojo}
+    El producto solo está definido si el número de columnas de $A$
+    coincide con el número de filas de $B$. Ese $p$ compartido es la
+    condición que hay que revisar antes de multiplicar.
+\end{ojo}
+
+Propiedades:
+
+\begin{itemize}[itemsep=0.1em]
+    \item $(AB)C = A(BC)$, asociativa
+    \item $A(B + C) = AB + AC$, distributiva
+    \item $A\,I = I\,A = A$, la identidad es el neutro
+    \item $AB \neq BA$ en general, \textbf{no} es conmutativa
+\end{itemize}
+
+\begin{idea}
+    Con la suma y el producto, las matrices cuadradas de orden $n$
+    forman un anillo, pero no un anillo conmutativo, porque el
+    producto no conmuta. Es el ejemplo que faltaba de la tabla de la
+    clase pasada.
+\end{idea}
+
+% =====================================================================
+
+\subsection{Multiplicación por bloques}
+
+Manipular matrices de dimensiones grandes es un proceso complejo para
+las computadoras. Conviene entonces manejar las matrices como bloques
+de submatrices más pequeñas.
+
+La idea es partir la matriz con líneas horizontales y verticales:
+\[
+    A =
+    \left(\begin{array}{cc|cc}
+        1 & 2 & 0 & 0 \\
+        3 & 4 & 0 & 0 \\ \hline
+        0 & 0 & 5 & 6 \\
+        0 & 0 & 7 & 8
+    \end{array}\right)
+    =
+    \begin{pmatrix}
+        A_{11} & A_{12} \\ A_{21} & A_{22}
+    \end{pmatrix} ,
+\]
+donde cada $A_{ij}$ es una submatriz de $2 \times 2$. Si $B$ se
+particiona de forma compatible, el producto se calcula con la misma
+fórmula de siempre, pero tratando cada bloque como si fuera una
+entrada:
+\[
+    AB =
+    \begin{pmatrix}
+        A_{11}B_{11} + A_{12}B_{21} & A_{11}B_{12} + A_{12}B_{22} \\
+        A_{21}B_{11} + A_{22}B_{21} & A_{21}B_{12} + A_{22}B_{22}
+    \end{pmatrix} .
+\]
+
+\begin{ojo}
+    Compatible quiere decir que los cortes de columnas de $A$ tienen
+    que caer en los mismos lugares que los cortes de filas de $B$. Si
+    no, los productos de bloques no están definidos.
+\end{ojo}
+
+\begin{idea}
+    Sirve porque cada bloque cabe en la memoria rápida de la máquina,
+    así que se multiplica sin ir y venir a memoria principal a cada
+    rato. También permite repartir los bloques entre varios
+    procesadores, ya que cada uno se calcula por separado.
+\end{idea}
 
 \end{document}
 %############################## END OF LIBRETA.TEX #############################
