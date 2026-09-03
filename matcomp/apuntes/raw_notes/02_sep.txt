@@ -1,0 +1,55 @@
+-- matrices --
+
+Un areglo es una lita de listas donde la longitud de cada nivel es la misma
+esl tamano de un arreglo d-dimensional se indica como  m x n x ... x P
+
+una matriz es como un arreglo de arreglos, donde tene filas y columnas
+ 
+ {ejemplo de matrix}
+
+el orden de una matriz m x n tiene m filas y n columnas, cuando m = N
+es una matriz cuadrada
+
+la diagonal pricnpal de una matriz son los elemnto s aij donde i=j y la secundaria
+es la que va alrevez
+
+tipos de matrices
+
+    -matriz cero
+    -matriz diagonal
+    -matriz identidad
+    -matriz trianglar superior e inferios
+
+
+Matriz transpuesta
+{def}
+{propiedades de la transpocicion de suma y asi}
+
+Matriz simetrica
+{def}
+
+Matriz antisimetrico
+{def}
+
+Operacines con matrices y sus propiedades 
+{def de todas }
+
+
+
+dos matrices son iguales si son iguales elemento a alemento aij = aij
+
+
+- producto escalar o productop unto entre vectores
+{def}
+{propiedaddes del producto punto}
+
+- multiplicacion de matrices
+{definicion y propiedades de suma, mltiplicacion y asi  }
+
+-- multiplicaion por bloques --
+manilpular matrices de dimencines grandes es un proceso complejo para compuadores
+combiene manejar las matrices com bloques de submatrices mas pequenas 
+{ejemplo explcado de particionado de matriz}
+
+
+
