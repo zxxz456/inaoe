@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.2.0
+%   * Version: 1.3.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       03/09/2026      Pase a LaTeX la toma cruda del 03/09
 %  zxxz6       01/09/2026      Pase a LaTeX la toma cruda del 01/09
 %  zxxz6       27/08/2026      Pase a LaTeX la toma cruda del 27/08
 %  zxxz6       25/08/2026      Creation
@@ -707,6 +708,262 @@ superficie separadora la separa correctamente
   el entrenamiento, la que deja el pasillo más ancho es la que tiene
   más holgura para los datos nuevos. Ese clasificador son las
   máquinas de vectores de soporte
+\end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 03 Sep - SVM
+% =====================================================================
+
+\clase{Máquinas de vectores de soporte (SVM)}{3 de septiembre de 2026}
+
+\begin{quick_sum}
+  En esta clase vimos como funcionan los SVM
+\end{quick_sum}
+
+\subsection*{El problema}
+
+Se plantea el problema de encontrar la superficie de separación entre
+los datos de una muestra, de tal manera que el margen geométrico que
+vimos sea el máximo posible
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[>=stealth]
+    % Frontera y margenes
+    \draw[acento, very thick] (0,0) -- (3.3,3.3);
+    \node[acento, font=\footnotesize, anchor=west] at (3.35,3.3)
+      {$\theta^{\mathsf{T}} x + \theta_0 = 0$};
+    \draw[gray!70!black, dashed] (0,1) -- (2.5,3.5);
+    \draw[gray!70!black, dashed] (1,0) -- (3.5,2.5);
+
+    % Margen
+    \draw[<->, red!70!black, thick] (1,2) -- (2,1);
+    \node[red!70!black, font=\footnotesize, anchor=west]
+      at (1.62,1.75) {$2\varepsilon$};
+
+    % Clase -1, arriba
+    \fill[acento] (1,2) circle (2.4pt);
+    \draw[acento, thick] (1,2) circle (4.5pt);
+    \fill[acento] (0.4,1.4) circle (2.4pt);
+    \draw[acento, thick] (0.4,1.4) circle (4.5pt);
+    \fill[acento] (0.3,2.6) circle (2.2pt);
+    \fill[acento] (1.3,3.1) circle (2.2pt);
+
+    % Clase +1, abajo
+    \fill[red!70!black] (2,1) circle (2.4pt);
+    \draw[red!70!black, thick] (2,1) circle (4.5pt);
+    \fill[red!70!black] (2.9,1.9) circle (2.4pt);
+    \draw[red!70!black, thick] (2.9,1.9) circle (4.5pt);
+    \fill[red!70!black] (3.1,0.7) circle (2.2pt);
+    \fill[red!70!black] (2.5,0.3) circle (2.2pt);
+  \end{tikzpicture}
+  \caption{La superficie que deja el pasillo más ancho. Los puntos
+    circulados, los que caen justo sobre el borde del margen, son los
+    vectores de soporte.}
+  \label{fig:svm}
+\end{figure}
+
+Se plantea como un problema de optimización: lo que quiero optimizar
+son los parámetros de mi vector, de tal manera que exista un margen
+alrededor de mi superficie de separación que sea lo más grande
+posible.
+
+Una manera de lograrlo sería encontrar una superficie que separe bien
+las instancias y luego tratar de que ese clasificador tenga el mayor
+margen posible. Se busca entonces maximizar el margen geométrico
+$\gamma / \norm{\theta}$, cumpliendo las restricciones
+\[
+    y^{(t)} \big(\theta^{\mathsf{T}} x^{(t)}\big) \geq \gamma
+    \qquad \text{para } t = 1, 2, \ldots, n .
+\]
+
+\begin{idea}
+  Esa restricción dice dos cosas al mismo tiempo. El \emph{signo} de
+  $y^{(t)}\theta^{\mathsf{T}}x^{(t)}$ dice si la instancia quedó del
+  lado correcto del plano, y su \emph{magnitud} dice qué tan lejos
+  quedó. Pedir que sea $\geq \gamma$ es pedir las dos: bien
+  clasificada, y además a distancia de sobra, no pegada a la
+  frontera.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Como problema de optimización}
+
+Maximizar el cociente que dijimos es lo mismo que minimizar su
+inverso al cuadrado:
+\[
+    \min_{\theta} \; \frac{1}{2}\,
+    \frac{\norm{\theta}^{2}}{\gamma^{2}}
+    \qquad \text{sujeto a} \qquad
+    y^{(t)} \theta^{\mathsf{T}} x^{(t)} \geq \gamma ,
+    \quad t = 1, \ldots, n .
+\]
+
+Así escrito el problema depende de $\gamma$, y eso sobra. Si se
+escala $\theta$ y $\gamma$ por la misma constante, ni las
+restricciones ni el margen geométrico cambian: la superficie es la
+misma. Se aprovecha esa libertad para fijar $\gamma = 1$, y el
+problema queda sin $\gamma$:
+\[
+    \min_{\theta} \; \frac{1}{2}\,\norm{\theta}^{2}
+    \qquad \text{sujeto a} \qquad
+    y^{(t)} \theta^{\mathsf{T}} x^{(t)} \geq 1 ,
+    \quad t = 1, \ldots, n .
+\]
+
+Con esa normalización el margen geométrico es $1 / \norm{\theta}$,
+así que minimizar la norma es literalmente ensanchar el pasillo.
+
+\subsubsection*{El offset}
+
+Hasta ahora nuestra función está atada a pasar por el origen, y no
+queremos eso. Para lograrlo se suma un vector de offset $\theta_0$:
+\[
+    f(x; \theta, \theta_0) =
+    \mathrm{sign}\big(\theta^{\mathsf{T}} x + \theta_0\big) ,
+\]
+y el problema se vuelve
+\[
+    \min_{\theta,\,\theta_0} \; \frac{1}{2}\,\norm{\theta}^{2}
+    \qquad \text{sujeto a} \qquad
+    y^{(t)} \big(\theta^{\mathsf{T}} x^{(t)} + \theta_0\big) \geq 1 .
+\]
+
+Esto ayuda a que podamos encontrar una superficie con mayor margen
+geométrico, porque ya no obligamos al plano a pasar por el origen.
+
+\subsubsection*{Vectores de soporte}
+
+Los elementos que caen justo a la distancia geométrica son los
+llamados \textbf{vectores de soporte}, y son elementos de la muestra.
+Son los que están circulados en la figura \ref{fig:svm}.
+
+% =====================================================================
+
+\subsection*{Validación cruzada}
+
+Para evaluar este clasificador podemos hacer uso de la validación
+cruzada. Consiste en tomar el conjunto de entrenamiento, separar un
+cachito, construir el modelo con el resto y evaluar en ese cachito.
+El cachito se llama \textbf{fold}, y esto se repite $k$ veces
+cambiando cuál fold se deja fuera.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \foreach \i in {1,...,5} {
+      \node[anchor=east, font=\footnotesize] at (0,{-0.62*\i})
+        {Iteración \i};
+      \foreach \j in {1,...,5} {
+        \ifnum\i=\j
+          \draw[fill=fondoOjo, draw=orange!70!black]
+            ({0.25+1.2*(\j-1)},{-0.62*\i-0.2})
+            rectangle ++(1.1,0.4);
+        \else
+          \draw[fill=fondoIdea, draw=acento!60]
+            ({0.25+1.2*(\j-1)},{-0.62*\i-0.2})
+            rectangle ++(1.1,0.4);
+        \fi
+      }
+    }
+    \draw[fill=fondoOjo, draw=orange!70!black]
+      (0.25,-4.2) rectangle ++(0.45,0.3);
+    \node[anchor=west, font=\footnotesize] at (0.8,-4.05) {prueba};
+    \draw[fill=fondoIdea, draw=acento!60]
+      (2.4,-4.2) rectangle ++(0.45,0.3);
+    \node[anchor=west, font=\footnotesize] at (2.95,-4.05)
+      {entrenamiento};
+  \end{tikzpicture}
+  \caption{Validación cruzada con $k = 5$. En cada iteración un fold
+    distinto hace de conjunto de prueba.}
+  \label{fig:kfolds}
+\end{figure}
+
+\subsubsection*{Leave-one-out}
+
+Si dejamos solo un elemento fuera es el \textbf{leave-one-out cross
+validation}, pero eso se hace $n$ veces, con $n$ el número de
+elementos del training set. El error se mide así:
+\[
+    E_{\mathrm{loo}} = \frac{1}{n} \sum_{i=1}^{n}
+    \left[\, 1 - \delta\big(y^{(i)},\,
+    f(x^{(i)};\, \theta^{(-i)})\big) \right] ,
+\]
+donde $\theta^{(-i)}$ son los parámetros entrenados con todo el
+conjunto \emph{menos} el ejemplo $i$. O sea que cada ejemplo se
+predice con un modelo que nunca lo vio, y $E_{\mathrm{loo}}$ es la
+fracción de veces que ese modelo se equivoca.
+
+\begin{idea}
+  El leave-one-out error está acotado por el número de vectores de
+  soporte:
+  \[
+      E_{\mathrm{loo}} \leq \frac{\#\text{vectores de soporte}}{n} .
+  \]
+  Cada vez que se quita una instancia que sea vector de soporte se
+  puede cometer un error, porque quitarla mueve la superficie. Pero
+  quitar una que no lo sea no cambia nada, así que ese ejemplo se
+  sigue clasificando bien. Un clasificador con pocos vectores de
+  soporte generaliza mejor.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Datos con ruido: variables de holgura}
+
+Uno de los problemas de este clasificador es que si las etiquetas del
+conjunto están mal, el clasificador va a estar incorrecto. También
+hay casos en los que el dato mismo trae error.
+
+Para solucionar esto se introducen \textbf{variables de holgura},
+dando una optimización relajada:
+\[
+    \min_{\theta,\,\theta_0,\,\xi} \; \frac{1}{2}\,\norm{\theta}^{2}
+    + C \sum_{t=1}^{n} \xi_t
+\]
+sujeta a
+\[
+    y^{(t)} \big(\theta^{\mathsf{T}} x^{(t)} + \theta_0\big)
+    \geq 1 - \xi_t ,
+    \qquad \xi_t \geq 0 ,
+    \qquad t = 1, \ldots, n .
+\]
+
+Cada $\xi_t$ mide cuánto se le perdona a la instancia $t$, y $C$ es
+un parámetro de costo, o sea qué tanto le va a costar violar las
+restricciones.
+
+\begin{ojo}
+  Si el costo no es tan grande, le voy a dar mucho chance a que
+  queden instancias dentro del margen geométrico. Y al revés: con $C$
+  grande no se permiten violaciones, el modelo se aprieta contra el
+  entrenamiento y vuelve a ser sensible al ruido.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Cuando los datos no son linealmente separables}
+
+Todo lo anterior es solo para instancias linealmente separables, pero
+qué pasa si las instancias no lo son. A alguien se le ocurrió llevar
+las instancias que no son linealmente separables a un espacio en el
+que sí lo sean.
+
+Entonces, en lugar de trabajar con la instancia del vector original,
+se trabaja con su imagen $\varphi(x)$ en el nuevo espacio. Ahí se
+construye el clasificador lineal y ahí se obtiene la respuesta:
+\[
+    y^{(t)} \big(\theta^{\mathsf{T}} \varphi(x^{(t)}) + \theta_0\big)
+    \geq 1 - \xi_t .
+\]
+
+\begin{idea}
+  La superficie sigue siendo un plano, pero en el espacio nuevo. Al
+  regresarla al espacio original se ve curva, y por eso el modelo
+  puede separar datos que una recta no separaba.
 \end{idea}
 
 \end{document}
