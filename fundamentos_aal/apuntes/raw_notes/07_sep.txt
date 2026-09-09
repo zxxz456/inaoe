@@ -1,0 +1,60 @@
+--- continuacion de medidas de eval ---
+
+
+por que no se logra hacer eso?
+por que es dificil teenr 100% de presicion? por la ambiguedad de la consulta
+imaginar que una consulta tiene una palabra
+
+por que es complejo tener 100 recall? por lo mismo de arriba
+
+COMO SOLUCIONAR ESO? Ser lo mas especifico posible en la query
+
+para esto se hace query expansion {explicar que es query expansion}
+
+para resolver el query expansion se usan 
+tesauros
+por means de user feedback
+usar automatick query expansion
+
+{explicar cada una}
+
+Thesaurus based query expansion {explicar este}, puede incrementar el recall pero disminuir la presicion
+
+
+relevance feedback query expansion {explicar este}
+
+
+Standard Rocchio Method {Exlicar bien este}
+Todos son vectores, la intencion es mover la direccion de la query a los que se parecen mas y
+alejarlo de los menos similares
+
+Psudo relevance feddback {explicar eese}
+no pedirle retro al usuari pero asumimos los primeros n relevntes
+
+
+la otra forma es encontrar asociaciones de palabras a partir de la propia coleccion
+es la semantica distribucional {explicar esta}
+
+transpuesta de la matriz de plabras contra doc
+
+cuadrada de las palabras - si los hago por ejemplo muy grande el contexto, se correlaconan palabras que estan como relacioanadas por contexto, y entre mas
+chico el contexto se hace la correlacion de sinonimia 
+
+{explicar cada una}
+
+todo esto lo hemos visto para resolver el problema de la ambiguedad de las consultas on the fly
+
+pero se peuede arreglar en el momento en el que le presentamos el resultado
+
+Clustering in informsation retrieval
+aqui agrupamos los resultados, comoo por tema 
+la hipotesis es que los documentos en el mismo cluster se comportan similares con respecto a la relevancia
+a los criterios de necesidad de info
+
+dos usos principales
+    clustering de colleciones
+        mayor eficiencia
+        tiende a mejorar el recllaa
+
+    search result clusteing 
+        mas info efectiva al usario
