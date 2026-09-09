@@ -1,0 +1,85 @@
+-- Instancias en espacio diferente en SVM ---
+
+Hasta ahora hemos trabajado solo ene l espacio original, donde se supone que los adtos
+son linealmente separables.
+Pero que pasa si los datos no son linealmente separable y querems usar las svm 
+
+tenemos que garantizar que las instancias sean linealmente separables, para esto, transformamos las instancias 
+de X por ejemplo a un espaco mayor donde las instancias sean linealmente separables 
+
+{hacer como diagrama de R2 a R3 solo para visualizar}
+
+encintar esa funcion que nos ayude a aumentar la deimension del espacio no es trivial
+pero cuando abordamos la svm de manera comneiente nos permite no preocupartnos poes esta funcion 
+
+{poner ejemplo de un vector de x1, x2 en r2 pasarlo a r3 con x1^2,x2^2, x1*x2 en r3 con algunos puntos}
+
+vamos ver como hacerle para no preocuparnos por sa funcion 
+
+Tenemos un problema de optimizacion 
+
+m´ın
+θ, θ0, ξ
+1
+2 ∥θ∥2 + C
+n∑
+t=1
+ξt
+sujeta a
+y(t)(θTx(t) + θ0
+) ≥ 1 − ξt, ξt ≥ 0, t = 1, . . . , n.
+
+estos problemas pueden convertirse en su forma dual en terminos de sus coeficientes de lagrange
+
+especificamente incluimos unos coeficientes escalares no negativos at pot cada inequality constraint
+y castemaos la estimacion del problema en terminos de theta y a = {a_1,a_2...a_n}
+
+{poner formula J(theta, theta_0; alpha) = 1/2 * ||theta||^2 - sum .... explicada a detalle cada termino y asi}
+
+El problema original de minimizcion para theta es transforamd como un prolema de meximizacion de J(theta, theta_0; alpha)
+con respecto a alpha
+
+    J(theta, theta_0) = max J(theta, theta_0; alpha)
+
+{Explicacion de cambio de la maximizacion y minimzacion, la forma primal y la forma dual}
+
+Si quiero enontrat rl minimo debo derivar con respecto a theta y luego a thetpa 0
+{poner las derivafas }
+
+la derivada de theta es el gradiente poque es la derivada del vector
+
+{poner todo el desarrollo de la sustitucoin de theta }
+
+{luego la forma dual y luego la matriz
+
+teorema que dice que para cuna funcion simetrica positiva existe un espacio de hilbert y una funcion phi
+tal que...
+
+es el truco del kernel}
+
+una funcion de esas es la istancia, simetrica y positiva semi definida
+
+gracias a ese toerama odemos ssutituir el producto interno costos de svm por otra funcion 
+
+las funciones mas utilizadas son los kernels polinimulaes y el radial basis 
+
+ahora, si ya resolvi el problema para alpha puedo saber quien es theta 
+
+EL MARGEN GEMOETRICO ES EL MISMO
+
+--- Clasificacion multiclase ---
+
+primero se intento convertir un problema de mas d dos clases en problema de dos clases
+suponiendo q tengo 3 clses es 
+
+1 | 2,3
+2 | 3,1
+3 | 1,2 
+
+y por sonsiguiente 3 clasificadores... y la solucion final es lo que diga la mayoria 
+
+pero existe una idea... one vs all clasification
+
+tenemos dos pociones, la anterior y divid
+
+pero tambien esta el direct multi class svm 
