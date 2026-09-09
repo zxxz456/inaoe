@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.9.0
+* Version: 1.10.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       08/09/2026      Agregue fundamentos_aal/actividades/
 zxxz6       29/08/2026      Agregue seminario1/ al indice
 zxxz6       25/08/2026      machine_learning ya tiene libreta
 zxxz6       25/08/2026      Agregue machine_learning/ al indice
@@ -67,6 +68,12 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](fundamentos_aal/apuntes/raw_notes/).
+  - [actividades/](fundamentos_aal/actividades/) - Entregas del curso, una
+    carpeta por actividad. Cada una lleva su `README.md` con el enunciado
+    literal del profesor.
+    - [actividad_1/](fundamentos_aal/actividades/actividad_1/) - Preprocesar
+      la colección Time y extraer el vocabulario con su frecuencia de
+      término, para documentos y consultas. Entrega el 11/09/2026.
   - [material_apoyo/](fundamentos_aal/material_apoyo/) - Desarrollos de
     fondo para repasar, generados con Claude y aparte de la toma de clase.
     - [modelos_n_gramas.tex](fundamentos_aal/material_apoyo/modelos_n_gramas.tex) -
