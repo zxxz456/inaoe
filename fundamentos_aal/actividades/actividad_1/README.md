@@ -5,25 +5,13 @@ README.md
 
 Descripcion:
 ------------
-Enunciado de la actividad 1 de Fundamentos para el Analisis Automatico
-de Lenguaje, tal como lo dio el profesor. Preprocesar la coleccion Time
-y extraer el vocabulario con su frecuencia de termino, tanto de los
-documentos como de las consultas.
-
-
-Considerations:
-------------
-- Las instrucciones se transcriben literales, no se reinterpretan. Si
-  hay una duda de interpretacion se pregunta, no se decide aqui
-- La coleccion Time no se versiona: son 423 documentos que se bajan de
-  la liga de Glasgow que viene abajo
-- Fecha de entrega: 11/09/2026
+Actividad 1
 
 
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
