@@ -1,0 +1,83 @@
+Query1 administr 1 buddhist 1 diem 1 dinh 1 kennedi 1 ngo 1 pressur 1 stop 1 suppress 1
+Query2 ambassador 1 cabot 1 chang 1 diem 1 effort 1 henri 1 lodg 1 nam' 1 polici 1 polit 1 presid 1 repress 1 viet 1
+Query3 number 2 station 2 troop 2 compar 1 germani 1 nam 1 south 1 state 1 unit 1 viet 1 west 1
+Query4 diem 1 nam 1 new 1 overthrew 1 polici 1 presid 1 regim 1 south 1 u. 1 viet 1
+Query5 coup 1 involv 1 nam 1 person 1 viet 1
+Query6 act 1 buddhist 1 ceremoni 1 commit 1 gain 1 monk 1 nam 1 seek 1 south 1 suicid 1 viet 1
+Query7 aid 1 asian 1 further 1 leader 1 nation 1 neutralist 1 norodom 1 princ 1 reject 1 sihanouk 1 u. 1
+Query8 borneo 1 feder 1 join 1 malaysia 1 north 1 opinion 1 public 1 sarawak 1 survey 1 team 1 u.n 1
+Query9 indonesia 1 malaysia 1 newly-cr 1 opposit 1
+Query10 asia 1 controversi 1 creation 1 feder 1 grow 1 malaysia 1 propos 1 southeast 1
+Query11 administr 2 arrang 1 indonesia 1 irian 1 nation 1 unit 1 west 1
+Query12 controversi 1 feder 1 indonesia 1 malaya 1 malaysia 1 propos 1 territori 1 unit 1
+Query13 truce 2 14 1 agre 1 britain 1 geneva 1 lao 1 nation 1 precari 1
+Query14 countri 1 discuss 1 east 1 form 1 intern 1 maphilindo 1 name 1 part 1 relat 1
+Query15 chung 1 elect 1 hee 1 korea 1 park 1 presid 1 south 1
+Query16 commiss 1 control 1 effort 1 fight 1 flare 1 indo-china 1 intern 1 lao 1 stop 1 three-nat 1 tri 1
+Query17 brunei 1 feder 1 malaysia 1 propos 1 sultan 1 withdraw 1
+Query18 contribut 1 forc 1 fund 1 nation 1 peacekeep 1 refus 1 russia' 1 support 1 unit 1
+Query19 forc 2 unit 2 yemen 2 agreement 1 arab 1 arabia 1 expeditionari 1 involv 1 nation 1 observ 1 republ 1 saudi 1 sent 1 withdraw 1
+Query20 nation 3 arrear 2 unit 2 assess 1 fail 1 involv 1 issu 1 level 1 limit 1 pay 1 payment 1 regular 1 state 1 warn 1
+Query21 32 1 africa 1 african 1 complaint 1 consider 1 council 1 nation 1 portug 1 secur 1 south 1
+Query22 altern 1 congo 1 forc 1 offer 1 u.n 1 withdrawn 1
+Query23 countri 1 join 1 nation 1 newli 1 unit 1
+Query24 african 1 coloni 1 effort 1 free 1 nation 1 portug 1 unit 1
+Query25 arab 1 conflict 1 consider 1 israel 1 neighbor 1 u.n 1
+Query26 compris 1 effect 1 major 1 nation 1 u.n 1 underdevelop 1
+Query27 british 1 four-pow 1 high 1 level 1 meet 1 negoti 1 new 1 propos 1 russia 1 summit 1
+Query28 elect 1 italian 1 parti 1 polit 1 popular 1 strength 1 variou 1 vote 1
+Query29 state 2 concern 1 export 1 most-favored-n 1 presid 1 rusk 1 secretari 1 talk 1 tito 1 treatment 1 unit 1 yugoslav 1 yugoslavia 1
+Query30 profumo 2 scandal 2 british 1 chanc 1 confid 1 effect 1 elect 1 labor' 1 macmillan 1 minist 1 next 1 parliamentari 1 prime 1 vote 1 won 1
+Query31 chancellorship 1 discuss 1 figur 1 futur 1 german 1 leader 1 west 1
+Query32 east 2 countri 1 european 1 germani 1 khrushchev 1 leader 1 premier 1 satellit 1 talk 1
+Query33 controversi 1 crisi 1 fleme 1 govern 1 involv 1 produc 1 walloon 1
+Query34 agricultur 1 difficulti 1 face 1 govern 1 grow 1 ireland' 1 minor 1 polici 1 unrest 1
+Query35 portug 2 african 1 possess 1 talk 1 troubl 1 u. 1
+Query36 antonin 1 czech 1 head 1 novotni 1 presid 1 regim 1 shake-up 1
+Query37 canada 1 deal 1 involv 1 russia 1 state 1 unit 1 wheat 1
+Query38 europ 1 forc 1 number 1 reduc 1 specul 1 u. 1
+Query39 democrat 2 christian 1 coalit 1 form 1 govern 1 itali 1 left-w 1 republican 1 social 1 socialist 1
+Query40 parti 2 britain 1 conserv 1 labor 1 lead 1 polit 1 poll 1 regard 1 result 1
+Query41 affect 1 alli 1 de 1 gaull 1 propos 1 reject 1 relat 1
+Query42 belief 1 de 1 defens 1 european 1 forc 1 france' 1 gaulle' 1 keyston 1 nuclear 1 presid 1 system 1
+Query43 closer 1 effort 1 khrushchev 1 relationship 1 yugoslavia 1
+Query44 bonn' 1 east-west 1 nonaggress 1 opposit 1 pact 1 propos 1
+Query45 background 1 britain 1 great 1 minist 1 new 1 prime 1
+Query46 british 1 common 1 de 1 entri 1 gaulle' 1 market 1 polici 1 presid 1
+Query47 europ 1 independ 1 propos 1 u. 1 unifi 1
+Query48 hot 1 line 1 propos 1
+Query49 background 1 chancellor 1 erhard 1 germani 1 ludwig 1 new 1 west 1
+Query50 april 1 countri 1 meet 1 member 1 minist 1 nato 1 pari 1 seato 1
+Query51 khrushchev 1 premier 1 successor 1
+Query52 premier 2 communist 1 hint 1 khrushchev 1 parti 1 post 1 retir 1 secretari 1
+Query53 pact 2 khrushchev 1 nation 1 nato 1 nonaggress 1 premier 1 press 1 warsaw 1
+Query54 ban 1 china' 1 communist 1 nuclear 1 reaction 1 sign 1 soviet 1 test 1 treati 1 union' 1 west 1
+Query55 crew 1 fleet 1 intern 1 kennedi 1 man 1 missil 1 nato 1 nuclear 1 presid 1 suggest 1
+Query56 cooper 1 kennedi 1 moon 1 presid 1 project 1 soviet 1 suggest 1 u. 1 union 1
+Query57 ban 1 provis 1 test 1 treati 1
+Query58 fleet 1 missil 1 nation 1 nuclear 1 polari 1 possess 1 submarin 1 u. 1
+Query59 confer 1 disarma 1 disput 1 geneva 1 inspect 1 soviet 1 system 1 u. 1 union 1
+Query60 ban 1 sign 1 test 1 treati 1
+Query61 develop 1 nation 1 nuclear 1 weapon 1 work 1
+Query62 autonomi 1 kurd' 1 moscow' 1 struggl 1 support 1
+Query63 arab 1 control 1 govern 1 nasser' 1 parti 1 present 1 presid 1 remain 1 rule 1 syria 1 union 1
+Query64 attack 1 come 1 entertain 1 govern 1 indian 1 minist 1 motion 1 nehru' 1 no-confid 1 offic 1 parliament 1 prime 1
+Query65 border 1 disput 1 israel 1 syria 1
+Query66 econom 2 agreement 1 closer 1 cooper 1 full 1 iraq 1 syria 1 uniti 1
+Query67 conflict 1 continu 1 india 1 kashmir 1 pakistan 1
+Query68 chines 1 communist 1 fear 1 indian 1 invas 1
+Query69 aflak 1 aim 1 arab 1 baath 1 control 1 countri 1 found 1 gain 1 iraq 1 michel 1 parti 1 renaiss 1 syria 1 unit 1
+Query70 away 1 feisal' 1 free 1 give 1 half-broth 1 king 1 power 1 reform 1 rein 1 rule 1 sign 1 state 1
+Query71 somalia 2 aid 1 border 1 disput 1 involv 1 militari 1 neighbor 1 russia 1 suppli 1
+Query72 africa 1 apartheid 1 econom 1 nation' 1 polici 1 protest 1 south 1 step 1
+Query73 algeria 1 algerian 1 bella 1 ben 1 bring 1 critic 1 help 1 increas 1 independ 1 leader 1 premier 1
+Query74 congo 1 katanga 1 mois 1 provinc 1 tshomb 1
+Query75 adoula' 1 charg 1 countri 1 cyril 1 embassi 1 order 1 premier 1 soviet 1 spi 1 staff 1 thrown 1
+Query76 african 2 22 1 31 1 ababa 1 addi 1 confer 1 head 1 independ 1 nation 1 state 1 uniti 1
+Query77 african 1 control 1 relax 1 spain' 1 territori 1
+Query78 kenya 2 12 1 africa 1 britain 1 dec 1 east 1 feder 1 form 1 gain 1 independ 1 tanganyika 1 uganda 1
+Query79 algerian 1 bella' 1 ben 1 constitut 1 full 1 give 1 new 1 parti 1 polit 1 power 1 premier 1 vote 1
+Query80 africa 1 america 1 area 1 asia 1 disput 1 effect 1 ferment 1 latin 1 nation 1 new 1 sino-soviet 1
+Query81 communist 2 world 2 chines 1 non-communist 1 rest 1 soviet 1 trade 1 union 1
+Query82 albanian 1 back 1 china 1 communist 1 ideolog 1 soviet 1 split 1 union 1
+Query83 assist 1 blame 1 chines 1 delay 1 develop 1 econom 1 program 1 red 1 russian 1 seriou 1 technic 1 treaty-break 1 troubl 1 withdraw 1
