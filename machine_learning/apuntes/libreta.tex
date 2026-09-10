@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.3.0
+%   * Version: 1.4.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/09/2026      Clase 8 Sep, forma dual, kernels y multiclase
+%  zxxz6       09/09/2026      Complete contra las diapositivas 03 a 05
 %  zxxz6       03/09/2026      Pase a LaTeX la toma cruda del 03/09
 %  zxxz6       01/09/2026      Pase a LaTeX la toma cruda del 01/09
 %  zxxz6       27/08/2026      Pase a LaTeX la toma cruda del 27/08
@@ -370,6 +372,28 @@ no estén en el dataset? ¿Es capaz de generalizar?
   algo en medio.
 \end{idea}
 
+\subsubsection*{Selección de modelo}
+
+Y cómo se encuentran clasificadores que generalicen bien. La clave es
+\emph{restringir} el conjunto de funciones binarias que uno se permite
+considerar. Se busca una clase de funciones tal que, si una función de
+la clase funciona bien en el entrenamiento, es probable que también
+funcione bien en las imágenes que no se han visto.
+
+\begin{idea}
+  \textbf{El problema de selección de modelo.} La clase correcta no
+  puede ser demasiado grande, porque entonces contiene demasiadas
+  funciones claramente distintas y una de ellas va a memorizar el
+  entrenamiento por casualidad, como la del píxel único. Pero tampoco
+  demasiado chica, porque entonces se corre el riesgo de no encontrar
+  ninguna función que funcione bien ni siquiera en el entrenamiento.
+  Encontrar esa clase es uno de los problemas centrales del
+  aprendizaje automático.
+\end{idea}
+
+Fijar la clase de funciones en los clasificadores lineales, que es lo
+que sigue, es exactamente tomar esa decisión.
+
 % =====================================================================
 
 \subsection*{Clasificadores lineales}
@@ -702,6 +726,37 @@ Cuando llegue una instancia nueva, el clasificador lineal tendrá que
 ser capaz de clasificarla: se pone en el plano y se ve si la
 superficie separadora la separa correctamente
 
+
+\subsubsection*{La garantía formal}
+
+El argumento se puede hacer preciso. Supongamos que \emph{todas} las
+imágenes y etiquetas que podríamos llegar a encontrar, no solo las del
+entrenamiento, cumplen los mismos dos supuestos: $\norm{x_t} < R$, y
+existe un $\theta^{*}$ finito con
+$y_t (\theta^{*})^{\mathsf{T}} x_t \geq \gamma$ para toda $t$. O sea
+que existe un clasificador lineal que sirve para todo el problema, no
+solo para la muestra.
+
+Ahora imaginemos que las instancias llegan una por una, y que por cada
+una hacemos a lo más un update si la clasificamos mal, y seguimos
+adelante sin volver a verla. ¿Cuántos errores vamos a cometer en esa
+secuencia arbitraria e indefinida?
+
+\begin{idea}
+  El mismo número: $k \leq (R / \gamma_{\mathrm{geom}})^{2}$. La cota
+  no cambia. Una vez cometidos esos errores, todas las instancias
+  nuevas se clasifican correctamente. Eso es una garantía de
+  generalización, y no salió de un supuesto estadístico sobre la
+  distribución de los datos, sino de la geometría del problema.
+\end{idea}
+
+\begin{ojo}
+  Con un pero: el algoritmo necesita \emph{saber} cuándo se equivocó,
+  porque la cota está expresada en número de updates, y los updates se
+  hacen sobre errores. En un escenario real donde nadie te dice la
+  etiqueta verdadera, no hay quién dispare el update.
+\end{ojo}
+
 \begin{idea}
   Lo que queremos ahora es un clasificador lineal que nos dé el
   máximo margen geométrico. De todas las superficies que separan bien
@@ -841,6 +896,37 @@ Los elementos que caen justo a la distancia geométrica son los
 llamados \textbf{vectores de soporte}, y son elementos de la muestra.
 Son los que están circulados en la figura \ref{fig:svm}.
 
+
+\subsection*{Propiedades del clasificador de margen máximo}
+
+\textbf{A favor:}
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{La solución es única} para cualquier conjunto de
+          entrenamiento linealmente separable. El perceptrón, en
+          cambio, se detiene en cualquier separador que funcione, y
+          cuál depende del orden en que le llegaron los datos.
+    \item \textbf{Es robusto a ejemplos ruidosos}, porque dejar la
+          frontera lo más lejos posible de los datos da holgura para
+          que una instancia corrida de lugar siga cayendo del lado
+          correcto.
+    \item \textbf{Depende solo de un subconjunto} de los ejemplos, los
+          que caen exactamente sobre el margen. Los demás podrían
+          estar en cualquier parte fuera del margen sin cambiar la
+          solución.
+\end{itemize}
+
+\textbf{En contra:}
+
+\begin{ojo}
+  Es robusto a ejemplos ruidosos, pero \textbf{no a etiquetas
+  ruidosas}. Un solo ejemplo mal etiquetado puede cambiar
+  radicalmente el clasificador de margen máximo: si queda del lado
+  equivocado, el pasillo tiene que encogerse hasta acomodarlo, y la
+  frontera se va a otro lado. Esa fragilidad es la que motiva las
+  variables de holgura.
+\end{ojo}
+
 % =====================================================================
 
 \subsection*{Validación cruzada}
@@ -965,6 +1051,422 @@ construye el clasificador lineal y ahí se obtiene la respuesta:
   regresarla al espacio original se ve curva, y por eso el modelo
   puede separar datos que una recta no separaba.
 \end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 08 Sep - SVM revisitada: forma dual, kernels y multiclase
+% =====================================================================
+
+\clase{SVM revisitada: forma dual y kernels}{8 de septiembre de 2026}
+
+\begin{quick_sum}
+    Retomamos el problema de mapear las instancias a un espacio donde
+    sí sean separables, y vimos que el mapeo explícito es caro y
+    normalmente ni siquiera lo conocemos. La salida es reescribir la
+    SVM en su forma dual, donde los ejemplos aparecen solo dentro de
+    productos internos, y ahí sustituir el producto por un kernel.
+    Cerramos con cómo se extiende todo esto a más de dos clases.
+\end{quick_sum}
+
+\subsection*{El mapeo explícito y su costo}
+
+La idea de la clase pasada: si el conjunto no es linealmente separable
+en $\R^d$, se busca una función $\varphi$ que lleve las instancias a un
+espacio de mayor dimensión donde sí lo sean,
+\[
+    \varphi : \R^{d} \to \R^{\mathcal{F}} ,
+    \qquad \mathcal{F} > d .
+\]
+
+\begin{ejemplo}
+  De dos dimensiones a tres, elevando y multiplicando coordenadas:
+  \[
+      [x_1, x_2] \;\longmapsto\;
+      \varphi([x_1, x_2]) = [\,x_1^{2},\; x_2^{2},\; x_1 x_2\,] .
+  \]
+  El producto interno en el espacio nuevo queda
+  \[
+      \varphi(x)^{\mathsf{T}} \varphi(z) =
+      x_1^{2} z_1^{2} + x_2^{2} z_2^{2} + x_1 x_2 z_1 z_2 .
+  \]
+  Con tres dimensiones de entrada el mismo esquema da nueve
+  coordenadas, todos los productos $x_i x_j$.
+\end{ejemplo}
+
+\begin{ojo}
+  Aquí está el problema. Encontrar la $\varphi$ adecuada no es
+  trivial, y aunque se encuentre, calcular productos internos en
+  $\R^{\mathcal{F}}$ puede salir carísimo: la dimensión crece rápido.
+  Peor aún, en general \emph{no conocemos} $\varphi$ explícitamente.
+\end{ojo}
+
+La salida no es buscar mejores mapeos, sino reformular la SVM de modo
+que $\varphi$ nunca aparezca sola, solo dentro de productos internos.
+Eso es la forma dual.
+
+% =====================================================================
+
+\subsection*{La forma dual}
+
+El problema en el espacio de características es el de siempre:
+\[
+    \min_{\theta,\,\theta_0} \; \frac{\norm{\theta}^{2}}{2}
+    \qquad \text{sujeto a} \qquad
+    y_t\big(\theta^{\mathsf{T}} \varphi(x_t) + \theta_0\big) \geq 1 ,
+    \quad t = 1, \ldots, n .
+\]
+
+Es convexo y con restricciones lineales, y ese tipo de problemas se
+puede pasar a su forma dual con multiplicadores de Lagrange. Se
+introduce un escalar no negativo $\alpha_t$ por cada restricción:
+\[
+    J(\theta, \theta_0; \alpha) = \frac{\norm{\theta}^{2}}{2}
+    - \sum_{t=1}^{n} \alpha_t
+      \Big[\, y_t\big(\theta^{\mathsf{T}} \varphi(x_t)
+      + \theta_0\big) - 1 \,\Big] .
+\]
+
+\begin{idea}
+  Cada $\alpha_t$ es el precio de violar la restricción $t$. Si la
+  restricción se cumple con holgura, al maximizar sobre $\alpha$ le
+  conviene poner $\alpha_t = 0$: esa restricción no está apretando y
+  no cobra nada. Solo las que se cumplen con igualdad, o sea las que
+  tocan el margen, terminan con $\alpha_t > 0$.
+\end{idea}
+
+Bajo las condiciones de optimalidad de Lagrange se pueden intercambiar
+el mínimo y el máximo sin cambiar la respuesta:
+\[
+    \underbrace{\min_{\theta,\theta_0} \; \max_{\alpha \geq 0}
+    J(\theta, \theta_0; \alpha)}_{\text{forma primal}}
+    \;=\;
+    \underbrace{\max_{\alpha \geq 0} \; \min_{\theta,\theta_0}
+    J(\theta, \theta_0; \alpha)}_{\text{forma dual}} .
+\]
+
+Resolviendo primero el mínimo interno, o sea derivando e igualando a
+cero:
+\begin{align*}
+    \frac{\partial J}{\partial \theta_0}
+      &= - \sum_{t=1}^{n} \alpha_t y_t = 0 , \\
+    \frac{\partial J}{\partial \theta}
+      &= \theta - \sum_{t=1}^{n} \alpha_t y_t \varphi(x_t) = 0
+      \;\Longrightarrow\;
+      \theta = \sum_{t=1}^{n} \alpha_t y_t \varphi(x_t) .
+\end{align*}
+
+\begin{idea}
+  Esa segunda ecuación dice algo fuerte: la solución $\theta$ siempre
+  vive en el subespacio generado por los ejemplos de entrenamiento. No
+  es un vector cualquiera de $\R^{\mathcal{F}}$, es una combinación
+  lineal de las propias instancias, pesada por $\alpha_t y_t$.
+\end{idea}
+
+Sustituyendo esa forma de $\theta$ en el objetivo se llega al dual:
+\[
+    \max_{\alpha} \;\; \sum_{t=1}^{n} \alpha_t
+    - \frac{1}{2} \sum_{i=1}^{n} \sum_{j=1}^{n}
+      \alpha_i \alpha_j y_i y_j
+      \big[\varphi(x_i)^{\mathsf{T}} \varphi(x_j)\big]
+\]
+sujeto a
+\[
+    \alpha_t \geq 0 , \qquad \sum_{t=1}^{n} \alpha_t y_t = 0 .
+\]
+
+Sigue siendo un problema de programación cuadrática, pero las
+restricciones son mucho más simples que las del primal.
+
+\subsubsection*{La matriz de Gram}
+
+Fíjate en lo que quedó: la dimensión $\mathcal{F}$ del espacio de
+características \textbf{ya no aparece}. El problema está formulado
+enteramente sobre la matriz de productos internos, llamada matriz de
+Gram:
+\[
+    K =
+    \begin{bmatrix}
+      \varphi(x_1)^{\mathsf{T}}\varphi(x_1) & \cdots &
+      \varphi(x_1)^{\mathsf{T}}\varphi(x_n) \\
+      \vdots & \ddots & \vdots \\
+      \varphi(x_n)^{\mathsf{T}}\varphi(x_1) & \cdots &
+      \varphi(x_n)^{\mathsf{T}}\varphi(x_n)
+    \end{bmatrix} .
+\]
+
+Es de $n \times n$, o sea que su tamaño depende del número de
+ejemplos, no de la dimensión del espacio. Ahí está la puerta.
+
+% =====================================================================
+
+\subsection*{El truco del kernel}
+
+\begin{idea}
+  \textbf{El truco del kernel.} Si tienes un algoritmo donde los
+  ejemplos aparecen \emph{solo} dentro de productos internos, puedes
+  reemplazar ese producto interno por otro, sin siquiera conocer
+  $\varphi$.
+\end{idea}
+
+Se define entonces una función kernel $K(x, x')$ tal que
+\[
+    K(x, x') = \varphi(x)^{\mathsf{T}} \varphi(x') ,
+\]
+y se sustituye. Nunca se calcula $\varphi(x)$: basta con conocer la
+forma funcional del kernel. Lo que costaba $\mathcal{F}$ operaciones
+ahora cuesta lo que cueste evaluar $K$, que suele ser $\Ord{d}$.
+
+\begin{teorema}[Mercer]
+  Para toda función $K : \R^{d} \times \R^{d} \to \R$ simétrica y
+  semidefinida positiva, existen un espacio de Hilbert $\mathcal{F}$ y
+  una función $\varphi : \R^{d} \to \mathcal{F}$ tales que
+  \[
+      K(x, x') = \langle \varphi(x), \varphi(x') \rangle .
+  \]
+\end{teorema}
+
+\begin{idea}
+  Este teorema es el permiso para trabajar al revés. No hace falta
+  construir el kernel a partir de un conjunto de funciones base
+  $\varphi_1(x), \ldots, \varphi_r(x)$: basta definir una $K$ que
+  cumpla las dos condiciones, simetría y semidefinida positiva, y el
+  teorema garantiza que \emph{alguna} $\varphi$ existe. Nunca hay que
+  verla.
+\end{idea}
+
+\subsubsection*{Kernels estándar}
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Polinomial} &
+      $K(x, x') = \big(1 + x^{\mathsf{T}} x'\big)^{p}$,
+      \quad $p = 1, 2, \ldots$ \\[0.4em]
+    \textbf{Base radial (RBF)} &
+      $K(x, x') = \exp\!\left(
+      -\dfrac{\beta}{2}\,\norm{x - x'}^{2}\right)$,
+      \quad $\beta > 0$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Con $p = 1$ el polinomial es prácticamente el producto interno
+original, o sea la SVM lineal de siempre. El RBF corresponde a un
+espacio de características de dimensión infinita, y aun así se evalúa
+con una resta, una norma y una exponencial.
+
+% =====================================================================
+
+\subsection*{Clasificar con la solución dual}
+
+Ya con los $\alpha_t$ resueltos, una instancia nueva se clasifica con
+la función discriminante:
+\[
+    \hat{y}(x) = \theta^{\mathsf{T}}\varphi(x) + \theta_0
+    = \sum_{t \in \mathrm{SV}} \alpha_t y_t\, K(x_t, x) + \theta_0 ,
+\]
+donde $\mathrm{SV}$ es el conjunto de vectores de soporte, o sea los
+que tienen $\alpha_t \neq 0$.
+
+\begin{idea}
+  Aquí reaparece la dispersión que ya conocíamos. Muchos $\alpha_t$
+  salen exactamente cero de la optimización, y son distintos de cero
+  \emph{solo} para los vectores de soporte. Por eso la suma corre
+  sobre $\mathrm{SV}$ y no sobre los $n$ ejemplos: los demás no
+  aportan nada al clasificar.
+\end{idea}
+
+\begin{ojo}
+  No sabemos qué ejemplos van a ser vectores de soporte hasta haber
+  resuelto la optimización. Y su identidad depende del kernel: cambiar
+  de kernel cambia quiénes son.
+\end{ojo}
+
+\subsubsection*{De dónde sale $\theta_0$}
+
+El offset se cayó del problema dual, así que hay que recuperarlo
+aparte. Se usa que para todo vector de soporte la restricción se
+cumple con igualdad:
+\[
+    y_i\Big(\sum_{t \in \mathrm{SV}} \alpha_t y_t\, K(x_t, x_i)
+    + \theta_0\Big) = 1 ,
+    \qquad i \in \mathrm{SV} ,
+\]
+y como $y_i \in \set{-1, 1}$ implica $y_i^{2} = 1$, se despeja
+\[
+    \theta_0 = y_i - \sum_{t \in \mathrm{SV}}
+    \alpha_t y_t\, K(x_t, x_i) .
+\]
+
+\subsubsection*{El margen geométrico en forma kernel}
+
+Sigue siendo $1/\norm{\theta}$, solo que ahora $\norm{\theta}$ se
+escribe con el kernel:
+\[
+    \hat{\gamma}_{\mathrm{geom}} = \left(
+    \sum_{i=1}^{n} \sum_{j=1}^{n}
+    \alpha_i \alpha_j y_i y_j\, K(x_i, x_j)
+    \right)^{-1/2} .
+\]
+
+% =====================================================================
+
+\subsection*{La forma dual relajada}
+
+Todo lo anterior supone que los datos sí son separables en el espacio
+de características. Con variables de holgura el primal era
+\[
+    \min \; \frac{\norm{\theta}^{2}}{2} + C \sum_{t=1}^{n} \xi_t
+    \qquad \text{sujeto a} \qquad
+    y_t\big(\theta^{\mathsf{T}}\varphi(x_t) + \theta_0\big)
+    \geq 1 - \xi_t .
+\]
+
+Su dual es casi idéntico al de arriba. La \emph{única} diferencia es
+que los multiplicadores quedan acotados por arriba:
+\[
+    \max_{\alpha} \;\; \sum_{t=1}^{n} \alpha_t
+    - \frac{1}{2} \sum_{i=1}^{n} \sum_{j=1}^{n}
+      \alpha_i \alpha_j y_i y_j\, K(x_i, x_j)
+    \qquad \text{sujeto a} \qquad
+    0 \leq \alpha_t \leq C ,
+    \quad \sum_{t=1}^{n} \alpha_t y_t = 0 .
+\]
+
+\begin{idea}
+  Por qué la cota superior: sin ella, una restricción imposible de
+  satisfacer haría crecer su $\alpha_t$ hasta infinito, porque el
+  precio de violarla nunca dejaría de subir. El valor $C$ es
+  justamente el punto donde uno decide dejar de insistir con esa
+  restricción. Es el mismo $C$ del primal, visto desde el otro lado.
+\end{idea}
+
+\begin{ojo}
+  Con holgura, $\theta_0$ ya no se despeja con cualquier $\alpha_t > 0$.
+  Hay que usar los que cumplen $0 < \alpha_t < C$, o sea excluir los
+  que están en el tope. Un $\alpha_t = C$ marca un punto que
+  \emph{viola} la restricción de margen, y para ese la igualdad no se
+  cumple.
+\end{ojo}
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Valor de $\alpha_t$} & \textbf{Dónde cae el ejemplo} &
+      \textbf{Sirve para $\theta_0$} \\
+    \midrule
+    $\alpha_t = 0$     & Fuera del margen, bien clasificado & No \\
+    $0 < \alpha_t < C$ & Justo sobre el margen              & Sí \\
+    $\alpha_t = C$     & Viola el margen                    & No \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Clasificación multiclase}
+
+Hasta aquí todo fue binario. En multiclase cada punto de entrenamiento
+pertenece a una de $N$ clases distintas, y se quiere una función que,
+dado un punto nuevo, determine correctamente a cuál pertenece.
+
+\begin{ojo}
+  Eso \textbf{no} es lo mismo que multietiqueta. Hay escenarios con
+  varias categorías donde un punto puede pertenecer a varias a la vez,
+  y ese es otro problema.
+\end{ojo}
+
+\subsubsection*{One vs All (OVA)}
+
+Se construyen $N$ clasificadores binarios. Para el $i$-ésimo, los
+positivos son todos los puntos de la clase $i$ y los negativos todos
+los que no. Si $f_i$ es ese clasificador, se decide con
+\[
+    f(x) = \arg\max_{i} \; f_i(x) .
+\]
+
+\subsubsection*{All vs All (AVA)}
+
+Un clasificador por cada par de clases $i, j$, donde $i$ son los
+positivos y $j$ los negativos. Como $f_{ji} = -f_{ij}$, en realidad
+solo hay que entrenar $N(N-1)/2$ de ellos. Se decide sumando votos:
+\[
+    f(x) = \arg\max_{i} \; \sum_{j} f_{ij}(x) .
+\]
+También se le llama \emph{all-pairs} o \emph{one-vs-one}.
+
+\begin{idea}
+  OVA y AVA son tan simples que mucha gente los inventó por separado.
+  Y eligiendo buenos clasificadores binarios de base, funcionan tan
+  bien como cualquier otra cosa que se te ocurra.
+\end{idea}
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+     & \textbf{OVA} & \textbf{AVA} \\
+    \midrule
+    Clasificadores & $\Ord{N}$ & $\Ord{N^{2}}$ \\
+    Tamaño de cada uno & Todo el conjunto & Solo dos clases \\
+    Balance de clases & Desbalanceado & Balanceado \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+AVA sale más rápido y usa menos memoria pese a entrenar más
+clasificadores, porque cada uno es mucho más chico. Si el tiempo de
+entrenamiento es superlineal en el número de puntos, que es el caso de
+la SVM, AVA es la mejor opción. OVA además produce muestras de
+entrenamiento desbalanceadas: una clase contra las otras $N-1$ juntas.
+
+\subsubsection*{SVM multiclase directa}
+
+En lugar de armar varios clasificadores binarios, lo natural es
+distinguir todas las clases en una sola optimización.
+
+\textbf{Weston y Watkins (1999).} Un vector de pesos $w_m$ por clase, y
+una holgura $\xi_{i,t}$ por cada ejemplo y cada clase equivocada:
+\[
+    \min \;\; \frac{1}{2}\sum_{m=1}^{k} w_m^{\mathsf{T}} w_m
+    + C \sum_{i=1}^{l} \sum_{t \neq y_i} \xi_{i,t}
+\]
+sujeto a
+\[
+    w_{y_i}^{\mathsf{T}} \varphi(x_i) + b_{y_i} \geq
+    w_{t}^{\mathsf{T}} \varphi(x_i) + b_{t} + 2 - \xi_{i,t} ,
+    \qquad \xi_{i,t} \geq 0 .
+\]
+Se decide con $\arg\max_m \big(w_m^{\mathsf{T}}\varphi(x) + b_m\big)$.
+Su desventaja principal es el tiempo de cómputo: el problema
+cuadrático resultante es enorme.
+
+\textbf{Crammer y Singer (2001).} Misma idea pero con una sola holgura
+$\xi_i$ por ejemplo, no una por clase:
+\[
+    \min \;\; \frac{1}{2}\sum_{m=1}^{k} w_m^{\mathsf{T}} w_m
+    + C \sum_{i=1}^{l} \xi_i
+\]
+sujeto a
+\[
+    w_{y_i}^{\mathsf{T}} \varphi(x_i)
+    - w_{t}^{\mathsf{T}} \varphi(x_i)
+    \geq 1 - \delta_{y_i, t} - \xi_i ,
+\]
+donde $\delta_{i,j}$ es la delta de Kronecker, que vale $1$ si $i = j$
+y $0$ si no. La optimización se hace sin los términos de offset $b_m$.
+
+\textbf{SimMSVM (He et al., 2012).} Reduce el número de restricciones
+de margen a $l$, una por ejemplo, comparando la clase correcta contra
+el promedio de las demás:
+\[
+    w_{y_i}^{\mathsf{T}} \varphi(x_i)
+    - \frac{1}{k-1} \sum_{m \neq y_i}
+      w_m^{\mathsf{T}} \varphi(x_i) \geq 1 - \xi_i .
+\]
+Sus autores probaron que su formulación dual es exactamente la de
+Crammer y Singer con una restricción adicional, y cada modelo de clase
+se construye sobre sus propios vectores de soporte.
 
 \end{document}
 
