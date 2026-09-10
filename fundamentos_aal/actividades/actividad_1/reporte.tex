@@ -1,0 +1,383 @@
+% =====================================================================
+%  reporte.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Reporte de la actividad 1 de Fundamentos para el Análisis Automático
+%  de Lenguaje: preprocesamiento de la colección Time y extracción del
+%  vocabulario con su frecuencia de término.
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.5.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       09/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Fundamentos para el Análisis Automático de Lenguaje}
+\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías \\
+                       Dr. Luis Villaseñor Pineda \\
+                       Dr. Manuel Montes y Gómez \\
+                       Dr. Aurelio López López}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../../templates/Preambulo.tex}
+
+% El preambulo compartido pone el numero de pagina en el pie. Un
+% reporte de tres hojas no lo necesita, asi que se limpia solo aqui.
+\fancyfoot[C]{}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\begin{center}
+  {\LARGE\bfseries Actividad 1\par}
+  \vspace{0.3em}
+  {\large Preprocesamiento y vocabulario de la colección Time\par}
+  \vspace{0.5em}
+  {\small \alumno \quad-\quad \periodo\par}
+  \vspace{0.4em}
+  \rule{\linewidth}{0.5pt}
+\end{center}
+
+\section*{Resumen}
+
+Se preprocesó la colección Time y se extrajo el vocabulario con su
+frecuencia de término, tanto de los 423 documentos como de las 83
+consultas, utilizando el texto en crudo, sin palabras nulas,
+truncado con Porter original y con la variante de NLTK. 
+El preprocesamiento consistió en eliminar las palabras
+vacías de la lista propia de la colección y truncar con el algoritmo
+de Porter. El vocabulario global pasó de 29\,418 términos en el
+texto crudo a 16\,675 tras el pipeline completo, una reducción del
+$43.3\%$. También hicieron comparaciones de los vocabularios en las 
+diferentes etapas del preprocesamiento.
+
+\section{La colección}
+
+Time es una colección de prueba clásica de recuperación de
+información, distribuida por el IR Group de Glasgow. Son artículos de
+la revista Time de 1963, en texto ASCII, todo en mayúsculas y con la
+puntuación mayormente separada por espacios.
+
+\begin{center}
+\begin{tabular}{llr}
+    \toprule
+    \textbf{Archivo} & \textbf{Contenido} & \textbf{Cantidad} \\
+    \midrule
+    \texttt{TIME.ALL} & Documentos, marcador \texttt{*TEXT} & 423 \\
+    \texttt{TIME.QUE} & Consultas, marcador \texttt{*FIND}  & 83 \\
+    \texttt{TIME.REL} & Juicios de relevancia               & 83 \\
+    \texttt{TIME.STP} & Palabras vacías                     & 340 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\section{Método}
+
+El procesamiento se implementó en \texttt{actividad.ipynb}, un
+\emph{notebook} de Jupyter sobre Python 3.13. Se apoya en dos
+bibliotecas y en nada más:
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Biblioteca} & \textbf{Versión} & \textbf{Para qué} \\
+    \midrule
+    \texttt{nltk}   & 3.10.3 & El \texttt{PorterStemmer}, en sus dos
+                                modos \\
+    \texttt{pandas} & 3.0.5  & Las tablas de vocabulario y la matriz
+                                documento-término \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La lectura, la tokenización y el filtrado de palabras vacías se
+resolvieron con la biblioteca estándar, principalmente
+\texttt{collections.Counter} para las frecuencias y
+\texttt{str.strip} para la puntuación. Las versiones están fijadas en
+\texttt{../requirements.txt}, porque el resultado depende de ellas: el
+\texttt{PorterStemmer} de NLTK cambia de comportamiento entre modos, y
+eso mueve el vocabulario.
+
+El procesamiento son cuatro etapas, aplicadas por igual a documentos y
+consultas:
+
+\begin{enumerate}[itemsep=0.15em]
+    \item \textbf{Lectura.} Se separa cada archivo por su marcador. Un
+          documento va desde su \texttt{*TEXT} hasta el siguiente, o
+          hasta \texttt{*STOP} al final.
+    \item \textbf{Tokenización.} Se parte por espacios y se quita la
+          puntuación de los extremos de cada token, conservando la
+          interna para no destrozar siglas como \emph{U.S}.
+    \item \textbf{Eliminación de palabras vacías.} Se comparan los
+          tokens limpios contra las 340 entradas de
+          \texttt{TIME.STP}.
+    \item \textbf{Truncamiento.} Porter, en sus dos variantes: el
+          algoritmo original de 1980 y el de NLTK por omisión.
+\end{enumerate}
+
+El vocabulario se representa en forma larga, una fila por par
+documento-término con su frecuencia, y se escribe al formato pedido:
+una línea por documento con su identificador seguido de los pares
+término y frecuencia.
+
+\section{Resultados}
+  
+Después de aplicar cada etapa de procesamiento, el vocabulario de la colección
+se reduce progresivamente, como se muestra en la Tabla~\ref{tab:docs}.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrrr}
+    \toprule
+    \textbf{Etapa} & \textbf{Tokens} & \textbf{Vocabulario} &
+      \textbf{Pares} & \textbf{Reducción} \\
+    \midrule
+    Texto crudo        & 263\,749 & 29\,418 & 140\,756 &
+      --- \\
+    Sin palabras vacías & 124\,030 & 23\,338 & 96\,865 &
+      $20.7\%$ \\
+    Porter (1980)      & 124\,030 & 16\,675 & 92\,091 &
+      $28.6\%$ \\
+    Porter (NLTK)      & 124\,030 & 16\,623 & 92\,040 &
+      $28.8\%$ \\
+    \midrule
+    \textbf{Acumulado} & $-53.0\%$ & $-43.3\%$ & $-34.6\%$ & \\
+    \bottomrule
+  \end{tabular}
+  \caption{Efecto de cada etapa sobre los 423 documentos. La reducción
+    de cada renglón es sobre el vocabulario del anterior; las dos
+    variantes de Porter parten de la misma etapa. El acumulado es con
+    Porter de 1980.}
+  \label{tab:docs}
+\end{table}
+
+Y, al construir la matriz del lenguaje como lo vimos en clase, con los
+documentos como instancias y las palabras como atributos, se obtuvo una
+matriz dispersa con las frecuencias de cada término en cada documento,
+de dimensiones distintas según la etapa del preprocesamiento.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrrr}
+    \toprule
+    \textbf{Etapa} & \textbf{Dimensiones} & \textbf{Celdas} &
+      \textbf{No cero} & \textbf{Dispersión} \\
+    \midrule
+    Texto crudo         & $423 \times 29\,418$ & 12\,443\,814 &
+      140\,756 & $98.87\%$ \\
+    Sin palabras vacías & $423 \times 23\,338$ &  9\,871\,974 &
+       96\,865 & $99.02\%$ \\
+    Porter (1980)       & $423 \times 16\,675$ &  7\,053\,525 &
+       92\,091 & $98.69\%$ \\
+    Porter (NLTK)       & $423 \times 16\,623$ &  7\,031\,529 &
+       92\,040 & $98.69\%$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Matriz documento-término en cada etapa. Las celdas
+    distintas de cero son los pares documento-término que sí
+    aparecen.}
+  \label{tab:matriz}
+\end{table}
+
+Más del $98\%$ de esa matriz son ceros en todas las etapas. En
+denso, con enteros de 32 bits, la del texto crudo pesa $49.8$ MB y
+la de Porter $28.2$ MB, casi puros ceros. Por eso el vocabulario se
+guarda en forma larga, que lista solo lo que sí aparece, y por eso
+el formato que pide el enunciado es esa misma forma.
+
+A continuación se muestran los 15 términos más comunes en cada etapa
+(crudo, sin vacías, Porter de 1980 y Porter de NLTK), así como las
+discrepancias entre los dos modos de Porter.
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{lr lr lr lr}
+    \toprule
+    \multicolumn{2}{c}{\textbf{Crudo}} &
+    \multicolumn{2}{c}{\textbf{Sin vacías}} &
+    \multicolumn{2}{c}{\textbf{Porter 1980}} &
+    \multicolumn{2}{c}{\textbf{Porter NLTK}} \\
+    \cmidrule(lr){1-2} \cmidrule(lr){3-4}
+    \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+    \emph{the} & 15\,809 & \emph{u.s} & 726 &
+      \emph{u.} & 726 & \emph{u.} & 726 \\
+    \emph{.} & 12\,148 & \emph{government} & 583 &
+      \emph{govern} & 609 & \emph{govern} & 609 \\
+    \emph{of} & 7\,219 & \emph{new} & 549 &
+      \emph{new} & 603 & \emph{new} & 549 \\
+    \emph{to} & 6\,303 & \emph{party} & 378 &
+      \emph{parti} & 434 & \emph{parti} & 434 \\
+    \emph{a} & 5\,781 & \emph{de} & 335 &
+      \emph{nation} & 426 & \emph{nation} & 426 \\
+    \emph{and} & 5\,501 & \emph{minister} & 310 &
+      \emph{communist} & 420 & \emph{communist} & 420 \\
+    \emph{in} & 5\,244 & \emph{west} & 310 &
+      \emph{red} & 377 & \emph{red} & 377 \\
+    \emph{\texttt{"}} & 4\,946 & \emph{war} & 280 &
+      \emph{minist} & 370 & \emph{minist} & 370 \\
+    \emph{that} & 2\,450 & \emph{south} & 280 &
+      \emph{de} & 355 & \emph{de} & 355 \\
+    \emph{for} & 2\,217 & \emph{communist} & 278 &
+      \emph{forc} & 331 & \emph{forc} & 331 \\
+    \emph{was} & 2\,134 & \emph{red} & 277 &
+      \emph{west} & 310 & \emph{west} & 310 \\
+    \emph{with} & 1\,830 & \emph{viet} & 267 &
+      \emph{war} & 297 & \emph{war} & 297 \\
+    \emph{his} & 1\,810 & \emph{british} & 247 &
+      \emph{polit} & 281 & \emph{polit} & 281 \\
+    \emph{is} & 1\,777 & \emph{president} & 243 &
+      \emph{south} & 280 & \emph{south} & 280 \\
+    \emph{he} & 1\,659 & \emph{world} & 240 &
+      \emph{countri} & 270 & \emph{countri} & 270 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Los 15 términos más frecuentes en cada etapa, con su
+    número de apariciones en toda la colección.}
+  \label{tab:top15}
+\end{table}
+
+
+Como se puede observar, en crudo los primeros lugares son artículos, 
+preposiciones y el punto,
+que con 12\,148 apariciones es el segundo término más frecuente de
+la colección, ninguno dice nada del contenido. Pero al quitar las vacías
+se puede vislumbrar el tema real, o al menos tratar de inferirlo. Y con Porter
+las frecuencias \emph{suben} aunque el vocabulario baje, porque
+\emph{govern} absorbe a \emph{government} y \emph{governments}.
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{lllr}
+    \toprule
+    \textbf{Palabra} & \textbf{Porter 1980} & \textbf{NLTK} &
+      \textbf{Veces} \\
+    \midrule
+    \emph{days} & \emph{dai} & \emph{day} & 136 \\
+    \emph{away} & \emph{awai} & \emph{away} & 100 \\
+    \emph{money} & \emph{monei} & \emph{money} & 61 \\
+    \emph{trying} & \emph{try} & \emph{tri} & 60 \\
+    \emph{news} & \emph{new} & \emph{news} & 54 \\
+    \emph{assembly} & \emph{assembli} & \emph{assembl} & 45 \\
+    \emph{pay} & \emph{pai} & \emph{pay} & 45 \\
+    \emph{stay} & \emph{stai} & \emph{stay} & 42 \\
+    \emph{died} & \emph{di} & \emph{die} & 40 \\
+    \emph{try} & \emph{try} & \emph{tri} & 37 \\
+    \emph{eyes} & \emph{ey} & \emph{eye} & 34 \\
+    \emph{possibly} & \emph{possibli} & \emph{possibl} & 31 \\
+    \emph{key} & \emph{kei} & \emph{key} & 31 \\
+    \emph{spy} & \emph{spy} & \emph{spi} & 26 \\
+    \emph{age} & \emph{ag} & \emph{age} & 24 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Las 15 discrepancias más frecuentes entre los dos modos de
+    Porter, sobre los 124\,030 tokens procesados.}
+  \label{tab:porter}
+\end{table}
+
+De la misma manera se procesaron las queries, obteniendo diferentes
+representaciones dependiendo de la etapa de procesamiento.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Etapa} & \textbf{Tokens} & \textbf{Vocabulario} &
+      \textbf{Pares} \\
+    \midrule
+    Texto crudo         & 1\,341 & 552 & 1\,228 \\
+    Sin palabras vacías & 722        & 449 & 697 \\
+    Porter (1980)       & 722        & 413 & 695 \\
+    Porter (NLTK)       & 722        & 413 & 695 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Lo mismo sobre las 83 consultas. Son mucho más cortas:
+    entre 3 y 18 palabras tras quitar las vacías, media $8.7$.}
+  \label{tab:queries}
+\end{table}
+
+
+La eliminación de palabras vacías es la que se lleva más de la mitad
+de los \emph{tokens} ($53\%$), pero apenas un quinto del
+vocabulario: quita muchas ocurrencias de pocas palabras distintas.
+Porter hace lo contrario, no cambia el número de tokens y encoge el
+vocabulario otro $28.6\%$, porque solo agrupa formas.
+
+\section{Conclusiones}
+
+El pipeline reduce el vocabulario a menos de la mitad, de 29\,418
+a 16\,675 términos, y las dos etapas contribuyen de forma
+distinta, quitar palabras vacías recorta ocurrencias, Porter agrupa
+formas.
+
+Quedan dos artefactos sin resolver. Porter se come la \emph{S} de
+\emph{U.S} tomándola por plural y la convierte en \texttt{u.}, que
+además es el término más frecuente del documento 017, con
+15 apariciones. Y el apóstrofo interno sobrevive al truncado de los
+extremos, así que \emph{britain} y \emph{britain'} quedan como dos
+términos distintos en el mismo documento.
+
+\section*{Entregables}
+
+En \texttt{out/}, una línea por documento o consulta con el formato
+\texttt{Doc<id> término frecuencia ...}:
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \texttt{vocab\_raw.txt} & Texto crudo \\
+    \texttt{vocab\_nn.txt} & Sin palabras vacías \\
+    \texttt{vocab\_porter.txt} & Sin vacías y con Porter (1980) \\
+    \texttt{vocab\_queries\_*.txt} & Lo mismo para las consultas \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El código está en \texttt{actividad.ipynb} y el entorno en
+\texttt{../requirements.txt}.
+
+\section*{Referencias}
+
+\begin{enumerate}[label={[\arabic*]}, itemsep=0.3em, leftmargin=*]
+    \item \textbf{Colección Time.} IR Group, University of Glasgow.
+          Colecciones de prueba para recuperación de información.\\
+          \url{http://ir.dcs.gla.ac.uk/resources/test_collections/}\\
+          De ahí se descargó \texttt{time.tar.gz}, con
+          \texttt{TIME.ALL}, \texttt{TIME.QUE}, \texttt{TIME.REL} y
+          \texttt{TIME.STP}.
+    \item \textbf{Algoritmo de Porter.} Martin Porter. Página oficial
+          del algoritmo, con la especificación y las
+          implementaciones.\\
+          \url{https://tartarus.org/martin/PorterStemmer/}\\
+          Publicado originalmente como \emph{An algorithm for suffix
+          stripping}, Program, 14(3), pp. 130--137, 1980.
+    \item \textbf{NLTK.} La implementación usada es
+          \texttt{nltk.stem.PorterStemmer} 3.10.3, en sus modos
+          \texttt{ORIGINAL\_ALGORITHM} y \texttt{NLTK\_EXTENSIONS}.
+\end{enumerate}
+
+\appendix
+
+\end{document}
+
+%############################# END OF REPORTE.TEX ##############################
+%###############################################################################
