@@ -12,12 +12,15 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.3.0
+%   * Version: 2.6.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/09/2026      Clase 9 Sep, representaciones y POS tagging
+%  zxxz6       09/09/2026      Nombre el algoritmo de Porter en preprocesado
+%  zxxz6       09/09/2026      Clase 7 Sep, expansion de consultas y clustering
 %  zxxz6       31/08/2026      Clase 31 Ago, modelos de lenguaje y evaluacion
 %  zxxz6       26/08/2026      Clase 26 Ago, continuacion del VSM
 %  zxxz6       24/08/2026      Clase 24 Ago, IR
@@ -345,6 +348,44 @@ vocabulario, y el vocabulario es el que define el tamaño del índice.
 La segunda es que sin esto el matching falla por pura forma: la
 consulta dice \textit{corrió} y el documento dice \textit{corriendo},
 que para una comparación de cadenas son dos cosas distintas.
+
+\subsubsection*{El algoritmo de Porter}
+
+El truncador estándar para inglés... lo
+publicó Martin Porter en 1980 y sigue siendo el que se usa por omisión
+en recuperación de información.
+
+No consulta ningún diccionario. Son reglas de sufijos agrupadas en
+cinco pasos que se aplican en orden, y dentro de cada paso gana el
+sufijo más largo que empate: primero los plurales y las terminaciones
+de verbo, luego los sufijos dobles como \textit{ational} o
+\textit{izer}, y al final la \textit{e} muda.
+
+La pieza que evita que destroce palabras cortas es la medida $m$. Cada
+palabra se modela como
+\[
+    [C]\,(VC)^{m}\,[V] ,
+\]
+donde $C$ es una racha de consonantes y $V$ una de vocales, así que $m$
+mide qué tan larga es la raíz. Casi toda regla lleva una condición
+sobre $m$, y por eso el mismo sufijo se trata distinto según la
+palabra: \textit{feed} se queda igual porque tiene $m = 0$, mientras
+que \textit{agreed} sí se trunca a \textit{agre}.
+
+\begin{idea}
+    El resultado no tiene que ser una palabra real, y no importa: el
+    stem solo es la llave con la que se agrupan las variantes.
+    \textit{Studies}, \textit{studied} y \textit{studying} caen los
+    tres en \textit{studi}, que no existe, pero con eso la consulta ya
+    empata con los tres documentos.
+\end{idea}
+
+Se equivoca en las dos direcciones. Junta lo que no va junto:
+\textit{universal}, \textit{university} y \textit{universe} terminan
+los tres en \textit{univers}. Y deja separado lo que sí va junto:
+\textit{europe} da \textit{europ}, pero \textit{european} se queda
+completo. Es ruido conocido y en IR sale a cuenta.
+
 
 \subsection*{Vector Space Model}
 
@@ -1137,6 +1178,342 @@ altura $P@k$. Sumar las áreas de los rectángulos es calcular
         \item pq es difícil tener $100$ de recall?
         \item ideas para solucionarlo?
     \end{itemize}
+\end{pendiente}
+
+\newpage
+% =====================================================================
+
+\clase{Expansión de consultas y clustering}{7 de septiembre de 2026}
+
+\begin{quick_sum}
+    Arrancamos respondiendo las tres preguntas que quedaron pendientes
+    de la clase pasada, y las tres tienen la misma raíz: la consulta es
+    ambigua. De ahí salió la expansión de consultas, con sus tres vías
+    (tesauros, retroalimentación del usuario y automática), el método
+    de Rocchio y la semántica distribucional. Cerramos con clustering,
+    que ataca el mismo problema pero del lado del resultado.
+\end{quick_sum}
+
+\subsection*{Por qué no se llega al 100}
+
+Las tres preguntas que dejó el Dr. la clase pasada se responden con lo
+mismo.
+
+Es difícil tener 100 de precisión porque la consulta es ambigua. Basta
+imaginar una consulta de una sola palabra: el sistema no tiene con qué
+saber a cuál de sus sentidos se refiere el usuario, así que devuelve
+documentos de todos, y los que sobran cuentan como error.
+
+Es difícil tener 100 de recall por la misma razón. Si la consulta dice
+\emph{coche} y el documento relevante dice \emph{automóvil}, el sistema
+no los empata y ese documento se queda fuera.
+
+\begin{idea}
+    La salida es ser lo más específico posible en la consulta. El
+    problema es que el usuario no sabe serlo: no conoce la colección ni
+    el vocabulario con el que está escrita. Entonces el sistema lo hace
+    por él, y eso es la expansión de consultas.
+\end{idea}
+
+\subsection*{Expansión de consultas}
+
+Expandir una consulta es agregarle términos que el usuario no escribió
+pero que apuntan a lo mismo que quiso decir: sinónimos, variantes
+morfológicas, términos relacionados. La consulta original no se
+sustituye, se le suman términos para que empate con más documentos
+relevantes.
+
+Sirve sobre todo para el recall, que es lo que la ambigüedad rompe
+primero. El riesgo va en la otra dirección: cada término que se agrega
+puede traer documentos que no vienen al caso, y eso baja la precisión.
+
+Hay tres vías para decidir qué términos agregar:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Tesauros.} Un recurso externo ya construido, que dice
+          qué palabras se relacionan con cuáles.
+    \item \textbf{Retroalimentación del usuario.} Se le pregunta cuáles
+          de los resultados le sirvieron y se aprende de ahí.
+    \item \textbf{Expansión automática.} Las asociaciones se sacan de
+          la propia colección, sin recurso externo ni usuario.
+\end{itemize}
+
+\subsubsection*{Basada en tesauros}
+
+A cada término de la consulta se le agregan sus sinónimos y términos
+relacionados según un tesauro, que puede ser general, como WordNet, o
+del dominio.
+
+Incrementa el recall, porque la consulta empieza a empatar con
+documentos escritos con otro vocabulario. Pero baja la precisión, y la
+razón es que el tesauro no sabe de cuál sentido se está hablando: si la
+consulta trae \emph{banco}, le agrega lo de la institución financiera y
+lo del asiento por igual.
+
+\subsubsection*{Retroalimentación de relevancia}
+
+El sistema devuelve una primera tanda de resultados, el usuario marca
+cuáles le sirvieron y cuáles no, y con eso el sistema arma una consulta
+nueva y vuelve a buscar.
+
+La ventaja es que la evidencia viene del usuario, que es el único que
+sabe qué necesita. La desventaja es que hay que pedírsela, y en un
+buscador real casi nadie se toma la molestia.
+
+\subsubsection*{Método de Rocchio}
+
+Es la forma estándar de aplicar esa retroalimentación. Como todo son
+vectores, la consulta se puede mover en el espacio: la idea es
+acercarla a los documentos que el usuario marcó como relevantes y
+alejarla de los que marcó como irrelevantes.
+
+\[
+    \vec{q}_m = \alpha\, \vec{q}_0
+    + \beta\, \frac{1}{\abs{D_r}} \sum_{\vec{d} \in D_r} \vec{d}
+    - \gamma\, \frac{1}{\abs{D_{nr}}} \sum_{\vec{d} \in D_{nr}} \vec{d}
+\]
+
+donde $\vec{q}_0$ es la consulta original, $D_r$ y $D_{nr}$ son los
+conjuntos de documentos marcados como relevantes e irrelevantes, y
+$\alpha$, $\beta$ y $\gamma$ pesan cuánto cuenta cada parte.
+
+\begin{ojo}
+    En la práctica $\beta > \gamma$. La evidencia positiva es más
+    confiable que la negativa: que al usuario le haya servido un
+    documento dice mucho, que no le haya servido puede deberse a que ya
+    lo conocía o a que no lo abrió.
+\end{ojo}
+
+\subsubsection*{Retroalimentación pseudo relevante}
+
+Igual que la anterior, pero sin preguntarle nada al usuario: se asume
+que los primeros $n$ resultados son relevantes y se aplica Rocchio con
+ellos.
+
+Funciona bien cuando la primera tanda ya es decente. Cuando no lo es,
+refuerza el error: la consulta se mueve hacia documentos equivocados y
+la segunda tanda sale peor que la primera.
+
+\subsection*{Semántica distribucional}
+
+La tercera vía, la automática. En lugar de un tesauro externo o del
+usuario, las asociaciones entre palabras salen de la propia colección.
+
+Se parte de la matriz de términos contra documentos y se multiplica por
+su transpuesta. El resultado es una matriz cuadrada de términos contra
+términos, donde cada celda dice en cuántos contextos aparecen juntas
+dos palabras.
+
+\[
+    C = A A^{T},
+    \qquad
+    A \in \R^{|V| \times |D|},
+    \qquad
+    C \in \R^{|V| \times |V|}
+\]
+
+\begin{idea}
+    El tamaño del contexto cambia qué tipo de relación sale. Con un
+    contexto grande se correlacionan palabras relacionadas por tema:
+    médico con hospital. Con un contexto chico la correlación se acerca
+    a la sinonimia, porque dos palabras rodeadas de las mismas pocas
+    palabras suelen ser intercambiables.
+\end{idea}
+
+\subsection*{Clustering en recuperación de información}
+
+Todo lo anterior ataca la ambigüedad sobre la marcha, antes de buscar.
+El clustering la ataca del otro lado, en el momento de presentar el
+resultado: se agrupan los resultados, por ejemplo por tema, y el
+usuario escoge el grupo que le interesa. Ahí desambigua él, sin tener
+que reescribir la consulta.
+
+\begin{idea}
+    \textbf{Hipótesis del cluster:} los documentos que caen en el mismo
+    grupo se comportan de forma similar respecto a la relevancia. Si
+    uno sirve para una necesidad de información, es probable que los
+    demás del grupo también.
+\end{idea}
+
+Tiene dos usos principales:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Clustering de la colección.} Se agrupa antes de
+          buscar. Da más eficiencia, porque la búsqueda se restringe a
+          los grupos prometedores en vez de recorrer todo, y tiende a
+          mejorar el recall.
+    \item \textbf{Clustering de resultados.} Se agrupa lo que se va a
+          devolver. No cambia qué se recuperó, cambia cómo se presenta,
+          y con eso la información le llega al usuario de forma más
+          efectiva.
+\end{itemize}
+
+\newpage
+% =====================================================================
+
+
+
+\clase{Representaciones más allá de las palabras}{9 de septiembre de 2026}
+
+\begin{quick_sum}
+    En esta clase impartió el Dr. Aurelio. Vimos repaso de conceptos que ya habíamos 
+    visto antes, como la ambigüedad y los problemas de sinonimia y polisemia, y cómo 
+    afectan la recuperación de información. 
+    También se introdujo la pregunta de fondo del indexado: cuál es la mejor unidad 
+    de representación para un documento y el POS tagging
+\end{quick_sum}
+
+\subsection*{Repaso: ambigüedad}
+
+La ambigüedad es la condición donde una información puede entenderse o
+interpretarse en más de un sentido. El contexto la mitiga, no la
+elimina.
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Léxica.} Palabras o frases con más de un significado
+          posible: \textit{banco}, \textit{gato}.
+    \item \textbf{Sintáctica.} La oración se puede parsear de varias
+          formas, y cada árbol da una interpretación distinta.
+    \item \textbf{Semántica.} El significado de una palabra o concepto
+          es vago o queda abierto, aunque la sintaxis sea clara.
+\end{itemize}
+
+\subsubsection*{Qué subyace: sinonimia y polisemia}
+
+Detrás de la ambigüedad hay dos problemas del lenguaje natural, y cada
+uno rompe una métrica diferente.
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Problema} & \textbf{Qué es} & \textbf{Qué degrada} \\
+    \midrule
+    Sinonimia & Varias palabras, un significado & Recall \\
+    Polisemia & Una palabra, varios significados & Precisión \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    La sinonimia baja el recall porque el documento relevante usa otra
+    palabra y nunca se recupera. La polisemia baja la precisión porque
+    la palabra empata con documentos de otro sentido y sí se recupera,
+    pero sobra. Son direcciones opuestas, por eso no hay una sola
+    solución que arregle las dos.
+\end{idea}
+
+\subsection*{Indexado de documentos}
+
+El objetivo del indexado es encontrar los significados importantes de
+un documento y construir con ellos una representación interna. Lo que
+no se indexe no existe para el sistema.
+
+Tres factores para juzgar una representación:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Precisión semántica.} Qué tan bien captura el
+          significado.
+    \item \textbf{Exhaustividad.} Si cubre todo el contenido del
+          documento o solo una parte.
+    \item \textbf{Manejabilidad.} Qué tan fácil le resulta a la
+          computadora manipularla.
+\end{itemize}
+
+\subsubsection*{Cuál es la mejor unidad de representación}
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Unidad} & \textbf{Cobertura} & \textbf{Precisión} \\
+    \midrule
+    Caracter  & Total    & Nula \\
+    Palabra   & Buena    & Baja \\
+    Frase     & Pobre    & Mayor \\
+    Concepto  & Pobre    & Alta \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Ninguna gana. Al subir de unidad se gana precisión y se pierde
+    cobertura: hay pocas frases y menos conceptos, así que casi nada
+    empata. Al bajar pasa lo contrario, todo empata y nada discrimina.
+    Por eso el modelo de espacio vectorial se quedó en la palabra: es
+    el punto donde las dos curvas todavía se cruzan.
+\end{idea}
+
+\subsection*{Etiquetado gramatical (POS tagging)}
+
+Tarea del procesamiento de lenguaje que consiste en asignarle a cada
+palabra de una oración la categoría gramatical que asume \emph{en esa
+secuencia}, no la que tendría aislada.
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Entrada} & Una cadena de palabras más un conjunto de
+                       etiquetas \\
+    \textbf{Salida}  & Una sola etiqueta, la mejor, para cada palabra \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La salida es una secuencia única: el etiquetador no propone
+alternativas, se compromete con una.
+
+\begin{ejemplo}
+    Sobre una oración de la colección Time:
+    \begin{center}
+    \begin{tabular}{llllll}
+        \toprule
+        \textit{The} & \textit{allies} & \textit{saw} &
+        \textit{the} & \textit{first} & \textit{outlines} \\
+        DT & NNS & VBD & DT & JJ & NNS \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \textit{The} sale determinante, \textit{saw} verbo en pasado.
+    Fuera de contexto \textit{saw} también es el sustantivo
+    \textit{sierra}, y es justo la ambigüedad léxica que el etiquetado
+    resuelve usando la secuencia.
+\end{ejemplo}
+
+\subsubsection*{Los conjuntos de etiquetas}
+
+Los dos de referencia salen de sendos corpus anotados a mano. El de
+\textbf{Brown} es el grande, del orden de 87 etiquetas, con
+distinciones muy finas. El de \textbf{Penn Treebank} lo simplificó a 36
+categorías gramaticales, más los signos de puntuación, y es el que se
+usa por omisión hoy.
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Etiqueta} & \textbf{Categoría} & \textbf{Ejemplo} \\
+    \midrule
+    NN, NNS   & Sustantivo singular, plural  & \textit{force, allies} \\
+    NNP       & Nombre propio                & \textit{Kennedy} \\
+    VB, VBD   & Verbo base, pasado           & \textit{help, saw} \\
+    VBG, VBN  & Gerundio, participio         & \textit{suppressing} \\
+    JJ        & Adjetivo                     & \textit{nuclear} \\
+    RB        & Adverbio                     & \textit{finally} \\
+    DT        & Determinante                 & \textit{the} \\
+    IN        & Preposición                  & \textit{after} \\
+    PRP       & Pronombre personal           & \textit{they} \\
+    CD        & Número cardinal              & \textit{1960} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacion}
+    El etiquetado gramatical se empezó a trabajar en los años sesenta,
+    en la misma época que el corpus de Brown.
+\end{observacion}
+
+\begin{pendiente}
+    Confirmar el número exacto de etiquetas de cada conjunto contra las
+    diapositivas, y para qué se usa el POS tagging dentro de IR, que no
+    alcanzó a verse.
 \end{pendiente}
 
 \end{document}
