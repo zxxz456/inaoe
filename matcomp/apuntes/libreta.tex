@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.2.0
+%   * Version: 2.3.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/09/2026      Clase 9 Sep, sistemas lineales y rango
 %  zxxz6       02/09/2026      Pase a LaTeX la toma cruda del 02/09
 %  zxxz6       26/08/2026      Pase a LaTeX la toma cruda del 26/08
 %  zxxz6       24/08/2026      Pase a LaTeX la toma cruda del 24/08
@@ -931,6 +932,358 @@ entrada:
     rato. También permite repartir los bloques entre varios
     procesadores, ya que cada uno se calcula por separado.
 \end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 09 Sep - Sistemas de ecuaciones lineales y rango
+% =====================================================================
+
+\clase{Sistemas de ecuaciones lineales}{9 de septiembre de 2026}
+
+\begin{quick_sum}
+    Por qué la linealidad es tan útil, cómo se junta un montón de
+    ecuaciones lineales en un sistema, y las tres formas de
+    resolverlo: eliminación, matriz aumentada con Gauss y con
+    Gauss-Jordan. Cierra con el rango, que es lo que dice de un
+    vistazo si un sistema tiene solución y cuántas.
+\end{quick_sum}
+
+\subsection*{Qué quiere decir lineal}
+
+\begin{definicion}[Expresión lineal]
+  Una expresión es lineal respecto de sus variables cuando estas
+  aparecen únicamente en \textbf{primer grado}, \textbf{no se
+  multiplican entre sí}, y los cambios en las variables producen
+  cambios de \textbf{magnitud constante} en el resultado.
+\end{definicion}
+
+Muchos fenómenos naturales se comportan así, y por eso el modelo
+lineal aparece en todos lados: llenar un tanque a flujo constante,
+moverse a velocidad constante, consumir recursos a tasa fija. La forma
+que se ve en la escuela es $y = mx + b$, y la \textbf{forma estándar}
+de la ecuación lineal en dos variables es
+\[
+    ax + by = c , \qquad a, b, c \in \R .
+\]
+
+Su gráfica es una recta: todo punto $(x, y)$ de esa recta satisface la
+ecuación. Con una variable más,
+\[
+    ax + by + cz = d
+\]
+es la ecuación de un \textbf{plano} en el espacio tridimensional.
+
+\begin{ejemplo}
+  En una imagen, el color de cada píxel son sus cantidades de rojo,
+  verde y azul, así que se puede tomar $x = R$, $y = G$, $z = B$. Una
+  clasificación sencilla por color separa objeto de fondo con
+  \[
+      2R - G + B - 100
+      \begin{cases}
+        > 0 & \text{es objeto} \\
+        = 0 & \text{es el plano que define la frontera} \\
+        < 0 & \text{es fondo}
+      \end{cases}
+  \]
+  El plano parte el espacio RGB en dos, y de qué lado cae el píxel
+  decide su clase.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Sistemas de ecuaciones lineales}
+
+Varias ecuaciones lineales sobre las mismas variables forman un
+sistema. En general, con $m$ ecuaciones y $n$ incógnitas:
+\[
+    \begin{array}{ccccccc}
+      a_{11}x_1 & + & a_{12}x_2 & + \cdots + & a_{1n}x_n & = & b_1 \\
+      a_{21}x_1 & + & a_{22}x_2 & + \cdots + & a_{2n}x_n & = & b_2 \\
+      \multicolumn{7}{c}{\vdots} \\
+      a_{m1}x_1 & + & a_{m2}x_2 & + \cdots + & a_{mn}x_n & = & b_m
+    \end{array}
+\]
+Los $a_{ij}$ son los \textbf{coeficientes} de las incógnitas y los
+$b_i$ las \textbf{constantes} del sistema.
+
+\begin{definicion}[Solución, consistencia]
+  Una solución es un conjunto de $n$ números
+  $x_1, \ldots, x_n$ que satisface \emph{cada una} de las ecuaciones.
+  El sistema es \textbf{consistente} si tiene al menos una solución, e
+  \textbf{inconsistente} si no tiene ninguna.
+\end{definicion}
+
+\begin{definicion}[Homogéneo]
+  Si todas las constantes son $b_i = 0$ el sistema es
+  \textbf{homogéneo}. Si al menos una es distinta de cero, es
+  \textbf{no homogéneo}.
+\end{definicion}
+
+Con dos ecuaciones y dos incógnitas cada ecuación es una recta, y
+resolver el sistema es buscar dónde se cruzan. Solo hay tres
+desenlaces:
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Geometría} & \textbf{Soluciones} & \textbf{Sistema} \\
+    \midrule
+    Se cruzan en un punto & Una única       & Consistente \\
+    Son paralelas         & Ninguna         & Inconsistente \\
+    Son la misma recta    & Infinitas       & Consistente \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  Que haya solo tres casos no es casualidad del plano: vale para
+  cualquier $m$ y $n$. Un sistema lineal nunca tiene, digamos, dos
+  soluciones o cinco. O ninguna, o una, o infinitas.
+\end{idea}
+
+\begin{ejemplo}
+  Dos especies de insectos comparten recipiente. Cada individuo de la
+  especie 1 consume 5 unidades del alimento AL1 y 3 del AL2; cada uno
+  de la especie 2 consume 2 del AL1 y 4 del AL2. Cada día se
+  suministran 900 de AL1 y 960 de AL2. Con $x$ y $y$ el número de
+  individuos de cada especie:
+  \[
+      \begin{array}{rcrcl}
+        5x & + & 2y & = & 900 \\
+        3x & + & 4y & = & 960
+      \end{array}
+  \]
+  Contar insectos a mano es imposible, pero el consumo sí se mide, y
+  de ahí sale el sistema.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Resolución por operaciones elementales}
+
+La idea es transformar el sistema en otro \textbf{equivalente}, o sea
+con las mismas soluciones, pero más simple. Hay tres operaciones
+permitidas:
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Notación} & \textbf{Operación} \\
+    \midrule
+    $R_{ij}$        & Intercambiar los renglones $i$ y $j$ \\
+    $cR_i$          & Multiplicar el renglón $i$ por una constante
+                      $c \neq 0$ \\
+    $cR_i + R_j$    & Multiplicar el renglón $i$ por $c \neq 0$ y
+                      sumarlo al renglón $j$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{La matriz aumentada}
+
+Se puede trabajar sobre las ecuaciones, pero es más cómodo tirar las
+variables y quedarse solo con los números, en la \textbf{matriz
+aumentada} del sistema:
+\[
+    (A \mid B) =
+    \left(\begin{array}{cccc|c}
+      a_{11} & a_{12} & \cdots & a_{1n} & b_1 \\
+      a_{21} & a_{22} & \cdots & a_{2n} & b_2 \\
+      \vdots &        &        &        & \vdots \\
+      a_{m1} & a_{m2} & \cdots & a_{mn} & b_m
+    \end{array}\right)
+\]
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Eliminación gaussiana} & Lleva a forma \textbf{escalonada}
+      \\
+    \textbf{Gauss-Jordan} & Sigue hasta forma \textbf{escalonada
+      reducida} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Una matriz está en forma \textbf{escalonada} si cumple:
+
+\begin{enumerate}[label=\roman*., itemsep=0.1em]
+    \item El primer elemento distinto de $0$ de cada renglón no nulo
+          es un $1$.
+    \item Ese primer $1$ aparece a la derecha del del renglón
+          anterior.
+    \item Los renglones de puros ceros quedan hasta abajo.
+\end{enumerate}
+
+Y es \textbf{escalonada reducida} si además cumple:
+
+\begin{enumerate}[label=\roman*., start=4, itemsep=0.1em]
+    \item En cada columna que contiene un $1$ pivote, los demás
+          elementos son $0$.
+\end{enumerate}
+
+\begin{ejemplo}
+  Resolviendo por Gauss el sistema
+  $2x_1 + 6x_2 + x_3 = 7$, $x_1 + 2x_2 - x_3 = -1$,
+  $5x_1 + 7x_2 - 4x_3 = 9$:
+  \[
+      \left(\begin{array}{ccc|c}
+        2 & 6 & 1 & 7 \\ 1 & 2 & -1 & -1 \\ 5 & 7 & -4 & 9
+      \end{array}\right)
+      \;\longrightarrow\;
+      \left(\begin{array}{ccc|c}
+        1 & 2 & -1 & -1 \\
+        0 & 1 & \tfrac{3}{2} & \tfrac{9}{2} \\
+        0 & 0 & 1 & 5
+      \end{array}\right)
+      \;\longrightarrow\;
+      \left(\begin{array}{ccc|c}
+        1 & 0 & 0 & 10 \\ 0 & 1 & 0 & -3 \\ 0 & 0 & 1 & 5
+      \end{array}\right)
+  \]
+  con $R_{12}$, luego $-2R_1 + R_2$ y $-5R_1 + R_3$, después
+  $\tfrac{1}{2}R_2$, $3R_2 + R_3$ y $\tfrac{2}{11}R_3$. La matriz de
+  en medio ya está escalonada y permite sustitución hacia atrás; la
+  última es la reducida y da la solución directo:
+  $x_1 = 10$, $x_2 = -3$, $x_3 = 5$.
+\end{ejemplo}
+
+\begin{idea}
+  Gauss-Jordan cuesta más operaciones pero no requiere sustitución
+  hacia atrás: la solución se lee inspeccionando la matriz final.
+\end{idea}
+
+\subsubsection*{Cómo leer la matriz final}
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Qué se ve} & \textbf{Qué significa} \\
+    \midrule
+    Pivotes $=$ variables & Solución única \\
+    Pivotes $<$ variables & Infinitas soluciones \\
+    Un renglón $[\,0\;0\cdots 0 \mid b \neq 0\,]$ & Sin solución \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Los dos primeros casos valen \emph{siempre y cuando} no aparezca la
+contradicción del tercero. Un renglón de puros ceros a la izquierda
+con algo distinto de cero a la derecha dice $0 = b$, que nada
+satisface.
+
+Cuando hay menos pivotes que variables, las que no tienen pivote son
+\textbf{variables libres}: se les asigna un parámetro $t$ arbitrario y
+las demás quedan en términos de él. Como $t$ recorre todos los reales,
+salen infinitas soluciones.
+
+% =====================================================================
+
+\subsection*{Sistemas homogéneos}
+
+Un sistema homogéneo \textbf{siempre es consistente}, porque
+$x_1 = x_2 = \cdots = x_n = 0$ satisface todas las ecuaciones. Esa es
+la \textbf{solución trivial}.
+
+\begin{idea}
+  La pregunta interesante no es si tiene solución, sino si tiene
+  soluciones \emph{no} triviales. Las tiene si el número $m$ de
+  ecuaciones es menor que el número $n$ de incógnitas: faltan
+  restricciones para clavar el origen como única respuesta.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Forma matricial y combinación lineal}
+
+Todo sistema se escribe como $AX = B$, con $A$ la matriz de
+coeficientes, $X$ el vector de incógnitas y $B$ el de constantes. Esta
+forma es la que se encuentra en los algoritmos.
+
+Si las columnas de $A$ son $c_1, \ldots, c_n$, entonces
+\[
+    AX = x_1 c_1 + x_2 c_2 + \cdots + x_n c_n .
+\]
+
+\begin{idea}
+  O sea que multiplicar $A$ por un vector es tomar una
+  \textbf{combinación lineal de las columnas} de $A$, con las
+  incógnitas como coeficientes. Y resolver $AX = B$ es preguntar: ¿con
+  qué pesos hay que combinar las columnas de $A$ para producir
+  exactamente $B$? Si $B$ no se puede armar así, el sistema es
+  inconsistente.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Rango de una matriz}
+
+A los renglones de $A$ se les llama vectores renglón y a sus columnas
+vectores columna. Como vectores, un conjunto de ellos puede ser
+linealmente independiente o dependiente.
+
+\begin{definicion}[Dependencia lineal]
+  Un conjunto de vectores es linealmente \textbf{dependiente} si
+  alguno se puede escribir como combinación lineal de los demás. Si
+  ninguno se puede, es linealmente \textbf{independiente}. Con dos
+  vectores basta ver si son proporcionales: $u_1 = (3,5)$ y
+  $u_2 = (9,15)$ son dependientes porque $u_2 = 3u_1$.
+\end{definicion}
+
+\begin{definicion}[Rango]
+  El rango de una matriz $A$ de $m \times n$, escrito
+  $\mathrm{Ran}(A)$, es el número máximo de vectores renglón o columna
+  linealmente independientes.
+\end{definicion}
+
+Determinarlo a ojo es difícil, pero hay un atajo: si $A$ es
+equivalente por renglones a una matriz escalonada $B$, entonces
+$\mathrm{Ran}(A)$ es el número de renglones de $B$ distintos de cero.
+Los renglones no nulos de $B$ forman además una base del espacio de
+renglones de $A$.
+
+\subsubsection*{Rango y sistemas}
+
+\begin{teorema}[Consistencia de $AX = B$]
+  Un sistema lineal $AX = B$ es consistente si y solo si el rango de
+  la matriz de coeficientes es igual al de la matriz aumentada:
+  \[
+      \mathrm{Ran}(A) = \mathrm{Ran}(A \mid B) .
+  \]
+\end{teorema}
+
+\begin{teorema}[Número de parámetros]
+  Si el sistema $AX = B$ con $n$ incógnitas es consistente y
+  $r = \mathrm{Ran}(A)$, entonces la solución contiene $n - r$
+  parámetros.
+\end{teorema}
+
+\begin{idea}
+  Los dos teoremas juntos contestan todo de un golpe. Se calcula
+  $\mathrm{Ran}(A)$ y $\mathrm{Ran}(A \mid B)$: si difieren no hay
+  solución; si coinciden, $n - r$ dice cuántos parámetros libres
+  quedan. Con $n - r = 0$ la solución es única, y con $n - r > 0$ hay
+  infinitas. Es la tabla de arriba, dicha con un solo número.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Para qué sirve todo esto}
+
+\textbf{La dependencia lineal} sirve para generar datos del mismo
+tipo, por ejemplo muestras sintéticas o aumento de datos: si sé que un
+vector es combinación de otros, puedo fabricar más. En espectroscopia,
+los espectros estelares de un mismo tipo de la clasificación de
+Harvard son muy parecidos entre sí, y esa redundancia es justamente
+dependencia lineal.
+
+\textbf{La independencia lineal} sirve para lo contrario, comprimir.
+En sensado comprimido una señal se descompone sobre una base
+linealmente independiente, y basta transmitir los coeficientes de esa
+combinación. Si transmisor y receptor comparten la base, nunca hace
+falta mandar la señal completa.
+
 
 \end{document}
 %############################## END OF LIBRETA.TEX #############################
