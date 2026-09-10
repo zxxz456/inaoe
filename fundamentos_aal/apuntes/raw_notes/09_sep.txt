@@ -1,0 +1,52 @@
+--- representaciones mas alla de las palabras ---
+
+repso rapido
+
+ambiguedad es una condicion donde la informacion puede ser
+entendida o interpretada en mas de un sentido
+
+el contexto puede ayudar a mitigar esa ambiguedad
+
+diferentes tipos de ambiguedad
+    - lexico: palabras o frases con mas de un significado posible (banco, gato)
+    - sintactico: una oracion puede ser parseada o reacomoadada en diferentes formas para dar diferentes interpretaciones
+    - semantico: el significado de una palabra frase o concepto es poco claro, vago o abiertos a diferentes interpreteaciones
+
+
+que es lo que subyace atras de la ambiguedad... dos problemas del lenguaje NATURAL
+la sinonimia: dos plabras con mismo significado (leads low recall)
+la polisemia: una palabra puede teer muchos significados (da baja oresicion)
+
+-- indexing de documentos
+El bjetivo es encontrar significados importantes y crear una representacion interna
+
+los factores a considerar son:
+    - la acc representa los significados (semantica)
+    - exhaustiveness (cubre todos los contenidos)
+    - facilidad de la comptadora para manipular
+
+cual es la mejor representacion de los contenidos?
+
+    char: no es suficientemente preciso
+    palabra: buena covertura, no preciso
+    phrase: porr overage more precise 
+    concept: poor coverage
+
+
+-- PART OF SPEECH TAGGING
+una tarea del procesamiento del lenguaje esasignar a una palabra es asignar
+a una palabra en una oracion la palabre o disurso que asume
+en esa secuencia 
+
+genera una scuencia unica, la mejor que le asigna su etiqueta
+a cada de unas palabras
+
+input: a string of words + a tag set
+out: a single best tag for each word
+
+{poner ejemplo}
+
+{poner los brown/pwnn treebank tags}
+
+
+Esto se comenzo a trabaja ren los 60s
