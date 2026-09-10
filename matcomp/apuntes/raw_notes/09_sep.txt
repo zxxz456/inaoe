@@ -1,0 +1,41 @@
+-- operaciones con matrices mas a detalle ---
+
+muchos de los fenomenos que observamos en la natruraleza tienen uncomprotamiento lineal
+
+una expresion e lineal respecto de sis veriables cuando estas aparecen unicamente en primer grado
+no se multiplican entre si y los cambios en las 
+variables producen cambios de magnitud contante en resultado
+
+    y=mx+b
+
+esa es la forma de la ec lineal...  
+    ax + by = c 
+es la forma estandar 
+
+pero se puede extender a n variables y n coef 
+
+se pueden hacer sistemas de ecuaciones con estas ecuaciones lineales
+
+la forma general es 
+{poner forma general}
+
+dado un sistema de ecuaciones si todo es cero, es un sistema homogeneo, si no es 
+cero es un sistema heterogeneo
+
+
+cuando es heterogeneo el sistema es equilibrado 
+
+un sistema de ecuaciones se puede solucionar con diferentes formas 
+    eliminacion
+    gauss jordan
+    representacion matricial y soluconar como matriz
+
+{explicar la consistencia }
+
+para eso se usan operaciones elementales
+    multiplicacion por una constatne difenete de cero
+    operaciones elementales entre filas 
+    intercambio de filas 
+
+Podemos hacerlo por eliminacion pero es mejor sacar la matriz uamentada del sistema
+{ejemplo}
