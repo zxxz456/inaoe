@@ -1,0 +1,797 @@
+% =====================================================================
+%  Determinantes.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Presentación en beamer sobre determinantes y los tres métodos para
+%  calcularlos: eliminación gaussiana, la fórmula grande sobre
+%  permutaciones y la expansión por cofactores. Sigue el capítulo 5
+%  de Strang, "Introduction to Linear Algebra", secciones 5.1 y 5.2,
+%  que es el extracto que se usó como fuente. Las láminas llevan
+%  solo lo esencial; lo que se dice en voz alta vive en
+%  .GuionDeterminantes.txt, lámina por lámina.
+%
+%
+%  Considerations:
+%  ------------
+%  - No usa templates/Preambulo.tex: ese preámbulo es para la clase
+%    article y carga geometry, fancyhdr y parskip, que chocan con
+%    beamer. El preámbulo de aquí es autocontenido
+%  - babel se carga con es-noshorthands por la misma razón que en
+%    templates/Preambulo.tex: en español el " queda activo y se come
+%    el texto que le sigue
+%  - El tema metropolis compila con pdflatex, aunque las fuentes Fira
+%    solo salen con XeLaTeX o LuaLaTeX. La cascada a Latin Modern es
+%    aceptable, así que la compilación se queda en pdflatex
+%  - El color de acento es el mismo \#1F4E79 de las libretas, para que
+%    la presentación y los apuntes se vean de la misma familia
+%  - Los ejemplos numéricos salen del extracto de Strang y sus
+%    resultados están verificados a mano, no aproximados
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 4.3.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       12/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% =====================================================================
+%  DATOS DE LA PRESENTACIÓN
+% =====================================================================
+\newcommand{\materia}{Matemáticas para Computación}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumnouno}{Bryan Ezequiel Violante Arriaga}
+\newcommand{\alumnodos}{Violeta Del Pilar Lagunes Viveros}
+
+% ==================== IDIOMA Y CODIFICACIÓN ====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla,es-noshorthands]{babel}
+\usepackage{lmodern}
+
+% ==================== MATEMÁTICAS Y TABLAS ====================
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{matrix,calc,backgrounds,babel}
+
+% ==================== TEMA ====================
+\usetheme{metropolis}
+\metroset{block=fill,numbering=none,progressbar=frametitle}
+
+% --- la misma paleta de las libretas ---
+\definecolor{acento}{HTML}{1F4E79}
+\definecolor{fondoIdea}{HTML}{EAF2FB}
+\definecolor{fondoOjo}{HTML}{FDF0E6}
+\setbeamercolor{palette primary}{bg=acento,fg=white}
+\setbeamercolor{frametitle}{bg=acento,fg=white}
+\setbeamercolor{progress bar}{fg=orange!70!black}
+\setbeamercolor{alerted text}{fg=orange!75!black}
+
+% --- las dos cajas que se usan a lo largo del deck ---
+\setbeamercolor{block title}{bg=acento!15,fg=acento}
+\setbeamercolor{block body}{bg=acento!7}
+\setbeamercolor{block title alerted}{bg=fondoOjo,fg=orange!45!black}
+\setbeamercolor{block body alerted}{bg=fondoOjo!60}
+
+% --- abreviaturas que se repiten en cada lámina ---
+\newcommand{\dt}[1]{\det #1}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+% El determinante escrito con barras, que es como aparece en Strang
+\newcommand{\dbar}[1]{%
+  \begin{vmatrix} #1 \end{vmatrix}%
+}
+\newcommand{\mat}[1]{%
+  \begin{bmatrix} #1 \end{bmatrix}%
+}
+
+% --- remate de lamina: una frase, sin barra de titulo vacia ---
+\newcommand{\remate}[1]{%
+  \vspace{0.3em}
+  \begin{center}\itshape\small #1\end{center}%
+}
+
+\title{Determinantes}
+\author{\alumnouno \and \alumnodos}
+\institute{\materia, INAOE}
+\date{\periodo}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\maketitle
+
+\begin{frame}{Disclaimer :P}
+
+    El material se preparó usando inteligencia artificial como
+    herramienta de apoyo, basado en fuentes verificables y confiables (chatgepete)
+
+\end{frame}
+
+\begin{frame}[t]{Contenido}
+  \small
+  \tableofcontents
+\end{frame}
+
+% =====================================================================
+%  1. Qué es un determinante
+% =====================================================================
+\section{Qué es un determinante}
+
+\begin{frame}{Definicion}
+  \begin{block}{Matriz cuadrada $\longrightarrow$ un número}
+    \[
+      A^{-1} \text{ existe}
+      \iff
+      \dt{A} \neq 0
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item Notación: $\dt{A}$ o $\abs{A}$.
+    \item Las barras son de la matriz, no valor absoluto:
+          $\abs{A}$ puede ser negativo.
+    \item $\dt{(A^{-1})} = 1/\dt{A}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Det de Matriz $2 \times 2$}
+  \[
+    A = \mat{a & b \\ c & d}
+    \qquad
+    \dt{A} = ad - bc
+    \qquad
+  \]
+
+  \begin{itemize}
+    \item Para $n$ grande no sirve. Explica, no calcula.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Tres formas de calcularlo}
+  \begin{enumerate}
+    \item \textbf{Eliminación gaussiana.} Triangular, multiplicar
+          pivotes. $\sim n^3/3$.
+    \item \textbf{Fórmula grande.} Suma de $n!$ términos.
+    \item \textbf{Cofactores.} Orden $n$ a orden $n-1$.
+  \end{enumerate}
+
+  \remate{Mismo número, distinto costo.}
+\end{frame}
+
+% =====================================================================
+%  2. Las diez propiedades
+% =====================================================================
+\section{Las propiedades}
+
+\begin{frame}{Regla 1: Determinante de la matriz identidad}
+  \[
+    \dt{I} = 1
+  \]
+
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{1 & 0 \\ 0 & 1} = 1
+      \qquad
+      \dbar{1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1} = 1
+    \]
+  \end{block}
+
+  \remate{Es la normalización. Sin ella todo se podría
+          escalar por una constante.}
+\end{frame}
+
+\begin{frame}{Regla 2: intercambiar renglones cambia el signo}
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{1 & 2 \\ 3 & 4} = 4 - 6 = -2
+      \qquad
+      \dbar{3 & 4 \\ 1 & 2} = 6 - 4 = +2
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item $P$ es $I$ con los renglones reordenados.
+    \item $\dt{P} = +1$ con un número par de intercambios,
+          $\dt{P} = -1$ con uno impar.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Regla 3: lineal en cada renglón}
+  \begin{block}{Escalar un renglón}
+    \[
+      \dbar{ta & tb \\ c & d} = t\,\dbar{a & b \\ c & d}
+      \qquad
+      \dbar{5 & 10 \\ 3 & 4} = -10 = 5\,(-2)
+    \]
+  \end{block}
+
+  \begin{block}{Sumar en un renglón}
+    \[
+      \dbar{5 & 2 \\ 3 & 4}
+      = \dbar{1 & 2 \\ 3 & 4} + \dbar{4 & 0 \\ 3 & 4}
+      \qquad
+      14 = -2 + 16
+    \]
+  \end{block}
+
+  \begin{alertblock}{Un renglón a la vez}
+    El segundo renglón no se movió en ninguna de las dos.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Regla 4: dos renglones iguales dan cero}
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{2 & 7 \\ 2 & 7} = 14 - 14 = 0
+      \qquad
+      \dbar{1 & 2 & 3 \\ 4 & 5 & 6 \\ 1 & 2 & 3} = 0
+    \]
+  \end{block}
+
+  \begin{block}{Por qué}
+    Intercambia los dos renglones iguales. La matriz no cambió, pero
+    la regla 2 dice que el signo sí:
+    \[
+      D = -D
+      \quad\Longrightarrow\quad
+      D = 0
+    \]
+  \end{block}
+\end{frame}
+
+\begin{frame}{Regla 5: restar un múltiplo no cambia nada}
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{1 & 2 \\ 3 & 7} = 7 - 6 = 1
+      \xrightarrow{\ R_2 - 3R_1\ }
+      \dbar{1 & 2 \\ 0 & 1} = 1 - 0 = 1
+    \]
+  \end{block}
+
+  \[
+    \dbar{a & b \\ c - \ell a & d - \ell b}
+    = \dbar{a & b \\ c & d}
+      - \ell\,\underbrace{\dbar{a & b \\ a & b}}_{0}
+    = \dbar{a & b \\ c & d}
+  \]
+
+
+\end{frame}
+
+\begin{frame}{Regla 6: un renglón de ceros da cero}
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{5 & 9 \\ 0 & 0} = 0 - 0 = 0
+    \]
+  \end{block}
+
+  \begin{block}{Por qué}
+    El renglón de ceros es $0$ por cualquier otro renglón. La regla
+    3 con $t = 0$ saca ese cero afuera del determinante.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Regla 7: triangular es el producto de la diagonal}
+  \[
+    \dbar{d_1 & * & * \\ & \ddots & * \\ 0 & & d_n}
+      = d_1 d_2 \cdots d_n
+  \]
+
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{2 & 7 & 1 \\ 0 & 3 & 5 \\ 0 & 0 & 4}
+      = (2)(3)(4) = 24
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item Limpiar con la regla 5, factorizar con la regla 3, cerrar
+          con la regla 1.
+    \item Si algún $d_i = 0$: renglón de ceros, determinante $0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Regla 8: cero si y solo si es singular}
+  \[
+    \dt{A} = \pm\,(d_1 d_2 \cdots d_n)
+    = \pm\,(\text{producto de los pivotes})
+  \]
+
+  \begin{block}{Ejemplo: singular}
+    El renglón 2 es $2$ veces el renglón 1.
+    \[
+      \dbar{1 & 2 \\ 2 & 4}
+      \xrightarrow{\ R_2 - 2R_1\ }
+      \dbar{1 & 2 \\ 0 & 0} = 0
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item Singular: falta un pivote, aparece un renglón de ceros.
+    \item Invertible: los $n$ pivotes son distintos de cero.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Regla 9: el determinante de producto}
+  \[
+    \dt{(AB)} = (\dt{A})(\dt{B})
+  \]
+
+  \begin{block}{Ejemplo}
+    \[
+      \underbrace{\mat{1 & 2 \\ 3 & 4}}_{\dt{} \,=\, -2}
+      \underbrace{\mat{2 & 0 \\ 1 & 3}}_{\dt{} \,=\, 6}
+      = \underbrace{\mat{4 & 6 \\ 10 & 12}}_{\dt{} \,=\, -12}
+      \qquad
+      (-2)(6) = -12
+    \]
+  \end{block}
+
+  \remate{Con $B = A^{-1}$ sale $(\dt{A})(\dt{A^{-1}}) = 1$.}
+\end{frame}
+
+\begin{frame}{Regla 10: determinante de la transpuesta}
+  \[
+    \dt{(A^{\mathsf{T}})} = \dt{A}
+  \]
+
+  \begin{block}{Ejemplo}
+    \[
+      \dbar{1 & 2 & 3 \\ 0 & 4 & 5 \\ 1 & 0 & 6} = 22
+      \qquad
+      \dbar{1 & 0 & 1 \\ 2 & 4 & 0 \\ 3 & 5 & 6} = 22
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item Traslada \alert{todas} las reglas de renglones a columnas,
+          sin demostrar nada nuevo.
+    \item Dos columnas iguales, o una de ceros, dan determinante
+          cero.
+  \end{itemize}
+
+  \remate{Multiplica de maravilla, suma pésimo.}
+\end{frame}
+
+% =====================================================================
+%  3. Cálculo por eliminación gaussiana
+% =====================================================================
+\section{Eliminación gaussiana (pivotes)}
+
+\begin{frame}{El algoritmo práctico}
+  \[
+    PA = LU
+    \quad\Longrightarrow\quad
+    (\dt{P})(\dt{A}) = (\dt{L})(\dt{U})
+    \quad\Longrightarrow\quad
+    \dt{A} = \pm\,(d_1 \cdots d_n)
+  \]
+
+  \begin{itemize}
+    \item $\dt{L} = 1$: unos en la diagonal.
+    \item $\dt{U}$: producto de los pivotes, regla 7.
+    \item Signo: paridad de los intercambios.
+  \end{itemize}
+
+  \begin{block}{Costo}
+    $\sim n^3/3$ operaciones.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Ejemplo: un intercambio}
+  \[
+    A = \mat{0 & 0 & 1 \\ 0 & 2 & 3 \\ 4 & 5 & 6}
+    \qquad
+    PA = \mat{4 & 5 & 6 \\ 0 & 2 & 3 \\ 0 & 0 & 1}
+  \]
+
+  \[
+    \dt{A} = -(4)(2)(1) = -8
+  \]
+
+  \remate{Un intercambio, número impar: $\dt{P} = -1$.}
+\end{frame}
+
+
+\begin{frame}{Los pivotes son cocientes de determinantes}
+  \[
+    \dt{A_k} = d_1 d_2 \cdots d_k
+    \qquad\Longrightarrow\qquad
+    d_k = \frac{\dt{A_k}}{\dt{A_{k-1}}}
+  \]
+
+  \begin{block}{Prueba práctica}
+    No hacen falta intercambios exactamente cuando
+    $\dt{A_k} \neq 0$ para toda submatriz superior izquierda $A_k$.
+  \end{block}
+\end{frame}
+
+% =====================================================================
+%  4. La fórmula grande
+% =====================================================================
+\section{La fórmula grande (permutaciones)}
+
+\begin{frame}{Partir renglones}
+  \[
+    \dbar{a & b \\ c & d}
+      = \dbar{a & 0 \\ c & d} + \dbar{0 & b \\ c & d}
+      = \dbar{a & 0 \\ 0 & d} + \dbar{0 & b \\ c & 0}
+  \]
+
+  \[
+    = ad\,\dbar{1 & 0 \\ 0 & 1} + bc\,\dbar{0 & 1 \\ 1 & 0}
+      = ad - bc
+  \]
+
+  \remate{Lo que sobrevive son \alert{matrices de permutación}.
+          Ellas ponen los signos.}
+\end{frame}
+
+\begin{frame}{La fórmula 3 por 3: seis términos}
+  \[
+    \dbar{a_{11} & a_{12} & a_{13} \\
+          a_{21} & a_{22} & a_{23} \\
+          a_{31} & a_{32} & a_{33}}
+    =
+    \begin{aligned}
+      &+ a_{11}a_{22}a_{33} + a_{12}a_{23}a_{31}
+         + a_{13}a_{21}a_{32} \\
+      &- a_{11}a_{23}a_{32} - a_{12}a_{21}a_{33}
+         - a_{13}a_{22}a_{31}
+    \end{aligned}
+  \]
+
+  Cada término se factoriza: el coeficiente por una \alert{matriz de
+  permutación}. Ella pone el signo.
+
+  \footnotesize
+  \[
+    \begin{aligned}
+      \dt{A} =\;
+        & a_{11}a_{22}a_{33}\dbar{1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1}
+        + a_{12}a_{23}a_{31}\dbar{0 & 1 & 0 \\ 0 & 0 & 1 \\ 1 & 0 & 0}
+        + a_{13}a_{21}a_{32}\dbar{0 & 0 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0}
+        \\[0.4em]
+        + & a_{11}a_{23}a_{32}\dbar{1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0}
+        + a_{12}a_{21}a_{33}\dbar{0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1}
+        + a_{13}a_{22}a_{31}\dbar{0 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 0}
+    \end{aligned}
+  \]
+  \normalsize
+
+
+
+\end{frame}
+
+\begin{frame}{Generalización}
+  \begin{block}{Suma sobre las $n!$ permutaciones de columnas}
+    \[
+      \dt{A} = \sum_{P} (\dt{P})\, a_{1\alpha}a_{2\beta}\cdots
+               a_{n\omega}
+    \]
+  \end{block}
+
+  \begin{itemize}
+    \item $(\alpha,\beta,\ldots,\omega)$: los ordenamientos de
+          $(1,\ldots,n)$.
+    \item $\dt{P} = \pm 1$ según la paridad.
+    \item $U$ triangular: solo sobrevive
+          $u_{11}u_{22}\cdots u_{nn}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pq no se usa}
+  \begin{center}
+    \begin{tabular}{r r r}
+      \toprule
+      $n$ & términos $n!$ & operaciones $\approx n^3/3$ \\
+      \midrule
+       3 & 6                 & 9 \\
+       5 & 120               & 42 \\
+      10 & 3\,628\,800       & 333 \\
+      11 & 39\,916\,800      & 444 \\
+      20 & $2.4\times10^{18}$ & 2\,667 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{alertblock}{El truco de las diagonales}
+    Sirve solo para $n = 3$. Con $n = 4$ da $8$ productos y hacen
+    falta $24$.
+  \end{alertblock}
+\end{frame}
+
+% =====================================================================
+%  5. Cofactores
+% =====================================================================
+\section{Expansión por cofactores}
+
+\begin{frame}{Algoritmo}
+  \[
+    \dt{A} =
+      a_{11}\underbrace{(a_{22}a_{33} - a_{23}a_{32})}_{C_{11}}
+    + a_{12}\underbrace{(a_{23}a_{31} - a_{21}a_{33})}_{C_{12}}
+    + a_{13}\underbrace{(a_{21}a_{32} - a_{22}a_{31})}_{C_{13}}
+  \]
+
+  \begin{alertblock}{El signo de en medio}
+    $C_{12}$ viene volteado. Ese volteo es el patrón
+    $(-1)^{i+j}$.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Cofactores y el tablero de ajedrez}
+  \begin{block}{Tacha el renglón $i$ y la columna $j$}
+    \[
+      C_{ij} = (-1)^{i+j}\,\dt{M_{ij}}
+      \qquad
+      M_{ij} \text{ de tamaño } n-1
+    \]
+  \end{block}
+
+  \[
+    (-1)^{i+j} =
+    \mat{+ & - & + & - \\
+         - & + & - & + \\
+         + & - & + & - \\
+         - & + & - & +}
+  \]
+\end{frame}
+
+\begin{frame}{La expansión}
+  \[
+    \dt{A} = a_{i1}C_{i1} + \cdots + a_{in}C_{in}
+    \qquad \text{(renglón $i$)}
+  \]
+  \[
+    \dt{A} = a_{1j}C_{1j} + \cdots + a_{nj}C_{nj}
+    \qquad \text{(columna $j$)}
+  \]
+
+  \begin{itemize}
+    \item Orden $n$ a orden $n-1$. Recursiva hasta $\dt{[a]} = a$.
+    \item \alert{Escoge el renglón o la columna con más ceros.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ejemplo: $-1, 2, -1$ por cofactores}
+  \[
+    \dbar{ 2 & -1 &    &    \\
+          -1 &  2 & -1 &    \\
+             & -1 &  2 & -1 \\
+             &    & -1 &  2}
+    = 2\,D_3 - (-1)\,\dbar{-1 & -1 & \\ & 2 & -1 \\ & -1 & 2}
+  \]
+
+  \begin{block}{Recurrencia}
+    \[
+      D_n = 2D_{n-1} - D_{n-2},
+      \qquad D_2 = 3,\ D_3 = 4
+      \quad\Longrightarrow\quad
+      D_n = n + 1
+    \]
+  \end{block}
+
+\end{frame}
+
+% =====================================================================
+%  6. Cierre
+% =====================================================================
+\section{Cómo elegir el método}
+
+\begin{frame}{Qué método y cuándo}
+  \begin{center}
+    \small
+    \begin{tabular}{@{}l l l@{}}
+      \toprule
+      \textbf{Método} & \textbf{Costo} & \textbf{Cuándo usarlo} \\
+      \midrule
+      Eliminación gaussiana & $\sim n^3/3$ & Matriz numérica y
+                                            general \\
+      Fórmula grande & $n!$ & Entradas explícitas, o $n \leq 3$ \\
+      Cofactores & $n!$ peor caso & Dispersa, de banda o
+                                    simbólica \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \remate{Eliminación para calcular. Cofactores cuando hay muchos
+          ceros. La fórmula grande para demostrar.}
+\end{frame}
+
+\begin{frame}{Ideas clave}
+  \begin{enumerate}
+    \item Definición: $\dt{I} = 1$, cambio de signo, linealidad por
+          renglón.
+    \item $\dt{A} = \pm(\text{producto de los pivotes})$.
+    \item $\dt{A} = 0 \iff A$ no es invertible.
+    \item $\dt{(AB)} = (\dt{A})(\dt{B})$ y
+          $\dt{(A^{\mathsf{T}})} = \dt{A}$.
+    \item Fórmula grande: $n!$ productos con signo.
+    \item Cofactores: orden $n$ a orden $n-1$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Referencia}
+  \begin{block}{Fuentes}
+    Gilbert Strang, \emph{Introduction to Linear Algebra}, \\
+    capítulo 5: Determinants. 
+  \end{block}
+
+\end{frame}
+
+% =====================================================================
+%  7. Ejercicios
+% =====================================================================
+\section{Ejercicios}
+
+\begin{frame}{Ejercicio 1: una matriz 2 por 2}
+  \[
+    A = \mat{3 & 5 \\ 2 & 4}
+  \]
+
+  \begin{block}{Por la formula directa}
+    \[
+      \dt{A} = (3)(4) - (5)(2) = 12 - 10 = 2
+    \]
+  \end{block}
+
+  \begin{block}{Por pivotes, para comprobar}
+    \[
+      \mat{3 & 5 \\ 2 & 4}
+      \xrightarrow{\ R_2 - \frac{2}{3}R_1\ }
+      \mat{3 & 5 \\ 0 & \tfrac{2}{3}}
+      \qquad
+      (3)\left(\tfrac{2}{3}\right) = 2
+    \]
+  \end{block}
+\end{frame}
+
+\begin{frame}{Ejercicio 2: una matriz 3 por 3}
+  \[
+    A = \mat{1 & 2 & 3 \\ 0 & 4 & 5 \\ 1 & 0 & 6}
+  \]
+
+  \begin{block}{Cofactores bajando por la primera columna}
+    Entradas $1$, $0$, $1$. El cero mata un termino completo.
+    \[
+      \dt{A}
+        = 1\,\dbar{4 & 5 \\ 0 & 6}
+        + 1\,\dbar{2 & 3 \\ 4 & 5}
+        = (24) + (10 - 12)
+        = 22
+    \]
+  \end{block}
+
+  \begin{alertblock}{Los signos}
+    $C_{11}$ y $C_{31}$ son los dos positivos: $(-1)^{1+1}$ y
+    $(-1)^{3+1}$.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Ejercicio 2: la regla de Sarrus}
+  Copia las dos primeras columnas a la derecha y multiplica sobre las
+  diagonales.
+
+  \begin{center}
+    \begin{tikzpicture}[baseline]
+      \matrix (m) [matrix of math nodes, column sep=1.1em,
+                   row sep=0.7em,
+                   nodes={minimum width=1.1em, inner sep=2pt,
+                          fill=white, rounded corners=1pt},
+                   ampersand replacement=\&] {
+        1 \& 2 \& 3 \& 1 \& 2 \\
+        0 \& 4 \& 5 \& 0 \& 4 \\
+        1 \& 0 \& 6 \& 1 \& 0 \\
+      };
+      % Las diagonales van al fondo para no tapar los digitos.
+      \begin{scope}[on background layer]
+        \draw[gray!50] ($(m-1-3)!0.5!(m-1-4) + (0,1em)$)
+                    -- ($(m-3-3)!0.5!(m-3-4) - (0,1em)$);
+        \draw[acento,line width=1.1pt]          (m-1-1) -- (m-3-3);
+        \draw[acento,line width=1.1pt]          (m-1-2) -- (m-3-4);
+        \draw[acento,line width=1.1pt]          (m-1-3) -- (m-3-5);
+        \draw[orange!70!black,line width=1.1pt] (m-3-1) -- (m-1-3);
+        \draw[orange!70!black,line width=1.1pt] (m-3-2) -- (m-1-4);
+        \draw[orange!70!black,line width=1.1pt] (m-3-3) -- (m-1-5);
+      \end{scope}
+    \end{tikzpicture}
+  \end{center}
+
+  \[
+    \dt{A} =
+    \underbrace{(24) + (10) + (0)}_{\text{\color{acento} bajando}}
+    - \underbrace{(12) + (0) + (0)}
+      _{\text{\color{orange!70!black} subiendo}}
+    = 34 - 12 = 22
+  \]
+
+  \remate{Mismo 22 que dieron los cofactores.
+          Solo sirve para $3$ por $3$.}
+\end{frame}
+
+\begin{frame}{Ejercicio 3: una matriz 4 por 4}
+  \[
+    A = \mat{1 & 2 & 0 & 1 \\
+             2 & 3 & 1 & 0 \\
+             0 & 1 & 2 & 1 \\
+             1 & 0 & 1 & 2}
+  \]
+
+  Con $4! = 24$ terminos la formula grande no es opcion y la primera
+  columna no tiene suficientes ceros para cofactores.
+
+  \remate{Se elimina.}
+\end{frame}
+
+\begin{frame}{Ejercicio 3: el procedimiento}
+  \footnotesize
+  \[
+    \mat{1 & 2 & 0 & 1 \\
+         2 & 3 & 1 & 0 \\
+         0 & 1 & 2 & 1 \\
+         1 & 0 & 1 & 2}
+    \xrightarrow[R_4 - R_1]{R_2 - 2R_1}
+    \mat{1 & 2 & 0 & 1 \\
+         0 & -1 & 1 & -2 \\
+         0 & 1 & 2 & 1 \\
+         0 & -2 & 1 & 1}
+    \xrightarrow[R_4 - 2R_2]{R_3 + R_2}
+    \mat{1 & 2 & 0 & 1 \\
+         0 & -1 & 1 & -2 \\
+         0 & 0 & 3 & -1 \\
+         0 & 0 & -1 & 5}
+  \]
+
+  \[
+    \xrightarrow{\ R_4 + \tfrac{1}{3}R_3\ }
+    \mat{1 & 2 & 0 & 1 \\
+         0 & -1 & 1 & -2 \\
+         0 & 0 & 3 & -1 \\
+         0 & 0 & 0 & \tfrac{14}{3}}
+    \qquad
+    \dt{A} = (1)(-1)(3)\left(\tfrac{14}{3}\right) = -14
+  \]
+
+  \normalsize
+  \remate{Sin intercambios, el signo es $+$. El determinante sale
+          negativo por el pivote $-1$, no por la permutación.}
+\end{frame}
+
+\begin{frame}{Ejercicio 4: para resolver}
+  \[
+    B = \mat{0 & 1 & 2 & 0 \\
+             1 & 0 & 3 & 1 \\
+             2 & 1 & 0 & 2 \\
+             0 & 2 & 1 & 1}
+  \]
+
+  \remate{Calcular $\dt{B}$.}
+
+\end{frame}
+
+\begin{frame}[standout]
+  Preguntas
+\end{frame}
+
+% =====================================================================
+\end{document}
+% =====================================================================
+%########################## END OF DETERMINANTES.TEX ###########################
+%###############################################################################
