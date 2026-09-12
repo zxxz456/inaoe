@@ -73,3 +73,6 @@ progra_ds/Arbol/arbol_animacion.html
 CLAUDE.md
 docs/
 *.o
+
+# Guiones de presentacion, notas para exponer que no se versionan
+.Guion*.txt
