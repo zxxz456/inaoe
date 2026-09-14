@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.6.0
+%   * Version: 2.7.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       14/09/2026      Clase 14 Sep, indexado mas alla de la palabra
 %  zxxz6       09/09/2026      Clase 9 Sep, representaciones y POS tagging
 %  zxxz6       09/09/2026      Nombre el algoritmo de Porter en preprocesado
 %  zxxz6       09/09/2026      Clase 7 Sep, expansion de consultas y clustering
@@ -1510,11 +1511,290 @@ usa por omisión hoy.
     en la misma época que el corpus de Brown.
 \end{observacion}
 
+
+
+\newpage
+% =====================================================================
+
+
+
+\clase{Indexado más allá de la palabra}{14 de septiembre de 2026}
+
+\begin{quick_sum}
+    Se cerró el etiquetado gramatical con las dos formas de resolverlo,
+    la de la etiqueta más frecuente y la de modelos ocultos de Markov,
+    y con el veredicto de para qué sirve en indexado.
+    De ahí salieron las otras dos propuestas para representar un
+    documento con algo distinto de la palabra suelta: las unidades
+    compuestas (frases, entidades nombradas, n-gramas, secuencias
+    frecuentes maximales) y el indexado por sentidos.
+\end{quick_sum}
+
+\subsection*{Cómo se resuelve el etiquetado}
+
+\subsubsection*{Primer enfoque: la etiqueta más frecuente}
+
+A cada palabra se le asigna la etiqueta que más veces recibe en un
+corpus anotado. Si $w$ admite las etiquetas $t_1, \ldots, t_k$, se
+escoge
+\[
+    \hat{t}(w) = \operatorname*{arg\,max}_{t_i} P(t_i \mid w) ,
+    \qquad
+    P(t_i \mid w) = \frac{C(t_i, w)}{C(w)} ,
+\]
+donde $C(t_i, w)$ es el número de veces que $w$ aparece etiquetada
+$t_i$ en el corpus. El contexto no entra en la cuenta: la decisión es
+la misma en toda oración donde aparezca $w$.
+
+Aun así acierta alrededor del $91$ por ciento en inglés. La razón es
+que la mayoría de las palabras no son ambiguas, y las que sí lo son
+tienen una distribución muy sesgada hacia una de sus etiquetas. Por
+ejemplo \textit{heat} se usa mucho más como sustantivo que como verbo,
+así que este método siempre lo etiqueta sustantivo y casi siempre le
+atina.
+
+\begin{ojo}
+    Ese $91$ por ciento es el piso contra el que se compara, no un
+    buen resultado. Es una palabra mal etiquetada de cada once, y los
+    errores no se reparten: caen justo sobre las palabras ambiguas,
+    que son las frecuentes y las que más peso tienen en la
+    interpretación.
+\end{ojo}
+
+\subsubsection*{Segundo enfoque: HMM tagging}
+
+El etiquetado con modelos ocultos de Markov no decide palabra por
+palabra, escoge la secuencia completa de etiquetas. Dada la secuencia
+de palabras $w_1^n$, busca
+\[
+    \hat{t}_1^n
+    = \operatorname*{arg\,max}_{t_1^n} P(t_1^n \mid w_1^n)
+    = \operatorname*{arg\,max}_{t_1^n} P(w_1^n \mid t_1^n)\, P(t_1^n) ,
+\]
+donde la segunda igualdad es la regla de Bayes, quitando $P(w_1^n)$
+porque es la misma para todas las secuencias candidatas y no cambia
+cuál gana.
+
+Así como está no se puede calcular, hay $|T|^n$ secuencias posibles.
+Se meten dos suposiciones:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Emisión.} Cada palabra depende solo de su propia
+          etiqueta, no de las vecinas:
+          $P(w_1^n \mid t_1^n) \approx \prod_i P(w_i \mid t_i)$.
+    \item \textbf{Transición.} Cada etiqueta depende solo de la
+          anterior, o sea un bigrama:
+          $P(t_1^n) \approx \prod_i P(t_i \mid t_{i-1})$.
+\end{itemize}
+
+Con las dos, el criterio queda
+\[
+    \hat{t}_1^n = \operatorname*{arg\,max}_{t_1^n}
+                  \prod_{i=1}^{n} P(w_i \mid t_i)\,
+                                  P(t_i \mid t_{i-1}) .
+\]
+
+Las dos probabilidades se estiman contando sobre el corpus anotado,
+igual que antes. Y para no enumerar las $|T|^n$ secuencias se usa
+Viterbi, programación dinámica que resuelve el máximo en
+$O(n \cdot |T|^2)$.
+
+\begin{ejemplo}
+    En \textit{to heat the water}, el método de la etiqueta más
+    frecuente pone \textit{heat} como sustantivo, porque ese es su uso
+    más común. El HMM lo corrige sin saber nada especial de
+    \textit{heat}: la transición manda. Después de TO casi siempre
+    viene un verbo en forma base, así que
+    $P(\text{VB} \mid \text{TO})$ es órdenes de magnitud mayor que
+    $P(\text{NN} \mid \text{TO})$, y el producto se voltea a favor de
+    VB aunque la emisión
+    $P(\text{heat} \mid \text{NN})$ sea la más grande de las dos.
+\end{ejemplo}
+
+\begin{idea}
+    Ahí está la diferencia entre los dos enfoques. El primero pregunta
+    qué es esta palabra normalmente. El segundo pregunta qué secuencia
+    de etiquetas hace más probable a la oración entera, y por eso
+    puede ir contra la etiqueta favorita de una palabra cuando el
+    contexto lo pide.
+\end{idea}
+
+\subsubsection*{Sirve el POS para indexar?}
+
+Indexar con la etiqueta pegada al término separa \textit{saw} verbo de
+\textit{saw} sustantivo, y con eso sube la precisión. Pero baja el
+recall: un documento que usa la palabra con la otra etiqueta deja de
+empatar, aunque hable de lo mismo.
+
+\begin{ojo}
+    El veredicto de la clase fue que no vale la pena como técnica de
+    indexado por sí sola, ni siquiera si el etiquetado se hace a mano.
+    El límite no es la calidad del etiquetador, es el intercambio:
+    lo que gana en precisión lo paga en recuerdo. El POS tagging se
+    queda como paso intermedio, insumo para extraer frases, no como el
+    índice mismo.
+\end{ojo}
+
+\subsection*{Segunda propuesta: unidades compuestas}
+
+Usar palabras sueltas como términos de indexado da buena exhaustividad
+y especificidad pobre: se cubre todo el documento, pero cada término
+discrimina poco. Y hay combinaciones cuyo significado no se recupera
+separando las palabras, \textit{apple pie} no es una manzana más un
+pastel.
+
+De ahí la idea de usar términos de indexado de más de una palabra,
+para reducir la ambigüedad.
+
+\begin{ejemplo}
+    Sobre \textit{this apple pie looks good and is a real treat}:
+    \begin{center}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Relación} & \textbf{Término} \\
+        \midrule
+        Adjetivo, sustantivo   & \textit{real treat} \\
+        Sustantivo, sustantivo & \textit{apple pie} \\
+        Sujeto, verbo          & \textit{pie looks} \\
+        Verbo, objeto          & \textit{is treat} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+La complicación es de dónde salen: hay que extraerlas del texto ya
+etiquetado con POS o del árbol sintáctico, y el análisis sintáctico
+completo es caro.
+
+La alternativa barata es el \textbf{chunking}, o análisis superficial.
+En vez de construir el árbol entero, reconoce bloques no recursivos
+(sobre todo sintagmas nominales) con patrones sobre las etiquetas POS.
+La operación complementaria es el \textbf{chinking}, que define qué
+sacar de un bloque ya formado en lugar de qué meter.
+
+\subsubsection*{Entidades nombradas}
+
+Son las entidades que el texto menciona por nombre. Las tres clases
+aceptadas son personas, lugares y organizaciones. Suelen agregarse
+fecha, hora, medidas, correos y direcciones.
+
+La ambigüedad sigue presente aunque se trabaje con entidades: un
+nombre como \textit{Charlie Kirk} puede ser una persona o un lugar,
+porque a los lugares se les pone nombre de persona.
+
+Se procesan en dos pasos:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item \textbf{Identificación.} Detectar los límites, dónde empieza
+          y dónde termina la entidad nombrada.
+    \item \textbf{Clasificación.} Asignarle una de las categorías
+          predefinidas.
+\end{enumerate}
+
+Cómo se ha atacado, en orden histórico:
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.1cm}
+                >{\raggedright\arraybackslash}p{5.1cm}
+                >{\raggedright\arraybackslash}p{5.1cm}}
+    \toprule
+    \textbf{Enfoque} & \textbf{Cómo} & \textbf{Limitación} \\
+    \midrule
+    Reglas basadas en conocimiento &
+    Expertos se sientan a escribir patrones y a etiquetar a mano &
+    No escala, y se rehace entero para cada dominio \\
+    \addlinespace
+    Aprendizaje automático y estadística (HMM, CRF) &
+    Explota rasgos de los elementos de interés: mayúsculas, patrones,
+    POS, prefijos y sufijos &
+    Requiere corpus extensos ya anotados \\
+    \addlinespace
+    Aprendizaje profundo y transformers (BERT, RoBERTa) &
+    Embeddings contextuales, la representación se aprende sola, sin
+    ingeniería manual de rasgos &
+    Mucho cómputo y conjuntos grandes para el ajuste fino por
+    dominio \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{N-gramas}
+
+Un n-grama es una subsecuencia de $n$ términos de una secuencia dada.
+Sobre \textit{apple pie looks good}, los bigramas son
+\textit{apple pie}, \textit{pie looks} y \textit{looks good}.
+
+Lo que los hace atractivos:
+
+\begin{itemize}[itemsep=0.2em]
+    \item Se calculan fácil, una pasada con una ventana deslizante.
+          No hacen falta etiquetador ni analizador sintáctico.
+    \item Se pueden combinar n-gramas de distinto tamaño, y eso da
+          flexibilidad al momento de buscar: la consulta empata con la
+          granularidad que tenga.
+\end{itemize}
+
+El problema es la alta dimensionalidad. El número de n-gramas crece
+muy por encima del tamaño del vocabulario, y el índice se vuelve
+inmanejable.
+
 \begin{pendiente}
-    Confirmar el número exacto de etiquetas de cada conjunto contra las
-    diapositivas, y para qué se usa el POS tagging dentro de IR, que no
-    alcanzó a verse.
+    Las dos preguntas que quedaron abiertas sobre n-gramas:
+    \begin{itemize}
+        \item Cómo reducir la dimensionalidad?
+        \item Cómo seleccionar los n-gramas útiles?
+    \end{itemize}
 \end{pendiente}
+
+\subsubsection*{Secuencias frecuentes maximales}
+
+Otro enfoque que también sale de las frecuencias. Una secuencia es
+frecuente si aparece en al menos cierto número de documentos de la
+colección, y es \textbf{maximal} si no está contenida en ninguna otra
+secuencia frecuente más larga.
+
+\begin{ejemplo}
+    Si \textit{united states of america} es frecuente, entonces
+    \textit{united states} también lo es, porque está contenida en
+    ella. Solo se queda la larga.
+\end{ejemplo}
+
+Esa poda es justo su fortaleza: el índice que forma es muy compacto.
+La extracción de las MFS se hace normalmente combinando métodos
+bottom-up con métodos voraces.
+
+\subsubsection*{Funciona el indexado compuesto?}
+
+El veredicto es mixto. Mejora los resultados en niveles bajos de
+recuerdo, o sea en la cabeza del ranking, los primeros documentos que
+regresa el sistema. Pero conforme la colección crece, la anotación de
+entidades nombradas se vuelve el cuello de botella y la ganancia se
+diluye.
+
+\begin{idea}
+    La recomendación de la clase no es reemplazar la bolsa de
+    palabras. Es considerar las frases como términos suplementarios
+    del espacio vectorial, encima de las palabras, no en lugar de
+    ellas.
+\end{idea}
+
+\subsection*{Tercera propuesta: indexado por sentidos}
+
+La tercera idea es ir más allá del empatamiento de términos, hacia el
+indexado por sentidos. La motivación son la sinonimia y la polisemia
+de la clase pasada: empatar cadenas de caracteres no arregla ninguna
+de las dos, porque una es un problema de recall y la otra de
+precisión. Lo que se busca entonces es capturar conceptos.
+
+Pero qué es un sentido? Es uno de los significados de una palabra.
+Las palabras tienen más de un significado, y cuál de ellos aplica lo
+decide el contexto.
+
+\begin{pendiente}
+    Queda pendiente cómo se representa y cómo se desambigua un
+    sentido, que es donde sigue la clase.
+\end{pendiente}
+
 
 \end{document}
 
