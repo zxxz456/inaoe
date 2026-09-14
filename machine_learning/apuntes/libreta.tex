@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.4.0
+%   * Version: 1.5.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       14/09/2026      Clase 10 Sep, preparacion de datos y redes
 %  zxxz6       09/09/2026      Clase 8 Sep, forma dual, kernels y multiclase
 %  zxxz6       09/09/2026      Complete contra las diapositivas 03 a 05
 %  zxxz6       03/09/2026      Pase a LaTeX la toma cruda del 03/09
@@ -1467,6 +1468,211 @@ el promedio de las demás:
 Sus autores probaron que su formulación dual es exactamente la de
 Crammer y Singer con una restricción adicional, y cada modelo de clase
 se construye sobre sus propios vectores de soporte.
+
+\newpage
+
+% =====================================================================
+%  Clase - Preparacion de datos y redes neuronales
+% =====================================================================
+
+\clase{Preparación de datos y redes neuronales}{10 de septiembre de
+2026}
+
+\begin{quick_sum}
+    Antes de aplicar cualquier clasificador hay que preparar los
+    datos: limpiarlos y ponerlos en una escala común, decidiendo entre
+    normalizar y estandarizar. Luego, cómo partir la muestra para
+    entrenar sin caer en overfitting ni en underfitting, y la variante
+    estratificada de la validación cruzada para datos desbalanceados.
+    Al final se abrió el tema nuevo, las redes neuronales artificiales,
+    con la neurona biológica que les sirve de modelo.
+\end{quick_sum}
+
+\subsection*{Preparación de los datos}
+
+A veces queremos aplicar un clasificador, un algoritmo que nos permita
+separar, clasificar o estimar. Pero antes están los datos, y lo
+primero es limpiarlos: eliminar columnas vacías, llenar los valores
+faltantes y demás.
+
+Después viene la escala. Los atributos suelen venir en unidades
+distintas, y para evitar que unos dominen a otros hay que
+\textbf{normalizar} o \textbf{estandarizar}.
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Técnica} & \textbf{Qué hace} & \textbf{Fórmula} \\
+  \midrule
+  Estandarizar & Media $0$, varianza $1$
+               & $z = \dfrac{x - \mu}{\sigma}$ \\
+  \addlinespace
+  Normalizar   & Todo entre $0$ y $1$
+               & $x' = \dfrac{x - \min}{\max - \min}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Estandarizar reordena los datos en función de su media y su varianza.
+Eso uniforma el manejo, para que ninguna variable se salga del rango
+de las demás, y de paso aplasta a los datos atípicos: reduce esa
+diferencia en vez de dejar que arrastre todo.
+
+Escoger entre las dos es una de las decisiones que hay que tomar, y
+depende de los datos y del objetivo. La regla que se dio en clase:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Distribución} & \textbf{Qué aplicar} \\
+  \midrule
+  No normal & Estandarizar \\
+  Normal    & Normalizar \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  La razón de fondo es de dónde salen las constantes de cada fórmula.
+  Normalizar usa el mínimo y el máximo, que son los dos estadísticos
+  más sensibles que existen a un valor extremo: si la distribución
+  tiene cola larga, un solo punto lejano estira el denominador y
+  comprime a todos los demás en una franja diminuta. Estandarizar usa
+  media y desviación, que no se dejan mover tanto por un punto. Por
+  eso la distribución no normal pide estandarizar. Si la distribución
+  es normal, el mínimo y el máximo se portan bien y normalizar es
+  seguro.
+\end{idea}
+
+\begin{ojo}
+  El escalado se aplica \textbf{por variable}, no sobre todos los
+  datos juntos. Cada columna tiene su propia media y desviación, o su
+  propio mínimo y máximo. Mezclarlas destruye justo lo que se quería
+  arreglar.
+\end{ojo}
+
+Todo esto sirve para que en el clasificador lineal no haya
+descompensaciones en los pesos. Si un atributo va de $0$ a $1$ y otro
+de $0$ a $100\,000$, el peso del segundo tiene que volverse diminuto
+para compensar, y el entrenamiento se vuelve lento y mal condicionado.
+
+\subsection*{Cómo dividir el conjunto de muestra}
+
+La siguiente decisión es cómo partir la muestra para el proceso de
+entrenamiento. Los dos extremos fallan por razones opuestas:
+
+\begin{itemize}[itemsep=0.2em]
+  \item Si le pasamos \textbf{todos} los datos al clasificador, se los
+        va a aprender y no va a poder generalizar. Eso es
+        \textbf{overfitting}, y además nos quedamos sin manera de
+        medirlo, porque ya no hay datos que el modelo no haya visto.
+  \item Si le pasamos \textbf{muy pocos}, no alcanza a aprender el
+        patrón de manera adecuada. Eso es \textbf{underfitting}.
+\end{itemize}
+
+De ahí las tres particiones, cada una con su trabajo:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Partición} & \textbf{Para qué} \\
+  \midrule
+  Entrenamiento & Ajustar los parámetros del modelo \\
+  Validación    & Escoger el modelo y sus hiperparámetros \\
+  Prueba        & Estimar el error real, una sola vez \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Los repartos usuales son $70/15/15$ o $80/10/10$ por ciento.
+
+\begin{ojo}
+  El conjunto de prueba se toca una vez, al final. Si se usa para
+  decidir algo, deja de ser una estimación honesta del error: se
+  convierte en parte del entrenamiento, y la generalización que
+  reporta ya está contaminada.
+\end{ojo}
+
+\subsubsection*{Validación cruzada estratificada}
+
+La otra opción es la validación cruzada, que ya se vio en la clase
+del 3 de septiembre (figura \ref{fig:kfolds}): se parte el conjunto en
+$k$ folds y se rota cuál se deja fuera.
+
+Con datos desbalanceados eso no basta. Se parten \textbf{por clases} y
+los folds se arman con datos de cada clase, de modo que cada fold
+conserve la proporción original.
+
+\begin{idea}
+  Sin estratificar, con una clase rara y folds aleatorios puede tocar
+  un fold sin un solo ejemplo de esa clase. Ese fold no mide nada
+  sobre ella, y el promedio de los $k$ errores sale optimista por una
+  razón que no tiene que ver con el clasificador.
+\end{idea}
+
+\subsection*{Redes neuronales artificiales}
+
+Hasta aquí todos los modelos salieron de plantear un problema de
+optimización. Pero alguien preguntó por qué no tratamos de emular el
+modo en que aprende el cerebro humano, y de ahí nace la idea de las
+redes neuronales artificiales.
+
+\subsubsection*{La neurona biológica}
+
+El cerebro está conectado por neuronas. Las conexiones entre neuronas
+se llaman \textbf{sinapsis}, y se dan entre axones y dendritas.
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Parte} & \textbf{Qué hace} \\
+  \midrule
+  Dendritas & Reciben las señales de otras neuronas \\
+  Soma      & Integra lo que llega y decide si dispara \\
+  Axón      & Lleva la señal de salida hacia afuera \\
+  Sinapsis  & Une el axón de una con la dendrita de otra, y es
+              donde la señal se pondera \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Por qué es eficiente el cerebro? Por el número: del orden de $10^{11}$
+neuronas y unas $10^{14}$ conexiones entre ellas. No es que cada
+neurona sea potente, es que son muchísimas y están densamente
+conectadas.
+
+\subsubsection*{La neurona artificial}
+
+El modelo artificial se queda con la estructura y tira la biología.
+Cada parte tiene su contraparte:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Biológica} & \textbf{Artificial} \\
+  \midrule
+  Dendritas & Las entradas $x_1, \ldots, x_d$ \\
+  Sinapsis  & Los pesos $w_1, \ldots, w_d$ \\
+  Soma      & La suma ponderada más el sesgo \\
+  Axón      & La salida, pasada por una función de activación \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+O sea
+\[
+    y = g\!\left( \sum_{i=1}^{d} w_i x_i + w_0 \right) ,
+\]
+con $g$ la función de activación.
+
+\begin{idea}
+  Con $g$ el signo, esa ecuación es exactamente el perceptrón de la
+  clase del 27 de agosto. La neurona artificial no es un modelo nuevo,
+  es el mismo clasificador lineal contado desde la biología. Lo nuevo
+  viene de conectar muchas en capas, que es donde deja de ser lineal.
+\end{idea}
+
+
 
 \end{document}
 
