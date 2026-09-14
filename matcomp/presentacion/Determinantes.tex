@@ -15,7 +15,7 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 4.6.0
+%   * Version: 4.8.0
 %
 %
 %  History:
@@ -680,145 +680,27 @@
 % =====================================================================
 \section{Ejercicios}
 
-\begin{frame}{Ejercicio 1: una matriz 2 por 2}
+\begin{frame}{Ejercicio 1}
   \[
     A = \mat{3 & 5 \\ 2 & 4}
   \]
 
-  \begin{block}{Por la formula directa}
-    \[
-      \dt{A} = (3)(4) - (5)(2) = 12 - 10 = 2
-    \]
-  \end{block}
-
-  \begin{block}{Por pivotes, para comprobar}
-    \[
-      \mat{3 & 5 \\ 2 & 4}
-      \xrightarrow{\ R_2 - \frac{2}{3}R_1\ }
-      \mat{3 & 5 \\ 0 & \tfrac{2}{3}}
-      \qquad
-      (3)\left(\tfrac{2}{3}\right) = 2
-    \]
-  \end{block}
 \end{frame}
 
-\begin{frame}{Ejercicio 2: una matriz 3 por 3}
+\begin{frame}{Ejercicio 2}
   \[
     A = \mat{1 & 2 & 3 \\ 0 & 4 & 5 \\ 1 & 0 & 6}
   \]
 
-  \begin{block}{Cofactores bajando por la primera columna}
-    Entradas $1$, $0$, $1$. El cero mata un termino completo.
-    \[
-      \dt{A}
-        = 1\,\dbar{4 & 5 \\ 0 & 6}
-        + 1\,\dbar{2 & 3 \\ 4 & 5}
-        = (24) + (10 - 12)
-        = 22
-    \]
-  \end{block}
 
-  \begin{alertblock}{Los signos}
-    $C_{11}$ y $C_{31}$ son los dos positivos: $(-1)^{1+1}$ y
-    $(-1)^{3+1}$.
-  \end{alertblock}
 \end{frame}
 
-\begin{frame}{Ejercicio 2: la regla de Sarrus}
-  Copia las dos primeras columnas a la derecha y multiplica sobre las
-  diagonales.
-
-  \begin{center}
-    \begin{tikzpicture}[baseline]
-      \matrix (m) [matrix of math nodes, column sep=1.1em,
-                   row sep=0.7em,
-                   nodes={minimum width=1.1em, inner sep=2pt,
-                          fill=white, rounded corners=1pt},
-                   ampersand replacement=\&] {
-        1 \& 2 \& 3 \& 1 \& 2 \\
-        0 \& 4 \& 5 \& 0 \& 4 \\
-        1 \& 0 \& 6 \& 1 \& 0 \\
-      };
-      % Las diagonales van al fondo para no tapar los digitos.
-      \begin{scope}[on background layer]
-        \draw[gray!50] ($(m-1-3)!0.5!(m-1-4) + (0,1em)$)
-                    -- ($(m-3-3)!0.5!(m-3-4) - (0,1em)$);
-        \draw[acento,line width=1.1pt]          (m-1-1) -- (m-3-3);
-        \draw[acento,line width=1.1pt]          (m-1-2) -- (m-3-4);
-        \draw[acento,line width=1.1pt]          (m-1-3) -- (m-3-5);
-        \draw[orange!70!black,line width=1.1pt] (m-3-1) -- (m-1-3);
-        \draw[orange!70!black,line width=1.1pt] (m-3-2) -- (m-1-4);
-        \draw[orange!70!black,line width=1.1pt] (m-3-3) -- (m-1-5);
-      \end{scope}
-    \end{tikzpicture}
-  \end{center}
-
+\begin{frame}{Ejercicio 67: para resolver}
   \[
-    \dt{A} =
-    \underbrace{(24) + (10) + (0)}_{\text{\color{acento} bajando}}
-    - \underbrace{(12) + (0) + (0)}
-      _{\text{\color{orange!70!black} subiendo}}
-    = 34 - 12 = 22
-  \]
-
-  \remate{Mismo 22 que dieron los cofactores.
-          Solo sirve para $3$ por $3$.}
-\end{frame}
-
-\begin{frame}{Ejercicio 3: una matriz 4 por 4}
-  \[
-    A = \mat{1 & 2 & 0 & 1 \\
-             2 & 3 & 1 & 0 \\
-             0 & 1 & 2 & 1 \\
-             1 & 0 & 1 & 2}
-  \]
-
-  Con $4! = 24$ terminos la formula grande no es opcion y la primera
-  columna no tiene suficientes ceros para cofactores.
-
-  \remate{Se elimina.}
-\end{frame}
-
-\begin{frame}{Ejercicio 3: el procedimiento}
-  \footnotesize
-  \[
-    \mat{1 & 2 & 0 & 1 \\
-         2 & 3 & 1 & 0 \\
-         0 & 1 & 2 & 1 \\
-         1 & 0 & 1 & 2}
-    \xrightarrow[R_4 - R_1]{R_2 - 2R_1}
-    \mat{1 & 2 & 0 & 1 \\
-         0 & -1 & 1 & -2 \\
-         0 & 1 & 2 & 1 \\
-         0 & -2 & 1 & 1}
-    \xrightarrow[R_4 - 2R_2]{R_3 + R_2}
-    \mat{1 & 2 & 0 & 1 \\
-         0 & -1 & 1 & -2 \\
-         0 & 0 & 3 & -1 \\
-         0 & 0 & -1 & 5}
-  \]
-
-  \[
-    \xrightarrow{\ R_4 + \tfrac{1}{3}R_3\ }
-    \mat{1 & 2 & 0 & 1 \\
-         0 & -1 & 1 & -2 \\
-         0 & 0 & 3 & -1 \\
-         0 & 0 & 0 & \tfrac{14}{3}}
-    \qquad
-    \dt{A} = (1)(-1)(3)\left(\tfrac{14}{3}\right) = -14
-  \]
-
-  \normalsize
-  \remate{Sin intercambios, el signo es $+$. El determinante sale
-          negativo por el pivote $-1$, no por la permutación.}
-\end{frame}
-
-\begin{frame}{Ejercicio 4: para resolver}
-  \[
-    B = \mat{0 & 1 & 2 & 0 \\
-             1 & 0 & 3 & 1 \\
-             2 & 1 & 0 & 2 \\
-             0 & 2 & 1 & 1}
+    B = \mat{0 & 2 & 3 & 0 \\
+             2 & 0 & 0 & 1 \\
+             1 & 4 & 2 & 0 \\
+             0 & 1 & 0 & 4}
   \]
 
   \remate{Calcular $\dt{B}$.}
