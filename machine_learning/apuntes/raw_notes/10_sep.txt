@@ -1,0 +1,58 @@
+
+
+A veeces queeremos aplicar un clasificador, un algoritmo queeremosnos permita separar 
+o clasificar o estimar.
+
+Pero tenemos nuestros datos, lo pimero es limpiarlos, eliminando columnas vacias,
+lleanado faltantes y asi, y para evitar que
+los datos tengan diferentes escalas se tienen que normalizar/estandarizar los datos
+
+    estandarixar: poner a todos los datos ordenadso en fnucion de su media y de su varianza, haciendo uniforme el manejo de los datos, para que no haya una variab q salga mas ede los demas... los datos atipicos los aplasta, reduce esa diferencia
+    normalizar: poner todo entre 0 y 1
+
+tomar la desicion entre normalizar o estandarizar es una de las desiciones que se 
+debe ntomar pero depende de los datos y del objetivo que ueramos 
+
+distribucion no normal -> estandarizar
+distribucion normal -> normalizar
+
+todo esto nos ayuda para que en nuestro clasificador lineal no haya 
+descopnesasione en los pesos de los clasificadores lineales
+
+Pero ahora como dividir mi conjunto de muestra para hacer este proceso de
+entrenamiento
+
+si le pasamos todos los datos al clasificadro pues se los va a aprender y no
+podra genrealizar, va a tener overfitting
+
+si le pasamos poquitos podriamos no aprender a generalizar de manea adecedad
+esto seria underfitting 
+
+
+no se aplican de manera combinada a todo, se aplican de manera combinada epro dependiente
+de la variable 
+
+se utilizan diferentes particiones para 
+entrenar -> validar -> prubar
+
+puede ser 70 15 15
+80 10 10 
+
+tambien se puede utilizar la cross validation  que es
+{explicar la validacion cruzada}
+
+para los datos desblanzeados se parten por clases y los folds se hacen con los datos 
+de cada clases
+
+pero alguien dijo por que no tratamos de emular el modo en que aprende el cerebro humao
+y nace la idea de las redes neuronales artificiales
+
+{estructura de las neuronas}
+
+basicamente nuestro cerebro esta conectado por neuronas, las conexiones entre neuronas
+se llaman sinapssi y estan conectadas por axones y dendritas 
+
+por que el cerebro es eficiente? tienen un nimero enorme de neuronas, como 100billones y trillones
+de coneexiones trene ellas
+
+- Artificial neurona
