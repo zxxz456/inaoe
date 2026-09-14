@@ -79,6 +79,10 @@
   \begin{bmatrix} #1 \end{bmatrix}%
 }
 
+% --- entrada tachada: se atenua, no se borra, para que se vea
+%     de donde sale el menor ---
+\newcommand{\ta}[1]{{\color{gray!40}#1}}
+
 % --- remate de lamina: una frase, sin barra de titulo vacia ---
 \newcommand{\remate}[1]{%
   \vspace{0.3em}
@@ -536,18 +540,59 @@
 \section{Expansión por cofactores}
 
 \begin{frame}{Algoritmo}
-  \[
-    \dt{A} =
-      a_{11}\underbrace{(a_{22}a_{33} - a_{23}a_{32})}_{C_{11}}
-    + a_{12}\underbrace{(a_{23}a_{31} - a_{21}a_{33})}_{C_{12}}
-    + a_{13}\underbrace{(a_{21}a_{32} - a_{22}a_{31})}_{C_{13}}
-  \]
+  Tacha el renglón $1$ y la columna $j$: sobra el menor $M_{1j}$.
 
-  \begin{alertblock}{El signo de en medio}
-    $C_{12}$ viene volteado. Ese volteo es el patrón
-    $(-1)^{i+j}$.
-  \end{alertblock}
+  \begin{center}
+    \scriptsize
+    \begin{tikzpicture}[every node/.style={font=\scriptsize}]
+      \node (a1) at (0, 1.25)
+        {$\mat{\ta{a_{11}} & \ta{a_{12}} & \ta{a_{13}} \\
+               \ta{a_{21}} & a_{22} & a_{23} \\
+               \ta{a_{31}} & a_{32} & a_{33}}$};
+      \node (a2) at (0, 0)
+        {$\mat{\ta{a_{11}} & \ta{a_{12}} & \ta{a_{13}} \\
+               a_{21} & \ta{a_{22}} & a_{23} \\
+               a_{31} & \ta{a_{32}} & a_{33}}$};
+      \node (a3) at (0,-1.25)
+        {$\mat{\ta{a_{11}} & \ta{a_{12}} & \ta{a_{13}} \\
+               a_{21} & a_{22} & \ta{a_{23}} \\
+               a_{31} & a_{32} & \ta{a_{33}}}$};
+
+      \node (m1) at (3.1, 1.25)
+        {$M_{11} = \dbar{a_{22} & a_{23} \\ a_{32} & a_{33}}$};
+      \node (m2) at (3.1, 0)
+        {$M_{12} = \dbar{a_{21} & a_{23} \\ a_{31} & a_{33}}$};
+      \node (m3) at (3.1,-1.25)
+        {$M_{13} = \dbar{a_{21} & a_{22} \\ a_{31} & a_{32}}$};
+
+      \draw[->] (a1) -- (m1);
+      \draw[->] (a2) -- (m2);
+      \draw[->] (a3) -- (m3);
+
+      \node (r1) at (6.8, 2.0) {$a_{33}$};
+      \node (r2) at (6.8, 1.55) {$a_{32}$};
+      \node (r3) at (6.8, 0.95) {$a_{23}$};
+      \node (r4) at (6.8, 0.5) {$a_{22}$};
+      \draw[->,acento] (m1) -- (r1);
+      \draw[->,acento] (m1) -- (r2);
+      \draw[->,gray]   (m1) -- (r3);
+      \draw[->,gray]   (m1) -- (r4);
+    \end{tikzpicture}
+  \end{center}
+
+  \remate{\[
+    C_{1j} = (-1)^{1+j}\,M_{1j}
+    \qquad\Longrightarrow\qquad
+    C_{11} = +M_{11}
+    \quad
+    C_{12} = -M_{12}
+    \quad
+    C_{13} = +M_{13}
+  \]}
+
 \end{frame}
+
+
 
 \begin{frame}{Cofactores y el tablero de ajedrez}
   \begin{block}{Tacha el renglón $i$ y la columna $j$}
@@ -579,29 +624,9 @@
 
   \begin{itemize}
     \item Orden $n$ a orden $n-1$. Recursiva hasta $\dt{[a]} = a$.
-    \item \alert{Escoge el renglón o la columna con más ceros.}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Ejemplo: $-1, 2, -1$ por cofactores}
-  \[
-    \dbar{ 2 & -1 &    &    \\
-          -1 &  2 & -1 &    \\
-             & -1 &  2 & -1 \\
-             &    & -1 &  2}
-    = 2\,D_3 - (-1)\,\dbar{-1 & -1 & \\ & 2 & -1 \\ & -1 & 2}
-  \]
-
-  \begin{block}{Recurrencia}
-    \[
-      D_n = 2D_{n-1} - D_{n-2},
-      \qquad D_2 = 3,\ D_3 = 4
-      \quad\Longrightarrow\quad
-      D_n = n + 1
-    \]
-  \end{block}
-
-\end{frame}
 
 % =====================================================================
 %  6. Cierre
