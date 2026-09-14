@@ -11,24 +11,27 @@ Actividad 1
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.1.0
+* Version: 1.2.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       14/09/2026      La carpeta actividad_1/ ahora se llama src/
 zxxz6       08/09/2026      Creation
 
 
 -->
 
-# Actividad 1
+# Actividades
 
-En este directorio se encuentra todo lo relacionado a la actividad 1, la
-cual se entrega el 11/sept/2026
+En este directorio se encuentra todo lo relacionado a las actividades
+de Fundamentos de AAL, codigo, entregables por actividad, etc.
 
-## Instrucciones
+## Actividad 1
+
+### Instrucciones
 Con la colección "Time", consistente de 423 documentos con 83 consultas asociadas con sus correspondientes juicios de relevancia, hacer lo siguiente:
 
 - Preprocesar cada documento con: 
@@ -53,6 +56,35 @@ La colección se puede obtener de la siguiente liga: http://ir.dcs.gla.ac.uk/res
 
 Se puede obtener alguna implementación (e información adicional) del algoritmo de Porter en: https://tartarus.org/martin/PorterStemmer/
 
+## Actividad 2
+
+### Instrucciones
+
+Partiendo de la tarea anterior para la colección Time, donde ya se cuenta con el
+vocabulario de cada documento y de las consultas:
+
+1) Conjuntar el vocabulario de la colección, calculando la frecuencia de documento
+(número de documentos en que aparece) de cada término (aquí no intervienen las
+consultas). A partir del vocabulario de la colección, construir los vectores de cada
+documento con un pesado tf-idf y cada consulta con pesado binario.
+
+2) Realizar la recuperación de información para las primeras 10 consultas, obteniendo
+los documentos que tienen una medida de similitud coseno distinta de cero y
+ordenándolos decrecientemente. Calcular los niveles de recuerdo y precisión alcanzados
+según el orden obtenido en la recuperación en cada una de las consultas. Para esto se
+usarán los juicios de relevancia de la colección.
+
+Se deberá generar una salida de la siguiente forma:
+
+```
+Qi
+D1 sim1 D2 sim2 ... Dj simj Pi Ri Fi
+```
+
+donde i = 1 a 10 indica el número de query, j índica la cantidad de documentos
+relevantes para la query i, y Pi, Ri y Fi indican la precisión, recall y F1 obtenidos para la
+query Qi.
+Entregables: Código y listado de salida generada.
 <!--
 ############################### END OF README.MD ###############################
 ################################################################################
