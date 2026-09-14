@@ -1,0 +1,102 @@
+--- primer enfoque ---
+
+Assign each word its most likely POS tag
+if w has tags t1, ... tk entonces podemos usar
+
+{formula P(ti|w)}
+
+teien 91 de success en ingles
+for instance heat is more often sued as a noun that a verb
+
+- HMM tagging 
+{explicacion de este taging con ejemplo y formula}
+
+el indexing con POS sirve, aumenta la precicion pero reduce el recall 
+
+no vale la pena como una tecnca de indexado por si sola, incluso si se taggea manual
+
+-- segunda idea
+
+usar palabra simples como terminos de indexado tiene buna exhastividad pero 
+especificidad pobre
+
+algunas combinaciones de plabras tieenen significados que no pueden ser entendidos
+sepaarando cada una de las palabras separadas
+
+para reducie la ambiguedad se usan terminos de indexing que son mas que una palabra
+
+por ejemplo 
+
+this apple pile looks good and is a real treat
+
+adjective nount realtion (real treat)
+noun noun relation (apple-pie)
+subject verb relation (pie looks)
+verb-object relation (is-treat)
+
+
+the complication is that they are extracted from pthe POS tagger text or from the syntactic tree
+
+
+una tecnica que no es tan cara es el chinking
+
+entidades nombradas 
+son entidades que se nombran en el texto, hay tres entidades aceptaas: nombres, localidades y organisasiones
+otras pueden ser date, time medidads, email, direcciones 
+
+pero la ambiguedad sigue presente
+
+charli kirk -> persona o lugar
+
+como se procesan
+
+primero se identifican -> se detectan como los limites, donde empieza mi entidad nombrada y donde termina 
+y luego se clasifican -> Se signan categoiras predefinidas para identificar la entidad
+
+Esto se empezo atacar con relas basadas en conocimiento , o sea a manita, se sientan expertos y etiquetan
+
+despeus se fue movindo hacia el machine learning y el analisis estadsitico, que es como el enfoque 
+clasico, analisis oculto de markov, conditional random fields. Lo qie se busca es explotar caracteristicas
+de elementos de interes, como el empleo de mayusculas, patrones, POS, prefijos y sufijos d palabras
+Una de las principales limitaciones es que requiere extensos corpus de entrenamiento con data taggeada
+
+Y ya despues se movio a los enfoques de aprendizaje profundo y los transformers. Se utilizan embeddings de contezto
+y arquitecturas neuronales (BERT, RoBERTa). Y estos aprenden automaticamente representamiento de contexto recursionsin 
+ingenieria manual
+La limitacion principal es que se reqiere mucho computo y requiere datasets largos fine tuned para dominios
+especificos
+
+
+- Ngramas
+Otra tecnoca es el procesmeinto por Ngramas
+
+Un N grama es una subsecuencia de n terminos de una secuencia dada
+Los ngramas son computados facilmente
+Se pueden combinar ngramas de diferente tamano, esto produce flexibilidad at searching time
+El problema es la alta dimensionalidad
+
+Como reducir la dimensionladiad? Como seleccionar los n gramas utiles?
+
+
+pero hay otro enfoque que tambien tine que ver con frecuencias, las secuencias de frecuentes maximales
+
+Son secuencias de paabras que son frecuentes en la coleccion de documentos y que no estan contenidas en 
+algun otro longer frequent sequence
+
+
+su principal fortaleza es que forma un index mu compacto
+
+La extraccion de MFS is comunmente basada e la combinacion de bottom-up y metodos voraces
+
+ya vimos varias formas de indexing compuesto, pero funiciona?
+Al inicio si, per cunaod se hace un anotado de entidades nombradas, el hecho de que la coleccion cezca
+esto es algo que afecta el buscar este enfoque para hacer indexamiento, logra mejorar los resultados
+en baojs niveles de recuerdo.
+La recomendacion es considerar frases como terminos sumplemnatrios del espacio vectorial, complementario
+a la bolasa de palabras.
+
+La tercer propuesta es ir mas alla del empatamiento de terminos a mas a lo que es un indexamiento
+por sentidos. La sinimia y polisema nos afectan, asi que se tratara capturar conceptos
+
+pero que es el sentido? es uno de los significados de la palabra (las palabras tienen mas de un significado 
+basado en el contexto)
