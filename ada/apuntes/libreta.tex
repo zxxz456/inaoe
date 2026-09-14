@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.1.0
+%   * Version: 3.2.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       14/09/2026      Clase 10 Sep, recurrencias y sus metodos
 %  zxxz6       30/08/2026      Unifique las cinco definiciones, quite ejemplos
 %  zxxz6       30/08/2026      Anexo de caracterizacion por limites
 %  zxxz6       26/08/2026      Complete la clase 3 con las diapositivas
@@ -1445,6 +1446,241 @@ ejercer ese derecho no ayuda.
     de intentar probar nada, porque el desenlace habitual es la
     incomparabilidad.
 \end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 4 - Recurrencias
+% =====================================================================
+
+\clase{Recurrencias}{10 de septiembre de 2026}
+
+\begin{quick_sum}
+  El tema que quedó abierto al final de la clase pasada. Qué es una
+  recurrencia y de dónde sale, el caso de quick sort que explica por
+  qué el mismo algoritmo aparece con dos complejidades distintas en la
+  tabla, y los cuatro métodos para resolverlas: sustitución,
+  iteración, árboles de recursión y el método maestro.
+\end{quick_sum}
+
+\subsection*{De dónde salen}
+
+Las recurrencias se dan cuando un algoritmo se llama a sí mismo. El
+trabajo que hace sobre una entrada de tamaño $n$ se parte en dos
+piezas: lo que cuesta acomodar el problema en este nivel, y lo que
+cuestan las llamadas sobre entradas más chicas. Esa segunda parte no
+se puede contar directamente, porque es la misma función otra vez.
+Entonces el tiempo de ejecución no queda como una fórmula cerrada,
+queda definido en términos de sí mismo.
+
+\begin{definicion}
+  Una recurrencia es una ecuación o desigualdad que describe una
+  función en términos de su valor para entradas más pequeñas.
+\end{definicion}
+
+\begin{ojo}
+  Una recurrencia sin caso base no define nada. La ecuación sola se
+  desdobla para siempre; es el caso base el que detiene el descenso y
+  le da un valor a todo lo demás. Cuando se omite, como se hace
+  seguido, se sobreentiende que $T(n)$ es constante para $n$
+  suficientemente chico.
+\end{ojo}
+
+\subsection*{Ejemplo: quick sort}
+
+Quick sort escoge un pivote, particiona el arreglo alrededor de él y
+se llama a sí mismo sobre cada lado. La partición recorre el arreglo
+una vez, así que cuesta $\Ord{n}$. Lo que cambia todo es cómo queda
+el corte, y eso depende del pivote.
+
+Si el pivote parte el arreglo por la mitad, cada llamada genera dos
+subproblemas de tamaño $n/2$:
+\[
+  T(n) = 2\,T\!\left(\frac{n}{2}\right) + \Ord{n} .
+\]
+
+Si el pivote resulta ser el mínimo o el máximo, un lado se queda
+vacío y el otro con todo menos el pivote:
+\[
+  T(n) = T(n - 1) + \Ord{n} .
+\]
+
+\begin{idea}
+  Son dos recurrencias del mismo algoritmo, y resuelven a
+  $\Ord{n \log n}$ y $\Ord{n^2}$ respectivamente. Ahí está la
+  explicación del renglón de quick sort en la tabla
+  \ref{tab:ordenamiento}: la diferencia entre el caso promedio y el
+  peor caso no está en el código, está en qué tan parejo queda el
+  corte.
+\end{idea}
+
+\subsection*{Métodos para resolver recurrencias}
+
+Resolver una recurrencia es encontrarle una forma cerrada, o al menos
+una cota asintótica. Se vieron cuatro caminos.
+
+\subsubsection*{Método de sustitución}
+
+Son dos pasos, en este orden:
+
+\begin{enumerate}[itemsep=0.2em]
+  \item \textbf{Adivinar} la forma de la solución.
+  \item \textbf{Probarla por inducción} matemática, y de paso
+        encontrar las constantes que la hacen cierta.
+\end{enumerate}
+
+El nombre viene del segundo paso: se sustituye la hipótesis de
+inducción dentro de la recurrencia. El método no dice cómo adivinar,
+y esa es su debilidad, hay que llegar con la respuesta propuesta. Por
+eso se usa junto con los árboles de recursión, que sirven para
+producir la conjetura.
+
+\begin{ejemplo}
+  Resolver $T(n) = 2\,T(n/2) + n$.
+
+  \textbf{Paso 1.} Conjetura: $T(n) = \Ord{n \log n}$. Escrito como
+  lo va a usar la inducción, existe $c > 0$ tal que
+  $T(n) \leq c\,n \log n$.
+
+  \textbf{Paso 2.} Se supone cierto para $n/2$, o sea
+  $T(n/2) \leq c\,(n/2) \log(n/2)$, y se sustituye:
+  \begin{align*}
+    T(n) &\leq 2 \left( c\,\frac{n}{2} \log \frac{n}{2} \right) + n \\
+         &= c\,n \log \frac{n}{2} + n \\
+         &= c\,n \log n - c\,n \log 2 + n \\
+         &= c\,n \log n - c\,n + n .
+  \end{align*}
+  Ese último renglón es $\leq c\,n \log n$ siempre que
+  $-c\,n + n \leq 0$, es decir $c \geq 1$. Con eso el paso inductivo
+  cierra.
+\end{ejemplo}
+
+\begin{ojo}
+  El caso base de esta inducción no puede ser $n = 1$: ahí
+  $c \cdot 1 \cdot \log 1 = 0$, y $T(1) \leq 0$ es falso porque
+  $T(1)$ es una constante positiva. No es que la conjetura esté mal,
+  es que la cota arranca más arriba. Se toman $n = 2$ y $n = 3$ como
+  base, y basta escoger $c$ grande, porque la notación asintótica
+  solo exige que la desigualdad valga de un $n_0$ en adelante.
+\end{ojo}
+
+\begin{ojo}
+  La inducción tiene que probar \emph{exactamente} la forma que se
+  conjeturó, con la misma constante. Un error clásico es probar
+  $T(n) \leq c\,n$ dejando un término suelto y decir que ese término
+  se absorbe porque es de orden menor. No se absorbe: la hipótesis de
+  inducción se usa como está escrita, y si no cierra, hay que
+  fortalecerla restando un término de orden menor.
+\end{ojo}
+
+\subsubsection*{Método de iteración}
+
+En vez de adivinar, se desenrolla. Se sustituye la recurrencia dentro
+de sí misma una y otra vez hasta que el patrón se vuelve visible,
+luego se suma la serie que quedó y se aplica el caso base para saber
+dónde parar.
+
+\begin{ejemplo}
+  Sobre la misma $T(n) = 2\,T(n/2) + n$:
+  \begin{align*}
+    T(n) &= 2\,T(n/2) + n \\
+         &= 2 \left[ 2\,T(n/4) + n/2 \right] + n
+          = 4\,T(n/4) + 2n \\
+         &= 4 \left[ 2\,T(n/8) + n/4 \right] + 2n
+          = 8\,T(n/8) + 3n .
+  \end{align*}
+  Después de $i$ desdoblamientos queda
+  $T(n) = 2^i\,T(n/2^i) + i\,n$. El descenso para cuando el argumento
+  llega al caso base, $n/2^i = 1$, o sea $i = \log_2 n$. Sustituyendo,
+  \[
+    T(n) = n\,T(1) + n \log_2 n = \Ord{n \log n} .
+  \]
+\end{ejemplo}
+
+No hace falta conjeturar nada, pero el álgebra se pone pesada rápido
+y es fácil equivocarse al identificar el patrón general.
+
+\subsubsection*{Árboles de recursión}
+
+Es la iteración, pero dibujada. Cada nodo es el costo que ese nivel
+paga por su cuenta, sin contar las llamadas, y los hijos son los
+subproblemas. Se suma el costo por nivel, se cuenta cuántos niveles
+hay, y se suman los niveles.
+
+Para $T(n) = 2\,T(n/2) + n$:
+
+\begin{center}
+\begin{tabular}{cccc}
+  \toprule
+  \textbf{Nivel} & \textbf{Subproblemas} & \textbf{Tamaño}
+    & \textbf{Costo del nivel} \\
+  \midrule
+  $0$        & $1$     & $n$     & $n$ \\
+  $1$        & $2$     & $n/2$   & $n$ \\
+  $2$        & $4$     & $n/4$   & $n$ \\
+  $i$        & $2^i$   & $n/2^i$ & $n$ \\
+  $\log_2 n$ & $n$     & $1$     & $n$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Cada nivel cuesta $n$ porque los subproblemas se duplican al mismo
+ritmo que se encogen, y hay $\log_2 n + 1$ niveles. El total es
+$n(\log_2 n + 1) = \Ord{n \log n}$.
+
+\begin{idea}
+  El árbol no es una prueba, es una herramienta para conjeturar. Se
+  dibuja para ver a qué le va a dar la respuesta, y luego esa
+  conjetura se prueba formalmente con sustitución. Los dos métodos se
+  usan en pareja.
+\end{idea}
+
+\subsubsection*{Método maestro}
+
+Es una receta, sin inducción ni desenrollado. Aplica a las
+recurrencias de la forma
+\[
+  T(n) = a\,T\!\left(\frac{n}{b}\right) + f(n) ,
+  \qquad a \geq 1 , \quad b > 1 ,
+\]
+que es el molde de divide y vencerás: $a$ subproblemas de tamaño
+$n/b$, más $f(n)$ de costo por partir y juntar.
+
+Todo se decide comparando $f(n)$ contra $n^{\log_b a}$, que es lo que
+cuestan las hojas del árbol:
+
+\begin{itemize}[itemsep=0.2em]
+  \item Si $f(n)$ crece más lento, mandan las hojas y
+        $T(n) = \Tht{n^{\log_b a}}$.
+  \item Si crecen igual, todos los niveles cuestan lo mismo y
+        $T(n) = \Tht{n^{\log_b a} \log n}$.
+  \item Si $f(n)$ crece más rápido, manda la raíz y
+        $T(n) = \Tht{f(n)}$.
+\end{itemize}
+
+Para quick sort balanceado, $a = 2$ y $b = 2$, así que
+$n^{\log_2 2} = n$, que es justo $f(n) = n$. Es el segundo caso, y
+devuelve $\Tht{n \log n}$ sin hacer cuentas.
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Método} & \textbf{Qué pide} & \textbf{Qué da} \\
+  \midrule
+  Sustitución & Una conjetura previa    & Prueba formal \\
+  Iteración   & Aguante algebraico      & La forma cerrada \\
+  Árbol       & Dibujar y sumar niveles & Una conjetura \\
+  Maestro     & Que encaje en el molde  & La cota, directo \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{pendiente}
+  Del método maestro solo se dio el enunciado. Faltan las condiciones
+  finas de cada caso, el hueco entre los casos donde el teorema no
+  aplica, y por qué el tercero necesita además una condición de
+  regularidad sobre $f$.
+\end{pendiente}
 
 \end{document}
 
