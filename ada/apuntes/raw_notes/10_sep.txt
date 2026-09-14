@@ -1,0 +1,19 @@
+-- recurrencias -- 
+
+se dan cunado un algoritmo se llama a su mismo
+su tiempo de ejecucion se puede describir como una recurrencias
+
+recurrencia: ecucaion o inigualdad que describe una funcion en eterminos de su valor para entradas mas pequenas 
+
+ejemplo de quicosort
+
+- metodos para resolver recurrencias
+    substitucion 
+    {explicar este}
+    {toner ejemplo}
+    
+    metodo de iteracion
+
+    arboles de recursion
+
+    metodo maestro 
