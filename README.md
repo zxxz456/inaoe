@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.12.0
+* Version: 1.13.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       14/09/2026      actividad_1/ de AAL ahora se llama src/
 zxxz6       09/09/2026      Documente el entorno y las salidas de la act 1
 zxxz6       09/09/2026      Agregue la coleccion Time al indice
 zxxz6       08/09/2026      Agregue fundamentos_aal/actividades/
@@ -70,16 +71,16 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](fundamentos_aal/apuntes/raw_notes/).
-  - [actividades/](fundamentos_aal/actividades/) - Entregas del curso, una
-    carpeta por actividad. Cada una lleva su `README.md` con el enunciado
-    literal del profesor. Lo que comparten todas vive un nivel arriba:
+  - [actividades/](fundamentos_aal/actividades/) - Entregas del curso. El
+    trabajo vive en `src/`, que lleva su `README.md` con el enunciado
+    literal del profesor. Lo que no es código vive un nivel arriba:
     - [time/](fundamentos_aal/actividades/time/) - La colección de prueba:
       423 documentos de la revista Time, 83 consultas con sus juicios de
       relevancia y la lista de 340 palabras vacías.
     - `requirements.txt` - El entorno de Python con las versiones fijadas.
       El `.venv` no se versiona; se recrea con
       `python3.13 -m venv .venv` y `pip install -r requirements.txt`.
-    - [actividad_1/](fundamentos_aal/actividades/actividad_1/) - Preprocesar
+    - [src/](fundamentos_aal/actividades/src/) - Preprocesar
       la colección Time y extraer el vocabulario con su frecuencia de
       término, para documentos y consultas. Entrega el 11/09/2026. El
       trabajo va en `actividad.ipynb` y los vocabularios que se entregan
