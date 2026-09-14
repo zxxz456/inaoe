@@ -15,7 +15,7 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 4.3.0
+%   * Version: 4.6.0
 %
 %
 %  History:
@@ -364,33 +364,76 @@
   \end{block}
 \end{frame}
 
-\begin{frame}{Ejemplo: un intercambio}
+\begin{frame}{Ejemplo}
+  \footnotesize
   \[
-    A = \mat{0 & 0 & 1 \\ 0 & 2 & 3 \\ 4 & 5 & 6}
+    \mat{0 & 1 & 2 \\ 1 & 2 & 3 \\ 2 & 1 & 1}
+    \xrightarrow{\ R_1 \leftrightarrow R_2\ }
+    \mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 2 & 1 & 1}
+    \xrightarrow{\ R_3 - 2R_1\ }
+    \mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 0 & -3 & -5}
+    \xrightarrow{\ R_3 + 3R_2\ }
+    \mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 0 & 0 & 1}
+  \]
+  \normalsize
+
+  \begin{itemize}
+    \item $a_{11} = 0$ no sirve de pivote: hay que intercambiar.
+    \item Pivotes: $1$, $1$, $1$. Producto $= 1$.
+    \item Un intercambio, número impar, así que $\dt{P} = -1$.
+  \end{itemize}
+
+  \[
+    \dt{A} = -(1)(1)(1) = -1
+  \]
+\end{frame}
+
+\begin{frame}{Ejemplo: dónde está $PA = LU$}
+  Las tres matrices ya estaban en la cadena de flechas.
+  \[
+    \underbrace{\mat{0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1}}_{P}
     \qquad
-    PA = \mat{4 & 5 & 6 \\ 0 & 2 & 3 \\ 0 & 0 & 1}
+    \underbrace{\mat{1 & 0 & 0 \\ 0 & 1 & 0 \\ 2 & -3 & 1}}_{L}
+    \qquad
+    \underbrace{\mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 0 & 0 & 1}}_{U}
   \]
 
-  \[
-    \dt{A} = -(4)(2)(1) = -8
-  \]
+  \begin{itemize}
+    \item $P$: el intercambio $R_1 \leftrightarrow R_2$.
+    \item $L$: los multiplicadores, cada uno donde se usó.
+    \item $U$: la última matriz de la cadena.
+  \end{itemize}
 
-  \remate{Un intercambio, número impar: $\dt{P} = -1$.}
+  \begin{alertblock}{$L$ guarda lo que se \emph{resta}}
+    La flecha decía $R_3 + 3R_2$, que es $R_3 - (-3)R_2$. En $L$ va
+    $-3$, no $+3$.
+  \end{alertblock}
 \end{frame}
 
-
-\begin{frame}{Los pivotes son cocientes de determinantes}
+\begin{frame}{Ejemplo: y de ahí el determinante}
   \[
-    \dt{A_k} = d_1 d_2 \cdots d_k
-    \qquad\Longrightarrow\qquad
-    d_k = \frac{\dt{A_k}}{\dt{A_{k-1}}}
+    LU = \mat{1 & 0 & 0 \\ 0 & 1 & 0 \\ 2 & -3 & 1}
+         \mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 0 & 0 & 1}
+       = \mat{1 & 2 & 3 \\ 0 & 1 & 2 \\ 2 & 1 & 1}
+       = PA
   \]
 
-  \begin{block}{Prueba práctica}
-    No hacen falta intercambios exactamente cuando
-    $\dt{A_k} \neq 0$ para toda submatriz superior izquierda $A_k$.
-  \end{block}
+  \begin{itemize}
+    \item $\dt{P} = -1$: un intercambio, regla 2.
+    \item $\dt{L} = 1$: unos en la diagonal, regla 7. El $2$ y el
+          $-3$ no cuentan.
+    \item $\dt{U} = (1)(1)(1) = 1$: triangular, regla 7.
+  \end{itemize}
+
+  \[
+    (\dt{P})(\dt{A}) = (\dt{L})(\dt{U})
+    \quad\Longrightarrow\quad
+    (-1)\,\dt{A} = 1
+    \quad\Longrightarrow\quad
+    \dt{A} = -1
+  \]
 \end{frame}
+
 
 % =====================================================================
 %  4. La fórmula grande
