@@ -22,13 +22,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.13.0
+* Version: 1.14.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       14/09/2026      Agregue reportes/ y la actividad 2 de AAL
 zxxz6       14/09/2026      actividad_1/ de AAL ahora se llama src/
 zxxz6       09/09/2026      Documente el entorno y las salidas de la act 1
 zxxz6       09/09/2026      Agregue la coleccion Time al indice
@@ -72,19 +73,26 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](fundamentos_aal/apuntes/raw_notes/).
   - [actividades/](fundamentos_aal/actividades/) - Entregas del curso. El
-    trabajo vive en `src/`, que lleva su `README.md` con el enunciado
-    literal del profesor. Lo que no es código vive un nivel arriba:
+    código vive en `src/` y los reportes escritos en `reportes/`. Lo que
+    comparten las actividades vive un nivel arriba:
     - [time/](fundamentos_aal/actividades/time/) - La colección de prueba:
       423 documentos de la revista Time, 83 consultas con sus juicios de
       relevancia y la lista de 340 palabras vacías.
     - `requirements.txt` - El entorno de Python con las versiones fijadas.
       El `.venv` no se versiona; se recrea con
       `python3.13 -m venv .venv` y `pip install -r requirements.txt`.
-    - [src/](fundamentos_aal/actividades/src/) - Preprocesar
-      la colección Time y extraer el vocabulario con su frecuencia de
-      término, para documentos y consultas. Entrega el 11/09/2026. El
-      trabajo va en `actividad.ipynb` y los vocabularios que se entregan
-      quedan en `out/`, en el formato `Doc<id> término frecuencia ...`.
+    - [src/](fundamentos_aal/actividades/src/) - El notebook
+      `actividad.ipynb`, con las dos actividades, y el `README.md` con el
+      enunciado literal del profesor. Las entregas quedan en `out/`, una
+      subcarpeta por actividad: la 1 lista el vocabulario con su
+      frecuencia de término (`Doc<id> término frecuencia ...`) y la 2 el
+      ranking de cada consulta con su similitud y sus métricas
+      (`Q<id> D<id> sim ... P R F1`).
+    - [reportes/](fundamentos_aal/actividades/reportes/) - Los reportes en
+      LaTeX, uno por actividad. El de la 1 cubre el preprocesamiento y la
+      extracción del vocabulario; el de la 2, el pesado con tf-idf y
+      Okapi BM25, la recuperación por similitud coseno y la evaluación
+      contra los juicios de relevancia.
   - [material_apoyo/](fundamentos_aal/material_apoyo/) - Desarrollos de
     fondo para repasar, generados con Claude y aparte de la toma de clase.
     - [modelos_n_gramas.tex](fundamentos_aal/material_apoyo/modelos_n_gramas.tex) -
