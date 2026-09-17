@@ -2,7 +2,6 @@
 README.md
 ========================
 
-
 Descripción:
 ------------
 Índice del repositorio: qué materia vive en cada carpeta y qué hace
