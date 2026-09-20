@@ -1,0 +1,3 @@
+--- gradiente descendente en un error ---
+
+-- delta rule 

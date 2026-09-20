@@ -1,0 +1,74 @@
+-- Continuacion de neuronas --
+
+
+{diagrama de tlu de mcculloch y pits}
+
+En la biologia no ocure de una manera rigida o dura de que haya o no disparo en las neuronas, 
+eso depende de el potencial de accion. Para hacer ese suavizado se utiliza una funcion sigmoide 
+
+{funcion sigmoidal ponerla y explicarla}
+
+- seleccion de la funcion de activacion
+Hay otras funciones que nos permiten cambiar el comportamiento de la activacion
+{explicar step, relu, tanh, softmax}
+step no es derivable, las otras si y esto es esencial para el calculo eficiente de los pesos
+
+- Hasta ahora se puede ver que nuestro TLU puede separar dos categorias depentiendo de su
+respuesta binaria 
+
+{ejemplo de tlu con step, dos pesos w1=w2=1 y theta = 1.5, poner figura y tabla (solo binarios)}
+
+Nuestra neurona artificial, esta haciendo el mismo rol que un clasificador lineal
+
+
+- desenso de gradiente en un error 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
