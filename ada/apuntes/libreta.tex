@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.2.0
+%   * Version: 3.4.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       20/09/2026      Clase 17 Sep, heaps y construccion en O(n)
+%  zxxz6       20/09/2026      Clase 15 Sep, los cuatro metodos con ejemplos
 %  zxxz6       14/09/2026      Clase 10 Sep, recurrencias y sus metodos
 %  zxxz6       30/08/2026      Unifique las cinco definiciones, quite ejemplos
 %  zxxz6       30/08/2026      Anexo de caracterizacion por limites
@@ -1514,173 +1516,918 @@ vacío y el otro con todo menos el pivote:
   corte.
 \end{idea}
 
-\subsection*{Métodos para resolver recurrencias}
+\subsection*{Los cuatro métodos, de un vistazo}
 
 Resolver una recurrencia es encontrarle una forma cerrada, o al menos
-una cota asintótica. Se vieron cuatro caminos.
-
-\subsubsection*{Método de sustitución}
-
-Son dos pasos, en este orden:
-
-\begin{enumerate}[itemsep=0.2em]
-  \item \textbf{Adivinar} la forma de la solución.
-  \item \textbf{Probarla por inducción} matemática, y de paso
-        encontrar las constantes que la hacen cierta.
-\end{enumerate}
-
-El nombre viene del segundo paso: se sustituye la hipótesis de
-inducción dentro de la recurrencia. El método no dice cómo adivinar,
-y esa es su debilidad, hay que llegar con la respuesta propuesta. Por
-eso se usa junto con los árboles de recursión, que sirven para
-producir la conjetura.
-
-\begin{ejemplo}
-  Resolver $T(n) = 2\,T(n/2) + n$.
-
-  \textbf{Paso 1.} Conjetura: $T(n) = \Ord{n \log n}$. Escrito como
-  lo va a usar la inducción, existe $c > 0$ tal que
-  $T(n) \leq c\,n \log n$.
-
-  \textbf{Paso 2.} Se supone cierto para $n/2$, o sea
-  $T(n/2) \leq c\,(n/2) \log(n/2)$, y se sustituye:
-  \begin{align*}
-    T(n) &\leq 2 \left( c\,\frac{n}{2} \log \frac{n}{2} \right) + n \\
-         &= c\,n \log \frac{n}{2} + n \\
-         &= c\,n \log n - c\,n \log 2 + n \\
-         &= c\,n \log n - c\,n + n .
-  \end{align*}
-  Ese último renglón es $\leq c\,n \log n$ siempre que
-  $-c\,n + n \leq 0$, es decir $c \geq 1$. Con eso el paso inductivo
-  cierra.
-\end{ejemplo}
-
-\begin{ojo}
-  El caso base de esta inducción no puede ser $n = 1$: ahí
-  $c \cdot 1 \cdot \log 1 = 0$, y $T(1) \leq 0$ es falso porque
-  $T(1)$ es una constante positiva. No es que la conjetura esté mal,
-  es que la cota arranca más arriba. Se toman $n = 2$ y $n = 3$ como
-  base, y basta escoger $c$ grande, porque la notación asintótica
-  solo exige que la desigualdad valga de un $n_0$ en adelante.
-\end{ojo}
-
-\begin{ojo}
-  La inducción tiene que probar \emph{exactamente} la forma que se
-  conjeturó, con la misma constante. Un error clásico es probar
-  $T(n) \leq c\,n$ dejando un término suelto y decir que ese término
-  se absorbe porque es de orden menor. No se absorbe: la hipótesis de
-  inducción se usa como está escrita, y si no cierra, hay que
-  fortalecerla restando un término de orden menor.
-\end{ojo}
-
-\subsubsection*{Método de iteración}
-
-En vez de adivinar, se desenrolla. Se sustituye la recurrencia dentro
-de sí misma una y otra vez hasta que el patrón se vuelve visible,
-luego se suma la serie que quedó y se aplica el caso base para saber
-dónde parar.
-
-\begin{ejemplo}
-  Sobre la misma $T(n) = 2\,T(n/2) + n$:
-  \begin{align*}
-    T(n) &= 2\,T(n/2) + n \\
-         &= 2 \left[ 2\,T(n/4) + n/2 \right] + n
-          = 4\,T(n/4) + 2n \\
-         &= 4 \left[ 2\,T(n/8) + n/4 \right] + 2n
-          = 8\,T(n/8) + 3n .
-  \end{align*}
-  Después de $i$ desdoblamientos queda
-  $T(n) = 2^i\,T(n/2^i) + i\,n$. El descenso para cuando el argumento
-  llega al caso base, $n/2^i = 1$, o sea $i = \log_2 n$. Sustituyendo,
-  \[
-    T(n) = n\,T(1) + n \log_2 n = \Ord{n \log n} .
-  \]
-\end{ejemplo}
-
-No hace falta conjeturar nada, pero el álgebra se pone pesada rápido
-y es fácil equivocarse al identificar el patrón general.
-
-\subsubsection*{Árboles de recursión}
-
-Es la iteración, pero dibujada. Cada nodo es el costo que ese nivel
-paga por su cuenta, sin contar las llamadas, y los hijos son los
-subproblemas. Se suma el costo por nivel, se cuenta cuántos niveles
-hay, y se suman los niveles.
-
-Para $T(n) = 2\,T(n/2) + n$:
+una cota asintótica. Se nombraron cuatro caminos, que se desarrollan
+en la clase siguiente.
 
 \begin{center}
-\begin{tabular}{cccc}
+\begin{tabular}{lp{8.3cm}}
   \toprule
-  \textbf{Nivel} & \textbf{Subproblemas} & \textbf{Tamaño}
-    & \textbf{Costo del nivel} \\
+  \textbf{Método} & \textbf{En qué consiste} \\
   \midrule
-  $0$        & $1$     & $n$     & $n$ \\
-  $1$        & $2$     & $n/2$   & $n$ \\
-  $2$        & $4$     & $n/4$   & $n$ \\
-  $i$        & $2^i$   & $n/2^i$ & $n$ \\
-  $\log_2 n$ & $n$     & $1$     & $n$ \\
+  Sustitución & Adivinar una cota y probarla por inducción
+                matemática \\
+  \addlinespace
+  Iteración   & Expandir la recurrencia hasta expresarla como una
+                sumatoria en términos de $n$ y las condiciones
+                iniciales \\
+  \addlinespace
+  Árbol       & Convertir la recurrencia en un árbol cuyos nodos son
+                los costos de los distintos niveles de la recursión \\
+  \addlinespace
+  Maestro     & Receta para las recurrencias de la forma
+                $T(n) = a\,T(n/b) + f(n)$. Requiere memorizar tres
+                casos \\
   \bottomrule
 \end{tabular}
 \end{center}
 
-Cada nivel cuesta $n$ porque los subproblemas se duplican al mismo
-ritmo que se encogen, y hay $\log_2 n + 1$ niveles. El total es
-$n(\log_2 n + 1) = \Ord{n \log n}$.
+
+\newpage
+
+% =====================================================================
+%  Clase 5 - Metodos para resolver recurrencias
+% =====================================================================
+
+\clase{Métodos para resolver recurrencias}{15 de septiembre de 2026}
+
+\begin{quick_sum}
+  Los cuatro métodos de la clase pasada, ahora cada uno con un ejemplo
+  resuelto paso a paso. Sustitución con su prueba por inducción fuerte
+  y el problema de las condiciones de frontera, iteración desenrollando
+  hasta una serie geométrica, árboles de recursión sumando por niveles,
+  y el teorema maestro con sus tres casos y el hueco que dejan.
+\end{quick_sum}
+
+% =====================================================================
+
+\subsection*{Método de sustitución}
+
+Consta de dos pasos, en este orden:
+
+\begin{enumerate}[itemsep=0.2em]
+  \item \textbf{Adivinar} la forma de la solución.
+  \item \textbf{Sustituir} en la recursión donde $n$ decrece, asumir
+        de manera inductiva que la cota es cierta ahí, y probarla para
+        el siguiente valor de $n$.
+\end{enumerate}
+
+Es un método poderoso, pero solo se aplica cuando es fácil adivinar la
+forma de la respuesta. Sirve tanto para cotas superiores como para
+inferiores.
+
+\subsubsection*{Ejemplo resuelto}
+
+\begin{ejemplo}
+  Resolver $T(n) = 2\,T(\lfloor n/2 \rfloor) + n$.
+
+  \textbf{Paso 1. Adivinamos} $T(n) = \Ord{n \lg n}$. Escrito como lo
+  va a usar la inducción, por probar que existe $c > 0$ con
+  \[
+      T(n) \leq c\,n \lg n .
+  \]
+
+  \textbf{Paso 2. Supongamos} que la cota vale para
+  $\lfloor n/2 \rfloor$, o sea
+  \[
+      T(\lfloor n/2 \rfloor) \leq
+      c \lfloor n/2 \rfloor \lg(\lfloor n/2 \rfloor) .
+  \]
+  Sustituyendo en la recurrencia:
+  \begin{align*}
+    T(n) &\leq 2\left( c \lfloor n/2 \rfloor
+            \lg(\lfloor n/2 \rfloor) \right) + n \\
+         &\leq c\,n \lg(n/2) + n
+          && \text{quitando el piso, que solo achica} \\
+         &= c\,n \lg n - c\,n \lg 2 + n
+          && \lg(n/2) = \lg n - \lg 2 \\
+         &= c\,n \lg n - c\,n + n
+          && \lg 2 = 1 \\
+         &\leq c\,n \lg n .
+  \end{align*}
+
+  El último paso pide que $-c\,n + n \leq 0$, es decir
+  $\boxed{c \geq 1}$.
+\end{ejemplo}
 
 \begin{idea}
-  El árbol no es una prueba, es una herramienta para conjeturar. Se
-  dibuja para ver a qué le va a dar la respuesta, y luego esa
-  conjetura se prueba formalmente con sustitución. Los dos métodos se
-  usan en pareja.
+  Fíjate en de dónde sale todo el trabajo: el $-c\,n$ aparece solo
+  porque $\lg 2 = 1$, y es justo lo que se come el $+n$ que la
+  recurrencia agrega en cada nivel. Si el término suelto fuera $n^2$
+  en vez de $n$, ese $-c\,n$ ya no alcanzaría y la conjetura
+  $\Ord{n \lg n}$ se caería.
 \end{idea}
 
-\subsubsection*{Método maestro}
+\subsubsection*{Las condiciones de frontera}
 
-Es una receta, sin inducción ni desenrollado. Aplica a las
-recurrencias de la forma
-\[
-  T(n) = a\,T\!\left(\frac{n}{b}\right) + f(n) ,
-  \qquad a \geq 1 , \quad b > 1 ,
-\]
-que es el molde de divide y vencerás: $a$ subproblemas de tamaño
-$n/b$, más $f(n)$ de costo por partir y juntar.
+La inducción no está completa hasta probar que la cota vale en la
+frontera. Y ahí aparece un detalle que tumba la prueba si se pasa por
+alto.
 
-Todo se decide comparando $f(n)$ contra $n^{\log_b a}$, que es lo que
-cuestan las hojas del árbol:
+\begin{ojo}
+  Con $T(1) = 1$, la cota exige $T(1) \leq c \cdot 1 \cdot \lg 1 = 0$,
+  o sea $1 \leq 0$, que es falso \textbf{para cualquier} $c$. La
+  recurrencia no funciona para $T(1)$.
+\end{ojo}
 
-\begin{itemize}[itemsep=0.2em]
-  \item Si $f(n)$ crece más lento, mandan las hojas y
-        $T(n) = \Tht{n^{\log_b a}}$.
-  \item Si crecen igual, todos los niveles cuestan lo mismo y
-        $T(n) = \Tht{n^{\log_b a} \log n}$.
-  \item Si $f(n)$ crece más rápido, manda la raíz y
-        $T(n) = \Tht{f(n)}$.
-\end{itemize}
-
-Para quick sort balanceado, $a = 2$ y $b = 2$, así que
-$n^{\log_2 2} = n$, que es justo $f(n) = n$. Es el segundo caso, y
-devuelve $\Tht{n \log n}$ sin hacer cuentas.
+La salida es que la notación asintótica solo exige que la desigualdad
+valga de un $n_0$ en adelante, así que se escoge $n_0 = 2$ y se
+verifican $n = 2$ y $n = 3$ como casos base:
 
 \begin{center}
 \begin{tabular}{lll}
   \toprule
-  \textbf{Método} & \textbf{Qué pide} & \textbf{Qué da} \\
+  \textbf{Valor} & \textbf{De la recurrencia} & \textbf{Lo que pide
+    la cota} \\
   \midrule
-  Sustitución & Una conjetura previa    & Prueba formal \\
-  Iteración   & Aguante algebraico      & La forma cerrada \\
-  Árbol       & Dibujar y sumar niveles & Una conjetura \\
-  Maestro     & Que encaje en el molde  & La cota, directo \\
+  $T(2)$ & $2T(1) + 2 = 4$ & $c\,2 \lg 2 = 2c \geq 4
+                             \;\Rightarrow\; c \geq 2$ \\
+  $T(3)$ & $2T(1) + 3 = 5$ & $c\,3 \lg 3 = 4.755c \geq 5$ \\
   \bottomrule
 \end{tabular}
 \end{center}
 
-\begin{pendiente}
-  Del método maestro solo se dio el enunciado. Faltan las condiciones
-  finas de cada caso, el hueco entre los casos donde el teorema no
-  aplica, y por qué el tercero necesita además una condición de
-  regularidad sobre $f$.
-\end{pendiente}
+Con $c \geq 2$ los dos se cumplen, y como el paso inductivo solo pedía
+$c \geq 1$, esa misma constante sirve para toda la prueba.
+
+\begin{ojo}
+  La constante $c$ tiene que ser \textbf{una sola} para toda la
+  prueba. No se vale escoger una para el paso inductivo y otra para
+  cada caso base: se elige la más exigente de todas y se usa en todos
+  lados.
+\end{ojo}
+
+\subsubsection*{Por qué la inducción tiene que ser fuerte}
+
+Hay una razón de fondo para que aquí no sirva la inducción ordinaria.
+La recurrencia manda de $n+1$ a $\lfloor (n+1)/2 \rfloor$, que no es
+$n$ sino un valor mucho más chico. Suponer la cota solo para $n$ no
+sirve de nada.
+
+\begin{definicion}
+  En la \textbf{inducción fuerte} la hipótesis no es que la propiedad
+  vale para $n$, sino que vale para \emph{todos} los valores desde el
+  caso base hasta $n$. Con eso se puede aplicar a cualquier tamaño
+  menor que aparezca.
+\end{definicion}
+
+\begin{ejemplo}
+  La misma recurrencia, escrita con la hipótesis fuerte.
+
+  \textbf{Hipótesis.} Para todo $k$ con $2 \leq k \leq n$,
+  \[
+      T(k) \leq c\,k \log_2 k .
+  \]
+
+  \textbf{Por demostrar.}
+  $T(n+1) \leq c\,(n+1) \log_2 (n+1)$.
+
+  \textbf{Paso inductivo.} Sea $m = \lfloor (n+1)/2 \rfloor$. Para
+  $n + 1 \geq 4$ se cumple $2 \leq m \leq n$, así que la hipótesis
+  aplica a $T(m)$:
+  \begin{align*}
+    T(n+1) &= 2\,T(m) + (n+1) \\
+           &\leq 2c\,m \log_2 m + (n+1)
+            && \text{por la hipótesis} \\
+           &\leq c\,(n+1) \log_2\!\left(\tfrac{n+1}{2}\right) + (n+1)
+            && \text{porque } 2m \leq n+1 \\
+           &= c\,(n+1)\left[\log_2(n+1) - 1\right] + (n+1) \\
+           &= c\,(n+1)\log_2(n+1) + (n+1)(1 - c) .
+  \end{align*}
+  Si $c \geq 1$ entonces $(n+1)(1-c) \leq 0$, y por lo tanto
+  \[
+      T(n+1) \leq c\,(n+1)\log_2(n+1) . \qedhere
+  \]
+\end{ejemplo}
+
+\begin{idea}
+  Los casos base $n = 2$ y $n = 3$ no son un capricho. Se necesita
+  $m \geq 2$ para poder aplicar la hipótesis, y $m = 1$ ocurre justo
+  cuando $n + 1 = 3$. Cubrir $2$ y $3$ a mano deja el paso general
+  trabajando siempre con $m$ dentro del rango.
+\end{idea}
+
+\subsubsection*{Cómo adivinar la cota}
+
+Es la debilidad del método: \textbf{no hay una manera general} de
+adivinar la solución correcta. Requiere experiencia y creatividad. Dos
+heurísticas que sí ayudan:
+
+\begin{itemize}[itemsep=0.2em]
+  \item Dibujar un árbol de recursión para generar un buen valor
+        inicial, y luego probarlo con sustitución.
+  \item Si la recurrencia se parece a otra ya resuelta, probar con una
+        solución parecida.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Método de iteración}
+
+No requiere adivinar la respuesta, y esa es toda su gracia. Se expande
+la recurrencia dentro de sí misma una y otra vez hasta expresarla como
+una sumatoria de términos que dependen solo de $n$ y de las
+condiciones iniciales. Después se acota esa sumatoria.
+
+El costo es el álgebra: puede ponerse pesado rápido. A veces se itera
+solo lo suficiente para intuir la forma de la solución y de ahí se
+sigue con sustitución.
+
+\begin{ejemplo}
+  Resolver $T(n) = 3\,T(\lfloor n/4 \rfloor) + n$.
+
+  \textbf{Paso 1. Desenrollar.}
+  \begin{align*}
+    T(n) &= n + 3\,T(\lfloor n/4 \rfloor) \\
+         &= n + 3\left(\lfloor n/4 \rfloor
+            + 3\,T(\lfloor n/16 \rfloor)\right) \\
+         &= n + 3\left(\lfloor n/4 \rfloor + 3\left(
+            \lfloor n/16 \rfloor
+            + 3\,T(\lfloor n/64 \rfloor)\right)\right) \\
+         &= n + 3\lfloor n/4 \rfloor + 9\lfloor n/16 \rfloor
+            + 27\,T(\lfloor n/64 \rfloor) .
+  \end{align*}
+
+  \textbf{Paso 2. Leer el patrón.} El término $i$-ésimo de la serie es
+  $3^i \lfloor n/4^i \rfloor$.
+
+  \textbf{Paso 3. Saber dónde parar.} La iteración llega al caso base
+  cuando $\lfloor n/4^i \rfloor = 1$, o sea cuando $i$ alcanza
+  $\log_4 n$.
+
+  \textbf{Paso 4. Acotar la suma.} Usando
+  $\lfloor n/4^i \rfloor \leq n/4^i$:
+  \begin{align*}
+    T(n) &\leq n + \tfrac{3n}{4} + \tfrac{9n}{16}
+            + \tfrac{27n}{64} + \cdots
+            + 3^{\log_4 n}\,\Tht{1} \\
+         &\leq n \sum_{i=0}^{\infty}
+            \left(\tfrac{3}{4}\right)^{i}
+            + \Tht{n^{\log_4 3}} \\
+         &= 4n + \ord{n} \\
+         &= \Ord{n} .
+  \end{align*}
+\end{ejemplo}
+
+\begin{idea}
+  Los dos pasos que hacen el truco. Primero, la serie
+  $\sum (3/4)^i$ es geométrica decreciente, así que converge a
+  $1/(1 - 3/4) = 4$ aunque se extienda al infinito: acotar de más no
+  cuesta nada y ahorra manejar el límite exacto. Segundo,
+  $n^{\log_4 3} \approx n^{0.79}$ crece más lento que $n$, así que es
+  $\ord{n}$ y desaparece dentro del $\Ord{n}$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Árboles de recursión}
+
+Es la iteración, pero dibujada. Cada nodo representa el costo de un
+subproblema dentro del conjunto de llamadas recursivas. Se suman los
+costos por nivel y luego se suman los niveles. Sirve sobre todo para
+\textbf{generar una buena conjetura}, que después se comprueba con
+sustitución.
+
+\begin{ejemplo}
+  Resolver $T(n) = 3\,T(\lfloor n/4 \rfloor) + \Tht{n^2}$. Se trabaja
+  con $T(n) = 3\,T(n/4) + c\,n^2$, con $c > 0$, y se supone que $n$ es
+  potencia exacta de $4$ para no cargar con los pisos.
+
+  \textbf{Paso 1. Cuántos niveles hay.} El subproblema a profundidad
+  $i$ tiene tamaño $n/4^i$. Llega a $1$ cuando $n/4^i = 1$, o sea
+  $i = \log_4 n$. El árbol tiene entonces $\log_4 n + 1$ niveles,
+  contando el $0$.
+
+  \textbf{Paso 2. Cuánto cuesta cada nivel.} Cada nodo se abre en
+  tres, así que a profundidad $i$ hay $3^i$ nodos, y cada uno cuesta
+  $c\,(n/4^i)^2$. Multiplicando:
+  \[
+      3^i \cdot c\left(\frac{n}{4^i}\right)^2
+      = \frac{3^i\,c\,n^2}{16^i}
+      = \left(\frac{3}{16}\right)^{i} c\,n^2 .
+  \]
+
+  \begin{center}
+  \begin{tabular}{cccc}
+    \toprule
+    \textbf{Nivel} & \textbf{Nodos} & \textbf{Tamaño}
+      & \textbf{Costo del nivel} \\
+    \midrule
+    $0$ & $1$   & $n$     & $c\,n^2$ \\
+    $1$ & $3$   & $n/4$   & $(3/16)\,c\,n^2$ \\
+    $2$ & $9$   & $n/16$  & $(3/16)^2 c\,n^2$ \\
+    $i$ & $3^i$ & $n/4^i$ & $(3/16)^i c\,n^2$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \textbf{Paso 3. Las hojas.} El último nivel, a profundidad
+  $\log_4 n$, tiene $3^{\log_4 n} = n^{\log_4 3}$ hojas, cada una con
+  costo $T(1)$, para un total de $\Tht{n^{\log_4 3}}$.
+
+  \textbf{Paso 4. Sumar todo.}
+  \begin{align*}
+    T(n) &= \sum_{i=0}^{\log_4 n - 1}
+            \left(\frac{3}{16}\right)^{i} c\,n^2
+            + \Tht{n^{\log_4 3}} \\
+         &< \sum_{i=0}^{\infty}
+            \left(\frac{3}{16}\right)^{i} c\,n^2
+            + \Tht{n^{\log_4 3}} \\
+         &= \frac{1}{1 - 3/16}\,c\,n^2 + \Tht{n^{\log_4 3}} \\
+         &= \frac{16}{13}\,c\,n^2 + \Tht{n^{\log_4 3}}
+          = \Ord{n^2} .
+  \end{align*}
+  Y como la raíz sola ya cuesta $c\,n^2$, la cota inferior también es
+  $n^2$, así que $T(n) = \Tht{n^2}$.
+\end{ejemplo}
+
+\subsubsection*{La identidad del exponente}
+
+En el paso 3 se usó $3^{\log_4 n} = n^{\log_4 3}$, que parece un
+truco y no lo es. Es un caso de
+$a^{\log_c b} = b^{\log_c a}$, y sale de escribir los dos lados como
+exponenciales:
+\[
+    3^{\log_4 n} = 3^{\frac{\ln n}{\ln 4}}
+                 = \left(e^{\ln 3}\right)^{\frac{\ln n}{\ln 4}}
+                 = e^{\frac{(\ln 3)(\ln n)}{\ln 4}} ,
+    \qquad
+    n^{\log_4 3} = e^{\frac{(\ln n)(\ln 3)}{\ln 4}} .
+\]
+Los exponentes son iguales porque la multiplicación es conmutativa.
+
+\subsubsection*{La serie geométrica finita}
+
+La otra pieza que se usó. Para $S = 1 + r + r^2 + \cdots + r^{k-1}$:
+\begin{align*}
+  S    &= 1 + r + r^2 + \cdots + r^{k-1} \\
+  r\,S &= \phantom{1 + {}} r + r^2 + \cdots + r^{k-1} + r^k .
+\end{align*}
+Restando la segunda de la primera se cancelan todos los términos de en
+medio y queda $S - r\,S = 1 - r^k$, de donde
+\[
+    S = \frac{1 - r^k}{1 - r} .
+\]
+Cuando $|r| < 1$ y la suma es infinita, $r^k \to 0$ y se llega a
+$\sum_{k=0}^{\infty} r^k = 1/(1-r)$, que es la forma que se usó
+arriba.
+
+\begin{idea}
+  Que $r = 3/16 < 1$ es lo que decide el resultado: el costo baja
+  geométricamente conforme se desciende, así que \textbf{manda la
+  raíz}. Si $r$ fuera mayor que $1$ mandarían las hojas, y si fuera
+  exactamente $1$ todos los niveles costarían lo mismo y habría que
+  multiplicar por el número de niveles. Esos tres escenarios son
+  exactamente los tres casos del método maestro.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Método maestro}
+
+Es una receta, sin inducción ni desenrollado. Aplica a las
+recurrencias de la forma
+\[
+    T(n) = a\,T(n/b) + f(n) ,
+    \qquad a \geq 1 , \quad b > 1 ,
+\]
+con $a$ y $b$ constantes y $f(n)$ asintóticamente positiva. Describe
+un algoritmo que parte un problema de tamaño $n$ en $a$ subproblemas
+de tamaño $n/b$, los resuelve recursivamente en tiempo $T(n/b)$, y
+paga $f(n)$ por dividir y combinar. Da igual si $n/b$ se lee como
+$\lfloor n/b \rfloor$ o como $\lceil n/b \rceil$.
+
+\begin{teorema}[Teorema maestro]
+  \label{teo:maestro}
+  Con $T(n) = a\,T(n/b) + f(n)$:
+  \begin{enumerate}[itemsep=0.25em]
+    \item Si $f(n) = \Ord{n^{\log_b a - \epsilon}}$ para alguna
+          constante $\epsilon > 0$, entonces
+          $T(n) = \Tht{n^{\log_b a}}$.
+    \item Si $f(n) = \Tht{n^{\log_b a}}$, entonces
+          $T(n) = \Tht{n^{\log_b a} \lg n}$.
+    \item Si $f(n) = \Omg{n^{\log_b a + \epsilon}}$ para alguna
+          constante $\epsilon > 0$, y además
+          $a\,f(n/b) \leq c\,f(n)$ para alguna constante $c < 1$ y
+          todo $n$ suficientemente grande, entonces
+          $T(n) = \Tht{f(n)}$.
+  \end{enumerate}
+\end{teorema}
+
+\begin{idea}
+  Los tres casos son la misma pregunta: comparar $f(n)$, que es lo que
+  cuesta la raíz, contra $n^{\log_b a}$, que es lo que cuestan las
+  hojas. \textbf{Gana la mayor de las dos.} Si empatan, todos los
+  niveles cuestan lo mismo y se multiplica por el factor logarítmico,
+  que no es otra cosa que el número de niveles.
+\end{idea}
+
+\subsubsection*{La letra chica}
+
+\begin{ojo}
+  En los casos 1 y 3 no basta con que una función sea mayor que la
+  otra: tiene que serlo \textbf{polinómicamente}, o sea por un factor
+  de $n^{\epsilon}$ con $\epsilon > 0$. Y el caso 3 pide además la
+  condición de regularidad $a\,f(n/b) \leq c\,f(n)$, que se cumple
+  para casi cualquier polinomio pero hay que verificarla.
+
+  La consecuencia es que \textbf{los tres casos no cubren todas las
+  posibilidades}. Hay recurrencias que caen en los huecos y para las
+  que el teorema simplemente no dice nada.
+\end{ojo}
+
+\subsubsection*{Los cuatro ejemplos}
+
+\begin{ejemplo}[Caso 1]
+  $T(n) = 9\,T(n/3) + n$. Aquí $a = 9$, $b = 3$, $f(n) = n$, y
+  $n^{\log_b a} = n^{\log_3 9} = n^2$. Como
+  $f(n) = n = \Ord{n^{2 - \epsilon}}$ con $\epsilon = 1$, las hojas
+  dominan:
+  \[
+      T(n) = \Tht{n^2} .
+  \]
+\end{ejemplo}
+
+\begin{ejemplo}[Caso 2]
+  $T(n) = T(2n/3) + 1$. Aquí $a = 1$, $b = 3/2$, $f(n) = 1$, y
+  $n^{\log_{3/2} 1} = n^0 = 1$. Como $f(n) = \Tht{1}$ empata con
+  $n^{\log_b a}$, todos los niveles cuestan lo mismo:
+  \[
+      T(n) = \Tht{\lg n} .
+  \]
+\end{ejemplo}
+
+\begin{ejemplo}[Caso 3]
+  $T(n) = 3\,T(n/4) + n \lg n$. Aquí $a = 3$, $b = 4$,
+  $f(n) = n \lg n$, y
+  $n^{\log_4 3} = \Ord{n^{0.793}}$. Como
+  $f(n) = \Omg{n^{\log_4 3 + \epsilon}}$ con
+  $\epsilon \approx 0.2$, falta verificar la regularidad:
+  \[
+      a\,f(n/b) = 3\,\frac{n}{4}\lg\frac{n}{4}
+      \leq \frac{3}{4}\,n \lg n = c\,f(n)
+      \quad \text{con } c = 3/4 < 1 .
+  \]
+  Se cumple, así que manda la raíz:
+  \[
+      T(n) = \Tht{n \lg n} .
+  \]
+\end{ejemplo}
+
+\begin{ejemplo}[Ninguno de los tres]
+  $T(n) = 2\,T(n/2) + n \lg n$. Tiene la forma correcta, con $a = 2$,
+  $b = 2$, $f(n) = n \lg n$ y $n^{\log_2 2} = n$.
+
+  Parecería el caso 3, porque $n \lg n$ sí es asintóticamente mayor
+  que $n$. El problema es que \textbf{no lo es polinómicamente}: el
+  cociente
+  \[
+      \frac{f(n)}{n^{\log_b a}} = \frac{n \lg n}{n} = \lg n
+  \]
+  es asintóticamente \emph{menor} que $n^{\epsilon}$ para cualquier
+  $\epsilon > 0$ positivo. La recurrencia cae en el hueco entre el
+  caso 2 y el caso 3, y el teorema maestro no la resuelve.
+\end{ejemplo}
+
+\begin{ojo}
+  Ese último ejemplo es el que hay que tener presente: que una
+  recurrencia tenga la forma $a\,T(n/b) + f(n)$ \textbf{no garantiza}
+  que el método maestro aplique. Siempre hay que comprobar cuál de los
+  tres casos se cumple, y aceptar que a veces ninguno lo hace. Ahí
+  toca volver a los árboles de recursión y a la sustitución.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Cuál usar}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Método} & \textbf{Qué pide} & \textbf{Qué entrega} \\
+  \midrule
+  Sustitución & Una conjetura previa    & Prueba formal \\
+  Iteración   & Aguante algebraico      & La forma cerrada \\
+  Árbol       & Dibujar y sumar niveles & Una conjetura \\
+  Maestro     & Que encaje en un caso   & La cota, directo \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  En la práctica se usan en pareja. El árbol da la conjetura, la
+  sustitución la prueba. El maestro se intenta primero porque si
+  aplica ahorra todo el trabajo, pero hay que verificar el caso, no
+  suponerlo.
+\end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 6 - Heaps
+% =====================================================================
+
+\clase{Heaps}{17 de septiembre de 2026}
+
+\begin{quick_sum}
+  Se cerró el método maestro y arrancó ordenamiento. El heap: qué es,
+  cómo se guarda un árbol binario en un arreglo plano, la propiedad
+  que lo define y su altura. Luego las operaciones, con
+  \textsc{Heapify} como la pieza central, y la construcción del heap,
+  que resulta costar $\Ord{n}$ y no $\Ord{n \lg n}$ como parecería.
+\end{quick_sum}
+
+\subsection*{Qué es un heap}
+
+\begin{definicion}
+  Un \textbf{heap} es una estructura de datos binaria: un arreglo que
+  representa un árbol binario \textbf{completo}, o sea lleno en todos
+  sus niveles salvo tal vez el último, que se llena de izquierda a
+  derecha.
+\end{definicion}
+
+Cada nodo del árbol es un elemento del arreglo y guarda su valor. El
+arreglo lleva dos atributos:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  $\mathit{length}[A]$    & Número de elementos del arreglo $A$ \\
+  $\mathit{heap\text{-}size}[A]$ & Número de elementos que de verdad
+                                   forman parte del heap \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Siempre se cumple
+$\mathit{heap\text{-}size}[A] \leq \mathit{length}[A]$, y la raíz del
+árbol es $A[1]$.
+
+\begin{ojo}
+  Los dos atributos no son lo mismo y la diferencia importa. El
+  arreglo puede ser más grande que el heap que contiene, y en
+  heapsort esa diferencia es justo el mecanismo: el heap se va
+  encogiendo dentro del mismo arreglo mientras la parte de atrás
+  guarda lo ya ordenado.
+\end{ojo}
+
+\subsubsection*{Navegar el árbol con aritmética}
+
+Lo que hace útil al heap es que no necesita apuntadores. Dado el
+índice $i$ de un nodo:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  $\textsc{Padre}(i)$    & \textbf{devolver} $\lfloor i/2 \rfloor$ \\
+  $\textsc{Izq}(i)$      & \textbf{devolver} $2i$ \\
+  $\textsc{Der}(i)$      & \textbf{devolver} $2i + 1$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  Estas tres fórmulas funcionan \textbf{porque} el árbol es completo.
+  Al recorrer por niveles, el nivel $k$ ocupa las posiciones
+  $2^k$ a $2^{k+1} - 1$, así que los hijos de $i$ caen siempre en
+  $2i$ y $2i+1$ sin dejar huecos. Si el árbol tuviera agujeros, la
+  cuenta se rompería y habría que volver a los apuntadores.
+\end{idea}
+
+\begin{ejemplo}
+  Sobre el arreglo
+  $A = [16, 14, 10, 8, 7, 9, 3, 2, 4, 1]$ con
+  $\mathit{heap\text{-}size} = 10$:
+  \begin{center}
+  \begin{tabular}{ccccc}
+    \toprule
+    $i$ & $A[i]$ & \textbf{Padre} & \textbf{Izq} & \textbf{Der} \\
+    \midrule
+    $1$ & $16$ & $-$            & $A[2] = 14$ & $A[3] = 10$ \\
+    $2$ & $14$ & $A[1] = 16$    & $A[4] = 8$  & $A[5] = 7$ \\
+    $5$ & $7$  & $A[2] = 14$    & $A[10] = 1$ & no existe \\
+    $8$ & $2$  & $A[4] = 8$     & no existe   & no existe \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  El índice $5$ solo tiene hijo izquierdo porque
+  $2 \cdot 5 + 1 = 11 > 10$. Los índices del $6$ en adelante son
+  hojas.
+\end{ejemplo}
+
+\subsubsection*{La propiedad de heap}
+
+\begin{definicion}
+  Un \textbf{MAX-HEAP} cumple
+  $A[\textsc{Padre}(i)] \geq A[i]$ para todo nodo $i$ distinto de la
+  raíz. Un \textbf{MIN-HEAP} cumple lo contrario,
+  $A[\textsc{Padre}(i)] \leq A[i]$.
+\end{definicion}
+
+\begin{ojo}
+  La propiedad solo relaciona a cada nodo con su \textbf{padre}. No
+  dice nada entre hermanos ni entre ramas distintas, así que un heap
+  \textbf{no es} un árbol binario de búsqueda y recorrerlo en orden no
+  da la secuencia ordenada. Lo único garantizado es que el máximo está
+  en la raíz.
+\end{ojo}
+
+\subsubsection*{Altura}
+
+La \textbf{altura de un nodo} es el número de arcos de la ruta simple
+más larga que baja de ese nodo a una hoja. La \textbf{altura del
+árbol} es la de su raíz.
+
+Como el árbol es completo, cada nivel duplica al anterior, así que con
+$x$ niveles caben
+\[
+    n = \underbrace{2 \cdot 2 \cdots 2}_{x} = 2^{x}
+    \quad \Longrightarrow \quad
+    x = \log_2 n .
+\]
+Por lo tanto la altura del árbol es $\Tht{\lg n}$, y ese logaritmo es
+el que va a aparecer en el costo de casi todas las operaciones.
+
+% =====================================================================
+
+\subsection*{Operaciones sobre un MAX-HEAP}
+
+\subsubsection*{Máximo}
+
+Está en la raíz por definición, así que se lee $A[1]$ y ya:
+$\Ord{1}$.
+
+\subsubsection*{Inserción}
+
+Primero hay que \textbf{respetar la forma} del heap, o sea que siga
+siendo un árbol completo. Eso obliga a meter el elemento nuevo en la
+única posición que no abre huecos: al final del arreglo.
+
+\begin{enumerate}[itemsep=0.2em]
+  \item Insertar al final del arreglo: $\Ord{1}$.
+  \item Verificar si se mantiene la propiedad de heap: $\Ord{1}$, es
+        una sola comparación contra el padre.
+  \item Si no se mantiene, intercambiar con el padre y repetir hacia
+        arriba, hasta la raíz si hace falta.
+\end{enumerate}
+
+El paso 3 sube a lo más la altura del árbol, así que la inserción
+cuesta $\Ord{\lg n}$.
+
+\subsubsection*{Eliminación de la raíz}
+
+Eliminar el último nodo es $\Ord{1}$. Eliminar la raíz, que es lo que
+de verdad se necesita, se resuelve con un truco:
+
+\begin{enumerate}[itemsep=0.2em]
+  \item Intercambiar el último nodo con la raíz: $\Ord{1}$.
+  \item Eliminar el último nodo, que ahora contiene el valor que
+        queríamos sacar: $\Ord{1}$.
+  \item La raíz quedó con un valor que probablemente viola la
+        propiedad. Hay que restaurarla, y para eso está
+        \textsc{Heapify}.
+\end{enumerate}
+
+% =====================================================================
+
+\subsection*{Heapify}
+
+Es la operación central. El escenario es muy específico:
+
+\begin{itemize}[itemsep=0.2em]
+  \item \textbf{Entrada:} un arreglo $A$ y un índice $i$.
+  \item \textbf{Supuesto:} los subárboles con raíz en
+        $\textsc{Izq}(i)$ y $\textsc{Der}(i)$ \emph{ya son heaps}
+        válidos.
+  \item \textbf{Problema:} $A[i]$ puede ser menor que alguno de sus
+        hijos, y eso viola la propiedad de MAX-HEAP.
+\end{itemize}
+
+La solución es buscar el mayor de los dos hijos e intercambiarlo con
+el padre. Pero el hijo que recibió el valor viejo puede ahora violar
+la propiedad en su propio subárbol, así que se repite el
+procedimiento ahí, con ese hijo como raíz.
+
+\begin{algorithm}[H]
+\caption{\textsc{Max-Heapify}$(A, i)$}
+\begin{algorithmic}[1]
+\State $l \gets \textsc{Izq}(i)$
+\State $r \gets \textsc{Der}(i)$
+\If{$l \leq \mathit{heap\text{-}size}[A]$ \textbf{y} $A[l] > A[i]$}
+  \State $\mathit{mayor} \gets l$
+\Else
+  \State $\mathit{mayor} \gets i$
+\EndIf
+\If{$r \leq \mathit{heap\text{-}size}[A]$ \textbf{y}
+    $A[r] > A[\mathit{mayor}]$}
+  \State $\mathit{mayor} \gets r$
+\EndIf
+\If{$\mathit{mayor} \neq i$}
+  \State \Intercambiar $A[i] \leftrightarrow A[\mathit{mayor}]$
+  \State \textsc{Max-Heapify}$(A, \mathit{mayor})$
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}
+  Sobre $A = [16, 4, 10, 14, 7, 9, 3, 2, 8, 1]$ con
+  $\mathit{heap\text{-}size} = 10$, llamando
+  \textsc{Max-Heapify}$(A, 2)$. El nodo $A[2] = 4$ es menor que sus
+  hijos, así que viola la propiedad.
+
+  \begin{center}
+  \begin{tabular}{clll}
+    \toprule
+    \textbf{Paso} & \textbf{$i$} & \textbf{Hijos}
+      & \textbf{Acción} \\
+    \midrule
+    1 & $2$ & $A[4] = 14$, $A[5] = 7$
+        & mayor es $14$, intercambiar con $A[2]$ \\
+    2 & $4$ & $A[8] = 2$, $A[9] = 8$
+        & mayor es $8$, intercambiar con $A[4]$ \\
+    3 & $9$ & sin hijos
+        & es hoja, se detiene \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  El arreglo queda $A = [16, 14, 10, 8, 7, 9, 3, 2, 4, 1]$. El $4$
+  bajó dos niveles, de la posición $2$ a la $9$, empujando hacia
+  arriba a los mayores.
+\end{ejemplo}
+
+\subsubsection*{Costo de Heapify}
+
+En un subárbol de tamaño $n$ con raíz en $i$, el trabajo son dos
+cosas: comparar $A[i]$ contra sus dos hijos, que es $\Tht{1}$, más la
+llamada recursiva sobre uno de los hijos. La recurrencia es
+\[
+    T(n) = T(n/2) + \Tht{1} ,
+\]
+que por el método maestro cae en el caso 2 con $a = 1$, $b = 2$,
+$n^{\log_2 1} = n^0 = 1$, y da
+\[
+    T(n) = \Ord{\lg n} .
+\]
+Dicho de otro modo, \textsc{Heapify} sobre un nodo de altura $h$
+cuesta $\Ord{h}$: baja un nivel por llamada y no puede bajar más que
+la altura.
+
+\begin{observacion}
+  La cota fina es $T(n) \leq T(2n/3) + \Tht{1}$, no $T(n/2)$. El peor
+  caso ocurre cuando el último nivel está lleno exactamente a la
+  mitad, y ahí el subárbol izquierdo alcanza $2n/3$ nodos en vez de
+  $n/2$. El resultado no cambia, porque
+  $n^{\log_{3/2} 1} = 1$ igual y el caso 2 sigue dando
+  $\Ord{\lg n}$, pero conviene saber de dónde sale ese $2/3$ cuando
+  aparezca en el libro.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Construcción del heap}
+
+La forma obvia es insertar los elementos uno por uno: meter al final,
+verificar la propiedad, subir si hace falta. Son $n$ inserciones de
+$\Ord{\lg n}$ cada una, o sea $\Ord{n \lg n}$.
+
+Se puede mejor. La idea es aplicar \textsc{Heapify} de abajo hacia
+arriba sobre la mitad de los nodos, apoyándose en dos observaciones:
+
+\begin{itemize}[itemsep=0.2em]
+  \item Los elementos $A[\lfloor n/2 \rfloor + 1 \ldots n]$ son
+        \textbf{hojas} del árbol, y una hoja ya es un heap válido de
+        un solo nodo. No hay nada que hacer con ellas.
+  \item Si se recorren los nodos \textbf{en orden decreciente} de
+        índice, cuando le toca a $i$ los subárboles de sus hijos ya
+        fueron procesados y son heaps. Eso es exactamente el supuesto
+        que \textsc{Heapify} necesita.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{\textsc{Build-Max-Heap}$(A)$}
+\begin{algorithmic}[1]
+\State $\mathit{heap\text{-}size}[A] \gets \mathit{length}[A]$
+\For{$i \gets \lfloor \mathit{length}[A]/2 \rfloor$
+     \textbf{bajando hasta} $1$}
+  \State \textsc{Max-Heapify}$(A, i)$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}
+  Construir el heap sobre $A = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]$,
+  con $n = 10$. El ciclo va de $i = \lfloor 10/2 \rfloor = 5$ hasta
+  $1$.
+
+  \begin{center}
+  \begin{tabular}{cll}
+    \toprule
+    \textbf{$i$} & \textbf{Qué pasa}
+      & \textbf{Arreglo después} \\
+    \midrule
+    $5$ & $A[5] = 16$ contra su hijo $A[10] = 7$.
+        & $4\;1\;3\;2\;16\;9\;10\;14\;8\;7$ \\
+        & Ya cumple, no se mueve nada. & \\
+    \addlinespace
+    $4$ & $A[4] = 2$ contra $14$ y $8$. Sube el $14$.
+        & $4\;1\;3\;14\;16\;9\;10\;2\;8\;7$ \\
+    \addlinespace
+    $3$ & $A[3] = 3$ contra $9$ y $10$. Sube el $10$.
+        & $4\;1\;10\;14\;16\;9\;3\;2\;8\;7$ \\
+    \addlinespace
+    $2$ & $A[2] = 1$ contra $14$ y $16$. Sube el $16$;
+        & $4\;16\;10\;14\;7\;9\;3\;2\;8\;1$ \\
+        & el $1$ sigue bajando y cambia con el $7$. & \\
+    \addlinespace
+    $1$ & $A[1] = 4$ contra $16$ y $10$. Sube el $16$;
+        & $16\;14\;10\;8\;7\;9\;3\;2\;4\;1$ \\
+        & el $4$ baja hasta la posición $9$. & \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  Fíjate en los renglones de $i = 2$ y $i = 1$: ahí
+  \textsc{Heapify} no hizo un solo intercambio sino una cadena de
+  ellos, porque el valor desplazado siguió violando la propiedad más
+  abajo.
+\end{ejemplo}
+
+\subsubsection*{Por qué cuesta $\Ord{n}$ y no $\Ord{n \lg n}$}
+
+La cuenta rápida dice: hay $\Ord{n}$ llamadas a \textsc{Heapify} y
+cada una cuesta $\Ord{\lg n}$, así que $\Ord{n \lg n}$. Esa cota es
+\textbf{correcta pero no justa}, y el motivo es que casi todas las
+llamadas son sobre nodos bajitos, donde \textsc{Heapify} apenas
+trabaja.
+
+La cota fina sale de contar por altura, apoyándose en una propiedad
+del árbol completo: en un heap de $n$ elementos hay a lo más
+$\lceil n/2^{h+1} \rceil$ nodos de altura $h$. Como
+\textsc{Heapify} en un nodo de altura $h$ cuesta $\Ord{h}$, el total
+es
+\[
+    \sum_{h=0}^{\lfloor \lg n \rfloor}
+    \left\lceil \frac{n}{2^{h+1}} \right\rceil \Ord{h}
+    = \Ord{\, n \cdot \frac{1}{2}
+      \sum_{h=0}^{\lfloor \lg n \rfloor} \frac{h}{2^{h}} \,} .
+\]
+
+Falta evaluar esa sumatoria, y el truco es derivar la serie
+geométrica. Partiendo de
+$\sum_{k=0}^{\infty} x^{k} = 1/(1-x)$ para $|x| < 1$, se derivan los
+dos lados:
+\[
+    \frac{d}{dx}\left( \sum_{k=0}^{\infty} x^{k} \right)
+    = \frac{d}{dx}\left( \frac{1}{1-x} \right)
+    \quad \Longrightarrow \quad
+    \sum_{k=0}^{\infty} k\,x^{k-1} = \frac{1}{(1-x)^2} .
+\]
+Multiplicando ambos lados por $x$:
+\[
+    \sum_{k=0}^{\infty} k\,x^{k} = \frac{x}{(1-x)^2} .
+\]
+En nuestro caso $k = h$ y $x = 1/2$, así que
+\[
+    \sum_{h=0}^{\infty} \frac{h}{2^{h}}
+    = \frac{1/2}{(1 - 1/2)^2}
+    = \frac{1/2}{1/4}
+    = 2 .
+\]
+Sustituyendo, el costo de \textsc{Build-Max-Heap} es
+\[
+    \Ord{\, n \cdot \tfrac{1}{2} \cdot 2 \,} = \Ord{n} .
+\]
+
+\begin{idea}
+  De dónde sale la ganancia: la mitad de los nodos son hojas y
+  cuestan cero, un cuarto tiene altura $1$ y cuesta uno, un octavo
+  tiene altura $2$, y así. Los nodos caros son poquísimos, y la serie
+  $\sum h/2^h$ converge a $2$ en vez de crecer con $\lg n$. Por eso
+  construir el heap de golpe es $\Ord{n}$, mientras que construirlo
+  insertando uno por uno es $\Ord{n \lg n}$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  \textbf{Operación} & \textbf{Costo} \\
+  \midrule
+  Encontrar el máximo         & $\Ord{1}$ \\
+  Insertar                    & $\Ord{\lg n}$ \\
+  Eliminar la raíz, vía \textsc{Heapify} & $\Ord{\lg n}$ \\
+  \textsc{Heapify} en un nodo de altura $h$ & $\Ord{h}$ \\
+  Construir insertando uno por uno & $\Ord{n \lg n}$ \\
+  \textsc{Build-Max-Heap}     & $\Ord{n}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
 
 \end{document}
 
