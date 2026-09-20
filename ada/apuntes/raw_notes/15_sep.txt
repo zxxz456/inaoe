@@ -1,0 +1,8 @@
+metodo de iteracion
+
+se empieza a sustituir de manera reucrrente 
+
+se llega a una serie 
+
+
+metodo del arbol de recursion
