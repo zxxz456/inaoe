@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.5.0
+%   * Version: 1.6.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       20/09/2026      Clase 17 Sep, gradiente, delta y backprop
+%  zxxz6       20/09/2026      Clase 15 Sep, TLU y separabilidad lineal
 %  zxxz6       14/09/2026      Clase 10 Sep, preparacion de datos y redes
 %  zxxz6       09/09/2026      Clase 8 Sep, forma dual, kernels y multiclase
 %  zxxz6       09/09/2026      Complete contra las diapositivas 03 a 05
@@ -1672,6 +1674,773 @@ con $g$ la función de activación.
   viene de conectar muchas en capas, que es donde deja de ser lineal.
 \end{idea}
 
+
+
+\newpage
+
+% =====================================================================
+%  Clase - Neurona artificial y separabilidad lineal
+% =====================================================================
+
+\clase{Neurona artificial y separabilidad lineal}{15 de septiembre de
+2026}
+
+\begin{quick_sum}
+    Continuación de la neurona. El TLU de McCulloch y Pitts con su
+    ejemplo numérico, por qué el escalón es demasiado rígido para
+    modelar una neurona real y cómo lo suaviza la sigmoide, el
+    catálogo de funciones de activación y por qué importa que sean
+    derivables. Al final, la lectura geométrica: el TLU es un
+    clasificador lineal y su frontera es un hiperplano perpendicular
+    al vector de pesos.
+\end{quick_sum}
+
+\subsection*{El TLU de McCulloch y Pitts}
+
+La tarea es modelar algunos de los ingredientes de una red neuronal
+biológica. El carácter de \emph{todo o nada} del potencial de acción
+se caracteriza con una señal de dos valores, $0$ y $1$. Si un nodo
+recibe $n$ señales de entrada $x_1, \ldots, x_n$, cada una solo puede
+valer $0$ o $1$.
+
+El efecto modulador de cada sinapsis se encapsula multiplicando la
+señal que entra por un peso. Con $n$ pesos $w_1, \ldots, w_n$ se
+forman los $n$ productos $w_i x_i$, y cada producto es el análogo de
+un \textbf{potencial postsináptico}, que puede ser positivo o
+negativo según el signo del peso.
+
+Esos productos se combinan sumándolos, y eso emula lo que pasa en el
+axón. El resultado es la \textbf{activación}:
+\[
+    a = \sum_{i=1}^{n} w_i x_i .
+\]
+
+Para emular la generación del potencial de acción hace falta un
+\textbf{umbral} $\theta$: si la activación lo alcanza o lo supera, el
+nodo emite $1$; si no, emite $0$.
+\[
+    y = \begin{cases}
+      1 & \text{si } a \geq \theta , \\
+      0 & \text{si } a < \theta .
+    \end{cases}
+\]
+
+\begin{definicion}
+  Esa unidad, suma ponderada más umbral con función escalón, se llama
+  \textbf{TLU}, \emph{threshold logic unit}, y es de McCulloch y
+  Pitts (1943).
+\end{definicion}
+
+\begin{ejemplo}
+  Una unidad de cinco entradas con pesos
+  $(0.5,\; 1.0,\; -1.0,\; -0.5,\; 1.2)$, a la que se le presenta el
+  patrón $(1, 1, 1, 0, 0)$.
+
+  La activación es
+  \begin{align*}
+    a &= (0.5 \times 1) + (1.0 \times 1) + (-1.0 \times 1)
+       + (-0.5 \times 0) + (1.2 \times 0) \\
+      &= 0.5 + 1.0 - 1.0 + 0 + 0 \\
+      &= 0.5 .
+  \end{align*}
+  Con umbral $\theta = 0.2$, como $a = 0.5 > 0.2$, la salida es
+  $y = 1$.
+
+  Fíjate en el tercer término: el peso $w_3 = -1.0$ es negativo, así
+  que esa entrada \textbf{inhibe} en vez de excitar, y se come
+  completo el aporte de la segunda. Los pesos negativos son la
+  contraparte de las sinapsis inhibitorias.
+\end{ejemplo}
+
+\subsection*{Comunicación con señales no binarias}
+
+El escalón es demasiado rígido para lo que hace una neurona real. Se
+cree que las neuronas codifican su señal en los \emph{patrones} de
+disparo del potencial de acción, no en la simple presencia o ausencia
+de un pulso. Si $f$ es la frecuencia de disparo, está acotada por
+abajo en cero y por arriba en un $f_{\max}$ que impone la duración
+del periodo refractario entre disparos.
+
+La salida es suavizar el escalón hasta una función continua que
+aplaste el rango, de modo que $y$ dependa de forma suave de $a$. La
+forma conveniente es la \textbf{sigmoide logística}:
+\[
+    y = \sigma(a) = \frac{1}{1 + \exp\!\left(
+        -\dfrac{a - \theta}{\rho} \right)} .
+\]
+
+Desglosando la fórmula pieza por pieza:
+
+\begin{itemize}[itemsep=0.25em]
+  \item El término $a - \theta$ centra la curva en el umbral: cuando
+        $a = \theta$ el exponente es cero, $\exp(0) = 1$ y queda
+        $y = 1/2$. El umbral es el punto donde la neurona está
+        indecisa.
+  \item El signo menos hace que la curva sea creciente. Si $a$ crece
+        mucho, el exponente se va a $-\infty$, $\exp(-\infty) = 0$ y
+        $y \to 1$. Si $a$ se hace muy negativa, el exponente se va a
+        $+\infty$ y $y \to 0$.
+  \item El divisor $\rho$ controla la forma. Valores grandes de
+        $\rho$ achican el exponente y aplanan la curva; valores
+        pequeños la hacen subir más abruptamente. En el límite
+        $\rho \to 0$ se recupera el escalón. En muchos textos se
+        omite, lo que equivale a fijar $\rho = 1$.
+\end{itemize}
+
+\begin{ojo}
+  La sigmoide tiende a $1$ cuando $a$ crece, pero \textbf{nunca lo
+  alcanza}. Igual por abajo: se acerca a $0$ sin tocarlo. Nunca
+  satura del todo, y eso va a importar cuando se derive, porque la
+  pendiente nunca es exactamente cero.
+\end{ojo}
+
+\begin{idea}
+  La derivada de la sigmoide se escribe en términos de ella misma:
+  \[
+      \sigma'(a) = \sigma(a)\,\left[1 - \sigma(a)\right] .
+  \]
+  Eso no es una curiosidad, es lo que hace barato el entrenamiento:
+  para calcular la pendiente en un punto no hay que evaluar nada
+  nuevo, se reusa la salida que ya se calculó en el paso hacia
+  adelante. Nota que vale cero en los extremos, donde $\sigma$ es $0$
+  o $1$, y es máxima en $\sigma = 1/2$, o sea justo en el umbral.
+\end{idea}
+
+\subsection*{Elegir la función de activación}
+
+Hay varias opciones, y cada una cambia el comportamiento de la
+unidad.
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Función} & \textbf{Definición} & \textbf{Rango} \\
+  \midrule
+  Escalón & $y = \begin{cases} 1 & a \geq \theta \\
+                               0 & a < \theta \end{cases}$
+          & $\{0, 1\}$ \\
+  \addlinespace
+  Sigmoide & $y = \dfrac{1}{1 + e^{-a}}$ & $(0, 1)$ \\
+  \addlinespace
+  ReLU & $y = \begin{cases} 0 & a < 0 \\
+                            a & \text{si no} \end{cases}$
+       & $[0, \infty)$ \\
+  \addlinespace
+  Tangente hiperbólica
+       & $y = \dfrac{e^{a} - e^{-a}}{e^{a} + e^{-a}}$
+       & $(-1, 1)$ \\
+  \addlinespace
+  Softmax & $Y_k = \dfrac{e^{a_k}}{\sum_i e^{a_i}}$
+          & $(0,1)$, suman $1$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Qué aporta cada una:
+
+\begin{itemize}[itemsep=0.25em]
+  \item \textbf{Escalón.} Decisión dura, sin grises. Es lo que define
+        al TLU original.
+  \item \textbf{Sigmoide.} El suavizado del escalón. Su salida en
+        $(0,1)$ se puede leer como una probabilidad.
+  \item \textbf{ReLU.} Deja pasar lo positivo y corta lo negativo. Es
+        barata de calcular y su derivada es $1$ o $0$, sin aplastarse
+        para valores grandes.
+  \item \textbf{Tangente hiperbólica.} Es una sigmoide centrada en
+        cero, con salida en $(-1,1)$. Que esté centrada ayuda porque
+        las salidas no quedan todas del mismo signo.
+  \item \textbf{Softmax.} No opera sobre una neurona sino sobre toda
+        la capa: normaliza las activaciones para que sumen $1$. Es la
+        que se usa en la capa de salida de un clasificador
+        multiclase.
+\end{itemize}
+
+\begin{ojo}
+  El punto que hay que retener: \textbf{el escalón no es derivable}.
+  Las otras sí, y eso es esencial para el cálculo eficiente de los
+  pesos. Todo el entrenamiento por descenso de gradiente descansa en
+  poder derivar la función de activación, así que el escalón deja a
+  la unidad sin manera práctica de aprender.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{El TLU como clasificador lineal}
+
+Un TLU parte sus patrones de entrada en dos categorías según su
+respuesta binaria. Esas categorías se pueden ver como regiones de un
+espacio multidimensional separadas por el equivalente en muchas
+dimensiones de una recta o un plano.
+
+\begin{ejemplo}
+  Un TLU de dos entradas con $w_1 = 1$, $w_2 = 1$ y $\theta = 1.5$.
+  Las cuatro entradas booleanas posibles dan:
+
+  \begin{center}
+  \begin{tabular}{cccc}
+    \toprule
+    $x_1$ & $x_2$ & \textbf{Activación} & \textbf{Salida} \\
+    \midrule
+    $0$ & $0$ & $0$ & $0$ \\
+    $0$ & $1$ & $1$ & $0$ \\
+    $1$ & $0$ & $1$ & $0$ \\
+    $1$ & $1$ & $2$ & $1$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  Solo el patrón $(1,1)$ supera el umbral de $1.5$. El TLU está
+  clasificando sus entradas en dos grupos: las que dan $1$ y las que
+  dan $0$. Como cada patrón tiene dos componentes, se puede dibujar
+  cada uno como un punto del \textbf{espacio de patrones}, y ahí
+  $(1,1)$ queda de un lado de una recta y los otros tres del otro.
+
+  Esa función es el AND lógico.
+\end{ejemplo}
+
+\subsubsection*{De dónde sale la recta}
+
+La condición crítica de clasificación ocurre cuando la activación
+iguala al umbral. Para dos entradas, igualando $a$ y $\theta$:
+\begin{align*}
+  w_1 x_1 + w_2 x_2 &= \theta \\
+  w_2 x_2           &= -w_1 x_1 + \theta \\
+  x_2               &= -\left(\frac{w_1}{w_2}\right) x_1
+                       + \left(\frac{\theta}{w_2}\right) .
+\end{align*}
+
+Eso es una recta $x_2 = a x_1 + b$, con pendiente
+$a = -w_1/w_2$ y ordenada al origen $b = \theta/w_2$ sobre el eje
+$x_2$. Con los valores del ejemplo, $w_1 = w_2 = 1$ y
+$\theta = 1.5$, queda $x_2 = -x_1 + 1.5$: una recta que corta ambos
+ejes en $1.5$ y deja a $(1,1)$ arriba, solo.
+
+\begin{idea}
+  Los pesos fijan la \textbf{inclinación} de la frontera y el umbral
+  fija su \textbf{posición}. Entrenar es mover esa recta hasta que
+  los puntos queden del lado correcto. Por eso a los TLU se les llama
+  \textbf{clasificadores lineales} y a sus patrones,
+  \textbf{linealmente separables}. Es el mismo objeto que el
+  perceptrón de la clase del 27 de agosto, visto desde la biología.
+\end{idea}
+
+\subsubsection*{En forma vectorial}
+
+Usando la definición de producto interno, la activación de un TLU de
+$n$ entradas se escribe
+\[
+    a = W \cdot X ,
+\]
+y la condición crítica queda
+\[
+    W \cdot X = \theta .
+\]
+
+Esa ecuación define un \textbf{hiperplano perpendicular al vector de
+pesos}. De un lado quedan todos los patrones que el TLU clasifica
+como $1$; del otro, los que clasifica como $0$.
+
+\begin{ojo}
+  Que el hiperplano sea perpendicular a $W$ no es un detalle
+  decorativo: quiere decir que $W$ apunta hacia el lado de los
+  positivos. Esa observación es la que va a justificar toda la regla
+  de entrenamiento de la clase siguiente, porque corregir un error
+  será \emph{rotar} $W$ hacia el patrón o alejarlo de él.
+\end{ojo}
+
+\subsection*{El umbral como un peso más}
+
+Hay un truco de notación que simplifica todo lo que viene. Partiendo
+de la condición de salida $W \cdot X \geq \theta$, se resta $\theta$
+de ambos lados y se hace explícito el signo:
+\[
+    W \cdot X + (-1)\,\theta \geq 0 .
+\]
+
+Leído así, el umbral es \textbf{un peso más}, alimentado por una
+entrada fija en $-1$. El vector de pesos, que era de dimensión $n$
+para una unidad de $n$ entradas, pasa a ser el vector de dimensión
+$n+1$
+\[
+    [\,w_1,\; w_2,\; \ldots,\; w_n,\; \theta\,] ,
+\]
+que se llama \textbf{vector de pesos aumentado}. Con él, la función
+del nodo se escribe sin umbral a la vista:
+\[
+    W \cdot X \geq 0 \;\Longrightarrow\; y = 1 ,
+    \qquad
+    W \cdot X < 0 \;\Longrightarrow\; y = 0 .
+\]
+
+\begin{idea}
+  En el espacio aumentado, $W \cdot X = 0$ define el hiperplano de
+  decisión, que sigue siendo ortogonal a $W$. Y la condición de
+  umbral cero significa que el hiperplano \textbf{pasa por el
+  origen}, porque esa es la única forma de que $W \cdot X = 0$ tenga
+  solución en el origen. La ganancia práctica es que ya no hay que
+  entrenar el umbral aparte: entra al mismo saco que los pesos y la
+  misma regla lo ajusta.
+\end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase - Entrenamiento, regla delta y backpropagation
+% =====================================================================
+
+\clase{Descenso de gradiente y backpropagation}{17 de septiembre de
+2026}
+
+\begin{quick_sum}
+    Cómo se entrena. Primero la regla del perceptrón, que sale de un
+    argumento puramente geométrico sobre rotar el vector de pesos.
+    Luego el descenso de gradiente sobre una función de error, la
+    regla delta con su derivación, y por qué converge donde el
+    perceptrón oscila. Al final el problema del XOR, que obliga a
+    meter capas ocultas, y backpropagation como la respuesta a quién
+    tiene la culpa del error.
+\end{quick_sum}
+
+\subsection*{Entrenar una red}
+
+Ajustar los pesos y los umbrales se hace con un proceso iterativo: se
+presentan ejemplos de la tarea una y otra vez, y en cada presentación
+se hacen cambios pequeños para acercarlos a sus valores deseados. A
+eso se le llama \textbf{entrenar la red}, y al conjunto de ejemplos,
+\textbf{conjunto de entrenamiento}.
+
+Trabajando con un solo nodo, el conjunto de entrenamiento son pares
+$\{V, t\}$, donde $V$ es un vector de entrada y $t$ es la clase
+objetivo, $1$ o $0$, a la que $V$ pertenece. La condición de salida
+$1$ se escribe $W \cdot V \geq \theta$.
+
+\subsection*{Ajustar el vector de pesos}
+
+Aquí el razonamiento es geométrico y vale la pena seguirlo despacio,
+porque de él sale la regla.
+
+\textbf{Caso 1: el objetivo es $t = 1$ pero sale $y = 0$.} Para
+producir un $0$ la activación tuvo que ser negativa, así que el
+producto punto $W \cdot V$ fue negativo. Eso significa que los dos
+vectores apuntaban en direcciones opuestas, con ángulo mayor a
+$90^{\circ}$. Lo que hace falta es \textbf{rotar $W$ para que apunte
+más hacia $V$}, y eso se logra sumándole una fracción de $V$:
+\[
+    W' = W + \alpha V , \qquad 0 < \alpha < 1 .
+\]
+
+\textbf{Caso 2: el objetivo es $t = 0$ pero sale $y = 1$.} Ahora la
+activación fue positiva cuando debió ser negativa, el ángulo es menor
+a $90^{\circ}$, y hay que \textbf{alejar $W$ de $V$} restando una
+fracción:
+\[
+    W' = W - \alpha V .
+\]
+
+Las dos situaciones se combinan en una sola regla:
+\[
+    \boxed{\;W' = W + \alpha\,(t - y)\,V\;}
+\]
+
+\begin{idea}
+  El factor $(t - y)$ hace todo el trabajo de selección, y solo puede
+  tomar tres valores. Si acertó, $t - y = 0$ y no se toca nada. Si
+  $t=1$ y $y=0$, vale $+1$ y se suma. Si $t=0$ y $y=1$, vale $-1$ y
+  se resta. Una sola expresión cubre los tres casos sin condicionales.
+\end{idea}
+
+Esa es la \textbf{regla de entrenamiento del perceptrón}, de Frank
+Rosenblatt (1957-1958). El $\alpha$ se llama \textbf{tasa de
+aprendizaje} y controla qué tan grande es cada corrección.
+
+\begin{algorithm}[H]
+\caption{Aprendizaje del perceptrón}
+\begin{algorithmic}[1]
+\Repeat
+  \For{cada par de entrenamiento $(V, t)$}
+    \State evaluar la salida $y$ al presentar $V$ al TLU
+    \If{$y \neq t$}
+      \State $W \gets W + \alpha\,(t - y)\,V$
+    \Else
+      \State no hacer nada
+    \EndIf
+  \EndFor
+\Until{$y = t$ para todos los vectores}
+\end{algorithmic}
+\end{algorithm}
+
+% =====================================================================
+
+\subsection*{Descenso de gradiente sobre un error}
+
+La regla anterior sale de la geometría. Ahora se llega a una parecida
+desde la optimización, y esa segunda ruta es la que generaliza a
+redes de varias capas.
+
+Considerando una red de un solo TLU, cualquier función de error $E$
+que exprese la discrepancia entre la salida deseada y la real puede
+verse como una \textbf{función de los pesos}:
+\[
+    E = E(w_1, w_2, \ldots, w_{n+1}) .
+\]
+El $n+1$ es porque el umbral ya va dentro, como peso aumentado.
+
+El vector de pesos óptimo se encuentra minimizando $E$ por descenso
+de gradiente:
+\[
+    \Delta w_i = -\,\alpha\,\frac{\partial E}{\partial w_i} .
+\]
+
+\begin{idea}
+  El signo menos es el corazón del método. La derivada
+  $\partial E / \partial w_i$ dice hacia dónde el error
+  \textbf{crece} si muevo ese peso. Como queremos bajarlo, nos
+  movemos en la dirección contraria. Si la pendiente es positiva, el
+  peso baja; si es negativa, sube. Y donde la pendiente es cero, en
+  el mínimo, el peso deja de moverse solo.
+\end{idea}
+
+Si $e^p$ es el error del patrón de entrenamiento $p$, el error total
+es el promedio sobre todos los patrones:
+\[
+    E = \frac{1}{N} \sum_{p=1}^{N} e^p .
+\]
+
+\subsubsection*{Cómo definir el error de un patrón}
+
+Vale la pena ver los tres intentos, porque cada uno arregla un
+problema del anterior.
+
+\textbf{Primer intento: la diferencia.} $e^p = t^p - y^p$. No sirve:
+la combinación $t^p = 0$, $y^p = 1$ da $-1$, mientras
+$t^p = 1$, $y^p = 0$ da $+1$. Los dos casos están igual de
+equivocados, pero uno cuenta como error negativo y al promediarlos se
+cancelarían.
+
+\textbf{Segundo intento: elevar al cuadrado.}
+$e^p = (t^p - y^p)^2$. Ya es simétrico y siempre positivo. Pero hay
+un problema más fino: $y^p$ depende de $a^p$ a través de la
+\textbf{función escalón, que es discontinua}, así que no se puede
+derivar.
+
+\textbf{Tercer intento: medir contra la activación.} Como la salida
+cambia justo cuando la activación cambia de signo, con $a \geq 0$
+dando $y = 1$, se define el error respecto a la activación:
+\[
+    e^p = (t^p - a^p)^2 .
+\]
+Y se agrega un factor de $1/2$, que no cambia dónde está el mínimo
+pero simplifica las derivadas:
+\[
+    e^p = \tfrac{1}{2}\,(t^p - a^p)^2 .
+\]
+
+% =====================================================================
+
+\subsection*{La regla delta}
+
+Como $E$ depende de todos los patrones, sus derivadas también, y eso
+obligaría a presentar el conjunto completo para evaluar un solo
+gradiente. Se evita presentando un patrón $p$, evaluando
+$\partial e^p / \partial w_i$ y usándolo como \textbf{estimación} del
+gradiente verdadero $\partial E / \partial w_i$.
+
+\subsubsection*{La derivada, paso a paso}
+
+Las diapositivas dicen que se puede demostrar. Se demuestra así.
+Partiendo de $e^p = \frac{1}{2}(t^p - a^p)^2$ con
+$a^p = \sum_i w_i x_i^p$, y aplicando la regla de la cadena:
+\begin{align*}
+  \frac{\partial e^p}{\partial w_i}
+    &= \frac{1}{2} \cdot 2\,(t^p - a^p) \cdot
+       \frac{\partial (t^p - a^p)}{\partial w_i}
+    && \text{cadena sobre el cuadrado} \\
+    &= (t^p - a^p) \cdot
+       \left( - \frac{\partial a^p}{\partial w_i} \right)
+    && t^p \text{ es constante} \\
+    &= -\,(t^p - a^p)\,x_i^p
+    && \frac{\partial}{\partial w_i}\sum_j w_j x_j^p = x_i^p .
+\end{align*}
+
+Ahí se ve para qué era el $1/2$: se cancela con el $2$ que baja del
+exponente y la expresión queda limpia.
+
+Sustituyendo en $\Delta w_i = -\alpha\,\partial E/\partial w_i$, los
+dos signos menos se cancelan y queda la \textbf{regla delta}:
+\[
+    \boxed{\;\Delta w_i = \alpha\,(t^p - a^p)\,x_i^p\;}
+\]
+
+\subsubsection*{Cómo se lee la fórmula}
+
+El gradiente depende de dos cosas, y las dos tienen sentido:
+
+\begin{itemize}[itemsep=0.25em]
+  \item \textbf{De la discrepancia $(t^p - a^p)$.} Entre más grande
+        sea el error, más grande la corrección, y viceversa. Si ya
+        acertó, la corrección es cero.
+  \item \textbf{De la entrada $x_i^p$.} Si esa entrada vale cero, la
+        $i$-ésima componente no está contribuyendo a la activación, y
+        entonces su peso no tiene culpa de nada: no se toca. Si la
+        entrada es grande, ese peso sí influye mucho y se corrige
+        proporcionalmente.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Entrenamiento con la regla delta}
+\begin{algorithmic}[1]
+\Repeat
+  \For{cada par de entrenamiento $(V, t)$}
+    \State evaluar la activación $a$ al presentar $V$ al TLU
+    \State $\Delta w_i \gets \alpha\,(t^p - a^p)\,x_i^p$
+           \Comment{para cada peso $i$}
+    \State $w_i \gets w_i + \Delta w_i$
+  \EndFor
+\Until{la razón de cambio del error sea suficientemente pequeña}
+\end{algorithmic}
+\end{algorithm}
+
+Esta regla la propusieron Widrow y Hoff (1960), así que originalmente
+se llamó \textbf{regla de Widrow-Hoff}. Se conoce más como
+\textbf{regla delta}, y al término $(t^p - a^p)$ se le dice
+\emph{la} $\delta$, porque es una diferencia.
+
+\begin{ojo}
+  La diferencia entre las dos reglas. Si \textbf{no existe solución},
+  o sea si el problema no es linealmente separable, bajo la regla del
+  perceptrón los pesos se siguen alterando en cantidades
+  significativas y el vector \textbf{oscila} sin parar. La regla
+  delta, en cambio, siempre converge (con $\alpha$ suficientemente
+  chica) a un vector $w_0$ donde el error es mínimo, aunque ese
+  mínimo no sea cero y algunos patrones queden mal clasificados.
+  Converger a la mejor respuesta imperfecta es mucho mejor que no
+  converger.
+\end{ojo}
+
+\subsubsection*{Versión con sigmoide}
+
+Se puede reinstalar la salida $y^p$ en la definición del error,
+ahora que se usa una sigmoide continua en vez del escalón:
+\[
+    e^p = \tfrac{1}{2}\,(t^p - y^p)^2 ,
+    \qquad y^p = \sigma(a^p) .
+\]
+Al derivar aparece un eslabón más en la cadena, la derivada de la
+sigmoide:
+\[
+    \frac{\partial e^p}{\partial w_i}
+    = -\,(t^p - y^p) \cdot
+      \underbrace{\frac{d\sigma}{da}}_{\sigma'(a)} \cdot\,
+      x_i^p ,
+\]
+y por lo tanto
+\[
+    \boxed{\;\Delta w_i
+    = \alpha\,\sigma'(a)\,(t^p - y^p)\,x_i^p\;}
+\]
+
+\begin{idea}
+  Ese factor $\sigma'(a)$ gobierna todo. El efecto de cambiar un peso
+  depende de qué tan sensible sea la salida a la activación, y esa
+  sensibilidad es justo la pendiente de la sigmoide. En las colas,
+  donde la sigmoide está casi plana, $\sigma'(a) \approx 0$ y el peso
+  casi no se mueve aunque el error sea grande: la neurona está
+  saturada. El aprendizaje es más rápido cerca del umbral, donde la
+  pendiente es máxima.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{El límite: el XOR}
+
+Todo lo anterior descansa en que los patrones sean linealmente
+separables. Hay funciones booleanas elementales que no lo son.
+
+\begin{ejemplo}
+  Tomando $(0,0)$ y $(1,1)$ con $t = 0$, y $(0,1)$ y $(1,0)$ con
+  $t = 1$. Los positivos quedan en dos esquinas opuestas del cuadrado
+  y los negativos en las otras dos.
+
+  \textbf{No existe ninguna recta} que separe unos de otros: hay que
+  dejar dos esquinas diagonalmente opuestas de un lado, y cualquier
+  recta que deje a $(0,1)$ y $(1,0)$ juntas necesariamente encierra
+  también a una de las otras dos.
+
+  Esa función es el XOR, y el señalamiento es de Minsky y Papert en
+  \emph{Perceptrons} (1969).
+\end{ejemplo}
+
+\begin{ojo}
+  Ese libro frenó la investigación en redes neuronales casi dos
+  décadas. La limitación que señalaba era real, pero era la de
+  \emph{una sola} unidad, no la de la idea entera.
+\end{ojo}
+
+\subsection*{La salida: más capas}
+
+La solución se encuentra fácil si el espacio se parte en
+\textbf{tres regiones} en vez de dos. Con dos rectas paralelas se
+puede dejar a $(0,1)$ y $(1,0)$ en la franja de en medio y a las
+otras dos esquinas afuera, una de cada lado.
+
+\begin{enumerate}[itemsep=0.25em]
+  \item Si en lugar de una neurona de salida se usan \textbf{dos},
+        se obtienen dos rectas, y con ellas quedan delimitadas las
+        tres regiones.
+  \item Para escoger entre una zona y otra de las tres hace falta
+        \textbf{otra capa}, con una neurona cuyas entradas sean las
+        salidas de las neuronas anteriores.
+\end{enumerate}
+
+Eso da una red de tres neuronas repartidas en dos capas: dos
+neuronas que reciben $x_1$ y $x_2$ con pesos $w_{11}, w_{21}, w_{12},
+w_{22}$, y una tercera que recibe las salidas de esas dos con pesos
+$w_{31}, w_{32}$ y produce $y$.
+
+\begin{definicion}
+  Una capa está \textbf{totalmente conectada} cuando las entradas de
+  cada unidad de la capa son las mismas. Una capa toma una entrada
+  $x \in \mathbb{R}^m$ y produce una salida $y \in \mathbb{R}^n$.
+\end{definicion}
+
+Con $m$ neuronas en una capa, el error se suma sobre todas:
+\[
+    e^p = \frac{1}{2} \sum_{j=1}^{m} (t_j^p - y_j^p)^2 ,
+\]
+y el gradiente del $i$-ésimo peso de la $j$-ésima neurona solo
+involucra el término de error de \emph{esa} neurona:
+\[
+    \Delta w_{ji} = \alpha\,\sigma'(a_j)\,(t_j^p - y_j^p)\,x_{ji}^p .
+\]
+
+% =====================================================================
+
+\subsection*{Backpropagation}
+
+La idea sigue siendo descenso de gradiente sobre $E$ como función de
+los pesos, pero ahora hay que tomar en cuenta los pesos de dos capas.
+
+Para la \textbf{capa de salida} es directo: se tiene acceso al
+desajuste entre el objetivo y la salida, y la fórmula de arriba
+aplica tal cual.
+
+El problema son las neuronas de la \textbf{capa oculta}, y la
+pregunta se plantea así: cuánta \emph{culpa} o responsabilidad hay
+que asignarle a los nodos ocultos por el error que aparece en la
+salida. Porque claramente, si la capa oculta le está pasando mala
+información a la de salida, las neuronas de salida no pueden aspirar
+a acertar.
+
+\subsubsection*{Descomponer la regla conocida}
+
+El punto de partida es mirar la regla que ya se tiene y separarla en
+piezas:
+\[
+    \Delta w_{ji} = \alpha\;
+    \underbrace{\sigma'(a_j)}_{\text{pendiente}}\;
+    \underbrace{(t_j^p - y_j^p)}_{\delta^j}\;
+    \underbrace{x_{ji}^p}_{\text{entrada}} .
+\]
+
+La entrada y la pendiente de la sigmoide están determinadas
+únicamente por la \textbf{estructura de la neurona}, así que van a
+aparecer igual en la expresión de una neurona oculta. El término que
+sobra, $\delta = (t^p - y^p)$, es el específico de las neuronas de
+salida, y toda la tarea se reduce a encontrar su equivalente para una
+neurona oculta.
+
+Con eso, la regla de la $k$-ésima neurona oculta se escribe ya:
+\[
+    \Delta w_{ki} = \alpha\,\sigma'(a_k)\,\delta^k\,x_{ki}^p ,
+\]
+a falta de saber qué es $\delta^k$.
+
+\subsubsection*{Encontrar la delta de una neurona oculta}
+
+Considera el enlace entre la $k$-ésima neurona oculta y la
+$j$-ésima de salida. Hay dos factores en juego:
+
+\begin{itemize}[itemsep=0.25em]
+  \item La contribución que la neurona $j$ hace al error está
+        expresada en su propia $\delta^j$, que ya se sabe calcular.
+  \item La influencia que $k$ tiene sobre $j$ está dada por el peso
+        $w_{jk}$ de la conexión entre ellas.
+\end{itemize}
+
+La interacción entre los dos se captura combinándolos
+\textbf{multiplicativamente}, como $\delta^j w_{jk}$. Y como la
+neurona $k$ casi con seguridad alimenta a varias neuronas de salida,
+hay que sumar esos productos sobre todas:
+\[
+    \boxed{\;\delta^k = \sum_{j \in I_k} \delta^j\,w_{jk}\;}
+\]
+donde $I_k$ es el conjunto de neuronas de la capa de salida que
+reciben entrada de la neurona oculta $k$.
+
+\begin{idea}
+  Ahí está el nombre del método. La $\delta$ de una neurona oculta no
+  se mide contra ningún objetivo, porque no hay objetivo para una
+  capa oculta. Se \textbf{arma hacia atrás}, juntando las deltas de
+  las neuronas a las que alimenta, cada una pesada por la fuerza de
+  la conexión. El error viaja de regreso por las mismas aristas que
+  la señal usó para ir hacia adelante, y los pesos hacen de factor de
+  reparto en las dos direcciones.
+\end{idea}
+
+\subsubsection*{La regla unificada}
+
+Para cualquier neurona $k$, oculta o de salida, el descenso de
+gradiente queda en una sola línea:
+\[
+    \Delta w_{ki} = \alpha\,\delta^k\,x_{ki}^p ,
+\]
+y lo único que cambia es cómo se calcula $\delta^k$:
+\begin{align*}
+  \delta^k &= \sigma'(a_k)\,(t_k^p - y_k^p)
+    && \text{si } k \text{ es de salida,} \\
+  \delta^k &= \sigma'(a_k) \sum_{j \in I_k} \delta^j\,w_{jk}
+    && \text{si } k \text{ es oculta.}
+\end{align*}
+
+\begin{algorithm}[H]
+\caption{Backpropagation}
+\begin{algorithmic}[1]
+\State presentar el patrón en la capa de entrada
+\State que las neuronas ocultas evalúen su salida con ese patrón
+\State que las neuronas de salida evalúen la suya con el resultado
+       del paso anterior
+\State aplicar el patrón objetivo a la capa de salida
+\State calcular las $\delta$ de las neuronas de salida
+\State entrenar cada neurona de salida por descenso de gradiente
+\State para cada neurona oculta, calcular su $\delta^k$
+\State entrenar cada neurona oculta con la $\delta^k$ del paso
+       anterior, por descenso de gradiente
+\end{algorithmic}
+\end{algorithm}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{Pasos} & \textbf{Nombre} & \textbf{Qué fluye} \\
+  \midrule
+  1 a 3 & Paso hacia adelante & La información, de entrada a salida \\
+  4 a 8 & Paso hacia atrás    & Las $\delta$, de salida a ocultas \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+El paso 7 es el que propaga las $\delta$ de vuelta desde los nodos de
+salida hacia las unidades ocultas, y de ahí el nombre
+\textbf{backpropagation}. En los años ochenta lo popularizaron
+Geoffrey Hinton, David Rumelhart y Ronald Williams.
+
+\begin{idea}
+  Se puede tener más de una capa oculta, y se entrena exactamente
+  igual: las $\delta$ de cada capa, salvo la de salida, se expresan
+  en términos de las de la capa que tienen encima. La recursión es la
+  misma sin importar la profundidad, y eso es lo que vuelve
+  entrenable a una red arbitrariamente honda.
+\end{idea}
 
 
 \end{document}
