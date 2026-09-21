@@ -1,0 +1,60 @@
+-- continuacion --
+retomamos idea de hacer un indexamnineto por sentido
+el significado es lo que esta en el diccionario/tesauro
+el sentido viene dado por el contexto que se va dando en las palabrras, los terminos que encontramos en el contexto
+
+
+para esto se tienen como dos entradas en la tabla de la misma palabra, dos o mas entradas
+donde una palabra denotara el sentido de la misma en un contexto y la otra en otro contexto
+
+esto se conoce como la desambiguacion del sentido de las paralbras, esta tarea es seleccionar
+el sentido correcto de una palabra a partir de un conjunto predefinido
+
+hay otra que es discriminacion,esta relacionada per o es diferente. pero la idea aqui es 
+dado un conjunto de textos, que diferentes sentidos surgen aqui
+un sistema encaminado a la discriminacion debe saber distinguir los diferentes sentidos con esa base de documentos
+
+-proceso   WSD
+{explicar a detalle cada paso}
+1 elegir un sense inventroy
+2 diseñar y aplicar un proceso de desambiguaicon
+3 evañuar eñ érfromance del procedimeinto
+
+-- knowdledge based pproaches {explicar}
+-- machine learning based approaches {explicar}
+
+- wordnet
+es un lexical database en ingles orgaanizada entorno a significados de palabras y relaciones semanticas
+incluye nouns, verbos, adjetivos y adverbios
+palabras con el mimsmo significado o muy ercanos estan agrupados en synsets
+cada synset representa un concepto particular 
+los synsets estan conectados por relacones semanticas
+
+{explicar hypernimia, holonimia}
+
+- Lesk algorithm para la desambiguacion
+{explicarlo con ejemplo}
+
+desventajas del algoritmo de Lesk
+son muchas combinaciones a analizar 
+que no haya suficiente traslape entre definiciones 
+
+la desambiguacion es benefica cuando tenemos consultas mu corttas. La desambiguacion
+sigue siendo un problema actual 
+
+
+
+- cuarta idea
+Indexamiento de tipo conceptual, la formulacion es que aqui la bolsa de palabras ignora todo el tipo
+de info semantico, solo trabaa con las formas superficiales de las palabras, esta representacion busca el tipo conceptual
+
+concepto esta relaciona con sentido pero desde un punto de vista practico
+
+la idea es representar los documentos en funcion de las palabras que ocurren en ellos, que la semantica del documento
+se obtiene a partir de esto .
+
+la primera propuesta DOR (Representacion de ocurrencia de documento)
+{explicar DOR y ejemplo grafico}
+
+{representando documentos por DOR, explicar }
+
