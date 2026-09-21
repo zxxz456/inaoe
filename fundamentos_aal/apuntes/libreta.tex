@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.7.0
+%   * Version: 2.8.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       21/09/2026      Clase 21 Sep, WSD e indexado conceptual
 %  zxxz6       14/09/2026      Clase 14 Sep, indexado mas alla de la palabra
 %  zxxz6       09/09/2026      Clase 9 Sep, representaciones y POS tagging
 %  zxxz6       09/09/2026      Nombre el algoritmo de Porter en preprocesado
@@ -1738,13 +1739,6 @@ El problema es la alta dimensionalidad. El número de n-gramas crece
 muy por encima del tamaño del vocabulario, y el índice se vuelve
 inmanejable.
 
-\begin{pendiente}
-    Las dos preguntas que quedaron abiertas sobre n-gramas:
-    \begin{itemize}
-        \item Cómo reducir la dimensionalidad?
-        \item Cómo seleccionar los n-gramas útiles?
-    \end{itemize}
-\end{pendiente}
 
 \subsubsection*{Secuencias frecuentes maximales}
 
@@ -1790,10 +1784,609 @@ Pero qué es un sentido? Es uno de los significados de una palabra.
 Las palabras tienen más de un significado, y cuál de ellos aplica lo
 decide el contexto.
 
-\begin{pendiente}
-    Queda pendiente cómo se representa y cómo se desambigua un
-    sentido, que es donde sigue la clase.
-\end{pendiente}
+
+
+
+
+\newpage
+% =====================================================================
+%  Clase 11 - Desambiguacion e indexado conceptual
+% =====================================================================
+
+\clase{Desambiguación e indexado conceptual}{21 de septiembre de 2026}
+
+\begin{quick_sum}
+    Continuación del indexado por sentidos. Se separó el significado
+    del sentido, se definió la desambiguación del sentido de las
+    palabras y se contrastó con la discriminación. De ahí salieron el
+    proceso de tres pasos, los dos enfoques para resolverlo, WordNet
+    como inventario de sentidos y el algoritmo de Lesk. Al final entró
+    la cuarta propuesta de indexado, la conceptual, con DOR.
+\end{quick_sum}
+
+\subsection*{Significado y sentido}
+
+Se usan casi como sinónimos, pero no son lo mismo:
+
+\begin{itemize}[itemsep=0.2em]
+    \item El \textbf{significado} es lo que está en el diccionario o
+          en el tesauro. Es una lista fija, escrita de antemano, que
+          no depende del texto que se esté procesando.
+    \item El \textbf{sentido} lo da el contexto, los términos que
+          rodean a la palabra en ese documento. Es lo que selecciona
+          cuál de los significados aplica.
+\end{itemize}
+
+Indexar así cambia la tabla del índice: una palabra deja de tener una
+entrada y pasa a tener dos o más, una por cada sentido.
+\textit{bank} como orilla del río y \textit{bank} como institución
+financiera pasan a ser términos de indexado distintos, aunque la
+cadena de caracteres sea la misma.
+
+\begin{idea}
+    Ese desdoblamiento es lo que ataca la polisemia: dos documentos
+    que comparten la cadena pero no el sentido dejan de empatar. Y si
+    además los sinónimos se colapsan en una sola entrada, se ataca la
+    sinonimia. Las dos de un golpe, que es justo lo que no logra el
+    empatamiento de cadenas.
+\end{idea}
+
+\subsection*{Desambiguación y discriminación}
+
+La \textbf{desambiguación del sentido de las palabras} (WSD, por
+\textit{word sense disambiguation}) es la tarea de seleccionar el
+sentido correcto de una palabra a partir de un conjunto predefinido.
+El inventario de sentidos existe antes de ver el texto.
+
+La \textbf{discriminación} está relacionada, pero es diferente. La
+pregunta aquí es otra: dado un conjunto de textos, qué sentidos
+distintos surgen en ellos. No hay inventario, y un sistema encaminado
+a la discriminación tiene que distinguir los sentidos con esa base de
+documentos. Los sentidos son la salida, no la entrada.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}
+                >{\raggedright\arraybackslash}p{5.4cm}
+                >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    & \textbf{Desambiguación} & \textbf{Discriminación} \\
+    \midrule
+    Inventario &
+    Predefinido y externo, el mismo para toda colección &
+    Se induce de los datos, cambia con la colección \\
+    \addlinespace
+    Salida &
+    Una etiqueta de sentido por ocurrencia &
+    Grupos de ocurrencias, sin nombre que los identifique \\
+    \addlinespace
+    Método &
+    Clasificación &
+    Agrupamiento \\
+    \addlinespace
+    Necesita &
+    Un recurso léxico, o un corpus ya anotado &
+    Solo los documentos de la colección \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{El proceso de WSD}
+
+\subsubsection*{1. Elegir un inventario de sentidos}
+
+Es la decisión que condiciona todo lo demás, porque fija cuáles son
+los sentidos posibles. Un sentido que no esté en el inventario no se
+puede asignar nunca, por bueno que sea el método.
+
+Las opciones van de un diccionario o un tesauro a una base como
+WordNet o a una ontología del dominio. Lo que se negocia al escoger es
+la \textbf{granularidad}:
+
+\begin{itemize}[itemsep=0.2em]
+    \item Un inventario fino distingue matices, y ahí la tarea se
+          vuelve tan difícil que ni los anotadores humanos coinciden
+          entre sí.
+    \item Uno grueso separa solo los sentidos muy distintos, los
+          homógrafos. Da acuerdo alto, pero captura menos.
+\end{itemize}
+
+Para recuperación conviene el grueso: interesan los sentidos que
+cambian el tema del documento, no los que cambian el matiz.
+
+\subsubsection*{2. Diseñar y aplicar el procedimiento}
+
+Se decide el alcance y el método. El alcance puede ser de dos tipos:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Todas las palabras}. Etiquetar cada palabra de
+          contenido del texto. Es lo que hace falta para indexar una
+          colección entera.
+    \item \textbf{Muestra léxica}. Solo unas cuantas palabras
+          objetivo, escogidas de antemano. Es el escenario de los
+          concursos de evaluación.
+\end{itemize}
+
+El método cae en una de dos familias, basada en conocimiento o basada
+en aprendizaje automático, que van más abajo.
+
+\subsubsection*{3. Evaluar el desempeño}
+
+Hay dos maneras de medir, y no responden la misma pregunta:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{In vitro}. La exactitud contra un corpus anotado a
+          mano. Mide la tarea aislada.
+    \item \textbf{In vivo}. Meter el desambiguador en el SRI y ver si
+          sube el MAP. Es la que importa aquí, porque un
+          desambiguador puede ser bueno y aun así no mover la
+          recuperación.
+\end{itemize}
+
+Y hay dos referencias contra las cuales comparar el número que salga:
+
+\begin{itemize}[itemsep=0.2em]
+    \item El \textbf{piso}: asignar siempre el sentido más frecuente
+          de la palabra. Es sorprendentemente difícil de superar,
+          porque la distribución de sentidos está muy sesgada.
+    \item El \textbf{techo}: el acuerdo entre anotadores humanos. Si
+          dos personas solo coinciden el $75$ por ciento de las
+          veces, no tiene sentido exigirle $90$ al sistema.
+\end{itemize}
+
+\subsection*{Los dos enfoques}
+
+\subsubsection*{Basados en conocimiento}
+
+Se apoyan en recursos léxicos ya construidos, diccionarios, tesauros
+o redes semánticas, y no necesitan datos etiquetados. La información
+sale del recurso, no de ejemplos.
+
+Cómo deciden:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Traslape de glosas}. Comparar la definición de cada
+          sentido con el contexto y quedarse con la que más palabras
+          comparte. Es Lesk, que va abajo.
+    \item \textbf{Métodos de grafo}. Armar el subgrafo de WordNet que
+          conecta a los sentidos candidatos de todas las palabras de
+          la oración y quedarse con los nodos mejor conectados.
+    \item \textbf{Restricciones de selección}. Un verbo restringe la
+          clase semántica de su objeto: \textit{comer} pide algo
+          comestible, y con eso se descartan sentidos.
+\end{itemize}
+
+A favor tienen la cobertura: alcanzan cualquier palabra que el
+recurso incluya, sin pagar anotación. En contra, dependen por
+completo de la calidad y la cobertura de ese recurso.
+
+\subsubsection*{Basados en aprendizaje automático}
+
+Tratan la desambiguación como un problema de clasificación. Cada
+ocurrencia se convierte en un vector de rasgos tomados de su
+contexto, y un clasificador predice el sentido.
+
+Los rasgos típicos salen de una ventana alrededor de la palabra
+objetivo:
+
+\begin{itemize}[itemsep=0.2em]
+    \item La bolsa de palabras de la ventana, las $k$ palabras de
+          cada lado sin importar el orden.
+    \item Las colocaciones, o sea las palabras exactas en las
+          posiciones $-1$, $+1$, $-2$, $+2$, que sí conservan el
+          orden.
+    \item La etiqueta gramatical de los vecinos, y las relaciones
+          sintácticas si hay analizador.
+\end{itemize}
+
+Según cuántos datos etiquetados haya, hay tres variantes:
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.0cm}
+                >{\raggedright\arraybackslash}p{5.0cm}
+                >{\raggedright\arraybackslash}p{5.0cm}}
+    \toprule
+    \textbf{Variante} & \textbf{Qué necesita} & \textbf{Qué entrega}
+    \\
+    \midrule
+    Supervisada &
+    Un corpus anotado con sentidos, palabra por palabra &
+    La mejor exactitud de las tres \\
+    \addlinespace
+    No supervisada &
+    Solo texto crudo &
+    Grupos de ocurrencias, o sea discriminación, no
+    desambiguación \\
+    \addlinespace
+    Semisupervisada &
+    Unas cuantas ocurrencias semilla por sentido &
+    Un clasificador que se amplía solo, etiquetando lo que ya
+    reconoce con confianza \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La semisupervisada se apoya en dos regularidades del lenguaje que se
+cumplen casi siempre: un sentido por colocación, la palabra
+acompañante fija el sentido, y un sentido por discurso, dentro de un
+mismo documento la palabra conserva el sentido con el que apareció la
+primera vez.
+
+\begin{ojo}
+    El cuello de botella del enfoque supervisado es la adquisición de
+    conocimiento: hace falta un corpus anotado por cada palabra que
+    se quiera desambiguar, anotar sentidos a mano es caro y los
+    anotadores no siempre coinciden. Por eso el enfoque basado en
+    conocimiento sigue vivo aunque sea menos exacto.
+\end{ojo}
+
+\subsection*{WordNet}
+
+Es una base de datos léxica del inglés organizada en torno a los
+significados de las palabras y a las relaciones semánticas entre
+ellos. Incluye sustantivos, verbos, adjetivos y adverbios.
+
+Su unidad no es la palabra. Las palabras con el mismo significado o
+muy cercano se agrupan en un \textbf{synset}, un conjunto de
+sinónimos, y cada synset representa un concepto particular. Los
+synsets están conectados por relaciones semánticas.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}
+                >{\raggedright\arraybackslash}p{5.2cm}
+                >{\raggedright\arraybackslash}p{5.2cm}}
+    \toprule
+    \textbf{Relación} & \textbf{Qué liga} & \textbf{Ejemplo} \\
+    \midrule
+    Sinonimia & Las palabras dentro de un mismo synset &
+    \textit{coche}, \textit{automóvil}, \textit{carro} \\
+    \addlinespace
+    Hiperonimia & Del caso al tipo general, es-un &
+    \textit{perro} es un \textit{cánido} \\
+    \addlinespace
+    Hiponimia & La inversa, del tipo al caso &
+    \textit{cánido} tiene por caso a \textit{perro} \\
+    \addlinespace
+    Holonimia & Del todo a la parte, tiene-parte &
+    \textit{coche} tiene por parte a \textit{rueda} \\
+    \addlinespace
+    Meronimia & La inversa, de la parte al todo &
+    \textit{rueda} es parte de \textit{coche} \\
+    \addlinespace
+    Antonimia & Opuestos, sobre todo entre adjetivos &
+    \textit{caliente} y \textit{frío} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{Hiperonimia}
+
+$Y$ es hiperónimo de $X$ si todo $X$ es un tipo de $Y$. Es la
+relación es-un, y lo importante es que es transitiva: si
+\textit{perro} es un \textit{cánido} y \textit{cánido} es un
+\textit{carnívoro}, entonces \textit{perro} es un \textit{carnívoro}.
+
+Esa transitividad es la que organiza los sustantivos de WordNet en
+una jerarquía con raíz única. Subiendo desde \textit{perro} se llega
+a la raíz:
+
+\begin{center}
+    \textit{perro} $\to$ \textit{cánido} $\to$ \textit{carnívoro}
+    $\to$ \textit{mamífero} $\to$ \textit{vertebrado} $\to$
+    \textit{animal} $\to$ \textit{organismo} $\to$ \textit{entidad}
+\end{center}
+
+La relación inversa, bajando, es la hiponimia.
+
+\subsubsection*{Holonimia}
+
+$Y$ es holónimo de $X$ si $X$ es parte de $Y$. Es la relación
+parte-de, vista desde el todo; vista desde la parte, la inversa, se
+llama meronimia. WordNet distingue tres tipos:
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Componente}. \textit{rueda} es parte de
+          \textit{coche}.
+    \item \textbf{Miembro}. \textit{árbol} es miembro de
+          \textit{bosque}.
+    \item \textbf{Sustancia}. \textit{oxígeno} es sustancia de
+          \textit{agua}.
+\end{itemize}
+
+\begin{ojo}
+    A diferencia de la hiperonimia, esta no se puede encadenar sin
+    cuidado. La manija es parte de la puerta y la puerta es parte de
+    la casa, pero decir que la manija es parte de la casa ya suena
+    raro. La transitividad solo se sostiene dentro del mismo tipo de
+    meronimia.
+\end{ojo}
+
+\begin{idea}
+    Para indexar, lo que se gana con el synset es directo: los
+    sinónimos se colapsan en una entrada, los sentidos de una
+    polisémica se separan en varias, y la jerarquía de hiperónimos
+    da una forma controlada de expandir la consulta. Si nada empata
+    con \textit{sedán}, se sube un nivel a \textit{coche}. Es la
+    expansión de consultas de la clase del $7$ de septiembre, pero
+    con un recurso que dice a dónde subir en vez de adivinarlo de las
+    coocurrencias.
+\end{idea}
+
+\subsection*{El algoritmo de Lesk}
+
+Lesk (1986) es el representante clásico de los métodos basados en
+conocimiento, y la idea cabe en una frase: el sentido correcto de una
+palabra es aquel cuya definición comparte más palabras con el
+contexto en el que la palabra aparece.
+
+\begin{algorithm}[H]
+\caption{Lesk simplificado}
+\begin{algorithmic}[1]
+\Procedure{Lesk}{$w$, $contexto$}
+    \State $mejor \gets$ sentido más frecuente de $w$
+    \State $mayor \gets 0$
+    \For{cada sentido $s$ de $w$ en el inventario}
+        \State $firma \gets$ palabras de la glosa y los ejemplos
+                            de $s$
+        \State $traslape \gets \abs{firma \cap contexto}$
+        \If{$traslape > mayor$}
+            \State $mayor \gets traslape$
+            \State $mejor \gets s$
+        \EndIf
+    \EndFor
+    \State \Return $mejor$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+La versión original de Lesk no compara la glosa contra el contexto,
+compara las glosas entre sí: toma todas las palabras de contenido de
+la ventana, considera todas las combinaciones de un sentido por
+palabra y se queda con la combinación que maximiza el traslape entre
+las glosas elegidas. Desambigua todas las palabras a la vez, y es
+mucho más cara.
+
+\begin{ejemplo}
+    El caso clásico es la frase \textit{pine cone}. Las glosas del
+    diccionario son:
+
+    \textit{pine}
+    \begin{enumerate}[itemsep=0.1em,label=\arabic*.]
+        \item kinds of evergreen tree with needle-shaped leaves
+        \item waste away through sorrow or illness
+    \end{enumerate}
+
+    \textit{cone}
+    \begin{enumerate}[itemsep=0.1em,label=\arabic*.]
+        \item solid body which narrows to a point
+        \item something of this shape whether solid or hollow
+        \item fruit of certain evergreen trees
+    \end{enumerate}
+
+    Con dos sentidos de \textit{pine} y tres de \textit{cone} hay
+    seis combinaciones que revisar:
+
+    \begin{center}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Combinación} & \textbf{Palabras en común} &
+        \textbf{Traslape} \\
+        \midrule
+        \textit{pine} 1, \textit{cone} 1 & ninguna & $0$ \\
+        \textit{pine} 1, \textit{cone} 2 & ninguna & $0$ \\
+        \textit{pine} 1, \textit{cone} 3 &
+        \textit{evergreen}, \textit{tree} & $2$ \\
+        \textit{pine} 2, \textit{cone} 1 & ninguna & $0$ \\
+        \textit{pine} 2, \textit{cone} 2 & ninguna & $0$ \\
+        \textit{pine} 2, \textit{cone} 3 & ninguna & $0$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    Gana la pareja \textit{pine} 1 con \textit{cone} 3: el árbol y su
+    fruto, que es la lectura correcta. Las dos palabras quedaron
+    desambiguadas al mismo tiempo.
+\end{ejemplo}
+
+\subsubsection*{Desventajas}
+
+Son dos, y las dos se ven en el ejemplo:
+
+\begin{enumerate}[itemsep=0.4em]
+    \item \textbf{Son muchas combinaciones a analizar.} Con dos
+          palabras fueron seis. Con una ventana de $k$ palabras de
+          contenido donde cada una tiene $s$ sentidos en promedio,
+          son $s^k$ combinaciones. Una oración de diez palabras de
+          contenido con tres sentidos cada una ya da
+          $3^{10} = 59\,049$ combinaciones que evaluar. Por eso en la
+          práctica se usa la versión simplificada, que es lineal en
+          el número de sentidos de la palabra objetivo.
+    \item \textbf{Puede no haber suficiente traslape entre las
+          definiciones.} Las glosas son cortas, una docena de
+          palabras, y es muy común que dos definiciones correctas no
+          compartan ni una. Cuando todos los traslapes dan cero el
+          algoritmo no tiene con qué decidir y se cae al sentido más
+          frecuente.
+\end{enumerate}
+
+Los dos parches habituales para lo segundo: expandir la firma de cada
+sentido con las glosas de los synsets vecinos en WordNet, hiperónimos
+e hipónimos incluidos, y pesar el traslape con idf para que las
+palabras comunes no dominen la cuenta.
+
+\begin{idea}
+    La desambiguación es benéfica cuando las consultas son muy
+    cortas. Dos o tres palabras no alcanzan para desambiguarse entre
+    sí, y es justo ahí donde el sentido equivocado hace más daño. En
+    una consulta larga los demás términos ya desambiguan solos y el
+    desambiguador aporta poco. Con todo, la desambiguación sigue
+    siendo un problema actual, no resuelto.
+\end{idea}
+
+\begin{ojo}
+    Un desambiguador imperfecto puede dejar la recuperación peor de
+    como estaba. Sanderson (1994) midió eso: por debajo de una
+    exactitud cercana al $90$ por ciento, los errores de sentido
+    meten más ruido del que quitan y conviene no desambiguar. Es el
+    mismo intercambio del etiquetado gramatical de la clase pasada,
+    lo que se gana en precisión se paga en recuerdo.
+\end{ojo}
+
+\subsection*{Cuarta propuesta: indexado conceptual}
+
+La formulación del problema es que la bolsa de palabras ignora toda
+la información semántica, trabaja solo con las formas superficiales
+de las palabras. Esta cuarta representación busca el tipo conceptual.
+
+El concepto está relacionado con el sentido, pero desde un punto de
+vista práctico: no hace falta un inventario escrito por
+lexicógrafos ni un desambiguador. La idea es representar los
+documentos en función de las palabras que ocurren en ellos, y que la
+semántica del documento se obtenga a partir de eso.
+
+\begin{idea}
+    Es un cambio de dónde viene el significado. En la propuesta
+    anterior lo aportaba un recurso externo, WordNet. Aquí lo aporta
+    la colección misma: dos palabras significan algo parecido si
+    aparecen en los mismos documentos. Es la semántica distribucional
+    de la clase del $7$ de septiembre, llevada al indexado.
+\end{idea}
+
+\subsubsection*{DOR}
+
+La primera propuesta es \textbf{DOR}, representación por ocurrencia
+en documentos (\textit{document occurrence representation}).
+
+El giro está en qué se toma como concepto: cada documento de la
+colección es una dimensión, un concepto primitivo. Una palabra se
+describe entonces por los documentos en los que ocurre, y dos
+palabras se parecen si ocurren en los mismos.
+
+\begin{ojo}
+    DOR es una representación de palabras, no de documentos. Lo que
+    construye directamente es un vector por cada término del
+    vocabulario. La representación del documento viene después, y es
+    derivada.
+\end{ojo}
+
+El peso de la dimensión $d_j$ en la representación del término $t_i$
+se calcula como el dual de tf-idf, intercambiando los papeles de
+término y documento:
+\[
+    w_{ij} = \mathrm{tf}_{i,j} \cdot \log \frac{\abs{T}}{\abs{T_j}} ,
+\]
+donde $\abs{T}$ es el tamaño del vocabulario y $\abs{T_j}$ el número
+de términos distintos que contiene $d_j$. La lectura es tf-idf al
+revés: un documento que toca muchísimos términos distintos describe
+mal cualquier concepto, igual que un término que aparece en
+muchísimos documentos discrimina mal.
+
+\subsubsection*{De palabras a documentos}
+
+Con los vectores de palabra ya construidos, el documento se arma
+sumando: la representación de un documento es la suma de los vectores
+de las palabras que contiene. Las consultas se representan igual,
+sumando los vectores de sus palabras.
+
+El efecto sobre la matriz es el que importa. La matriz
+palabra-documento, de $m \times n$, se convierte en una matriz
+documento-documento, de $n \times n$, y esa segunda es la que se usa
+como índice para la recuperación.
+
+\begin{center}
+\begin{tabular}{ccc}
+    \textbf{Palabra-documento} & & \textbf{Documento-documento} \\
+    \small representación de palabras & &
+    \small índice para recuperación \\[0.7em]
+    \begin{tabular}{c|cccc}
+                 & $d_1$ & $d_2$ & $\cdots$ & $d_n$ \\
+        \hline
+        $t_1$    &       &          &       &       \\
+        $t_2$    &       &          &       &       \\
+        $\vdots$ &       & $w_{ij}$ &       &       \\
+        $t_m$    &       &          &       &       \\
+    \end{tabular}
+    &
+    \quad $\xrightarrow{\ \text{suma}\ }$ \quad
+    &
+    \begin{tabular}{c|cccc}
+                 & $d_1$ & $d_2$ & $\cdots$ & $d_n$ \\
+        \hline
+        $d_1$    &       &          &       &       \\
+        $d_2$    &       &          &       &       \\
+        $\vdots$ &       & $w_{ij}$ &       &       \\
+        $d_n$    &       &          &       &       \\
+    \end{tabular}
+\end{tabular}
+\end{center}
+
+\begin{ejemplo}
+    Una colección de cuatro documentos, dos de fútbol y dos de
+    medicina, con pesos crudos para que la cuenta se siga a mano:
+    $d_1$ contiene \textit{gol} y \textit{equipo}, $d_2$
+    \textit{gol} y \textit{árbitro}, $d_3$ \textit{virus} y
+    \textit{fiebre}, y $d_4$ \textit{virus} y \textit{paciente}.
+
+    Cada renglón de la matriz palabra-documento es el vector DOR de
+    una palabra:
+
+    \begin{center}
+    \begin{tabular}{lcccc}
+        \toprule
+        & $d_1$ & $d_2$ & $d_3$ & $d_4$ \\
+        \midrule
+        \textit{gol}      & $1$ & $1$ & $0$ & $0$ \\
+        \textit{equipo}   & $1$ & $0$ & $0$ & $0$ \\
+        \textit{árbitro}  & $0$ & $1$ & $0$ & $0$ \\
+        \textit{virus}    & $0$ & $0$ & $1$ & $1$ \\
+        \textit{fiebre}   & $0$ & $0$ & $1$ & $0$ \\
+        \textit{paciente} & $0$ & $0$ & $0$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    Sumando los vectores de las palabras de cada documento sale la
+    matriz documento-documento:
+    \begin{align*}
+        d_1 &= (1,1,0,0) + (1,0,0,0) = (2,1,0,0) \\
+        d_2 &= (1,1,0,0) + (0,1,0,0) = (1,2,0,0) \\
+        d_3 &= (0,0,1,1) + (0,0,1,0) = (0,0,2,1) \\
+        d_4 &= (0,0,1,1) + (0,0,0,1) = (0,0,1,2)
+    \end{align*}
+
+    Queda diagonal por bloques: los dos documentos de fútbol se
+    parecen entre sí y no se parecen nada a los de medicina, y nadie
+    tuvo que declarar cuáles eran los temas.
+
+    Ahora la consulta \textit{equipo}, que se representa con el
+    vector de esa palabra, $(1,0,0,0)$. Los cosenos contra los cuatro
+    documentos son
+    \[
+        \cos(q, d_1) = \frac{2}{\sqrt{5}} = 0.894 ,
+        \qquad
+        \cos(q, d_2) = \frac{1}{\sqrt{5}} = 0.447 ,
+    \]
+    y cero contra $d_3$ y $d_4$.
+\end{ejemplo}
+
+\begin{idea}
+    Lo interesante del ejemplo está en $d_2$: la palabra
+    \textit{equipo} no aparece en $d_2$. Con la bolsa de palabras su
+    similitud sería exactamente cero y ese documento no se
+    recuperaría nunca. DOR lo trae porque \textit{equipo} y
+    \textit{gol} coocurren en $d_1$, y \textit{gol} sí está en $d_2$.
+    La conexión que en la propuesta anterior tenía que poner el
+    diccionario, aquí la puso la colección.
+\end{idea}
+
+\begin{ojo}
+    El costo es la dimensionalidad. El vector de una palabra tiene
+    tantas componentes como documentos haya, así que la
+    representación crece con la colección y no con el vocabulario. Y
+    al sumar, los documentos dejan de ser dispersos: la matriz
+    documento-documento se llena. Para una colección grande eso pesa
+    más que el índice invertido de siempre.
+\end{ojo}
+
 
 
 \end{document}
