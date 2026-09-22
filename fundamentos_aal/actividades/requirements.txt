@@ -11,3 +11,4 @@ ipykernel==7.3.0
 matplotlib==3.11.2
 nltk==3.10.3
 pandas==3.0.5
+scikit-learn==1.9.1
