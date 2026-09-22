@@ -11,13 +11,14 @@ Actividad 1
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.2.0
+* Version: 1.3.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       21/09/2026      El README sube a la raiz de actividades/
 zxxz6       14/09/2026      La carpeta actividad_1/ ahora se llama src/
 zxxz6       08/09/2026      Creation
 
@@ -85,6 +86,20 @@ donde i = 1 a 10 indica el número de query, j índica la cantidad de documentos
 relevantes para la query i, y Pi, Ri y Fi indican la precisión, recall y F1 obtenidos para la
 query Qi.
 Entregables: Código y listado de salida generada.
+
+## Actividad 3
+
+### Instrucciones
+
+Partiendo de la tarea 2, para cada consulta recuperar los 100 documentos con mayor
+similitud coseno. Considerar los 3 primeros documentos recuperados como relevantes,
+y mediante la aplicación de la fórmula de Rocchio, construir una nueva consulta. 
+Con esta nueva consulta recuperar nuevamente los 100 documentos con mayor similitud
+coseno.
+Calcular y comparar el "Average Precision" (AP) de los documentos recuperados para
+cada consulta, antes y después de la expansión de la consulta.
+Entregables: Código y lista de AP por consulta, antes y después de expansión.
+
 <!--
 ############################### END OF README.MD ###############################
 ################################################################################
