@@ -1,0 +1,482 @@
+% =====================================================================
+%  reporte_3.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Reporte de la actividad 3 de Fundamentos para el Análisis Automático
+%  de Lenguaje: expansión de consultas con la fórmula de Rocchio sobre
+%  pseudo-retroalimentación, evaluación con average precision antes y
+%  después de expandir, y construcción de la matriz de coocurrencia
+%  C = A A^T para la semántica distribucional.
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       22/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Fundamentos para el Análisis Automático de Lenguaje}
+\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías \\
+                       Dr. Luis Villaseñor Pineda \\
+                       Dr. Manuel Montes y Gómez \\
+                       Dr. Aurelio López López}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../../templates/Preambulo.tex}
+
+% El preambulo compartido pone el numero de pagina en el pie. Un
+% reporte de pocas hojas no lo necesita, asi que se limpia solo aqui.
+\fancyfoot[C]{}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\begin{center}
+  {\LARGE\bfseries Actividad 3\par}
+  \vspace{0.3em}
+  {\large Expansión de consultas con Rocchio y semántica
+   distribucional\par}
+  \vspace{0.5em}
+  {\small \alumno \quad-\quad \periodo\par}
+  \vspace{0.4em}
+  \rule{\linewidth}{0.5pt}
+\end{center}
+
+\section*{Resumen}
+
+Partiendo de la recuperación de la actividad 2, se recuperaron los
+100 documentos de mayor similitud coseno para cada una de las primeras
+10 consultas, se tomaron los 3 primeros como relevantes y con la
+fórmula de Rocchio se construyó una consulta expandida con la que se
+recuperó de nuevo. La comparación se hace con average precision antes
+y después, sobre los cuatro sistemas de la actividad anterior.
+
+La expansión mejora el MAP en los cuatro, entre $0.018$ y $0.024$,
+pero el promedio esconde dos comportamientos opuestos: sube donde la
+semilla acertó y hunde la consulta donde no.
+
+Y como complemento se implementó la tercera vía de la expansión, la automática, construyendo
+la matriz de coocurrencia $C = A A^{T}$
+
+\section{Start point}
+
+De la actividad 2 se heredan las matrices documento-término con pesado
+tf-idf y Okapi BM25 sobre los dos corpus truncados, las matrices de
+consulta con pesado binario, y las matrices de similitud coseno ya
+calculadas. Los juicios de relevancia de \texttt{TIME.REL} se usan
+para medir; no intervienen en la expansión.
+
+Posteriormente se obtienen las 100 consultas con mayor similitud coseno 
+(para la query $9$ solo se obtuvieron 77 documentos)
+
+\section{Método}
+
+\subsection*{Expansión con la fórmula de Rocchio}
+
+Rocchio mueve el vector de la consulta hacia el centroide de lo que se
+asume relevante y lo aleja del centroide del resto:
+\[
+    q_m = \alpha\, q
+        + \frac{\beta}{|D_r|} \sum_{d \in D_r} d
+        - \frac{\gamma}{|D_{nr}|} \sum_{d \in D_{nr}} d ,
+\]
+con los valores por default $\alpha = 1$, $\beta = 0.75$ y
+$\gamma = 0.15$.
+
+Esto se puede ver graficamente en la figura 2.
+
+$D_r$ son los primeros 3 documentos recuperados (pseudo-feedback,
+la relevancia la define la posicion en el ranking, no los juicios).
+
+$D_{nr}$ se son los 97 restantes del top 100 y no la colección entera, es decir que solo se
+retroalimenta con lo que el sistema ya había traído
+
+Cabe mencionar que las consultas se normalizan antes de sumar, ya que las
+consultas estan pesadas en binario y los corpus en $tf$-$idf$ y $BM25$, sin normalizar,
+$\alpha$ y $\beta$ no pesan lo que la fórmula dice que pesan
+
+Y tambien, pesos negativos que produce el término de
+$\gamma$ se recortan a cero
+
+\subsection*{Evaluación}
+
+La medida es la average precision, la misma de la actividad 2:
+\[
+    \mathrm{AP}(q) = \frac{1}{|\mathrm{Rel}|} \sum_{k=1}^{n}
+                     P@k \cdot \mathrm{rel}(k) .
+\]
+El AP de antes se mide sobre los mismos 100 documentos de la primera
+pasada, no sobre el ranking completo, para que las dos cifras se
+comparen sobre el mismo corte. EN consecuencia estos valores no coinciden con
+los de la actividad 2, donde el AP se media sobre todo el ranking.
+
+\subsection*{Semántica distribucional}
+
+Aqui, las asociaciones entre
+palabras salen de la colección misma, no de un tesauro externo ni del
+usuario. Se parte de la matriz de terminos contra contextos y se
+multiplica por su transpuesta:
+\[
+    C = A A^{T},
+    \qquad
+    A \in \R^{|V| \times |D|},
+    \qquad
+    C \in \R^{|V| \times |V|} .
+\]
+Con $A$ binaria, cada celda de $C$ cuenta en cuántos contextos
+aparecen juntas dos palabras, y la diagonal queda con la frecuencia de
+contexto de cada término, debido a que un termino comparte consigo mismo
+todos sus contextos
+
+Recordar la idea principal de esto (vista en clase): con un contexto grande deberían correlacionarse palabras
+relacionadas por tema, y con uno chico la relacion deberia acercarse a
+la sinonimia. 
+
+Se usaron dos tamaños; El contexto grande es el
+documento completo. El chico es una ventana de 12 palabras: el
+documento se parte en trozos de 12 palabras que no se traslapan, y
+cada trozo pasa a ser una columna de $A$. La formula no cambia, solo
+cambia qué es una columna.
+
+Para ordenar los vecinos de un término no sirve el conteo crudo, que
+está dominado por las palabras más comunes de la colección. Se usa el
+coseno entre las dos filas binarias de $A$, que sale de la propia
+matriz:
+\[
+    \mathrm{sim}(t, u) = \frac{C[t,u]}{\sqrt{C[t,t] \cdot C[u,u]}} .
+\]
+
+
+\section{Resultados}
+
+\subsection*{Efecto de la expansión}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Sistema} & \textbf{MAP antes} & \textbf{MAP después}
+      & \textbf{Diferencia} \\
+    \midrule
+    Porter tf-idf & 0.5376 & 0.5618 & $+0.0242$ \\
+    Porter BM25   & 0.4893 & 0.5101 & $+0.0208$ \\
+    NLTK tf-idf   & 0.5376 & 0.5618 & $+0.0242$ \\
+    NLTK BM25     & 0.4907 & 0.5090 & $+0.0183$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Avg del AP sobre las primeras 10 consultas (medido
+    sobre el top 100 en las dos pasadas).}
+  \label{tab:map}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{r rr rr rr rr}
+    \toprule
+    & \multicolumn{2}{c}{\textbf{Porter tf-idf}}
+    & \multicolumn{2}{c}{\textbf{Porter BM25}}
+    & \multicolumn{2}{c}{\textbf{NLTK tf-idf}}
+    & \multicolumn{2}{c}{\textbf{NLTK BM25}} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+    \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+    \textbf{Q} & antes & desp. & antes & desp.
+               & antes & desp. & antes & desp. \\
+    \midrule
+     1 & .7497 & .8010 & .5495 & .5980
+       & .7497 & .8010 & .5495 & .5980 \\
+     2 & .7000 & .7500 & .3667 & .4167
+       & .7000 & .7500 & .3667 & .4167 \\
+     3 & .1401 & .1429 & .1138 & .1346
+       & .1401 & .1429 & .1138 & .1346 \\
+     4 & .0417 & .0453 & .0197 & .0445
+       & .0417 & .0452 & .0196 & .0445 \\
+     5 & .0354 & .0317 & .0482 & .0900
+       & .0354 & .0317 & .0482 & .0786 \\
+     6 & .9114 & .9576 & .9396 & .9798
+       & .9114 & .9576 & .9535 & .9798 \\
+     7 & .0305 & .0135 & .0625 & .0357
+       & .0305 & .0135 & .0625 & .0357 \\
+     8 & 1.000 & 1.000 & 1.000 & 1.000
+       & 1.000 & 1.000 & 1.000 & 1.000 \\
+     9 & .9185 & .9276 & .9375 & .9464
+       & .9185 & .9276 & .9375 & .9464 \\
+    10 & .8486 & .9484 & .8556 & .8556
+       & .8486 & .9484 & .8556 & .8556 \\
+    \midrule
+    \textbf{media} & \textbf{.5376} & \textbf{.5618}
+      & \textbf{.4893} & \textbf{.5101}
+      & \textbf{.5376} & \textbf{.5618}
+      & \textbf{.4907} & \textbf{.5090} \\
+    \bottomrule
+  \end{tabular}
+  \caption{AP por consulta, antes y después de la expansión}
+  \label{tab:apquery}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{rocchio_ap.pdf}
+  \caption{AP antes y después, sistema NLTK tf-idf.}
+  \label{fig:ap}
+\end{figure}
+
+Se puede notar (en la figura) que las consultas se parten en dos grupos. Seis de
+ellas ya estaban por encima de $0.70$ y la expansión las mejora o las
+deja igual. Las otras cuatro, la 3, 4, 5 y 7, están por debajo de
+$0.15$ antes y siguen por debajo después. La expansión no rescata una
+consulta que empezó mal.
+
+\subsection*{Visualizando Rocchio}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{rocchio_desplazamiento.pdf}
+  \caption{Proyección PCA del top 100 de dos consultas, sistema
+    NLTK tf-idf}
+  \label{fig:desplazamiento}
+\end{figure}
+
+En las dos graficas la flecha apunta hacia $c+$, que es el centroide de la
+semilla, que es exactamente lo que hace Rocchio. Lo que cambia es
+dónde está ese centroide respecto de los relevantes. En la
+consulta 1 la semilla cae entre los triángulos y el AP sube de
+$0.7497$ a $0.8010$. En la consulta 7 los dos unicos relevantes
+quedaron lejos, la consulta se aleja todavía más de ellos y el AP
+baja de $0.0305$ a $0.0135$
+\ref{tab:apquery}.
+
+\subsection*{Matriz decoocurrencia}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Contexto} & \textbf{Columnas de $A$}
+      & \textbf{Tamaño de $C$} & \textbf{Celdas no nulas} \\
+    \midrule
+    Documento        &     423 & $16\,623^2$ & 7.02\,\% \\
+    Ventana de 12    & 10\,530 & $16\,623^2$ & 0.41\,\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{$C$ mide lo mismo en los dos casos; lo que cambia es el
+    ancho de $A$}
+  \label{tab:contextos}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrrr}
+    \toprule
+    & \textbf{nuclear} & \textbf{soviet} & \textbf{africa}
+      & \textbf{kennedi} \\
+    \midrule
+    nuclear &  44 & 24 &  6 & 14 \\
+    soviet  &  24 & 91 & 10 & 13 \\
+    africa  &   6 & 10 & 51 &  7 \\
+    kennedi &  14 & 13 &  7 & 41 \\
+    \bottomrule
+  \end{tabular}
+  \quad
+  \begin{tabular}{lrrrr}
+    \toprule
+    & \textbf{nuclear} & \textbf{soviet} & \textbf{africa}
+      & \textbf{kennedi} \\
+    \midrule
+    nuclear & 111 &   5 &   0 &  2 \\
+    soviet  &   5 & 240 &   1 &  2 \\
+    africa  &   0 &   1 & 105 &  1 \\
+    kennedi &   2 &   2 &   1 & 71 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Bloques de $C$ para cuatro términos, con contexto
+    documento arriba y ventana de 12 abajo}
+  \label{tab:bloques}
+\end{table}
+
+Se puede observar que con contexto documento,
+\texttt{nuclear} y \texttt{soviet} comparten 24 articulos de los 44 en
+que aparece el primero. Con ventana de 12 comparten 5, y
+\texttt{nuclear} con \texttt{africa} pasa de 6 a ninguno.
+
+\subsection*{Vecinos segun el tamaño de contexto}
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Término} & \textbf{Contexto} & \textbf{Vecinos más
+      cercanos} \\
+    \midrule
+    soviet  & documento  & moscow .72, russian .69, russia .63,
+                             khrushchev .55 \\
+            & ventana 12 & union .14, moscow .10, russian .10,
+                           kremlin .10 \\
+    \midrule
+    nuclear & documento  & nato .57, deterr .56, polari .51,
+                           multilater .43 \\
+            & ventana 12 & deterr .26, weapon .19, warhead .17,
+                           nato .16 \\
+    \midrule
+    kennedi & documento  & washington .49, presid .44, u. .41,
+                           washington' .38 \\
+            & ventana 12 & presid .23, john .17, administr .14,
+                           devis .11 \\
+    \midrule
+    africa  & documento  & african .58, africa' .50, black .50,
+                           white .42 \\
+            & ventana 12 & south .16, asia .13, latin .13,
+                           central .11 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Los cuatro vecinos de mayor coseno bajo cada tamaño de
+    contexto. Con el documento completo salen palabras del mismo
+    tema; con la ventana salen las que forman frase.}
+  \label{tab:vecinos}
+\end{table}
+
+\subsection*{Geometría de los vectores de término}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{vectores_termino.pdf}
+  \caption{El vector de \texttt{soviet}, sus tres vecinos más
+    cercanos y tres términos frecuentes que no comparten ni un
+    documento con el}
+  \label{fig:vectores}
+\end{figure}
+
+Los tres términos ajenos que eligió el procedimiento son
+\texttt{cong}, \texttt{diem} y \texttt{nam'}, es decir Viet Cong, Ngo
+Dinh Diem y Viet Nam's: en esta colección la cobertura de Vietnam y la
+de los soviéticos no coinciden nunca en el mismo docuemtno
+
+\section{Discusión}
+
+\subsection*{Rocchio sirve?}
+
+La ganancia de MAP, entre $0.018$ y $0.024$, es consistente en los
+cuatro sistemas, pero, cuando la semilla de tres documentos era
+efectivamente relevante, la consulta se mueve hacia la zona correcta y
+el AP sube; cuando no lo era, se mueve en la dirección equivocada y el
+AP baja.
+
+La consulta 7 es el caso evidente. Tiene solo dos documentos relevantes en
+toda la colección, y ninguno de los dos estaba entre los tres primeros
+de la primera pasada. La expansión reforzo lo que ya salía arriba, que
+era incorrecto, y empujó los dos relevantes más abajo. Es el modo de
+falla conocido de la pseudo-retroalimentación, y no es un defecto de
+la implementación sino del suponer que los primeros 3 son los relevantes.
+La query 7 era la peor antes de la expansion, al expandir sigue siendo la peor.
+
+Mi opinion es que Rocchio sirve en general, pero su efectividad depende 
+críticamente de la calidad de la semilla inicial
+
+
+\subsection*{El tamaño de contexto no produce sinonimia}
+
+La primera mitad de la hipotesis se cumple. Con el
+documento completo como contexto, los vecinos de \texttt{soviet} son
+\texttt{moscow}, \texttt{russian}, \texttt{russia} y
+\texttt{khrushchev}, y los de \texttt{nuclear} son \texttt{nato},
+\texttt{deterr}, \texttt{polari} y \texttt{multilater}, que son
+los temas relacionados.
+
+La segunda mitad esta medio rara. Con ventana de 12 no aparecen
+sinónimos, aparecen colocaciones, \texttt{soviet union},
+\texttt{south africa}, \texttt{president kennedy},
+\texttt{nuclear warhead}. Aun no me queda claro el porque, tendria
+que investigar mas.
+
+
+\section{Conclusiones}
+
+La expansión con Rocchio mejora el MAP en los cuatro sistemas, de
+$0.5376$ a $0.5618$ en el mejor de ellos. La mejora existe pero es
+pequeña, y sobre todo desigual: seis consultas mejoran o quedan igual
+y dos empeoran.
+
+La semántica distribucional reproduce la parte tematica de la
+hipotesis del tamaño de contexto y no reproduce la parte de la
+sinonimia. Puede que sea un problema de implementacion.
+
+Al revisar las referencias es que la hipótesis de
+Harris y lo que calcula $C = A A^{T}$ no son la misma cosa.
+Harris dice que dos palabras se parecen si aparecen \emph{en
+contextos similares}, lo que copararia las filas de $C$
+entre sí. Lo que mide $C[t,u]$ es que dos palabras aparezcan
+\emph{juntas}, que es una relación distinta, por ejemplo \texttt{soviet} y
+\texttt{union} ocurren juntas todo el tiempo y no son sinonimos, y 
+desde mi experiencia dos sinonimos de verdad casi nunca coocurren en 
+una ventana corta, porque uno sustituye al otro en vez de acompañarlo
+
+Si eso es correcto, entonces la sinonimia no deberia salir de leer
+las celdas de $C$ sino de comparar sus filas, y mi implementacion
+estaria midiendo bien algo que no es lo que la hipotesis predice.
+Lo dejo como suposicion porque no alcance a probarlo. Agradeceria
+retroalimentación sobre este punto
+
+\section*{Entregables}
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \texttt{out/actividad\_3/ap\_por\_consulta.csv}
+      & AP por consulta, antes y después \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El archivo trae una fila por sistema y consulta, con las columnas
+\texttt{sistema}, \texttt{query}, \texttt{AP antes},
+\texttt{AP despues} y \texttt{delta}, o sea 40 filas para los cuatro
+sistemas y las diez consultas.
+
+El código está en \texttt{src/actividad.ipynb} y el entorno en
+\texttt{../requirements.txt}.
+
+
+\section*{Referencias}
+
+\begin{enumerate}[label={[\arabic*]}, itemsep=0.3em, leftmargin=*]
+    \item \textbf{Rocchio.} J. J. Rocchio,
+          \emph{Relevance feedback in information retrieval}, en
+          \emph{The SMART Retrieval System}, Prentice Hall, 1971.\\
+    \item \textbf{Tesauro automático.} Manning, Raghavan y Schütze,
+          \emph{Introduction to Information Retrieval}, Cambridge
+          University\\
+          \url{https://nlp.stanford.edu/IR-book/}\\
+    \item \textbf{Hipótesis distribucional.} Zellig Harris,
+          \emph{Distributional structure}.\\
+          \url{https://doi.org/10.1080/00437956.1954.11659520}\\
+    \item \textbf{Colección Time.} IR Group, University of Glasgow.
+          Colecciones de prueba para recuperación de información.\\
+          \url{http://ir.dcs.gla.ac.uk/resources/test_collections/}
+    \item \textbf{Algoritmo de Porter.} Martin Porter.\\
+          \url{https://tartarus.org/martin/PorterStemmer/}
+\end{enumerate}
+
+\appendix
+
+\end{document}
+
+%############################ END OF REPORTE_3.TEX #############################
+%###############################################################################
