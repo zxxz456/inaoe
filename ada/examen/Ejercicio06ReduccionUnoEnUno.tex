@@ -1,0 +1,109 @@
+% =====================================================================
+%  Ejercicio06ReduccionUnoEnUno.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 6 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Reducción de uno en uno: iteración}{6}{20}
+
+\noindent\textbf{Convenciones.}
+Todos los logaritmos son en base $2$.
+
+\noindent Analice por iteración
+\[
+  T(n) = T(n-1) + 1, \qquad T(1) = 1.
+\]
+Obtenga tanto una fórmula exacta como su complejidad asintótica.
+
+\paso{Expansión sin simplificar:} cada renglón sustituye un solo
+término $T(\cdot)$ por su definición y conserva el $+1$ que lo
+acompañaba.
+\begin{align*}
+  T(n) &= T(n-1) + 1
+          \razon{recurrencia dada} \\
+       &= \bigl[T(n-2) + 1\bigr] + 1
+          \razon{$T(n-1) = T(n-2) + 1$} \\
+       &= \Bigl[\bigl[T(n-3) + 1\bigr] + 1\Bigr] + 1
+          \razon{$T(n-2) = T(n-3) + 1$} \\
+       &= \biggl[\Bigl[\bigl[T(n-4) + 1\bigr] + 1\Bigr] + 1\biggr] + 1
+          \razon{$T(n-3) = T(n-4) + 1$} \\
+       &= T(n-4) + 1 + 1 + 1 + 1
+          \razon{se quitan los corchetes, la suma asocia}
+\end{align*}
+
+\paso{Forma general:} el argumento baja una unidad por sustitución y
+cada sustitución aporta exactamente un $1$, así que después de $k$ de
+ellas hay $k$ unos sumados.
+\[
+  T(n) = T(n-k) + k, \qquad 1 \le k \le n-1.
+\]
+
+\paso{Donde se detiene:} la iteración para cuando el argumento cae en
+el caso base.
+\begin{align*}
+  n - k &= 1 \razon{el único valor conocido es $T(1)$} \\
+      k &= n - 1 \razon{se despeja $k$}
+\end{align*}
+
+\paso{Sustitución del corte:} hasta aquí se reemplaza $k$ por $n-1$ en
+la forma general.
+\begin{align*}
+  T(n) &= T\bigl(n - (n-1)\bigr) + (n-1)
+          \razon{se sustituye $k = n-1$} \\
+       &= T(1) + (n-1)
+          \razon{se simplifica el argumento} \\
+       &= 1 + (n-1)
+          \razon{caso base $T(1) = 1$} \\
+       &= n
+          \razon{se suma}
+\end{align*}
+
+\respuesta{T(n) = n}
+
+\paso{Complejidad:} la fórmula exacta es el propio $n$, de modo que
+$c_1 n \le T(n) \le c_2 n$ se cumple para todo $n \ge n_0$ con
+$c_1 = c_2 = 1$ y $n_0 = 1$.
+
+\respuesta{T(n) \in \Tht{n}}
+
+\end{document}
+
+%################### END OF EJERCICIO06REDUCCIONUNOENUNO.TEX ###################
+%###############################################################################
