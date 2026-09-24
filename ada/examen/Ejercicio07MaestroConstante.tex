@@ -1,0 +1,91 @@
+% =====================================================================
+%  Ejercicio07MaestroConstante.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 7 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Método maestro: $T(n) = 2T(n/4) + 1$}{7}{20}
+
+\noindent\textbf{Convenciones.}
+Todos los logaritmos son en base $2$.
+
+\noindent Resolver con el método maestro:
+\[
+  T(n) = 2\,T(n/4) + 1.
+\]
+
+\paso{Parámetros:} la recurrencia tiene la forma
+$T(n) = a\,T(n/b) + f(n)$, de donde
+\[
+  a = 2, \qquad b = 4, \qquad f(n) = 1.
+\]
+
+\paso{Exponente crítico:} se evalúa $\log_b a$ y se deja como número,
+no como expresión:
+\begin{align*}
+  \log_b a &= \log_4 2 \\
+           &= \frac{\log 2}{\log 4} \razon{cambio de base} \\
+           &= \frac{1}{2}. \razon{$\log 2 = 1$ y $\log 4 = 2$}
+\end{align*}
+Por lo tanto $n^{\log_b a} = n^{1/2} = \sqrt{n}$.
+
+\paso{Comparación:} $f(n) = 1$ es constante y $\sqrt{n}$ crece sin
+cota, así que $f(n)$ queda por debajo de $n^{\log_b a}$. Falta ver que
+la separación es polinómica, no solo estricta.
+
+\paso{Caso 1:} se exhibe $\varepsilon = 1/2 > 0$, que cumple la
+condición $f(n) = \Ord{n^{\log_b a - \varepsilon}}$:
+\begin{align*}
+  n^{\log_b a - \varepsilon} &= n^{1/2 - 1/2}
+                               \razon{valores de $\log_b a$ y
+                                      $\varepsilon$} \\
+                             &= n^{0} \\
+                             &= 1,
+\end{align*}
+y $f(n) = 1 = \Ord{1}$ tomando la constante $c = 1$ para toda
+$n \geq 1$. Aplica el caso 1, que concluye
+$T(n) \in \Tht{n^{\log_b a}}$.
+
+\respuesta{T(n) \in \Tht{\sqrt{n}}}
+
+\end{document}
+
+%################### END OF EJERCICIO07MAESTROCONSTANTE.TEX ####################
+%###############################################################################
