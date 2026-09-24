@@ -1,0 +1,157 @@
+% =====================================================================
+%  Ejercicio12ComparacionNiveles.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 12 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Comparación de niveles y comprobación por sustitución}{12}{20}
+
+\noindent\textbf{Convenciones.}
+Se supone que $n$ es potencia de $2$ y que
+$\log n = \log_2 n$.
+
+\noindent Para $T(n) = 2T(n/2) + n^2$ con $T(1) = 1$, construir el
+árbol de recurrencia y responder: el costo aumenta o disminuye al
+avanzar por los niveles, qué nivel aporta la mayor parte del costo y
+cuál es la complejidad asintótica. Comprobar después el resultado
+mediante sustitución.
+
+\paso{Costo de un nivel:} la raíz tiene tamaño $n$ y costo no
+recursivo $n^2$, y cada nodo se parte en dos hijos de la mitad del
+tamaño. En el nivel $i$ hay entonces $2^{i}$ nodos de tamaño
+$n/2^{i}$:
+\begin{align*}
+  \text{costo del nivel } i
+    &= 2^{i} \left(\frac{n}{2^{i}}\right)^{\!2}
+       \razon{nodos del nivel, por el costo de cada nodo} \\
+    &= 2^{i} \cdot \frac{n^{2}}{4^{i}}
+       \razon{cuadrado del cociente} \\
+    &= \frac{n^{2}}{2^{i}}
+       \razon{$4^{i} = 2^{i} \cdot 2^{i}$}.
+\end{align*}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{cccc}
+    \toprule
+    \textbf{Nivel} & \textbf{Nodos} & \textbf{Tamaño}
+      & \textbf{Costo del nivel} \\
+    \midrule
+    $0$      & $1$     & $n$       & $n^{2}$ \\
+    $1$      & $2$     & $n/2$     & $n^{2}/2$ \\
+    $2$      & $4$     & $n/4$     & $n^{2}/4$ \\
+    $i$      & $2^{i}$ & $n/2^{i}$ & $n^{2}/2^{i}$ \\
+    $\log n$ & $n$     & $1$       & $n$ \quad (hojas) \\
+    \bottomrule
+  \end{tabular}
+  \caption{Costo por nivel del árbol de $T(n) = 2T(n/2) + n^2$.}
+  \label{ej12-niveles}
+\end{table}
+
+\paso{Altura y hojas:} el caso base pega cuando $n/2^{i} = 1$, o sea
+en $i = \log n$, que es la altura del árbol. Ahí hay
+$2^{\log n} = n$ hojas de costo $T(1) = 1$ cada una, que suman $n$.
+El renglón de las hojas va aparte de los niveles internos porque su
+costo es el caso base, no $(n/2^{i})^{2}$.
+
+\paso{Costo total:} se suman los niveles internos $i = 0, \dots,
+\log n - 1$ y se agregan las hojas:
+\begin{align*}
+  T(n) &= \sum_{i=0}^{\log n - 1} \frac{n^{2}}{2^{i}} + n
+          \razon{niveles internos más hojas} \\
+       &= n^{2} \sum_{i=0}^{\log n - 1}
+          \left(\frac{1}{2}\right)^{\!i} + n
+          \razon{se factoriza $n^{2}$} \\
+       &= n^{2} \cdot \frac{1 - (1/2)^{\log n}}{1 - 1/2} + n
+          \razon{suma geométrica de $\log n$ términos} \\
+       &= 2n^{2}\left(1 - \frac{1}{n}\right) + n
+          \razon{$(1/2)^{\log n} = 1/n$ y $1/(1 - 1/2) = 2$} \\
+       &= 2n^{2} - 2n + n \\
+       &= 2n^{2} - n.
+\end{align*}
+
+\paso{El costo disminuye al avanzar por los niveles:} el cociente
+entre dos niveles consecutivos es
+\[
+  \frac{n^{2}/2^{\,i+1}}{n^{2}/2^{\,i}} = \frac{1}{2},
+\]
+o sea cada nivel cuesta la mitad del anterior. El número de nodos se
+duplica, pero el costo de cada nodo se divide entre cuatro.
+
+\paso{La mayor parte del costo la aporta la raíz,} el nivel $0$, con
+$n^{2}$ de un total de $2n^{2} - n$. Los demás niveles juntos aportan
+$n^{2} - n$, menos que la raíz sola.
+
+\paso{Complejidad asintótica:} en $T(n) = 2n^{2} - n$ el término
+dominante es $n^{2}$, de donde $T(n) \in \Tht{n^{2}}$.
+
+Comprobación por sustitución de $T(n) = 2n^{2} - n$, por inducción
+sobre $n$ en potencias de $2$.
+
+\paso{Caso base:} con $n = 1$,
+\[
+  T(1) = 1 = 2 \cdot 1^{2} - 1.
+\]
+
+\paso{Hipótesis inductiva:} se supone que la fórmula vale para $n/2$,
+\[
+  T(n/2) = 2\left(\frac{n}{2}\right)^{\!2} - \frac{n}{2}.
+\]
+
+\paso{Paso inductivo:} se sustituye la hipótesis en la recurrencia:
+\begin{align*}
+  T(n) &= 2\,T(n/2) + n^{2}
+          \razon{definición de la recurrencia} \\
+       &= 2\left[\,2\left(\frac{n}{2}\right)^{\!2}
+          - \frac{n}{2}\,\right] + n^{2}
+          \razon{hipótesis inductiva} \\
+       &= 2\left[\,\frac{n^{2}}{2} - \frac{n}{2}\,\right] + n^{2}
+          \razon{$2(n/2)^{2} = n^{2}/2$} \\
+       &= n^{2} - n + n^{2}
+          \razon{se distribuye el $2$} \\
+       &= 2n^{2} - n.
+\end{align*}
+
+\respuesta{T(n) = 2n^{2} - n \in \Tht{n^{2}}}
+
+\end{document}
+
+%################## END OF EJERCICIO12COMPARACIONNIVELES.TEX ###################
+%###############################################################################
