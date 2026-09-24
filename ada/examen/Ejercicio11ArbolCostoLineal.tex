@@ -1,0 +1,126 @@
+% =====================================================================
+%  Ejercicio11ArbolCostoLineal.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 11 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Árbol con costo lineal}{11}{20}
+
+\noindent\textbf{Convenciones.}
+Se supone que $n$ es potencia de $2$ y que
+$\log n = \log_2 n$.
+
+\noindent Construya el árbol para
+\[
+  T(n) = 2T(n/2) + n, \qquad T(1) = 1.
+\]
+Para cada nivel, determine el número de nodos, el tamaño de cada
+subproblema, el costo total del nivel y la altura del árbol.
+Finalmente, calcule el costo total.
+
+\paso{Nodos, tamaño y costo por nivel:} cada nodo de tamaño $m$ genera
+dos hijos de tamaño $m/2$ y aporta $m$ de costo propio. Entonces, en
+el nivel $i$:
+\begin{align*}
+  \text{nodos}(i) &= 2^{i} \razon{cada nivel duplica al anterior} \\
+  \text{tamaño}(i) &= \frac{n}{2^{i}}
+      \razon{cada nivel parte el tamaño a la mitad} \\
+  \text{costo}(i) &= 2^{i} \cdot \frac{n}{2^{i}}
+      \razon{nodos por costo de cada nodo} \\
+                  &= n.
+\end{align*}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    \toprule
+    \textbf{Nivel} & \textbf{Nodos} & \textbf{Tamaño}
+      & \textbf{Costo por nodo} & \textbf{Costo del nivel} \\
+    \midrule
+    $0$ & $1$ & $n$ & $n$ & $n$ \\
+    $1$ & $2$ & $n/2$ & $n/2$ & $n$ \\
+    $2$ & $4$ & $n/4$ & $n/4$ & $n$ \\
+    $i$ & $2^{i}$ & $n/2^{i}$ & $n/2^{i}$ & $n$ \\
+    $\log n$ & $n$ & $1$ & $T(1) = 1$ & $n$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Niveles del árbol de $T(n) = 2T(n/2) + n$.}
+  \label{ej11:ej11-tab-niveles}
+\end{table}
+
+\paso{Altura:} la recursión para cuando el subproblema llega al caso
+base, o sea cuando el tamaño del nivel $i$ vale $1$:
+\begin{align*}
+  \frac{n}{2^{i}} &= 1 \razon{condición de paro} \\
+  2^{i} &= n \\
+  i &= \log n \razon{logaritmo en ambos lados}
+\end{align*}
+El último nivel es el $\log n$, así que la altura del árbol es
+$h = \log n$ y los niveles internos son $i = 0, 1, \dots, \log n - 1$.
+
+\paso{Costo de los niveles internos:} son $\log n$ niveles y cada uno
+cuesta $n$:
+\begin{align*}
+  C_{\text{int}} &= \sum_{i=0}^{\log n - 1} n
+      \razon{costo del nivel $i$, de la tabla} \\
+                 &= n \log n \razon{$\log n$ sumandos iguales a $n$}
+\end{align*}
+
+\paso{Costo de las hojas:} las hojas están todas en el nivel $\log n$
+y no se expanden, así que cuestan $T(1)$ cada una:
+\begin{align*}
+  \text{hojas} &= 2^{\log n} \razon{nodos del nivel $\log n$} \\
+               &= n \\
+  C_{\text{hoj}} &= n \cdot T(1) \razon{una hoja por cada caso base} \\
+                 &= n \razon{$T(1) = 1$}
+\end{align*}
+
+\paso{Costo total:} se suman los niveles internos y las hojas:
+\begin{align*}
+  T(n) &= C_{\text{int}} + C_{\text{hoj}} \\
+       &= n \log n + n.
+\end{align*}
+
+\respuesta{T(n) = n \log n + n \in \Tht{n \log n}}
+
+\end{document}
+
+%################### END OF EJERCICIO11ARBOLCOSTOLINEAL.TEX ####################
+%###############################################################################
