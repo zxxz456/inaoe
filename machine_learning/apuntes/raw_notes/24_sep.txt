@@ -1,0 +1,5 @@
+- continuacion cnn
+
+- autoencoders
+    - sparse auntoencoders 
+    - stacked autoencoders
