@@ -1,0 +1,102 @@
+% =====================================================================
+%  Ejercicio09MaestroLineal.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 9 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Método maestro: $T(n) = 2T(n/4) + n$}{9}{20}
+
+\noindent\textbf{Convenciones.}
+Todos los logaritmos son en base $2$.
+
+\noindent Utilizando el método maestro, resuelva la recurrencia
+\[
+  T(n) = 2\,T(n/4) + n.
+\]
+
+\paso{Parámetros:} la recurrencia tiene la forma
+$T(n) = a\,T(n/b) + f(n)$ con
+\[
+  a = 2, \qquad b = 4, \qquad f(n) = n.
+\]
+
+\paso{Potencia de comparación:} se evalúa el exponente
+$\log_b a$ y con él la potencia contra la que se compara $f$:
+\begin{align*}
+  \log_b a &= \log_4 2 \razon{$a = 2$, $b = 4$} \\
+           &= \frac{\log 2}{\log 4} \razon{cambio de base} \\
+           &= \frac{1}{2} \razon{$\log 2 = 1$, $\log 4 = 2$}
+\end{align*}
+de modo que $n^{\log_b a} = n^{1/2} = \sqrt{n}$.
+
+\paso{Comparación de $f(n)$ contra $n^{\log_b a}$:} se escribe $f$ como
+potencia de $n$ para leer la diferencia de exponentes:
+\begin{align*}
+  f(n) &= n \\
+       &= n^{1} \\
+       &= n^{1/2 + 1/2} \razon{$1 = \tfrac{1}{2} + \tfrac{1}{2}$} \\
+       &= n^{\log_b a + \varepsilon}
+          \razon{con $\varepsilon = \tfrac{1}{2} > 0$}
+\end{align*}
+Por lo tanto $f(n) \in \Omg{n^{\log_b a + \varepsilon}}$: $f$ es
+polinómicamente mayor que $\sqrt{n}$, por el factor $n^{1/2}$.
+
+\paso{Condición de regularidad:} el caso 3 exige
+$a\,f(n/b) \le c\,f(n)$ para alguna constante $c < 1$ y toda $n$
+suficientemente grande:
+\begin{align*}
+  a\,f(n/b) &= 2\,f(n/4) \razon{$a = 2$, $b = 4$} \\
+            &= 2 \cdot \frac{n}{4} \razon{$f(n) = n$} \\
+            &= \frac{n}{2} \\
+            &= \frac{1}{2}\,f(n)
+\end{align*}
+lo cual cumple $a\,f(n/b) \le c\,f(n)$ con $c = 1/2 < 1$ para toda
+$n \ge 1$, con igualdad.
+
+\paso{Caso que aplica:} el caso 3, porque
+$f(n) \in \Omg{n^{\log_b a + \varepsilon}}$ con
+$\varepsilon = 1/2$ y la regularidad se cumple con $c = 1/2$. El caso
+3 concluye $T(n) \in \Tht{f(n)}$, y aquí $f(n) = n$.
+\respuesta{T(n) \in \Tht{n}}
+
+\end{document}
+
+%##################### END OF EJERCICIO09MAESTROLINEAL.TEX #####################
+%###############################################################################
