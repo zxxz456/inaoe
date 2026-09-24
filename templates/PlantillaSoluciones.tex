@@ -1,0 +1,203 @@
+% =====================================================================
+%  PlantillaSoluciones.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Plantilla de una tanda de ejercicios resueltos, del estilo que se
+%  relee antes de un examen: desarrollo renglón por renglón, sin saltos
+%  entre pasos, con el resultado encuadrado al final de cada ejercicio.
+%  Para empezar una tanda se copia este archivo a ada/examen/, se
+%  cambian los datos de la materia y el encabezado, y se reemplaza el
+%  contenido de muestra.
+%
+%  El preámbulo vive en Preambulo.tex y se carga con \input, igual que
+%  en la libreta. Todo lo que sigue del \begin{document} es muestra.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - No lleva portadilla ni índice: se hojea de corrido, no se navega.
+%    Por eso usa \encabezadoSoluciones y no \portadilla
+%  - Los cuatro datos de la materia van ANTES del \input, porque
+%    hyperref los expande al cargarse. \materia sale en el encabezado
+%    de cada página, así que conviene el nombre del tema, no el del
+%    curso: es lo que sirve para ubicarse al hojear
+%  - La ruta del \input es relativa al documento. Este archivo vive
+%    junto a Preambulo.tex; una tanda en ada/examen/ escribe
+%    ../../templates/Preambulo.tex
+%  - \resaltar no admite matemáticas adentro: soul truena con $...$.
+%    Una fórmula que hay que destacar va en \respuesta
+%  - Las tablas de traza van con [H], no con [htbp]: una traza que
+%    LaTeX manda dos páginas adelante deja de leerse junto al paso
+%    que la produjo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       23/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DEL DOCUMENTO
+%  \materia sale a la izquierda del encabezado de cada página y
+%  \periodo a la derecha. En una tanda de ejercicios conviene que
+%  \materia sea el tema, que es lo que uno busca al hojear.
+% =====================================================================
+\newcommand{\materia}{Soluciones: tema de la tanda}
+\newcommand{\profesor}{Nombre del profesor}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{Preambulo.tex}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\encabezadoSoluciones
+  {Soluciones --- Tema de la tanda}
+  {Desarrollo paso a paso, apto para copiar en examen}
+
+% --- Los supuestos que valen para todo el documento van hasta arriba,
+%     una sola vez, en lugar de repetirlos en cada ejercicio ---
+\noindent\textbf{Convenciones.} Se supone que $n$ es potencia de $2$ y
+que $\log n = \log_2 n$. En los montículos se indexa desde $1$, con
+$\mathrm{padre}(i) = \lfloor i/2 \rfloor$, $\mathrm{izq}(i) = 2i$ y
+$\mathrm{der}(i) = 2i + 1$.
+
+% =====================================================================
+%  A PARTIR DE AQUÍ VAN LOS EJERCICIOS.
+%  Se copia el bloque que corresponda y se borra la muestra.
+% =====================================================================
+
+\parte{Recurrencias}
+
+% --- PATRÓN 1: demostración por inducción -----------------------------
+\problema{Método de sustitución e inducción}
+
+\noindent Resolver, con $T(1) = 1$:
+\[
+  T(n) = T(n/2) + 1.
+\]
+
+Una conjetura más fuerte que $\Tht{\log n}$, y por eso más fácil de
+sostener en la inducción, es
+\respuesta{T(n) = \log n + 1}
+
+\paso{Caso base:} con $n = 1$,
+\[
+  T(1) = 1 = \log 1 + 1.
+\]
+
+\paso{Hipótesis inductiva:} se supone que vale para $n/2$,
+\[
+  T(n/2) = \log(n/2) + 1.
+\]
+
+\paso{Paso inductivo:} se sustituye la hipótesis y se despeja. Cada
+renglón hace una sola cosa:
+\begin{align*}
+  T(n) &= T(n/2) + 1      \razon{definición} \\
+       &= \log(n/2) + 1 + 1 \razon{hipótesis inductiva} \\
+       &= \log n - \log 2 + 2 \razon{log del cociente} \\
+       &= \log n - 1 + 2    \razon{$\log 2 = 1$} \\
+       &= \log n + 1.
+\end{align*}
+
+Como el término dominante es $\log n$,
+\respuesta{T(n) \in \Tht{\log n}}
+
+% --- PATRÓN 2: expansión por iteración --------------------------------
+\problema{Método de iteración}
+
+\noindent Resolver, con $T(1) = 1$:
+\[
+  T(n) = T(n/2) + n.
+\]
+
+\paso{Expansiones:} se sustituye la recurrencia en sí misma y no se
+simplifica nada todavía, para que el patrón se vea:
+\begin{align*}
+  T(n) &= T(n/2) + n \\
+       &= T(n/4) + \frac{n}{2} + n \\
+       &= T(n/8) + \frac{n}{4} + \frac{n}{2} + n.
+\end{align*}
+
+\paso{Forma general:} después de $k$ expansiones,
+\[
+  T(n) = T\!\left(\frac{n}{2^k}\right)
+         + n \sum_{i=0}^{k-1} \left(\frac{1}{2}\right)^{i}.
+\]
+
+\paso{Dónde se detiene:} el caso base pega cuando $n/2^k = 1$, o sea
+cuando \resaltar{k vale log n}. Sustituyendo ese $k$:
+\begin{align*}
+  T(n) &= 1 + n \cdot
+          \frac{1 - (1/2)^{\log n}}{1 - 1/2} \razon{suma geométrica} \\
+       &= 1 + 2n\left(1 - \frac{1}{n}\right)
+          \razon{$(1/2)^{\log n} = 1/n$} \\
+       &= 1 + 2n - 2 \\
+       &= 2n - 1.
+\end{align*}
+
+\begin{resultado}
+  $T(n) = 2n - 1$, de donde $T(n) \in \Tht{n}$. La serie se reduce a
+  la mitad en cada término, así que el primer nivel domina y la suma
+  entera cuesta lo mismo que la raíz salvo constante.
+\end{resultado}
+
+\parte{Montículos}
+
+% --- PATRÓN 3: traza de un algoritmo ----------------------------------
+\problema{Aplicación de \textsc{Max-Heapify}}
+
+\noindent Sobre el arreglo $[16, 4, 10, 14, 7, 9, 3, 2, 8, 1]$ con
+$i = 2$.
+
+\paso{Precondición:} los subárboles con raíz en $4$ y en $5$ ya son
+max-heaps. En efecto, $[14, 2, 8]$ y $[7, 1]$ lo son.
+
+Cada llamada compara el nodo con sus dos hijos y baja al mayor. Una
+fila de la tabla por comparación, sin agrupar dos pasos en uno:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccl}
+    \toprule
+    $i$ & $A[i]$ & $A[\mathrm{izq}]$ & $A[\mathrm{der}]$
+        & \textbf{Arreglo después} \\
+    \midrule
+    2 & 4 & 14 & 7 & $[16, 14, 10, 4, 7, 9, 3, 2, 8, 1]$ \\
+    4 & 4 & 2  & 8 & $[16, 14, 10, 8, 7, 9, 3, 2, 4, 1]$ \\
+    9 & 4 & -- & -- & hoja, se detiene \\
+    \bottomrule
+  \end{tabular}
+  \caption{Traza de \textsc{Max-Heapify} desde $i = 2$.}
+  \label{tab:heapify}
+\end{table}
+
+\respuesta{[16, 14, 10, 8, 7, 9, 3, 2, 4, 1]}
+
+\begin{ojo}
+  El elemento baja hasta que ya es mayor que sus dos hijos o hasta que
+  llega a una hoja, no un número fijo de niveles. Por eso el peor caso
+  es la altura del montículo, $\Ord{\log n}$.
+\end{ojo}
+
+\end{document}
+
+%####################### END OF PLANTILLASOLUCIONES.TEX ########################
+%###############################################################################
