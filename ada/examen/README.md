@@ -32,9 +32,7 @@ zxxz6       24/09/2026      Creation
 
 # Respuestas :P
 
-Aqui viven los ejercicios resueltos de ADA, uno por archivo. El
-desarrollo va renglon por renglon porque la hoja se relee en frio
-antes del examen, no mientras se resuelve.
+jsajdjassjd
 
 <!--
 ############################### END OF README.MD ###############################
