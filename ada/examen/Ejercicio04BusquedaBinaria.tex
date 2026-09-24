@@ -1,0 +1,112 @@
+% =====================================================================
+%  Ejercicio04BusquedaBinaria.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 4 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Búsqueda binaria: sustitución e inducción}{4}{20}
+
+\noindent\textbf{Convenciones.}
+Se supone que $n$ es potencia de $2$ y que
+$\log n = \log_2 n$.
+
+\noindent Considere
+\[
+  T(n) = T(n/2) + 1, \qquad T(1) = 1 .
+\]
+Conjeture que $T(n)$ pertenece a $\Tht{\log n}$ y demuestrelo mediante
+sustitución e inducción.
+
+\medskip
+\noindent Cada llamada parte el tamaño a la mitad y cobra 1, y de $n$
+a 1 hay $\log n$ mitades; con el 1 del caso base la conjetura es
+\respuesta{T(n) = \log n + 1}
+
+\noindent Se prueba esa igualdad por inducción sobre $k$, con
+$n = 2^k$, y de ella salen las dos cotas.
+
+\paso{Caso base:} $k = 0$, es decir $n = 1$. La recurrencia da
+$T(1) = 1$ y la fórmula da $\log 1 + 1 = 0 + 1 = 1$.
+
+\paso{Hipótesis inductiva:} para un $k \ge 1$ fijo se supone que la
+fórmula vale en $n/2 = 2^{k-1}$, o sea $T(n/2) = \log(n/2) + 1$.
+
+\paso{Paso inductivo:} se sustituye la hipótesis en la recurrencia
+evaluada en $n = 2^k$:
+\begin{align*}
+  T(n) &= T(n/2) + 1
+         \razon{recurrencia} \\
+       &= \bigl( \log(n/2) + 1 \bigr) + 1
+         \razon{hipótesis inductiva} \\
+       &= (\log n - \log 2 + 1) + 1
+         \razon{logaritmo del cociente} \\
+       &= (\log n - 1 + 1) + 1
+         \razon{$\log 2 = 1$} \\
+       &= \log n + 1 .
+\end{align*}
+La fórmula vale entonces para todo $n = 2^k$ con $k \ge 0$.
+
+\paso{Cotas:} con la forma cerrada ya probada, para $n \ge 2$ se tiene
+$\log n \ge 1$, de donde
+\begin{align*}
+  T(n) &= \log n + 1
+         \razon{forma cerrada} \\
+       &\le \log n + \log n
+         \razon{$1 \le \log n$ para $n \ge 2$} \\
+       &= 2 \log n ,
+\end{align*}
+y por el otro lado
+\begin{align*}
+  T(n) &= \log n + 1
+         \razon{forma cerrada} \\
+       &\ge \log n
+         \razon{se descarta el sumando $1 > 0$} .
+\end{align*}
+Con $c_1 = 1$, $c_2 = 2$ y $n_0 = 2$ se cumple
+$c_1 \log n \le T(n) \le c_2 \log n$ para todo $n \ge n_0$. El umbral
+no baja a $n = 1$: ahí $\log n = 0$ y ninguna constante sostiene
+$T(1) = 1 \le c_2 \cdot 0$.
+
+\respuesta{T(n) = \log n + 1 \in \Tht{\log n}}
+
+\end{document}
+
+%#################### END OF EJERCICIO04BUSQUEDABINARIA.TEX ####################
+%###############################################################################
