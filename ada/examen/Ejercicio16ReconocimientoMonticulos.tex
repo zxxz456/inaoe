@@ -1,0 +1,101 @@
+% =====================================================================
+%  Ejercicio16ReconocimientoMonticulos.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 16 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Reconocimiento de montículos}{16}{20}
+
+\noindent\textbf{Convenciones.}
+Se indexa desde $1$, con $\mathrm{padre}(i) = \lfloor i/2
+\rfloor$, $\mathrm{izq}(i) = 2i$ y $\mathrm{der}(i) = 2i + 1$.
+
+\noindent Determinar si cada arreglo representa un max-heap, un
+min-heap o ninguno, verificando la propiedad entre cada nodo y sus
+hijos:
+\[
+  a)\ [20, 15, 18, 8, 10, 5, 17], \qquad
+  b)\ [2, 4, 3, 9, 7, 8, 6], \qquad
+  c)\ [15, 10, 20, 8, 9, 17, 25].
+\]
+
+Los tres arreglos tienen $n = 7$, así que los nodos internos son
+$i = 1, 2, 3$ y las posiciones $4$ a $7$ son hojas, sin hijos que
+comparar.
+
+\paso{a) $[20, 15, 18, 8, 10, 5, 17]$:}
+\begin{align*}
+  A[1] = 20 &> A[2] = 15, & A[1] = 20 &> A[3] = 18, \\
+  A[2] = 15 &> A[4] = 8,  & A[2] = 15 &> A[5] = 10, \\
+  A[3] = 18 &> A[6] = 5,  & A[3] = 18 &> A[7] = 17.
+\end{align*}
+Las seis comparaciones dan $A[i] \geq A[2i]$ y $A[i] \geq A[2i + 1]$,
+de modo que es max-heap; la primera, $20 > 15$, niega min-heap.
+
+\paso{b) $[2, 4, 3, 9, 7, 8, 6]$:}
+\begin{align*}
+  A[1] = 2 &< A[2] = 4, & A[1] = 2 &< A[3] = 3, \\
+  A[2] = 4 &< A[4] = 9, & A[2] = 4 &< A[5] = 7, \\
+  A[3] = 3 &< A[6] = 8, & A[3] = 3 &< A[7] = 6.
+\end{align*}
+Las seis comparaciones dan $A[i] \leq A[2i]$ y $A[i] \leq A[2i + 1]$,
+de modo que es min-heap; la primera, $2 < 4$, niega max-heap.
+
+\paso{c) $[15, 10, 20, 8, 9, 17, 25]$:}
+\begin{align*}
+  A[1] = 15 &> A[2] = 10, & A[1] = 15 &< A[3] = 20, \\
+  A[2] = 10 &> A[4] = 8,  & A[2] = 10 &> A[5] = 9,  \\
+  A[3] = 20 &> A[6] = 17, & A[3] = 20 &< A[7] = 25.
+\end{align*}
+El sentido de la desigualdad cambia dentro del mismo arreglo. La
+comparación $A[1] = 15 < A[3] = 20$ rompe max-heap, porque la raíz es
+menor que su hijo derecho, y $A[1] = 15 > A[2] = 10$ rompe min-heap,
+porque la raíz es mayor que su hijo izquierdo. No es ninguno de los
+dos.
+
+\respuesta{
+  \text{a) max-heap} \qquad \text{b) min-heap} \qquad
+  \text{c) ninguno}
+}
+
+\end{document}
+
+%############### END OF EJERCICIO16RECONOCIMIENTOMONTICULOS.TEX ################
+%###############################################################################
