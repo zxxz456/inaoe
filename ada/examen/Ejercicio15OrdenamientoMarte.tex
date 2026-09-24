@@ -1,0 +1,126 @@
+% =====================================================================
+%  Ejercicio15OrdenamientoMarte.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 15 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Ordenamiento para el vehículo explorador de Marte}{15}{20}
+
+\noindent\textbf{Convenciones.}
+Todos los logaritmos son en base $2$.
+
+\noindent Indica qué algoritmo de ordenamiento utilizarías y por qué.
+Puede haber más de una respuesta correcta: estás escribiendo código
+para que se ejecute en el próximo vehículo explorador de Marte y
+clasifique los datos recopilados cada noche. (Piensa en cómo realizar
+la clasificación con memoria y capacidad de cómputo limitadas).
+
+\paso{Restricciones del escenario:}
+\begin{itemize}[nosep,leftmargin=1.2em]
+  \item \textbf{Memoria limitada.} La RAM se reparte con el software
+    de vuelo: un auxiliar de $\Tht{n}$ compite contra los datos que
+    se van a ordenar.
+  \item \textbf{Cómputo limitado.} Procesador endurecido contra
+    radiación y ventana nocturna fija: el costo se dimensiona con la
+    cota, no con una medición en tierra.
+  \item \textbf{Sin supervisión.} Se presupuesta el peor caso, porque
+    no hay quién reinicie una corrida que se pasó de la ventana.
+  \item \textbf{Fallos por radiación.} El estado vivo se acota antes
+    del lanzamiento, y una pila cuya profundidad depende de los datos
+    no se deja acotar.
+\end{itemize}
+
+\paso{Candidatos:}
+
+\begin{table}[H]
+  \centering\small
+  \begin{tabular}{lcccl}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Mejor} & \textbf{Promedio} &
+      \textbf{Peor} & \textbf{Memoria extra} \\
+    \midrule
+    Mergesort & $\Tht{n\log n}$ & $\Tht{n\log n}$ & $\Tht{n\log n}$
+      & $\Tht{n}$ \\
+    Quicksort & $\Tht{n\log n}$ & $\Tht{n\log n}$ & $\Tht{n^2}$
+      & $\Ord{\log n}$ de pila \\
+    Heapsort & $\Tht{n\log n}$ & $\Tht{n\log n}$ & $\Tht{n\log n}$
+      & $\Tht{1}$ \\
+    Inserción & $\Tht{n}$ & $\Tht{n^2}$ & $\Tht{n^2}$ & $\Tht{1}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparaciones y memoria extra sobre claves distintas.}
+  \label{ej15:ej15-tab-candidatos}
+\end{table}
+
+\paso{Elección:}
+\begin{itemize}[nosep,leftmargin=1.2em]
+  \item Heapsort es el único que cumple las dos restricciones a la
+    vez: peor caso $\Tht{n\log n}$ y memoria extra $\Tht{1}$.
+    Mergesort da la cota y cobra $\Tht{n}$; quicksort da la memoria y
+    no la cota.
+  \item Su peor caso coincide con el promedio, así que la ventana se
+    dimensiona con un solo número. Quicksort con pivote fijo cae en
+    $\Tht{n^2}$ cuando el lote ya viene ordenado por la clave, que es
+    el caso si la clave es la marca de tiempo; aleatorizar el pivote
+    vuelve improbable ese caso, no lo elimina.
+  \item El \emph{sift-down} es iterativo y trabaja sobre el mismo
+    arreglo: ni pila que dependa de los datos, ni buffer en vuelo.
+\end{itemize}
+
+\paso{Cuándo cambia la respuesta:}
+\begin{itemize}[nosep,leftmargin=1.2em]
+  \item Lotes chicos o casi ordenados por la clave de salida:
+    inserción cuesta $\Tht{n + i}$ con $i$ inversiones, y gana
+    mientras $i \in \ord{n\log n}$, con la misma memoria $\Tht{1}$.
+  \item Hace falta estabilidad, o el lote no cabe en RAM y se ordena
+    por bloques contra la memoria flash: mergesort, que es estable y
+    accede secuencialmente.
+  \item Claves enteras de rango $k$ acotado y conocido: counting sort
+    ordena en $\Tht{n + k}$, y el arreglo de conteo $\Tht{k}$ se
+    dimensiona antes del lanzamiento porque no depende del lote.
+\end{itemize}
+
+\respuesta{\text{Heapsort}\;\bigl(\Tht{n\log n}\ \text{en el peor
+caso},\ \Tht{1}\ \text{de memoria extra}\bigr)}
+
+\end{document}
+
+%################### END OF EJERCICIO15ORDENAMIENTOMARTE.TEX ###################
+%###############################################################################
