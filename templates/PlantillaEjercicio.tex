@@ -1,0 +1,71 @@
+% =====================================================================
+%  PlantillaEjercicio.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Molde de la hoja de UN ejercicio resuelto. Se copia una vez por
+%  ejercicio a <materia>/examen/EjercicioNN<NombreCorto>.tex, se
+%  cambian el encabezado y las convenciones, y se pega el desarrollo.
+%
+%  No lleva título grande, ni subtítulo, ni pie de página: solo un
+%  renglón chico arriba con el nombre del ejercicio y su número. Cada
+%  centímetro que se va en adornos es un paso del desarrollo que no
+%  cabe en la hoja.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - \encabezadoEjercicio sustituye a \encabezadoSoluciones, que es
+%    para una tanda completa en un solo documento y sí pone portada.
+%    En una hoja de un ejercicio no se usa
+%  - Los cuatro datos de la materia van ANTES del \input porque
+%    hyperref los expande al cargarse, aunque \materia ya no salga
+%    impreso: el encabezado de una hoja suelta lo sustituye
+%  - Solo se declaran las convenciones que ese ejercicio usa. A uno de
+%    recurrencias no le importa cómo se indexan los montículos
+%  - La ruta del \input es relativa al documento: desde
+%    <materia>/examen/ son ../../templates/
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de <tema>}
+\newcommand{\profesor}{Nombre del profesor}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+% Título del ejercicio, su número y cuántos trae la hoja. Sale como un
+% solo renglón chico arriba, y no hay nada más de adorno.
+\encabezadoEjercicio{Título del ejercicio}{9}{20}
+
+\noindent\textbf{Convenciones.}
+Solo las que este ejercicio usa.
+
+% A partir de aquí, el desarrollo: enunciado, los \paso con su álgebra
+% renglón por renglón, y \respuesta. Sin cajas de color y sin
+% comprobación impresa; eso se verifica aparte.
+
+\end{document}
+
+%######################## END OF PLANTILLAEJERCICIO.TEX ########################
+%###############################################################################
