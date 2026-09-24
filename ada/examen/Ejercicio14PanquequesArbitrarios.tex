@@ -26,6 +26,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/09/2026      Recorte a lo esencial, sin tocar el algebra
 %  zxxz6       24/09/2026      Creation
 %
 %
@@ -44,8 +45,8 @@
 \encabezadoEjercicio{Panqueques de tamaño arbitrario con QuickSort}{14}{20}
 
 \noindent\textbf{Convenciones.}
-Invertir de la posicion $i$ a la $j$ toma tiempo $\Ord{1}$ y
-cuesta $j - i$ unidades de energia. Todos los logaritmos son en base $2$.
+Todos los logaritmos son en base $2$. La clave $\chi_{\le p}(x)$ vale
+$0$ si $x \le p$ y $1$ si no; $\chi_{<p}$ igual, con $<$.
 
 \noindent Los panqueques $P[1 \ldots n]$ se etiquetan de arriba hacia
 abajo y la operación $\textsc{Flip}(i, j)$, con $1 \le i \le j \le n$,
@@ -58,18 +59,13 @@ cantidad esperada de energía $\Ord{n \log^{2} n}$. Analice el tiempo
 de ejecución y el consumo de energía de su algoritmo, y demuestre su
 correctitud.
 
-\paso{Algoritmo:} QuickSort con pivote aleatorio, donde la partición
-la hace la caja negra del ejercicio 13, que ordena con flips una pila
-de $m$ panqueques de solo dos tamaños distintos en tiempo y energía
-$\Ord{m \log m}$; se usa sin justificarla. Fijado el pivote $p$, la
-pila de claves $\chi_{\le p}(x) = 0$ si $x \le p$ y $1$ en otro caso
-toma solo dos valores, así que se corre la caja negra sobre las claves
-y se aplican sus flips a la pila real, que queda con los tamaños
-$\le p$ arriba de los $> p$: eso es
-$\textsc{DosValores}(P, i, j, \chi_{\le p})$. La segunda partición,
-con la clave $\chi_{<p}$, separa arriba los tamaños $< p$ de los
-iguales a $p$; sin ella, una pila de panqueques todos del mismo tamaño
-no reduciría nunca el problema.
+\paso{Algoritmo:} QuickSort con pivote aleatorio. Cada partición la
+hace la caja negra del ejercicio 13, $\textsc{DosValores}(P, i, j,
+\chi)$, que con flips ordena $P[i \ldots j]$ según una clave de dos
+valores en tiempo y energía $\Ord{m \log m}$, $m = j - i + 1$. La
+segunda partición aparta los iguales al pivote: sin ella una pila de
+tamaños iguales nunca se reduce. Se llama con
+$\textsc{OrdenaPila}(P, 1, n)$.
 
 \begin{algorithm}[H]
   \caption{Ordena una pila de panqueques de tamaños arbitrarios}
@@ -96,36 +92,17 @@ no reduciría nunca el problema.
   \end{algorithmic}
 \end{algorithm}
 
-\noindent La llamada inicial es $\textsc{OrdenaPila}(P, 1, n)$.
+\paso{Costo de una llamada:} contar $s$ y $t$ es $\Ord{m}$ sin
+energía, y la energía de $\textsc{Flip}(k, l)$ solo depende de
+$l - k$, así que la caja negra sobre un subbloque cuesta lo mismo que
+sobre una pila suelta. Hay una $c$ con la que tiempo y energía propios
+son $\le c\,m \log m$ para $m \ge 2$; el $\Ord{1}$ de una llamada con
+$m \le 1$ se le cobra al llamador. Las dos cantidades cumplen la misma
+recurrencia: sea $C(m)$ la cota esperada de cualquiera de ellas.
 
-\paso{Costo de una llamada:} en un bloque de $m = j - i + 1$
-panqueques, contar $s$ y $t$ toma $\Ord{m}$ comparaciones y ninguna
-energía, y las dos llamadas a la caja negra cuestan $\Ord{m \log m}$
-de tiempo y $\Ord{m \log m}$ de energía: la energía de
-$\textsc{Flip}(k, l)$ es $l - k$, que no depende de dónde esté el
-bloque, así que la caja negra sobre un subbloque de $m$ panqueques
-cuesta lo mismo que sobre una pila suelta de $m$. Una llamada con
-$m \le 1$ solo prueba $j \le i$ y devuelve, y ese $\Ord{1}$ se le cobra
-a la llamada que la hizo, que dispara a lo más dos: eso cambia la
-constante y no la recurrencia. Hay entonces una constante $c$ con la
-que, para $m \ge 2$, el tiempo propio y la energía propia de una
-llamada son a lo más $c\,m \log m$, y cero para $m \le 1$: las dos
-cantidades cumplen la misma recurrencia y basta resolverla una vez.
-Sea $C(m)$ el mayor costo esperado, de tiempo o de energía, sobre
-los bloques de $m$ panqueques.
-
-\paso{Recurrencia esperada:} el pivote se toma uniforme entre las $m$
-posiciones del bloque, así que, fijada de antemano una biyección entre
-posiciones y rangos, su rango $R$ es uniforme en $\{1, \dots, m\}$. Si
-$x_1 \le \cdots \le x_m$ son los tamaños del bloque ordenados y el
-pivote resulta de rango $r$, los dos bloques recursivos miden
-\[
-  u_r = \abs{\set{k : x_k < x_r}} \le r - 1, \qquad
-  v_r = \abs{\set{k : x_k > x_r}} \le m - r,
-\]
-porque los panqueques de tamaño exactamente $x_r$, que son al menos
-uno, no entran en ninguna de las dos recursiones. Condicionando en el
-rango del pivote, cada uno con probabilidad $1/m$,
+\paso{Recurrencia:} el rango $r$ del pivote es uniforme en
+$\{1, \dots, m\}$ y los bloques recursivos miden $u_r \le r - 1$ y
+$v_r \le m - r$, porque los iguales al pivote no entran a la recursión:
 \begin{equation}\label{ej14:ej14-rec-esperada}
   C(m) \le c\,m \log m
        + \frac{1}{m} \sum_{r=1}^{m} \bigl(C(u_r) + C(v_r)\bigr),
@@ -155,25 +132,11 @@ y el convenio $0 \log 0 = 0$,
        \razon{$(m/2) \log m \ge 1 \ge 1/8$ para $m \ge 2$}
 \end{align*}
 
-\paso{Solución de la recurrencia:} sea $A = 4c \log n$. Se prueba por
-inducción fuerte que $C(m) \le A\,m \log m$ para todo bloque de
-$m \le n$ panqueques.
-
-\paso{Caso base:} con $m = 0$ y con $m = 1$ el bloque ya está ordenado
-y no hay recursión, y el $\Ord{1}$ de la llamada ya se le cobró al
-llamador, así que $C(m) = 0 = A\,m \log m$.
-
-\paso{Hipótesis inductiva:} $C(k) \le A\,k \log k$ para todo $k < m$.
-
-\paso{Paso inductivo:} sea $m \ge 2$. Como $u_r \le r - 1 < m$ y
-$v_r \le m - r < m$, la hipótesis aplica a los dos bloques recursivos,
-y como $k \log k$ no decrece sobre los enteros $k \ge 0$, porque vale
-$0$ en $k = 0$ y en $k = 1$ y de ahí en adelante sus dos factores
-crecen,
-\[
-  C(u_r) \le A\,(r - 1) \log(r - 1), \qquad
-  C(v_r) \le A\,(m - r) \log(m - r).
-\]
+\paso{Solución:} con $A = 4c \log n$ se prueba por inducción fuerte
+que $C(m) \le A\,m \log m$ para $m \le n$. Con $m \le 1$, $C(m) = 0$.
+Con $m \ge 2$, como $k \log k$ no decrece en los enteros $k \ge 0$, la
+hipótesis da $C(u_r) \le A\,(r-1) \log(r-1)$ y
+$C(v_r) \le A\,(m-r) \log(m-r)$, y
 \begin{align*}
   C(m) &\le c\,m \log m
           + \frac{1}{m} \sum_{r=1}^{m} \bigl(C(u_r) + C(v_r)\bigr)
@@ -185,8 +148,7 @@ crecen,
             \bigl((r-1) \log(r-1) + (m-r) \log(m-r)\bigr)
           \razon{las dos cotas de arriba} \\
        &= \frac{A}{4} m + \frac{2A}{m} \sum_{k=1}^{m-1} k \log k
-          \razon{las dos sumas recorren $k = 0, \dots, m-1$, y los
-                 términos con $k \le 1$ valen $0$} \\
+          \razon{ambas recorren $k = 0, \dots, m-1$ y $k \le 1$ aporta $0$} \\
        &\le \frac{A}{4} m + \frac{2A}{m}
             \left( \frac{m^{2}}{2} \log m - \frac{m^{2}}{8} \right)
           \razon{cota de la suma} \\
@@ -194,47 +156,17 @@ crecen,
           \razon{se distribuye $2A/m$} \\
        &= A\,m \log m
 \end{align*}
-Con $m = n$ queda $C(n) \le A\,n \log n = 4c\,n \log^{2} n$, cota que
-vale igual para el tiempo esperado y para la energía esperada.
 
-\paso{Correctitud:} por inducción fuerte sobre $m = j - i + 1$ se
-prueba que $\textsc{OrdenaPila}(P, i, j)$ deja $P[i \ldots j]$ en
-orden no decreciente hacia abajo, conserva el multiconjunto de tamaños
-y no toca ninguna posición fuera de $[i, j]$: todos sus flips quedan
-dentro de $[i, j]$ y un flip permuta el bloque. La precondición es
-solo que los tamaños sean positivos y que $1 \le i$, $j \le n$ y
-$j \ge i - 1$.
-
-\paso{Caso base:} con $m \le 1$ el bloque ya está ordenado y el
-algoritmo devuelve sin ejecutar nada.
-
-\paso{Hipótesis inductiva:} la afirmación vale para todo bloque de
-tamaño menor que $m$, con $m \ge 2$.
-
-\paso{Paso inductivo:} $s$ y $t$ se cuentan antes de las particiones y
-los flips solo permutan el bloque, así que siguen valiendo después.
-Cada flip mueve cada panqueque junto con su clave, así que la clave de
-la posición $k$ es en todo momento la del panqueque que la ocupa y
-ordenar las claves con la caja negra acomoda los tamaños por su clave.
-La clave $\chi_{\le p}$ tiene $t$ ceros, así que la primera llamada a la
-caja negra deja en $P[i \ldots i+t-1]$ exactamente los tamaños $\le p$
-y en $P[i+t \ldots j]$ los $> p$; la segunda, sobre
-$P[i \ldots i+t-1]$ con la clave $\chi_{<p}$, que tiene $s$ ceros,
-deja en $P[i \ldots i+s-1]$ los tamaños $< p$ y en
-$P[i+s \ldots i+t-1]$ los iguales a $p$. Esos $t - s \ge 1$ panqueques,
-al menos el pivote, ya están en su lugar definitivo: arriba todo es
-$< p$, abajo todo es $> p$, y entre ellos el orden da igual porque
-miden lo mismo. La única violación que puede quedar está dentro de los
-dos bloques de los extremos, que miden $s$ y $m - t$ con
-$s + (m - t) = m - (t - s) \le m - 1$; cada uno mide menos que $m$, así
-que por la hipótesis inductiva $P[i \ldots i+s-1]$ queda ordenado con
-tamaños $< p$ y $P[i+t \ldots j]$ ordenado con tamaños $> p$. Pegando
-los tres tramos, $P[i \ldots j]$ queda ordenado, y la recursión
-termina porque cada llamada recibe un bloque estrictamente más chico.
-
-Con $i = 1$ y $j = n$ la pila entera queda en orden no decreciente de
-arriba hacia abajo, es decir con el panqueque más grande hasta abajo,
-y el único movimiento que se usó fue $\textsc{Flip}$.
+\paso{Correctitud:} por inducción fuerte sobre $m$,
+$\textsc{OrdenaPila}(P, i, j)$ ordena $P[i \ldots j]$ sin tocar nada
+fuera del bloque. Con $m \le 1$ no hay nada que hacer. Con $m \ge 2$,
+cada flip mueve al panqueque junto con su clave, así que la primera
+caja negra deja en $P[i \ldots i+t-1]$ los tamaños $\le p$ y abajo los
+$> p$, y la segunda deja en $P[i \ldots i+s-1]$ los $< p$ y en
+$P[i+s \ldots i+t-1]$ los iguales a $p$, ya en su lugar. Los extremos
+miden $s$ y $m - t$, ambos $< m$ porque $t - s \ge 1$; por hipótesis
+quedan ordenados, y pegando los tres tramos queda ordenado
+$P[i \ldots j]$.
 
 \respuesta{C(n) \le 4c\,n \log^{2} n \in \Ord{n \log^{2} n}
   \quad \text{en tiempo y en energía}}
