@@ -36,12 +36,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.5.0
+%   * Version: 1.7.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/09/2026      Encabezado de una hoja de un ejercicio
+%  zxxz6       23/09/2026      Macros de los documentos de soluciones
 %  zxxz6       30/08/2026      Macros de lim, limsup y liminf sobre n
 %  zxxz6       25/08/2026      Macros de Omega, Theta, o y omega chicas
 %  zxxz6       20/08/2026      Cargue pgfplots para graficas de datos
@@ -91,6 +93,10 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{array}
+% float da el especificador [H], que clava una tabla donde se
+% escribio. Una traza que LaTeX manda dos paginas adelante deja
+% de leerse junto al paso que la produjo
+\usepackage{float}
 \usepackage{xcolor}
 % tikz ya viene arrastrado por tcolorbox[most], pero se carga
 % explicito para no depender de ese detalle; la libreria babel
@@ -104,6 +110,8 @@
 \usepackage[ruled,section]{algorithm}
 \usepackage{algpseudocode}
 \usepackage[most]{tcolorbox}
+% soul da \hl, el unico resaltado que parte renglon; \colorbox no
+\usepackage{soul}
 \usepackage{hyperref}
 
 % =====================================================================
@@ -136,6 +144,8 @@
 \definecolor{comentario}{HTML}{5A7D5A}
 \definecolor{cadena}{HTML}{A03030}
 \definecolor{fondoCodigo}{HTML}{F7F7F7}
+\definecolor{fondoResultado}{HTML}{EAF5EC}
+\definecolor{marcador}{HTML}{FFF3A3}
 
 % --- entornos de teorema; numeran por sección, o sea por clase ---
 \theoremstyle{definition}
@@ -173,6 +183,14 @@
   colback=fondoPend, colframe=pink!60!black, boxrule=0.6pt,
   arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
   title={Idea Random}, fonttitle=\bfseries\small, #1
+}
+
+% --- el resultado al que llego un ejercicio, para que se vea de
+%     lejos al hojear la hoja antes del examen ---
+\newtcolorbox{resultado}[1][]{
+  colback=fondoResultado, colframe=green!45!black, boxrule=0.6pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt,
+  title={Resultado}, fonttitle=\bfseries\small, #1
 }
 
 % --- código ---
@@ -271,6 +289,95 @@
   \vspace{1em}
   \rule{\linewidth}{0.5pt}%
 }
+
+% =====================================================================
+%  DOCUMENTOS DE SOLUCIONES
+%  Lo que usa una tanda de ejercicios resueltos. Una libreta no toca
+%  nada de aqui, pero vive en el preambulo compartido para no tener
+%  dos archivos que arreglar cuando cambie el estilo.
+% =====================================================================
+
+% --- encabezado compacto: titulo, subtitulo y regla. Sustituye a
+%     \portadilla cuando el documento es una tanda de ejercicios: sin
+%     indice, porque se hojea de corrido, no se navega ---
+\newcommand{\encabezadoSoluciones}[2]{%
+  % El paquete algorithm se carga con la opcion [section] para que en
+  % una libreta el pseudocodigo se numere por clase. Aqui no hay
+  % secciones, asi que esa numeracion sale como "Algoritmo 0.1". Se
+  % corrige al vuelo, y solo en los documentos que llaman a este
+  % encabezado: la libreta no se entera.
+  \renewcommand{\thealgorithm}{\arabic{algorithm}}%
+  \begin{center}
+    {\LARGE\bfseries #1\par}
+    \vspace{0.3em}
+    {\small\itshape #2\par}
+    \vspace{0.5em}
+    \rule{\linewidth}{0.5pt}
+  \end{center}
+  \vspace{0.3em}%
+}
+
+% --- hoja de un solo ejercicio: un renglon chico arriba con el
+%     titulo y su numero, y ya. Sin titulo grande y sin pie de pagina,
+%     porque en una hoja de dos paginas cada centimetro que se va en
+%     adornos es un paso del desarrollo que no cabe ---
+\newcommand{\encabezadoEjercicio}[3]{%
+  % Misma correccion que en \encabezadoSoluciones: sin secciones, el
+  % pseudocodigo saldria numerado "0.1"
+  \renewcommand{\thealgorithm}{\arabic{algorithm}}%
+  \fancyhf{}%
+  \fancyhead[L]{\small\textsc{#1} (ejercicio #2 de #3)}%
+  \renewcommand{\headrulewidth}{0.4pt}%
+  \pagestyle{fancy}%
+  \thispagestyle{fancy}%
+}
+
+% --- bloque tematico, numerado con romanos: I, II, III. Agrupa los
+%     ejercicios que comparten tema. No dibuja regla: la del
+%     \problema que sigue ya separa el titulo del primer ejercicio,
+%     y dos rayas seguidas dejan un hueco feo ---
+\newcounter{parte}
+\renewcommand{\theparte}{\Roman{parte}}
+\newcommand{\parte}[1]{%
+  \bigskip
+  \refstepcounter{parte}%
+  \noindent{\large\bfseries \theparte. #1\par}%
+}
+
+% --- un ejercicio resuelto. Se numera solo y corrido a lo largo del
+%     documento, sin reiniciar en cada parte, para poder decir "el 14"
+%     sin aclarar de que bloque ---
+\newcounter{problema}
+\newcommand{\problema}[1]{%
+  \bigskip
+  \noindent\rule{\linewidth}{0.4pt}\par
+  \vspace{0.3em}
+  \refstepcounter{problema}%
+  \noindent{\bfseries Ejercicio \theproblema\ --- #1\par}
+  \vspace{0.3em}%
+}
+
+% --- rotulo del paso que sigue: Caso base, Hipotesis inductiva, Paso
+%     inductivo. El texto sigue en el mismo renglon ---
+\newcommand{\paso}[1]{\par\vspace{0.3em}\noindent\textbf{#1}\ }
+
+% --- la respuesta de un ejercicio, centrada y en un cuadro. El
+%     argumento va en modo matematico, sin los delimitadores ---
+\newcommand{\respuesta}[1]{%
+  \[
+    \boxed{\;#1\;}
+  \]
+}
+
+% --- resaltado inline, como pasarle el plumon a media frase. No
+%     admite matematicas adentro: soul rompe con $...$, asi que una
+%     formula que hay que destacar va en \respuesta ---
+\sethlcolor{marcador}
+\newcommand{\resaltar}[1]{\hl{#1}}
+
+% --- justificacion al final de un renglon de \align, en chiquito y
+%     entre parentesis, para decir de donde salio el paso ---
+\newcommand{\razon}[1]{\quad\text{\small\itshape (#1)}}
 
 %############################ END OF PREAMBULO.TEX #############################
 %###############################################################################
