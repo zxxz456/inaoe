@@ -42,6 +42,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/09/2026      El nombre del alumno en el encabezado
 %  zxxz6       24/09/2026      Encabezado de una hoja de un ejercicio
 %  zxxz6       23/09/2026      Macros de los documentos de soluciones
 %  zxxz6       30/08/2026      Macros de lim, limsup y liminf sobre n
@@ -327,6 +328,9 @@
   \renewcommand{\thealgorithm}{\arabic{algorithm}}%
   \fancyhf{}%
   \fancyhead[L]{\small\textsc{#1} (ejercicio #2 de #3)}%
+  % El nombre va a la derecha porque las hojas de respuestas se
+  % entregan y el profesor pide que cada una lo lleve
+  \fancyhead[R]{\small\alumno}%
   \renewcommand{\headrulewidth}{0.4pt}%
   \pagestyle{fancy}%
   \thispagestyle{fancy}%
