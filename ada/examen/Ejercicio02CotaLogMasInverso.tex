@@ -1,0 +1,105 @@
+% =====================================================================
+%  Ejercicio02CotaLogMasInverso.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 2 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Cota de $\log n$ contra $\log n + 1/n$}{2}{20}
+
+\noindent\textbf{Convenciones.}
+$f(n) \in \Ord{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \le c\,g(n)$ para todo $n \ge n_0$, y
+$f(n) \in \Omg{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \ge c\,g(n)$ para todo $n \ge n_0$. Todos los logaritmos son en base $2$.
+
+\noindent Para $f(n) = \log n$ y $g(n) = \log n + 1/n$, indicar cuál de
+las cotas se cumple: (i) $\Ord{g(n)}$, (ii) $\Omg{g(n)}$, (iii) ambas,
+es decir $\Tht{g(n)}$. Se piden las constantes $c$ y $n_0$ de cada cota
+que se afirme.
+
+\paso{Dominio:} en $n = 1$ se tiene $f(1) = \log 1 = 0$ y
+$g(1) = 0 + 1 = 1$, así que ninguna constante $c > 0$ cumple
+$f(1) \ge c\,g(1)$. La cota inferior tiene que arrancar en $n_0 \ge 2$;
+la superior no tiene ese estorbo y vale desde $n = 1$.
+
+\paso{Cota superior:} se resta $f$ de $g$ con $c = 1$.
+\begin{align*}
+  g(n) - f(n)
+    &= \left(\log n + \frac{1}{n}\right) - \log n
+       \razon{definición de $f$ y $g$} \\
+    &= \frac{1}{n} \razon{se cancelan los $\log n$} \\
+    &> 0 \razon{$n \ge 1$}
+\end{align*}
+La diferencia es positiva en todo el dominio, luego
+$f(n) \le 1 \cdot g(n)$ para todo $n \ge 1$.
+\respuesta{f(n) \in \Ord{g(n)} \quad\text{con } c = 1,\ n_0 = 1}
+
+\paso{Cota inferior:} se propone $c = 1/2$ y se mide la holgura.
+\begin{align*}
+  f(n) - \frac{1}{2}\,g(n)
+    &= \log n - \frac{1}{2}\left(\log n + \frac{1}{n}\right)
+       \razon{$c = 1/2$} \\
+    &= \frac{1}{2}\log n - \frac{1}{2n}
+       \razon{se distribuye y se agrupan los $\log n$} \\
+    &= \frac{1}{2n}\left(n \log n - 1\right)
+       \razon{factor común $1/(2n)$}
+\end{align*}
+
+El signo queda en el paréntesis, porque $1/(2n) > 0$. Como $n$ y
+$\log n$ son positivos y no decrecientes para $n \ge 2$, su producto
+tampoco decrece:
+\begin{align*}
+  n \log n &\ge 2 \log 2 \razon{$n \log n$ no decrece, evaluado en $2$} \\
+           &= 2 \razon{$\log 2 = 1$} \\
+  n \log n - 1 &\ge 1 > 0.
+\end{align*}
+Entonces $f(n) - \tfrac{1}{2} g(n) > 0$ para todo $n \ge 2$, o sea
+$f(n) \ge \tfrac{1}{2}\,g(n)$ desde ahí.
+\respuesta{f(n) \in \Omg{g(n)} \quad\text{con } c = 1/2,\ n_0 = 2}
+
+\paso{Conclusión:} las dos cotas se cumplen a la vez tomando el mayor
+de los dos umbrales, $n_0 = 2$, de modo que
+$\tfrac{1}{2}\,g(n) \le f(n) \le g(n)$ para todo $n \ge 2$.
+\respuesta{\text{(iii)}\quad f(n) \in \Tht{g(n)}}
+
+\end{document}
+
+%################### END OF EJERCICIO02COTALOGMASINVERSO.TEX ###################
+%###############################################################################
