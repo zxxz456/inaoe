@@ -26,6 +26,7 @@
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       24/09/2026      Condense la correctitud a dos paginas
 %  zxxz6       24/09/2026      Creation
 %
 %
@@ -44,8 +45,7 @@
 \encabezadoEjercicio{Panqueques de tamaño 1 o 2 con MergeSort}{13}{20}
 
 \noindent\textbf{Convenciones.}
-Invertir de la posicion $i$ a la $j$ toma tiempo $\Ord{1}$ y
-cuesta $j - i$ unidades de energia. Todos los logaritmos son en base $2$.
+Todos los logaritmos son en base $2$ y $n$ es potencia de $2$.
 
 \noindent Los panqueques $P[1 \ldots n]$ se etiquetan de arriba hacia
 abajo y la operación $\textsc{Flip}(i, j)$, con $1 \le i \le j \le n$,
@@ -58,11 +58,10 @@ panqueques utilizando $\Ord{n \log n}$ unidades de energía. Analice el
 tiempo de ejecución y el consumo de energía de su algoritmo, y
 demuestre su correctitud.
 
-\paso{Algoritmo:} con solo dos tamaños, un segmento ordenado es un
-bloque de unos seguido de un bloque de doses, así que dos mitades ya
-ordenadas forman $1^{a} 2^{b} 1^{c} 2^{d}$ y un único flip sobre
-$2^{b} 1^{c}$ las mezcla. Cada llamada devuelve cuántos unos tiene su
-segmento, y con eso la mezcla ubica el flip sin recorrer nada.
+\paso{Algoritmo:} MergeSort donde dos mitades ordenadas
+$1^{a} 2^{b} 1^{c} 2^{d}$ se mezclan con un solo flip sobre
+$2^{b} 1^{c}$. Cada llamada devuelve cuántos unos tiene su segmento,
+así que el flip se ubica sin recorrer nada.
 
 \begin{algorithm}[H]
   \caption{Ordena una pila de panqueques de tamaño $1$ o $2$}
@@ -97,15 +96,13 @@ segmento, y con eso la mezcla ubica el flip sin recorrer nada.
 
 \noindent La llamada inicial es $\textsc{Ordena}(P, 1, n)$.
 
-\paso{Tiempo de ejecución:} fuera de las dos llamadas recursivas, cada
-invocación calcula $q$, calcula $b$, compara y hace a lo más un flip,
-que cuesta $\Ord{1}$ por hipótesis; no recorre la mezcla porque $a$ y
-$c$ llegan de las llamadas. Entonces
+\paso{Tiempo de ejecución:} fuera de las llamadas recursivas cada
+invocación hace trabajo constante y a lo más un flip de costo
+$\Ord{1}$:
 \[
   T(n) = 2\,T(n/2) + \Tht{1}, \qquad T(1) = \Tht{1},
 \]
-que en el método maestro tiene dos subproblemas, factor de reducción
-$2$ y trabajo propio $f(n) \in \Tht{1}$.
+con dos subproblemas de tamaño $n/2$ y $f(n) \in \Tht{1}$.
 \begin{align*}
   n^{\log_2 2} &= n \razon{$\log_2 2 = 1$} \\
   f(n) \in \Tht{1} &\subseteq \Ord{n^{0}}
@@ -116,9 +113,8 @@ $2$ y trabajo propio $f(n) \in \Tht{1}$.
 Aplica el caso 1, que concluye
 $T(n) \in \Tht{n^{\log_2 2}} = \Tht{n}$.
 
-\paso{Energía:} cada llamada hace a lo más un flip, de $i = p + a$ a
-$j = q + c$. Sobre un segmento de tamaño $m = r - p + 1$ ese flip
-cuesta
+\paso{Energía:} sobre un segmento de tamaño $m = r - p + 1$ el flip
+de $i = p + a$ a $j = q + c$ cuesta
 \begin{align*}
   j - i &= (q + c) - (p + a) \razon{posiciones del flip} \\
         &= \left[(q - p + 1) - a\right] + c - 1
@@ -128,12 +124,11 @@ cuesta
            \razon{$b$ y $c$ cuentan panqueques distintos de
                   $P[p \ldots r]$}
 \end{align*}
-Sumando el flip de cada llamada, la energía total cumple
+Sumando sobre las llamadas,
 \[
   E(n) \le 2\,E(n/2) + n - 1, \qquad E(1) = 0,
 \]
-porque una pila de un panqueque no dispara ningún flip. Se prueba por
-inducción que $E(n) \le n \log n$.
+y se prueba por inducción que $E(n) \le n \log n$.
 
 \paso{Caso base:} con $n = 1$,
 \[
@@ -155,37 +150,23 @@ inducción que $E(n) \le n \log n$.
        &\le n \log n
 \end{align*}
 
-\paso{Correctitud:} por inducción sobre $m = r - p + 1$ se prueba que
-$\textsc{Ordena}(P, p, r)$ deja $P[p \ldots r]$ en orden no
-decreciente, conserva el multiconjunto de tamaños, no modifica
-ninguna posición fuera de $[p, r]$ y devuelve el número de unos del
-segmento. La precondición es solo $P[k] \in \{1, 2\}$ y
-$1 \le p \le r \le n$.
+\paso{Correctitud:} por inducción sobre $m = r - p + 1$:
+$\textsc{Ordena}(P, p, r)$ deja $P[p \ldots r]$ no decreciente, solo
+permuta panqueques dentro de $[p, r]$ y devuelve su número de unos.
 
-\paso{Caso base:} con $m = 1$ el segmento tiene un panqueque, así que
-ya está ordenado y no se ejecuta ningún flip; el algoritmo devuelve
-$1$ si $P[p] = 1$ y $0$ si $P[p] = 2$, que es su número de unos.
+\paso{Caso base:} con $m = 1$ el segmento ya está ordenado, no hay
+flip y se devuelve $1$ si $P[p] = 1$ y $0$ si $P[p] = 2$.
 
-\paso{Hipótesis inductiva:} la afirmación vale para todo segmento de
-tamaño menor que $m$, con $m \ge 2$.
+\paso{Hipótesis inductiva:} vale para todo segmento de tamaño menor
+que $m$, con $m \ge 2$.
 
-\paso{Paso inductivo:} de $m \ge 2$ sale $p \le q < r$, así que
-$P[p \ldots q]$ y $P[q + 1 \ldots r]$ son no vacíos y de tamaño menor
-que $m$. Por la hipótesis inductiva, al volver de las dos llamadas
-\[
-  P[p \ldots q] = 1^{a} 2^{b}, \qquad
-  P[q + 1 \ldots r] = 1^{c} 2^{d},
-\]
-con $a$ y $c$ los valores devueltos, $b = (q - p + 1) - a$ y
-$d = (r - q) - c$. El segmento completo es $1^{a} 2^{b} 1^{c} 2^{d}$,
-que es no decreciente dentro de cada mitad; la única violación que
-puede quedar es la frontera entre ellas, el descenso del bloque
-$2^{b}$ al bloque $1^{c}$, y existe si y solo si $b > 0$ y $c > 0$,
-que es la condición del \textbf{si}. Como $a + b = q - p + 1$, el
-bloque $2^{b}$ ocupa las posiciones $p + a$ a $q$ y el bloque $1^{c}$
-ocupa $q + 1$ a $q + c$, de modo que $\textsc{Flip}(p + a, q + c)$
-invierte exactamente $2^{b} 1^{c}$, y escribiendo $w^{R}$ para la
-cadena $w$ invertida:
+\paso{Paso inductivo:} como $p \le q < r$, ambas mitades son no vacías
+y menores que $m$; por la hipótesis inductiva quedan
+$P[p \ldots q] = 1^{a} 2^{b}$ y $P[q + 1 \ldots r] = 1^{c} 2^{d}$.
+El único descenso de $1^{a} 2^{b} 1^{c} 2^{d}$ está entre $2^{b}$ y
+$1^{c}$, y existe si y solo si $b > 0$ y $c > 0$. Esos bloques ocupan
+las posiciones $p + a$ a $q + c$, así que el flip invierte
+exactamente $2^{b} 1^{c}$:
 \begin{align*}
   \left(2^{b} 1^{c}\right)^{R}
     &= \left(1^{c}\right)^{R} \left(2^{b}\right)^{R}
@@ -193,17 +174,9 @@ cadena $w$ invertida:
     &= 1^{c} 2^{b}
        \razon{un bloque constante invertido es él mismo}
 \end{align*}
-El segmento queda $1^{a} 1^{c} 2^{b} 2^{d} = 1^{a+c} 2^{b+d}$, no
-decreciente, y el valor devuelto $a + c$ es su número de unos. Si
-$b = 0$ o $c = 0$ no hay flip y el segmento ya vale
-$1^{a+c} 2^{b+d}$. El flip actúa dentro de
-$[p + a, q + c] \subseteq [p, r]$, así que no toca el prefijo $1^{a}$,
-el sufijo $2^{d}$ ni nada fuera de $[p, r]$, y por ser una inversión
-permuta los tamaños sin cambiar el multiconjunto.
-
-Con $m = n$, la llamada $\textsc{Ordena}(P, 1, n)$ deja los $n$
-panqueques en orden no decreciente de arriba hacia abajo, es decir con
-el más grande hasta abajo: la pirámide que pide Barr.
+El segmento queda $1^{a+c} 2^{b+d}$, igual que sin flip cuando $b = 0$
+o $c = 0$, y $a + c$ es su número de unos. El flip cae dentro de
+$[p, r]$, así que no toca nada fuera del segmento.
 
 \respuesta{T(n) \in \Tht{n} \subseteq \Ord{n \log n},
   \qquad E(n) \le n \log n \in \Ord{n \log n}}
