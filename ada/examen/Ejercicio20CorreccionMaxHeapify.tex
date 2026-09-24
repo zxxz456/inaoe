@@ -1,0 +1,189 @@
+% =====================================================================
+%  Ejercicio20CorreccionMaxHeapify.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 20 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio
+  {Corrección de MAX-HEAPIFY por inducción sobre la altura}{20}{20}
+
+\noindent\textbf{Convenciones.}
+Se indexa desde $1$, con $\mathrm{padre}(i) = \lfloor i/2
+\rfloor$, $\mathrm{izq}(i) = 2i$ y $\mathrm{der}(i) = 2i + 1$.
+
+\noindent Demuestre que \textsc{Max-Heapify}$(A, i)$ restaura
+correctamente la propiedad de max-heap en el subárbol con raíz $i$,
+bajo la precondición de que los subárboles izquierdo y derecho de $i$
+ya son max-heaps. Organice la demostración como una inducción sobre la
+altura $h$ del subárbol: caso base $h = 0$; hipótesis inductiva, el
+algoritmo funciona para subárboles de altura menor que $h$; paso
+inductivo, analice qué sucede si la raíz ya es el mayor elemento y qué
+sucede si debe intercambiarse con uno de sus hijos.
+
+\paso{Notación y precondición:} sea $n$ el número de nodos,
+$\ell = \mathrm{izq}(i)$ y $r = \mathrm{der}(i)$. El subárbol con raíz
+$i$ es max-heap cuando $A[j] \ge A[c]$ para todo nodo $j$ de ese
+subárbol y todo hijo $c$ de $j$ que exista. La precondición es que los
+subárboles con raíz $\ell$ y $r$ ya lo cumplen, así que las únicas
+parejas en duda son $(i, \ell)$ y $(i, r)$. El algoritmo toma el
+índice $m$ del mayor entre $A[i]$, $A[\ell]$ y $A[r]$, contando solo
+los hijos que existen; si $m = i$ se detiene, y si $m \ne i$
+intercambia $A[i]$ con $A[m]$ y se llama sobre $m$.
+
+Se prueba por inducción sobre $h$ la afirmación con sus dos cláusulas:
+al terminar la llamada, (i) el subárbol con raíz $i$ es max-heap y
+(ii) ninguna posición fuera de ese subárbol cambió. La cláusula (ii)
+va dentro de la inducción porque el paso inductivo la necesita para
+que la llamada recursiva no deshaga lo ya arreglado.
+
+\paso{Caso base:} $h = 0$ significa $\ell = 2i > n$, o sea que $i$ no
+tiene hijos; con $n = 10$ e $i = 7$, $\ell = 14 > 10$. El subárbol es
+el solo nodo $i$ y no contiene ninguna pareja padre-hijo, de modo que
+la condición $A[j] \ge A[c]$ se cumple por vacuidad. El algoritmo no
+halla hijos con que comparar, deja $m = i$, no intercambia y termina,
+así que (ii) también vale.
+
+\paso{Hipótesis inductiva:} se supone la afirmación para todo nodo
+cuyo subárbol tenga altura menor que $h$: si sus dos subárboles hijos
+son max-heaps, la llamada lo deja como max-heap y no escribe en
+ninguna posición fuera de ese subárbol.
+
+\paso{Paso inductivo, caso 1, la raíz ya es el mayor:} aquí $m = i$, y
+por como se eligió $m$,
+\begin{align*}
+  A[i] &\ge A[\ell]
+         \razon{$A[i]$ ganó la comparación con el hijo izquierdo} \\
+  A[i] &\ge A[r]
+         \razon{y la del derecho, si $r$ existe}
+\end{align*}
+El algoritmo no escribe nada, luego (ii) vale y $A$ sigue siendo el de
+la precondición. Las parejas padre-hijo del subárbol con raíz $i$ son
+las dos de arriba y las que quedan dentro de los subárboles de $\ell$
+y de $r$, que valen por la precondición. No queda ninguna otra pareja,
+así que el subárbol con raíz $i$ es max-heap.
+
+\paso{Paso inductivo, caso 2, hay que intercambiar:} aquí $m \ne i$.
+Tómese $m = \ell$; con $m = r$ el argumento corre renglón por renglón
+igual, porque abajo solo se usa que $m$ es hijo de $i$ y que su
+subárbol era max-heap, nunca de qué lado cuelga. Sea $A'$ el arreglo
+justo después del intercambio, o sea $A'[i] = A[m]$, $A'[m] = A[i]$ y
+$A'[j] = A[j]$ en toda otra posición.
+
+La nueva raíz domina al hijo que recibió el valor viejo:
+\begin{align*}
+  A'[i] &= A[m]
+          \razon{el intercambio sube $A[m]$ a la raíz} \\
+        &= \max\set{A[i],\ A[\ell],\ A[r]}
+          \razon{$m$ es el índice del mayor de los tres} \\
+        &\ge A[i]
+          \razon{el máximo no es menor que ninguno} \\
+        &= A'[m]
+          \razon{el viejo $A[i]$ bajó a la posición $m$} \\
+        &= A'[\ell]
+          \razon{en este caso $m = \ell$}
+\end{align*}
+y también al otro hijo, que no se movió:
+\begin{align*}
+  A'[i] &= \max\set{A[i],\ A[\ell],\ A[r]}
+          \razon{renglón anterior} \\
+        &\ge A[r]
+          \razon{el máximo no es menor que ninguno} \\
+        &= A'[r]
+          \razon{el intercambio solo escribió en $i$ y en $m$}
+\end{align*}
+Más aún, $A'[i]$ domina todo el subárbol de $m$ y no solo su raíz:
+\begin{align*}
+  A'[i] &= A[m]
+          \razon{primer renglón de arriba} \\
+        &\ge A[j] \quad \text{para todo $j$ del subárbol de $m$}
+          \razon{encadenando $A[\text{padre}] \ge A[\text{hijo}]$ de
+                 $m$ a $j$}
+\end{align*}
+y ese subárbol conserva en $A'$ los mismos valores salvo $A[m]$, que
+fue sustituido por $A[i] \le A'[i]$. Todo valor que el subárbol de $m$
+guarda en $A'$ es entonces a lo más $A'[i]$.
+
+\paso{Dónde puede quedar la violación:} el intercambio escribió solo
+en $i$ y en $m$, así que una pareja padre-hijo del subárbol de $i$
+conserva sus dos valores salvo que toque una de esas dos posiciones.
+Separando los cuatro grupos:
+\begin{itemize}
+  \item $(i, \ell)$ y $(i, r)$: recién probadas en $A'$.
+  \item las parejas internas del subárbol de $r$: ninguno de sus nodos
+        es $i$ ni $m$, conservan sus valores y valían por la
+        precondición.
+  \item las parejas internas del subárbol de $m$ que no tienen a $m$
+        de padre: tampoco se tocaron, y valían porque el subárbol de
+        $m$ era max-heap.
+  \item $(m, \mathrm{izq}(m))$ y $(m, \mathrm{der}(m))$: las únicas
+        que pueden fallar, porque $A'[m] = A[i]$ es un valor nuevo en
+        esa posición mientras sus hijos siguen con el suyo.
+\end{itemize}
+Toda violación cae dentro del subárbol con raíz $m$, que es justo
+donde el algoritmo vuelve a llamarse.
+
+\paso{La llamada sobre $m$ cumple la precondición y baja de altura:}
+los subárboles con raíz $\mathrm{izq}(m)$ y $\mathrm{der}(m)$ no
+contienen a $i$, que es el padre de $m$, ni a $m$, que es su padre, de
+modo que el intercambio no los tocó; y eran max-heaps por ser
+subárboles del de $m$, que lo era. Por otro lado $m$ es hijo de $i$,
+así que su subárbol es parte propia del de $i$ y su altura es a lo más
+$h - 1 < h$. No tiene por qué ser exactamente $h - 1$, ya que el
+subárbol derecho puede quedar un nivel más corto; por eso la hipótesis
+se enuncia para toda altura menor que $h$.
+
+\paso{Cierre:} por hipótesis inductiva la llamada deja el subárbol de
+$m$ como max-heap y no escribe fuera de él. Las parejas internas de
+ese subárbol quedan bien por (i) de la hipótesis; el subárbol de $r$ y
+la pareja $(i, r)$ no volvieron a tocarse por (ii); y en la pareja
+$(i, m)$ el valor de $i$ no cambió, mientras que la llamada solo
+permuta valores del subárbol de $m$, todos a lo más $A'[i]$, así que
+el valor final en $m$ tampoco supera al de $i$. Todas las parejas del
+subárbol de $i$ se cumplen, que es (i). Lo único escrito fue el
+intercambio en $i$ y $m$ más lo que hizo la llamada dentro del
+subárbol de $m$, todo dentro del subárbol de $i$, que es (ii). La
+inducción queda cerrada.
+\respuesta{A[j] \ge A[c] \quad \text{para todo $j$ del subárbol con
+  raíz $i$ y todo hijo $c$ de $j$}}
+
+\end{document}
+
+%################# END OF EJERCICIO20CORRECCIONMAXHEAPIFY.TEX ##################
+%###############################################################################
