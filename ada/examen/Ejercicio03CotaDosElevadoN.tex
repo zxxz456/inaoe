@@ -1,0 +1,106 @@
+% =====================================================================
+%  Ejercicio03CotaDosElevadoN.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 3 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Cota de $2^n$ contra $2^{2n}$}{3}{20}
+
+\noindent\textbf{Convenciones.}
+$f(n) \in \Ord{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \le c\,g(n)$ para todo $n \ge n_0$, y
+$f(n) \in \Omg{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \ge c\,g(n)$ para todo $n \ge n_0$. Todos los logaritmos son en base $2$.
+
+\noindent Para $f(n) = 2^{n}$ y $g(n) = 2^{2n}$, indicar cuál cota se
+cumple: (i) $\Ord{g(n)}$, (ii) $\Omg{g(n)}$ o (iii) ambas, es decir
+$\Tht{g(n)}$. Si se afirma una cota hay que dar constantes $c$ y
+$n_0$ con $f(n) \le c\,g(n)$, o bien $f(n) \ge c\,g(n)$, para todo
+$n \ge n_0$.
+
+\paso{Cota superior:} se acota $f$ por $g$ factorizando el exponente.
+\begin{align*}
+  f(n) &= 2^{n} \\
+       &= 2^{n} \cdot 1 \\
+       &\le 2^{n} \cdot 2^{n}
+          \razon{$2^{n} \ge 1$ para $n \ge 1$} \\
+       &= 2^{n + n}
+          \razon{ley de exponentes} \\
+       &= 2^{2n} \\
+       &= g(n).
+\end{align*}
+
+La cadena vale para todo $n \ge 1$, o sea $f(n) \le 1 \cdot g(n)$ con
+$c = 1$ y $n_0 = 1$.
+
+\paso{Cota inferior:} se supone que existen y se llega a una
+contradicción. Sean $c > 0$ y $n_0 \in \N$ tales que
+$f(n) \ge c\,g(n)$ para todo $n \ge n_0$. Para esos $n$:
+\begin{align*}
+  2^{n} &\ge c \cdot 2^{2n}
+        \razon{suposición} \\
+  2^{n} &\ge c \cdot 2^{n} \cdot 2^{n}
+        \razon{ley de exponentes} \\
+  1 &\ge c \cdot 2^{n}
+        \razon{se divide entre $2^{n} > 0$} \\
+  2^{n} &\le \frac{1}{c}
+        \razon{se divide entre $c > 0$} \\
+  n &\le \log \frac{1}{c}
+        \razon{el logaritmo es creciente}.
+\end{align*}
+
+\paso{Contradicción:} el último renglón acota a todo $n \ge n_0$ por
+la constante $\log(1/c)$, que no depende de $n$. El entero
+\[
+  n_1 = \max\!\left(n_0,\;
+        \left\lfloor \log \tfrac{1}{c} \right\rfloor + 1\right)
+\]
+cumple $n_1 \ge n_0$, así que le aplica la cota, y a la vez
+$n_1 \ge \lfloor \log(1/c) \rfloor + 1 > \log(1/c)$, que la viola.
+Ninguna pareja $(c, n_0)$ sirve, de modo que $f(n) \notin \Omg{g(n)}$
+y con eso tampoco $f(n) \in \Tht{g(n)}$.
+
+\respuesta{\text{Solo (i):}\;\; 2^{n} \in \Ord{2^{2n}}
+           \;\;\text{con}\;\; c = 1,\; n_0 = 1}
+
+\end{document}
+
+%#################### END OF EJERCICIO03COTADOSELEVADON.TEX ####################
+%###############################################################################
