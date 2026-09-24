@@ -1,0 +1,97 @@
+% =====================================================================
+%  Ejercicio08MaestroRaiz.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 8 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Método maestro: $T(n) = 2T(n/4) + \sqrt{n}$}{8}{20}
+
+\noindent\textbf{Convenciones.}
+Todos los logaritmos son en base $2$.
+
+\noindent Resolver con el método maestro:
+\[
+  T(n) = 2\,T(n/4) + \sqrt{n}.
+\]
+
+\paso{Parámetros:} la recurrencia ya tiene la forma
+$T(n) = a\,T(n/b) + f(n)$, con
+\[
+  a = 2, \qquad b = 4, \qquad f(n) = \sqrt{n} = n^{1/2}.
+\]
+
+\paso{Potencia de comparación:} se evalúa el exponente
+$\log_b a = \log_4 2$,
+\begin{align*}
+  \log_4 2 &= \frac{\log 2}{\log 4} \razon{cambio de base} \\
+           &= \frac{1}{2}
+              \razon{$\log 2 = 1$ y $\log 4 = 2$}
+\end{align*}
+\[
+  n^{\log_b a} = n^{1/2} = \sqrt{n}.
+\]
+
+\paso{Comparación:} el cociente entre $f(n)$ y esa potencia es
+\begin{align*}
+  \frac{f(n)}{n^{\log_b a}} &= \frac{n^{1/2}}{n^{1/2}}
+                               \razon{ambos valen $\sqrt{n}$} \\
+                            &= 1 \quad \text{para toda } n \ge 1,
+\end{align*}
+de modo que $f(n) = \Tht{n^{\log_b a}}$.
+
+\paso{Caso que aplica:} el cociente constante descarta los casos
+extremos. El caso 1 exige $f(n) = \Ord{n^{\log_b a - \epsilon}}$, es
+decir un cociente acotado por $c\,n^{-\epsilon}$, y el caso 3 exige
+$f(n) = \Omg{n^{\log_b a + \epsilon}}$, es decir un cociente que crece
+como $n^{\epsilon}$; ninguna de las dos se cumple con cociente $1$
+para $\epsilon > 0$. Queda el caso 2, cuya condición
+$f(n) = \Tht{n^{\log_b a}}$ es justo la del renglón anterior, y su
+conclusión es
+\begin{align*}
+  T(n) &= \Tht{n^{\log_b a} \log n} \razon{caso 2 del teorema} \\
+       &= \Tht{n^{1/2} \log n}      \razon{$\log_b a = 1/2$}
+\end{align*}
+
+\respuesta{T(n) \in \Tht{\sqrt{n}\,\log n}}
+
+\end{document}
+
+%###################### END OF EJERCICIO08MAESTRORAIZ.TEX ######################
+%###############################################################################
