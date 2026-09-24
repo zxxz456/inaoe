@@ -1,0 +1,113 @@
+% =====================================================================
+%  Ejercicio17MinHeapify.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 17 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Aplicación de MIN-HEAPIFY}{17}{20}
+
+\noindent\textbf{Convenciones.}
+Se indexa desde $1$, con $\mathrm{padre}(i) = \lfloor i/2
+\rfloor$, $\mathrm{izq}(i) = 2i$ y $\mathrm{der}(i) = 2i + 1$.
+
+\noindent Dado
+\[
+  [2,\ 9,\ 4,\ 12,\ 11,\ 7,\ 6,\ 15,\ 14],
+\]
+aplique \textsc{Min-Heapify} desde la posicion 2. Muestre todas las
+comparaciones y los intercambios realizados.
+
+\paso{Nodo, hijos y cotas:} con $i = 2$ y $n = 9$,
+\begin{align*}
+  \mathrm{izq}(2) &= 2 \cdot 2 = 4, & 4 &\le 9
+    \razon{el hijo izquierdo existe} \\
+  \mathrm{der}(2) &= 2 \cdot 2 + 1 = 5, & 5 &\le 9
+    \razon{el hijo derecho existe}
+\end{align*}
+con $A[2] = 9$, $A[4] = 12$ y $A[5] = 11$. El indice
+$\mathit{menor}$ arranca en $i = 2$ y cada hijo aporta una
+comparacion.
+
+\paso{Comparaciones:}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c l c c c}
+    \toprule
+    \# & Comparacion & Con valores & Resultado &
+      $\mathit{menor}$ \\
+    \midrule
+    1 & $A[4] < A[2]$ (hijo izquierdo) & $12 < 9$ & falso & $2$ \\
+    2 & $A[5] < A[2]$ (hijo derecho)   & $11 < 9$ & falso & $2$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Las dos unicas comparaciones de
+    \textsc{Min-Heapify}$(A, 2)$. Ninguna actualiza
+    $\mathit{menor}$, asi que el arreglo sigue en
+    $[2,9,4,12,11,7,6,15,14]$ despues de cada una.}
+  \label{ej17:ej17-comparaciones}
+\end{table}
+
+\paso{Intercambios:} al terminar las comparaciones
+$\mathit{menor} = 2 = i$, de modo que la condicion
+$\mathit{menor} \neq i$ es falsa: el procedimiento no intercambia
+nada y no hace llamada recursiva. No hay ningun intercambio que
+mostrar, y la razon es que el nodo 2 ya era menor o igual que sus dos
+hijos,
+\[
+  A[2] = 9 \le 12 = A[4],
+  \qquad
+  A[2] = 9 \le 11 = A[5],
+\]
+es decir, el subarbol enraizado en la posicion 2 ya cumplia la
+propiedad de min-heap antes de la llamada.
+
+\respuesta{
+  \begin{array}{c}
+    [2,\ 9,\ 4,\ 12,\ 11,\ 7,\ 6,\ 15,\ 14]
+    \quad \text{(arreglo sin cambios)} \\[0.4em]
+    2 \text{ comparaciones}, \qquad 0 \text{ intercambios}
+  \end{array}
+}
+
+\end{document}
+
+%###################### END OF EJERCICIO17MINHEAPIFY.TEX #######################
+%###############################################################################
