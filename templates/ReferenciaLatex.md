@@ -26,13 +26,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.3.0
+* Version: 1.4.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       23/09/2026      Seccion 18, documentos de soluciones
 zxxz6       19/08/2026      Documente \profesor con varios nombres
 zxxz6       18/08/2026      Documente el preambulo compartido
 zxxz6       18/08/2026      Agregue la seccion de pseudocodigo
@@ -511,6 +512,54 @@ La plantilla carga babel con `es-noshorthands`. Sin esa opción, el español dej
 | Una figura se va al final | Normal: LaTeX la reacomoda. Con `[H]` y `float` se clava en su lugar |
 
 Cuando el error no se entiende, se busca la primera línea del `.log` que empieza con `!`: esa es la real, las de abajo son consecuencia.
+
+---
+
+## 18. Documentos de soluciones
+
+Una tanda de ejercicios resueltos no usa `\portadilla` ni índice: se hojea de corrido. El esqueleto sale de [`PlantillaSoluciones.tex`](PlantillaSoluciones.tex), que ya trae armados los tres patrones que salen siempre (inducción, iteración y traza).
+
+```latex
+\encabezadoSoluciones
+  {Soluciones --- Recurrencias y monticulos}
+  {Desarrollo paso a paso, apto para copiar en examen}
+
+\noindent\textbf{Convenciones.} Se supone que $n$ es potencia de $2$...
+
+\parte{Recurrencias}          % bloque tematico: I, II, III
+
+\problema{Metodo de sustitucion}   % Ejercicio 1, se numera solo
+
+\paso{Caso base:} con $n = 1$,
+\[ T(1) = 1 = \log 1 + 1. \]
+
+\begin{align*}
+  T(n) &= T(n/2) + 1       \razon{definicion} \\
+       &= \log(n/2) + 2    \razon{hipotesis inductiva}
+\end{align*}
+
+\respuesta{T(n) \in \Tht{\log n}}
+```
+
+| Comando | Qué produce |
+|---|---|
+| `\encabezadoSoluciones{titulo}{subtitulo}` | Título grande, subtítulo en cursiva y regla. Va una sola vez |
+| `\parte{Recurrencias}` | Bloque temático numerado con romanos |
+| `\problema{titulo}` | Abre un ejercicio; el contador corre a lo largo de todo el documento |
+| `\paso{Caso base:}` | Rótulo en negrita; el texto sigue en el mismo renglón |
+| `\respuesta{formula}` | La fórmula centrada y encuadrada. El argumento va en modo matemático, sin los `$` |
+| `\begin{resultado}` | Caja verde titulada Resultado, para cuando el cierre lleva prosa |
+| `\resaltar{texto}` | Marcador amarillo, parte renglón |
+| `\razon{de donde salio}` | Justificación en chiquito al final de un renglón de `align` |
+
+Tres cosas que truenan o estorban:
+
+- **`\resaltar` no admite matemáticas.** `soul` se rompe con `$...$` adentro. Una fórmula que hay que destacar va en `\respuesta`, no resaltada.
+- **Las tablas de traza van con `[H]`,** no con `[htbp]`. El especificador lo da el paquete `float`, que el preámbulo ya carga. Una traza que LaTeX manda dos páginas adelante deja de leerse junto al paso que la produjo.
+- **`\parte` no dibuja regla.** La pone el `\problema` que sigue; dos rayas seguidas dejan un hueco.
+- **El pseudocodigo se numera solo.** `algorithm` viene con la opcion `[section]`, pensada para las libretas, y en un documento sin secciones imprimiria "Algoritmo 0.1". `\encabezadoSoluciones` lo reajusta, asi que no hay nada que hacer salvo llamarlo.
+
+El contador de ejercicios no reinicia en cada `\parte`, a propósito: así se puede decir "el 14" sin aclarar de qué bloque.
 
 <!--
 ########################## END OF REFERENCIALATEX.MD ###########################
