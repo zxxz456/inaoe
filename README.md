@@ -28,6 +28,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       23/09/2026      Agregue ada/examen/ y PlantillaSoluciones
 zxxz6       14/09/2026      Agregue reportes/ y la actividad 2 de AAL
 zxxz6       14/09/2026      actividad_1/ de AAL ahora se llama src/
 zxxz6       09/09/2026      Documente el entorno y las salidas de la act 1
@@ -61,6 +62,10 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](ada/apuntes/) - Libreta de clase en LaTeX (`libreta.tex`),
     una sección por sesión. La toma cruda de cada clase queda en
     [raw_notes/](ada/apuntes/raw_notes/).
+  - [examen/](ada/examen/) - Ejercicios resueltos, un `.tex` por tema con
+    su `.pdf` al lado. El desarrollo va renglón por renglón y con el
+    resultado encuadrado, porque la hoja se relee en frío antes del
+    examen.
   - [dummy/](ada/dummy/) - Experimentos que alimentan los apuntes.
     `ComparaOrdenamientos.c` cronometra bubble sort contra quick sort
     sobre los mismos arreglos aleatorios, de 2^1 hasta 2^25 elementos, y
@@ -175,6 +180,10 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     todas las libretas de una vez.
   - [PlantillaApuntes.tex](templates/PlantillaApuntes.tex) - Punto de
     partida para una libreta nueva, y ejemplo de uso de cada entorno.
+  - [PlantillaSoluciones.tex](templates/PlantillaSoluciones.tex) - Punto
+    de partida para una tanda de ejercicios resueltos. Sin portadilla ni
+    índice, con los tres patrones que salen siempre ya armados:
+    inducción, iteración y traza de un algoritmo.
   - [ReferenciaLatex.md](templates/ReferenciaLatex.md) - Chuleta de los
     comandos y las fórmulas que salen a cada rato.
 
