@@ -1,0 +1,169 @@
+% =====================================================================
+%  Ejercicio19ComplejidadConstruccion.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 19 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Complejidad de construcción: análisis por alturas}{19}{20}
+
+\noindent\textbf{Convenciones.}
+Se indexa desde $1$, con $\mathrm{padre}(i) = \lfloor i/2
+\rfloor$, $\mathrm{izq}(i) = 2i$ y $\mathrm{der}(i) = 2i + 1$.
+Se supone que $n$ es potencia de $2$ y que
+$\log n = \log_2 n$.
+
+\noindent Una estimación sencilla puede sugerir que construir un
+montículo cuesta $\Ord{n \log n}$, porque se llama a \textsc{Heapify}
+$\Ord{n}$ veces y cada llamada cuesta $\Ord{\log n}$. Explique por qué
+esta cota no es ajustada y demuestre que la construcción de abajo
+hacia arriba cuesta $\Ord{n}$. Puede utilizar
+$\sum_{h=0}^{\infty} h/2^{h} = 2$. Justifique también por qué la
+construcción pertenece a $\Omg{n}$.
+
+Sea $T(n)$ el costo de construir el montículo de abajo hacia arriba,
+$n_h$ el número de nodos de altura $h$ y $h(v)$ la altura del nodo
+$v$.
+
+\paso{Costo real de una llamada:} \textsc{Heapify} sobre un nodo de
+altura $h$ baja el elemento a lo más $h$ niveles y hace un número
+constante de comparaciones e intercambios por nivel, así que cuesta a
+lo más $c\,(h+1)$ con $c > 0$ constante, no $c \log n$.
+
+\paso{Nodos por altura:} en un árbol casi completo los niveles del
+subárbol de un nodo $v$ están llenos salvo el último, así que si $v$
+tiene altura $h$ su subárbol tiene al menos $2^{h} - 1$ nodos en sus
+primeros $h$ niveles más uno en el último. Dos nodos distintos de la
+misma altura tienen subárboles ajenos, de modo que
+\[
+  n_h \cdot 2^{h} \le n,
+  \qquad\text{es decir}\qquad
+  n_h \le \frac{n}{2^{h}}.
+\]
+
+\paso{Por qué $\Ord{n \log n}$ no es ajustada:} el ciclo recorre
+$i = n/2, \dots, 1$, o sea que ni siquiera llama a \textsc{Heapify}
+sobre las $n/2$ hojas. La estimación floja le cobra $\log n$ a cada
+llamada, pero el número de nodos de altura $h$ decae como $2^{-h}$
+mientras el costo apenas crece como $h$, y la altura $\log n$ la
+alcanza un solo nodo, la raíz. La cota es válida y regala un factor
+$\log n$.
+
+\paso{Cota superior:} se suma por alturas, no por nodos.
+\begin{align*}
+  T(n) &\le \sum_{h=1}^{\log n} n_h \, c\,(h+1)
+        \razon{no hay llamadas con $h = 0$} \\
+       &\le \sum_{h=1}^{\log n} \frac{n}{2^{h}}\, c\,(h+1)
+        \razon{$n_h \le n/2^{h}$} \\
+       &\le \sum_{h=1}^{\log n} \frac{n}{2^{h}}\, 2c\,h
+        \razon{$h + 1 \le 2h$ si $h \ge 1$} \\
+       &= 2cn \sum_{h=1}^{\log n} \frac{h}{2^{h}}
+        \razon{constantes fuera de la suma} \\
+       &\le 2cn \sum_{h=0}^{\infty} \frac{h}{2^{h}}
+        \razon{todos los términos son no negativos} \\
+       &= 4cn
+        \razon{serie del enunciado}
+\end{align*}
+La constante $4c$ no depende de $n$, así que
+\respuesta{T(n) \in \Ord{n}}
+
+\paso{Suma de alturas de un árbol perfecto:} sea $S_H$ la suma de las
+alturas de todos los nodos de un árbol binario perfecto de altura $H$.
+Ese árbol es una raíz de altura $H$ con dos subárboles perfectos de
+altura $H-1$, de donde $S_H = 2S_{H-1} + H$. Los primeros valores son
+$S_0 = 0$, $S_1 = 1$, $S_2 = 4$ y $S_3 = 11$, cada uno a distancia
+$H + 2$ de $2^{H+1}$, lo que sugiere
+\respuesta{S_H = 2^{H+1} - H - 2}
+
+\paso{Caso base:} el árbol de altura $H = 0$ es un solo nodo de altura
+$0$, así que $S_0 = 0$, y la fórmula da $2^{1} - 0 - 2 = 2 - 2 = 0$.
+
+\paso{Hipótesis inductiva:} para un $H \ge 1$ fijo se supone que vale
+en $H-1$, es decir
+\[
+  S_{H-1} = 2^{H} - (H-1) - 2.
+\]
+
+\paso{Paso inductivo:} se parte de la recurrencia y cada renglón hace
+una sola manipulación.
+\begin{align*}
+  S_H &= 2S_{H-1} + H
+       \razon{recurrencia del árbol perfecto} \\
+      &= 2\left(2^{H} - (H-1) - 2\right) + H
+       \razon{hipótesis inductiva} \\
+      &= 2^{H+1} - 2(H-1) - 4 + H
+       \razon{se distribuye el $2$} \\
+      &= 2^{H+1} - 2H + 2 - 4 + H
+       \razon{se distribuye el signo} \\
+      &= 2^{H+1} - H - 2
+       \razon{se agrupan los términos en $H$}
+\end{align*}
+La fórmula vale en $H = 0$ y se hereda de $H-1$ a $H$, así que vale
+para toda $H \ge 0$.
+
+\paso{Cierre del argumento lineal:} un montículo de $n$ nodos tiene
+altura $\log n$ y cabe dentro del árbol binario perfecto de esa misma
+altura: cada nodo conserva su profundidad y su subárbol solo puede
+crecer, así que su altura ahí es al menos la que tiene en el
+montículo.
+\begin{align*}
+  \sum_{v} h(v) &\le S_{\log n}
+                 \razon{el montículo cabe en el árbol perfecto} \\
+                &= 2^{\log n + 1} - \log n - 2
+                 \razon{forma cerrada ya demostrada} \\
+                &= 2n - \log n - 2
+                 \razon{$2^{\log n} = n$} \\
+                &< 2n
+\end{align*}
+Como cada llamada cuesta a lo más $2c\,h(v)$ y solo hay llamadas con
+$h(v) \ge 1$, resulta $T(n) \le 2c \sum_{v} h(v) < 4cn$, la misma cota
+lineal sin recurrir a la serie infinita.
+
+\paso{Cota inferior:} el ciclo ejecuta una llamada a \textsc{Heapify}
+por cada $i = n/2, \dots, 1$, o sea $n/2$ llamadas, y cada una compara
+$A[i]$ contra al menos uno de sus hijos, con un costo de al menos
+$c' > 0$. Entonces $T(n) \ge c'\,n/2$, que es $\Omg{n}$.
+
+Con $T(n) \in \Ord{n}$ y $T(n) \in \Omg{n}$,
+\respuesta{T(n) \in \Tht{n}}
+
+\end{document}
+
+%################ END OF EJERCICIO19COMPLEJIDADCONSTRUCCION.TEX ################
+%###############################################################################
