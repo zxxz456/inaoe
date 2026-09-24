@@ -1,0 +1,123 @@
+% =====================================================================
+%  Ejercicio18ConstruccionMaxHeap.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 18 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Construcción de un max-heap}{18}{20}
+
+\noindent\textbf{Convenciones.}
+Se indexa desde $1$, con $\mathrm{padre}(i) = \lfloor i/2
+\rfloor$, $\mathrm{izq}(i) = 2i$ y $\mathrm{der}(i) = 2i + 1$.
+
+\noindent Convertir
+\[
+  A = [4, 10, 3, 5, 1, 8, 7, 9, 2, 6]
+\]
+en un max-heap con el algoritmo de abajo hacia arriba, empezando en
+$\lfloor n/2 \rfloor$ y mostrando el arreglo después de cada llamada a
+\textsc{Max-Heapify}.
+
+\paso{Índice inicial:} el nodo $i$ tiene hijo izquierdo $2i$, así que
+es interno solo si $2i \le n$, es decir $i \le n/2$. Con $n = 10$, el
+último índice que lo cumple es
+\[
+  \left\lfloor \frac{n}{2} \right\rfloor
+  = \left\lfloor \frac{10}{2} \right\rfloor = 5,
+\]
+y los índices $6, \ldots, 10$ son hojas, que ya son max-heaps de un
+elemento. El barrido va de $i = 5$ hasta $i = 1$: al llamar a
+\textsc{Max-Heapify} sobre $i$, los dos subárboles de $i$ ya cumplen
+la propiedad.
+
+\paso{Traza:} una fila por comparación. Cuando el mayor no es $i$, se
+intercambia y la llamada continúa en el índice del mayor, así que una
+misma llamada ocupa varias filas.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccccl}
+    \toprule
+    \textbf{Llamada} & $i$ & $A[i]$ & $A[\mathrm{izq}]$
+      & $A[\mathrm{der}]$ & \textbf{Mayor}
+      & \textbf{Arreglo después} \\
+    \midrule
+    $i = 5$ & 5  & 1 & 6  & -- & 10
+      & $[4, 10, 3, 5, 6, 8, 7, 9, 2, 1]$ \\
+            & 10 & 1 & -- & -- & --
+      & hoja, se detiene \\
+    \midrule
+    $i = 4$ & 4  & 5 & 9  & 2  & 8
+      & $[4, 10, 3, 9, 6, 8, 7, 5, 2, 1]$ \\
+            & 8  & 5 & -- & -- & --
+      & hoja, se detiene \\
+    \midrule
+    $i = 3$ & 3  & 3 & 8  & 7  & 6
+      & $[4, 10, 8, 9, 6, 3, 7, 5, 2, 1]$ \\
+            & 6  & 3 & -- & -- & --
+      & hoja, se detiene \\
+    \midrule
+    $i = 2$ & 2  & 10 & 9 & 6  & 2
+      & $[4, 10, 8, 9, 6, 3, 7, 5, 2, 1]$ \\
+    \midrule
+    $i = 1$ & 1  & 4 & 10 & 8  & 2
+      & $[10, 4, 8, 9, 6, 3, 7, 5, 2, 1]$ \\
+            & 2  & 4 & 9  & 6  & 4
+      & $[10, 9, 8, 4, 6, 3, 7, 5, 2, 1]$ \\
+            & 4  & 4 & 5  & 2  & 8
+      & $[10, 9, 8, 5, 6, 3, 7, 4, 2, 1]$ \\
+            & 8  & 4 & -- & -- & --
+      & hoja, se detiene \\
+    \bottomrule
+  \end{tabular}
+  \caption{Construcción del max-heap, de $i = 5$ hasta $i = 1$.}
+  \label{ej18:ej18-traza}
+\end{table}
+
+En la llamada con $i = 2$ el mayor es el propio nodo, así que no hay
+intercambio y el arreglo queda igual que después de la llamada
+anterior.
+
+\respuesta{[10, 9, 8, 5, 6, 3, 7, 4, 2, 1]}
+
+\end{document}
+
+%################## END OF EJERCICIO18CONSTRUCCIONMAXHEAP.TEX ##################
+%###############################################################################
