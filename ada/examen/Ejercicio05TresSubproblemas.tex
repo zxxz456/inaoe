@@ -1,0 +1,136 @@
+% =====================================================================
+%  Ejercicio05TresSubproblemas.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 5 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Tres subproblemas: cota por sustitución}{5}{20}
+
+\noindent\textbf{Convenciones.}
+Se supone que $n$ es potencia de $2$ y que
+$\log n = \log_2 n$.
+
+\noindent Analice mediante sustitución
+\[
+  T(n) = 3T(n/2) + n, \qquad T(1) = 1.
+\]
+Proponga primero una cota asintótica y verifique formalmente que se
+cumple.
+
+\paso{De dónde sale la conjetura:} dos expansiones dejan ver que cada
+nivel triplica el número de subproblemas:
+\begin{align*}
+  T(n) &= 3T(n/2) + n \\
+       &= 9T(n/4) + \tfrac{3}{2}n + n \\
+       &= 27T(n/8) + \tfrac{9}{4}n + \tfrac{3}{2}n + n.
+\end{align*}
+En el nivel $k$ hay $3^k$ subproblemas de tamaño $n/2^k$ y el caso
+base pega en $k = \log n$, así que las hojas cuestan
+$3^{\log n} = n^{\log 3}$, por la identidad $a^{\log b} = b^{\log a}$,
+y dominan a la serie de razón $3/2$ que suman los niveles internos. Lo
+que se prueba por inducción sobre $n = 2^k$ es entonces
+\respuesta{n^{\log 3} \le T(n) \le 3n^{\log 3} - 2n}
+
+\paso{Cota superior:} con la hipótesis simple $T(n) \le cn^{\log 3}$
+la sustitución deja un residuo $+n$ que ninguna constante absorbe, así
+que se refuerza restando un término lineal: $T(n) \le cn^{\log 3} - 2n$.
+
+\paso{Caso base:} con $n = 1$ la cota pide $1 \le c - 2$, o sea
+$c \ge 3$. Se toma $c = 3$, y entonces
+\[
+  T(1) = 1 \le 3 \cdot 1^{\log 3} - 2 \cdot 1 = 1.
+\]
+
+\paso{Hipótesis inductiva:} se supone que vale para $n/2$,
+\[
+  T(n/2) \le c\left(\frac{n}{2}\right)^{\log 3} - 2 \cdot \frac{n}{2}.
+\]
+
+\paso{Paso inductivo:} se sustituye la hipótesis en la recurrencia.
+Cada renglón hace una sola manipulación:
+\begin{align*}
+  T(n) &= 3T(n/2) + n \razon{definición} \\
+       &\le 3\left[\, c\left(\frac{n}{2}\right)^{\log 3}
+          - 2 \cdot \frac{n}{2} \,\right] + n
+          \razon{hipótesis inductiva} \\
+       &= 3c\left(\frac{n}{2}\right)^{\log 3} - 3n + n
+          \razon{se distribuye el $3$} \\
+       &= 3c\,\frac{n^{\log 3}}{3} - 3n + n
+          \razon{$2^{\log 3} = 3$} \\
+       &= cn^{\log 3} - 3n + n \razon{se cancela el $3$} \\
+       &= cn^{\log 3} - 2n.
+\end{align*}
+El renglón final es la misma forma de la hipótesis, con la misma
+$c = 3$, así que la cota se propaga de $n/2$ a $n$.
+
+\paso{Cota inferior:} aquí no hace falta reforzar: el $+n$ de la
+recurrencia juega a favor de la desigualdad, y basta con
+$T(n) \ge c'n^{\log 3}$.
+
+\paso{Caso base:} con $n = 1$ la cota pide $1 \ge c'$. Se toma
+$c' = 1$, y entonces
+\[
+  T(1) = 1 \ge 1 \cdot 1^{\log 3} = 1.
+\]
+
+\paso{Hipótesis inductiva:} se supone que vale para $n/2$,
+\[
+  T(n/2) \ge c'\left(\frac{n}{2}\right)^{\log 3}.
+\]
+
+\paso{Paso inductivo:} con $c' = 1$,
+\begin{align*}
+  T(n) &= 3T(n/2) + n \razon{definición} \\
+       &\ge 3\left(\frac{n}{2}\right)^{\log 3} + n
+          \razon{hipótesis inductiva} \\
+       &= 3\,\frac{n^{\log 3}}{3} + n \razon{$2^{\log 3} = 3$} \\
+       &= n^{\log 3} + n \\
+       &\ge n^{\log 3}. \razon{se descarta el término $+n$, positivo}
+\end{align*}
+
+Las dos inducciones cierran para toda $n = 2^k$ con $k \ge 0$, con
+$c' = 1$ y $c = 3$, y juntas encierran a $T$ entre dos múltiplos de
+$n^{\log 3}$:
+\respuesta{T(n) \in \Tht{n^{\log 3}}}
+
+\end{document}
+
+%################### END OF EJERCICIO05TRESSUBPROBLEMAS.TEX ####################
+%###############################################################################
