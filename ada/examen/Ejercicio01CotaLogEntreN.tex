@@ -1,0 +1,116 @@
+% =====================================================================
+%  Ejercicio01CotaLogEntreN.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Ejercicio 1 de la hoja de cotas asintóticas, recurrencias y
+%  montículos, resuelto paso a paso. Un ejercicio por documento.
+%
+%
+%  Considerations:
+%  ------------
+%  - Compila con pdflatex sin shell-escape. Dos pasadas, o latexmk
+%  - Solo declara las convenciones que este ejercicio usa
+%  - Sin título grande y sin pie de página: el encabezado de un
+%    renglón deja la hoja entera para el desarrollo
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       24/09/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+\newcommand{\materia}{Hoja de recurrencias y montículos}
+\newcommand{\profesor}{Dr. José Martínez Carranza}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../templates/Preambulo.tex}
+
+\begin{document}
+
+\encabezadoEjercicio{Cota de $(\log n)/n$ contra $1/n$}{1}{20}
+
+\noindent\textbf{Convenciones.}
+$f(n) \in \Ord{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \le c\,g(n)$ para todo $n \ge n_0$, y
+$f(n) \in \Omg{g(n)}$ si existen $c > 0$ y $n_0$ tales que
+$f(n) \ge c\,g(n)$ para todo $n \ge n_0$. Todos los logaritmos son en base $2$.
+
+\noindent Para $f(n) = \dfrac{\log n}{n}$ y $g(n) = \dfrac{1}{n}$,
+indicar cuál de las cotas (i) $\Ord{g(n)}$, (ii) $\Omg{g(n)}$ o
+(iii) $\Tht{g(n)}$ se cumple, y exhibir las constantes $c$ y $n_0$
+que la sostienen.
+
+\paso{Cociente de las dos funciones:} decide las dos cotas de un solo
+golpe, porque $g(n) > 0$ para todo $n \ge 1$.
+\begin{align*}
+  \frac{f(n)}{g(n)}
+    &= \frac{(\log n)/n}{1/n}
+       \razon{definición de $f$ y de $g$} \\
+    &= \frac{\log n}{n} \cdot n
+       \razon{dividir entre $1/n$ es multiplicar por $n$} \\
+    &= \log n.
+\end{align*}
+
+\paso{Cota inferior, con $c = 1$ y $n_0 = 2$:}
+\begin{align*}
+  n &\ge 2
+     \razon{rango en el que se afirma la cota} \\
+  \log n &\ge \log 2
+     \razon{el logaritmo es creciente} \\
+  \log n &\ge 1
+     \razon{$\log 2 = 1$} \\
+  \frac{\log n}{n} &\ge \frac{1}{n}
+     \razon{se multiplica por $1/n > 0$} \\
+  f(n) &\ge 1 \cdot g(n).
+\end{align*}
+
+El $n_0$ no baja a $1$: ahí $f(1) = 0$ y $g(1) = 1$, así que ninguna
+$c > 0$ cumple $f(1) \ge c\,g(1)$.
+
+\paso{No existe cota superior:} se supone que hay $c > 0$ y $n_0$ con
+$f(n) \le c\,g(n)$ para todo $n \ge n_0$.
+\begin{align*}
+  \frac{\log n}{n} &\le \frac{c}{n}
+     \razon{lo supuesto, para todo $n \ge n_0$} \\
+  \log n &\le c
+     \razon{se multiplica por $n > 0$}.
+\end{align*}
+
+Se toma $n_1 = \max\{\,n_0,\; 2^{\,c+1}\,\}$, que cumple $n_1 \ge n_0$
+y por lo tanto también cumple la desigualdad anterior:
+\begin{align*}
+  n_1 &\ge 2^{\,c+1}
+     \razon{definición de $n_1$} \\
+  \log n_1 &\ge \log 2^{\,c+1}
+     \razon{el logaritmo es creciente} \\
+  \log n_1 &\ge c + 1
+     \razon{$\log 2^{k} = k$} \\
+  \log n_1 &> c.
+\end{align*}
+
+Eso contradice $\log n \le c$ evaluada en $n = n_1$, de modo que no
+existen tales $c$ y $n_0$ y $f(n) \notin \Ord{g(n)}$. Como
+$\Tht{g(n)}$ exige las dos cotas, el inciso (iii) queda descartado con
+la misma contradicción.
+
+\respuesta{\text{(ii)}\quad f(n) \in \Omg{1/n}
+  \quad \text{con} \quad c = 1, \; n_0 = 2}
+
+\end{document}
+
+%##################### END OF EJERCICIO01COTALOGENTREN.TEX #####################
+%###############################################################################
