@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.8.0
+%   * Version: 2.9.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       25/09/2026      Clase 23 Sep, TCOR, random indexing y LSI
 %  zxxz6       21/09/2026      Clase 21 Sep, WSD e indexado conceptual
 %  zxxz6       14/09/2026      Clase 14 Sep, indexado mas alla de la palabra
 %  zxxz6       09/09/2026      Clase 9 Sep, representaciones y POS tagging
@@ -2387,7 +2388,268 @@ como índice para la recuperación.
     más que el índice invertido de siempre.
 \end{ojo}
 
+\newpage
+% =====================================================================
+%  Clase 12 - Representaciones conceptuales
+% =====================================================================
 
+\clase{Representaciones conceptuales}{23 de septiembre de 2026}
+
+\begin{quick_sum}
+    Continuación del indexado conceptual. Después de DOR vino su
+    pareja, TCOR, que describe cada palabra por las palabras con las
+    que coocurre. Luego random indexing, una forma barata de construir
+    bolsas de conceptos, qué tanto funcionan en IR y la
+    representación más usada, LSI.
+\end{quick_sum}
+
+\subsection*{TCOR}
+
+En WSD una palabra se representa por los términos que ocurren en su
+contexto: el significado de una palabra lo transmiten las palabras
+que suelen aparecer junto a ella. Esa es la base de \textbf{TCOR},
+representación por coocurrencia de términos (\textit{term
+co-occurrence representation}).
+
+Cambia el concepto primitivo respecto a DOR. Allá cada documento era
+una dimensión; aquí cada palabra del vocabulario lo es. La matriz es
+palabra-palabra, de $m \times m$, y la celda $w_{ij}$ pesa la
+coocurrencia de $t_i$ con $t_j$.
+
+\begin{center}
+\begin{tabular}{c|cccc}
+             & $t_1$ & $t_2$ & $\cdots$ & $t_m$ \\
+    \hline
+    $t_1$    &       &          &       &       \\
+    $t_2$    &       &          &       &       \\
+    $\vdots$ &       & $w_{ij}$ &       &       \\
+    $t_m$    &       &          &       &       \\
+\end{tabular}
+\end{center}
+
+Las dos intuiciones sobre los pesos son las mismas de tf-idf, con
+palabras en lugar de documentos:
+
+\begin{itemize}[itemsep=0.3em]
+    \item Entre más contextos compartan $t_i$ y $t_j$, más importa
+          $t_j$ para caracterizar la semántica de $t_i$. Es el tf.
+    \item Entre más palabras distintas acompañen a $t_j$, menos
+          aporta a caracterizar a $t_i$. Es el idf: una palabra que
+          aparece con todo no dice nada de nadie.
+\end{itemize}
+
+Juntas dan el peso
+\[
+    w_{ij} = \mathrm{tf}_{i,j} \cdot \log \frac{\abs{T}}{\abs{T_j}} ,
+\]
+donde $\mathrm{tf}_{i,j}$ es el número de contextos en que coocurren
+$t_i$ y $t_j$, y $\abs{T_j}$ el número de términos distintos con los
+que coocurre $t_j$.
+
+Igual que DOR, TCOR es una representación de palabras. El documento
+se obtiene sumando los vectores de sus palabras, y la consulta igual.
+La matriz palabra-palabra se vuelve una matriz documento-palabra, de
+$n \times m$, que es el índice para recuperar.
+
+\begin{ejemplo}
+    La misma colección de fútbol y medicina de DOR, con conteos crudos
+    y el documento como contexto. Cada palabra coocurre consigo misma
+    una vez, por eso la diagonal vale $1$. Los vectores de las palabras
+    de fútbol, sobre las dimensiones (\textit{gol}, \textit{equipo},
+    \textit{árbitro}, \textit{virus}, \textit{fiebre},
+    \textit{paciente}), son
+    \begin{align*}
+        \textit{gol}     &= (1,1,1,0,0,0) \\
+        \textit{equipo}  &= (1,1,0,0,0,0) \\
+        \textit{árbitro} &= (1,0,1,0,0,0)
+    \end{align*}
+    y sumando salen los documentos:
+    \begin{align*}
+        d_1 &= \textit{gol} + \textit{equipo}  = (2,2,1,0,0,0) \\
+        d_2 &= \textit{gol} + \textit{árbitro} = (2,1,2,0,0,0)
+    \end{align*}
+    La consulta \textit{equipo} es $q = (1,1,0,0,0,0)$, y
+    \[
+        \cos(q, d_1) = \frac{4}{\sqrt{2}\cdot 3} = 0.943 ,
+        \qquad
+        \cos(q, d_2) = \frac{3}{\sqrt{2}\cdot 3} = 0.707 .
+    \]
+    Otra vez $d_2$ se recupera sin contener \textit{equipo}, ahora
+    porque \textit{equipo} y \textit{gol} coocurren. La diferencia con
+    DOR es el tamaño: el vector tiene una componente por palabra del
+    vocabulario, no por documento, así que no crece con la colección.
+\end{ejemplo}
+
+\subsection*{Otras representaciones de bolsa de conceptos}
+
+La bolsa de palabras estándar casi nunca se usa tal cual. Antes se
+refina de una de dos formas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Selección de características:} se quitan palabras
+          con base en medidas estadísticas, como la frecuencia en
+          documentos o la ganancia de información.
+    \item \textbf{Extracción de características:} se crean
+          características artificiales a partir de las originales,
+          con agrupamiento distribucional de palabras o con métodos de
+          análisis factorial, como LSI.
+\end{itemize}
+
+El problema de las dos es que son caras. Random indexing es una forma
+sencilla de generar representaciones de bolsa de conceptos (BoC).
+
+\subsection*{Random indexing}
+
+Es una metodología de espacio vectorial que acumula vectores de
+contexto para las palabras a partir de la coocurrencia. Son tres
+pasos.
+
+\subsubsection*{1. Vectores índice}
+
+A cada contexto, que puede ser un documento, un párrafo o una
+oración, se le asigna un \textbf{vector índice} aleatorio y único de
+dimensión $k \ll n$. Es casi todo ceros, con unas pocas entradas en
+$+1$ y $-1$ en posiciones al azar.
+
+\begin{idea}
+    El truco es que en dimensión alta los vectores aleatorios dispersos
+    son casi ortogonales entre sí. Se comportan como si cada contexto
+    tuviera su propia dimensión, que es lo que hace DOR, pero en $k$
+    componentes en lugar de $n$. La reducción de dimensión sale gratis,
+    sin factorizar ninguna matriz.
+\end{idea}
+
+\subsubsection*{2. Vectores de contexto}
+
+Se recorre el texto y cada vez que una palabra aparece en un contexto
+se le suma el vector índice de ese contexto. El vector de contexto de
+la palabra es la suma de los vectores índice de todos los contextos
+donde aparece.
+
+\begin{ejemplo}
+    Dos documentos con $k = 10$:
+    \begin{align*}
+        D_1 &: \text{Towards an Automata Theory of Brain}
+            & r_1 &= (0,1,0,0,0,-1,0,0,0,0) \\
+        D_2 &: \text{From Automata Theory to Brain Theory}
+            & r_2 &= (1,0,0,0,0,0,0,-1,0,0)
+    \end{align*}
+    \textit{Brain} aparece en los dos, así que su vector de contexto es
+    \[
+        \mathrm{CV}_{\textit{brain}} = r_1 + r_2
+        = (1,1,0,0,0,-1,0,-1,0,0) .
+    \]
+    \textit{Automata} y \textit{Theory} también aparecen en los dos y
+    reciben el mismo vector. Con dos documentos no hay más información
+    que esa: las tres palabras ocurren exactamente en los mismos
+    contextos.
+\end{ejemplo}
+
+\subsubsection*{3. Vectores de documento}
+
+El documento se representa con la suma ponderada de los vectores de
+contexto de sus palabras, con el idf como peso. Para
+$d_i$: \textit{From Automata Theory to Brain Theory},
+\[
+    d_i = a_1 \mathrm{CV}_1 + a_2 \mathrm{CV}_2 + a_3 \mathrm{CV}_3
+          + a_2 \mathrm{CV}_2 ,
+\]
+con $\mathrm{CV}_1$, $\mathrm{CV}_2$ y $\mathrm{CV}_3$ los vectores de
+\textit{Automata}, \textit{Theory} y \textit{Brain}, y $a_1$, $a_2$,
+$a_3$ sus idf. \textit{Theory} aparece dos veces, por eso su término
+se suma dos veces.
+
+\subsection*{Funcionan las representaciones conceptuales?}
+
+\begin{itemize}[itemsep=0.3em]
+    \item Resuelven varios problemas de emparejamiento conceptual:
+          capturan información de relación entre palabras, incluida
+          la causal, la orientada a metas y la taxonómica.
+    \item En IR hay poco trabajo. Los experimentos muestran que TCOR,
+          DOR y random indexing superan al VSM tradicional; en las
+          colecciones de CLEF la mejora ronda el $7$ por ciento.
+    \item El enfoque más usado es el de indexado semántico latente,
+          LSI, pero es computacionalmente caro.
+\end{itemize}
+
+\subsection*{Indexado semántico latente (LSI)}
+
+El concepto clave es la \textbf{coocurrencia}: dos o más términos que
+aparecen en los mismos documentos más seguido de lo que daría el azar.
+
+\begin{center}
+\begin{tabular}{lcccc}
+    \toprule
+                & $t_1$ & $t_2$     & $t_3$ & $t_4$       \\
+    \midrule
+    Consulta    & user  & interface &       &             \\
+    Documento 1 & user  & interface & HCI   & interaction \\
+    Documento 2 &       &           & HCI   & interaction \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El documento 2 no comparte ni un término con la consulta y su coseno
+es cero. Intuitivamente también es un buen candidato: el documento 1
+muestra que \textit{user} e \textit{interface} van con \textit{HCI} e
+\textit{interaction}.
+
+LSI proyecta consultas y documentos a un espacio con dimensiones
+semánticas ``latentes'':
+
+\begin{itemize}[itemsep=0.3em]
+    \item Los términos que coocurren van a las mismas dimensiones, así
+          que dos documentos pueden tener coseno alto sin compartir
+          ningún término.
+    \item Los que no coocurren van a dimensiones distintas.
+    \item El espacio latente tiene menos dimensiones que el original:
+          es una técnica de reducción de dimensión.
+\end{itemize}
+
+La proyección sale de la descomposición en valores singulares de la
+matriz término-documento $A$, de $m \times n$, truncada a los $k$
+valores singulares más grandes:
+\[
+    A \approx A_k = U_k \Sigma_k V_k^{T} .
+\]
+Las columnas de $U_k$ son las dimensiones latentes, y las de
+$\Sigma_k V_k^{T}$ los documentos en ese espacio. Una consulta nueva
+se proyecta con $\hat{q} = \Sigma_k^{-1} U_k^{T} q$.
+
+\begin{ejemplo}
+    La tabla de arriba, con términos en los renglones
+    (\textit{user}, \textit{interface}, \textit{HCI},
+    \textit{interaction}) y los dos documentos en las columnas:
+    \[
+        A = \begin{pmatrix} 1 & 0 \\ 1 & 0 \\ 1 & 1 \\ 1 & 1
+            \end{pmatrix},
+        \qquad
+        A^{T} A = \begin{pmatrix} 4 & 2 \\ 2 & 2 \end{pmatrix} .
+    \]
+    Los valores propios de $A^{T}A$ son $3 \pm \sqrt{5}$, así que
+    $\sigma_1 = 2.288$ y $\sigma_2 = 0.874$. Quedándose con $k = 1$,
+    con $v_1 = (0.851, 0.526)$,
+    \[
+        A_1 = \sigma_1 u_1 v_1^{T}
+            = \begin{pmatrix}
+                0.724 & 0.447 \\ 0.724 & 0.447 \\
+                1.171 & 0.724 \\ 1.171 & 0.724
+              \end{pmatrix} .
+    \]
+    El documento 2 ahora tiene peso $0.447$ en \textit{user} y en
+    \textit{interface}, términos que no contiene. Con la consulta
+    $q = (1,1,0,0)$ el coseno contra el documento 2 pasa de $0$ a
+    $0.53$.
+\end{ejemplo}
+
+\begin{ojo}
+    La similitud nueva la crea el truncamiento, no la SVD. Con
+    $k = 2$ no se pierde nada, $A_2 = A$ y el documento 2 vuelve a
+    coseno cero. El $k$ controla cuánto se mezclan los términos: muy
+    chico y todo se parece a todo, como aquí donde los dos documentos
+    quedan con el mismo coseno. El costo es la SVD de una matriz de
+    vocabulario por colección, y por eso LSI es caro.
+\end{ojo}
 
 \end{document}
 
