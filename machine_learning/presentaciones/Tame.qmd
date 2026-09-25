@@ -1,0 +1,184 @@
+---
+title: "TAME"
+subtitle: "Tabular Alignment via Moment Embeddings"
+author: "Bryan Ezequiel Violante Arriaga"
+institute: "INAOE"
+date: today
+date-format: "DD/MM/YYYY"
+lang: es
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    progress: true
+    hash: true
+    transition: fade
+    center: false
+    width: 1280
+    height: 720
+---
+
+<!--
+Tame.qmd
+========================
+
+
+Descripcion:
+------------
+Presentacion en Quarto con reveal.js sobre TAME (Tabular Alignment via
+Moment Embeddings). Por ahora es solo el esqueleto: cada diapositiva
+lleva texto de relleno que se sustituye por el contenido real conforme
+se define.
+
+
+Considerations:
+------------
+- Se compila con "quarto render Tame.qmd" o se previsualiza con
+  "quarto preview Tame.qmd"
+- El front matter YAML tiene que ser lo primero del archivo, por eso el
+  encabezado va inmediatamente despues
+- Cada "##" abre una diapositiva y cada "#" una seccion
+
+
+Metadata:
+----------
+* Author: zxxz6 (Bryan Violante Arriaga)
+* Version: 1.0.0
+* License: Copyright (c) 2026 Bryan Violante Arriaga.
+
+
+History:
+------------
+Author      Date            Description
+zxxz6       25/09/2026      Creation
+
+
+-->
+
+## Contenido
+
+1. Motivación
+2. Planteamiento del problema
+3. Antecedentes
+4. Método: TAME
+5. Experimentos
+6. Resultados
+7. Conclusiones
+
+# Motivación
+
+## Motivación
+
+- Lorem ipsum dolor sit amet, consectetur adipiscing elit
+- Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+- Ut enim ad minim veniam, quis nostrud exercitation ullamco
+
+::: {.notes}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+:::
+
+# Planteamiento del problema
+
+## Alineación tabular
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+
+$$
+\min_{\theta} \; \mathcal{L}(\theta) = \sum_{i=1}^{n} \ell(x_i, y_i)
+$$
+
+## Formulación
+
+:::: {.columns}
+::: {.column width="50%"}
+- Lorem ipsum dolor sit amet
+- Consectetur adipiscing elit
+- Sed do eiusmod tempor
+:::
+::: {.column width="50%"}
+- Ut enim ad minim veniam
+- Quis nostrud exercitation
+- Ullamco laboris nisi
+:::
+::::
+
+# Antecedentes
+
+## Embeddings de momentos
+
+- Lorem ipsum dolor sit amet, consectetur adipiscing elit
+- Duis aute irure dolor in reprehenderit in voluptate velit
+- Excepteur sint occaecat cupidatat non proident
+
+## Trabajo relacionado
+
+| Método  | Lorem  | Ipsum  | Dolor  |
+|---------|--------|--------|--------|
+| Lorem A | Sit    | Amet   | Elit   |
+| Lorem B | Sit    | Amet   | Elit   |
+| Lorem C | Sit    | Amet   | Elit   |
+
+# Método: TAME
+
+## Idea general
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua.
+
+::: {.fragment}
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+:::
+
+## Arquitectura
+
+![Lorem ipsum dolor sit amet](https://placehold.co/960x400?text=Diagrama)
+
+## Algoritmo
+
+1. Lorem ipsum dolor sit amet
+2. Consectetur adipiscing elit
+3. Sed do eiusmod tempor incididunt
+4. Ut labore et dolore magna aliqua
+
+# Experimentos
+
+## Configuración experimental
+
+- **Datos:** lorem ipsum dolor sit amet
+- **Métricas:** consectetur adipiscing elit
+- **Líneas base:** sed do eiusmod tempor
+
+# Resultados
+
+## Resultados principales
+
+| Método | Lorem | Ipsum | Dolor |
+|--------|-------|-------|-------|
+| Base A | 0.00  | 0.00  | 0.00  |
+| Base B | 0.00  | 0.00  | 0.00  |
+| TAME   | 0.00  | 0.00  | 0.00  |
+
+## Análisis
+
+![Lorem ipsum dolor sit amet](https://placehold.co/960x400?text=Figura)
+
+# Conclusiones
+
+## Conclusiones
+
+- Lorem ipsum dolor sit amet, consectetur adipiscing elit
+- Sed do eiusmod tempor incididunt ut labore
+- Ut enim ad minim veniam, quis nostrud exercitation
+
+## Referencias
+
+- Lorem, I. (2026). *Dolor sit amet*. Consectetur Adipiscing.
+- Ipsum, L. (2025). *Sed do eiusmod tempor*. Incididunt.
+
+## ¿Preguntas? {.center}
+
+<!--
+############################### END OF TAME.QMD ################################
+################################################################################
+-->
