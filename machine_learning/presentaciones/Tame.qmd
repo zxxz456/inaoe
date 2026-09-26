@@ -13,6 +13,7 @@ format:
     hash: true
     transition: fade
     html-math-method: katex
+    embed-resources: true
     center: false
     width: 1280
     height: 720

@@ -76,6 +76,8 @@ docs/
 
 # Quarto (salida de render; los .qmd SI se versionan)
 machine_learning/presentaciones/*.html
+# ... salvo el HTML autocontenido, para verla sin instalar Quarto
+!machine_learning/presentaciones/Tame.html
 machine_learning/presentaciones/*_files/
 .quarto/
 
