@@ -75,10 +75,10 @@ docs/
 *.o
 
 # Quarto (salida de render; los .qmd SI se versionan)
-machine_learning/presentaciones/*.html
+machine_learning/presentaciones/**/*.html
 # ... salvo el HTML autocontenido, para verla sin instalar Quarto
-!machine_learning/presentaciones/Tame.html
-machine_learning/presentaciones/*_files/
+!machine_learning/presentaciones/presentacion1/Tame.html
+machine_learning/presentaciones/**/*_files/
 .quarto/
 
 # Guiones de presentacion, notas para exponer que no se versionan
