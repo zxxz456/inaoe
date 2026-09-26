@@ -21,13 +21,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.14.0
+* Version: 1.15.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       26/09/2026      Agregue machine_learning/presentaciones/
 zxxz6       23/09/2026      Agregue ada/examen/ y PlantillaSoluciones
 zxxz6       14/09/2026      Agregue reportes/ y la actividad 2 de AAL
 zxxz6       14/09/2026      actividad_1/ de AAL ahora se llama src/
@@ -106,6 +107,11 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](machine_learning/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](machine_learning/apuntes/raw_notes/).
+  - [presentaciones/](machine_learning/presentaciones/) - Exposiciones en
+    Quarto con reveal.js. `Tame.qmd` presenta TAME, destilación de datos
+    tabulares por alineación de momentos, con diagramas animados y notas
+    del presentador; las figuras viven en `img/`. Se compila con
+    `quarto render Tame.qmd`, y el `.html` que genera no se versiona.
 - [matcomp/](matcomp/) - Matemáticas para Computación.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
