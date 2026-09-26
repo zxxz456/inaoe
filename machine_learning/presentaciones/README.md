@@ -20,13 +20,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.1.0
+* Version: 1.2.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       26/09/2026      Una carpeta por exposicion, TAME en presentacion1/
 zxxz6       26/09/2026      El HTML ahora es un solo archivo
 zxxz6       26/09/2026      Creation
 
@@ -38,8 +39,11 @@ zxxz6       26/09/2026      Creation
 Exposiciones de Aprendizaje Computacional hechas en
 [Quarto](https://quarto.org) con reveal.js.
 
-- `Tame.qmd`: TAME, destilación de datos tabulares por alineación de
-  momentos. Las figuras viven en `img/`.
+Cada exposición vive en su propia carpeta, con su `.qmd`, su `.html`
+compilado y sus figuras en `img/`:
+
+- [presentacion1/](presentacion1/): `Tame.qmd`, TAME, destilación de
+  datos tabulares por alineación de momentos.
 
 ## 1. Instalar Quarto
 
@@ -80,10 +84,10 @@ carpeta `bin/` al `PATH`.
 
 ## 2. Ver la presentación
 
-Desde la raíz del repositorio, entra a esta carpeta:
+Desde la raíz del repositorio, entra a la carpeta de la exposición:
 
 ```bash
-cd machine_learning/presentaciones
+cd machine_learning/presentaciones/presentacion1
 ```
 
 **Opción A, vista previa.** Compila, abre el navegador y recarga sola
