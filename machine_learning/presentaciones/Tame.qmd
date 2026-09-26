@@ -199,18 +199,13 @@ conjunto completo.
 ::::
 
 ::: {.notes}
-eN lo que coinciden todos los papers... destilar in a nutshell es
-generar un subconjunto pequeño y muy informativo tal que un modelo 
+destilar in a nutshell es
+generar un subconjunto pequeño y muy informativo de tal suerte que un modelo 
 entrenado con el tenga un desempeño comparable al del modelo entrenado 
 con todos los datos.
 
-Si en cambio se eligen renglones reales como representantes, se le
-llama coreset selection... 
-
 notar q las instancias destiladas no tienen pq existir en
 el conjunto original
-
-(en la imagen se ve como los datos destilados parecen no tener sentido)
 :::
 
 ::: aside
@@ -236,7 +231,7 @@ Privacidad y copyrigth: no hay que conservar ni reutilizar
 grandes volúmenes de datos crudos (aunq tame dice que no es necesariamente cierto)
 
 Entrenamientos repetidos:  Si se entrenan cientos de modelos sobre el
-mismo conjunto, reducirlo una vez paga muchas veces
+mismo conjunto, reducirlo una pues es mas optimo
 :::
 
 ::: aside
@@ -765,14 +760,13 @@ localidad de una imagen, por ejemplo. En tabular esas invariancias son
 difíciles de encontrar
 
 estructura heterogtnea en datos tabulares: columnas numéricas, ordinales y categóricas mezcladas.
-Pocas muestras, valores extremos y datos faltantes
+
 
 Sin localidad: el orden de las columnas no significa nada, a diferencia de los pixeles o
 las palabras
 
 Las redes batallan para aprender
-patrones irregulares de la función objetivo. Y son invariantes a
-rotaciones del espacio de entrada, lo que estorba cuando hay muchas
+patrones irregulares de la función objetivo... cuando hay muchas
 columnas no informativas: el árbol simplemente las ignora, la red las
 mezcla con las buenas
 :::
@@ -1490,21 +1484,45 @@ Ilustración a partir de Zhang et al. (2024), figura 1
 
 ## El caso tabular
 
-- Columnas **heterogéneas**
-- Aprendices **no diferenciables**
-- Se evalúa con **RF, XGBoost, SVM**
+Frente a imágenes, dos diferencias:
+
+:::: {.columns}
+::: {.column width="50%"}
+**Heterogeneidad de características**
+
+- Tipos y rangos distintos
+- Categóricas y numéricas
+- Datos faltantes
+:::
+::: {.column width="50%"}
+**Agnosticidad al modelo**
+
+- Árboles, lineales, vecinos
+- No siempre diferenciable
+:::
+::::
+
+::: {.fragment}
+Hay que **retener toda la información**: no sabemos qué usará el
+modelo.
+:::
 
 ::: {.notes}
-casi toda la investigación en destilación es
-sobre imágenes, y el caso tabular trae retos propios.
+la destilación se ha estudiado casi solo
+en imágenes, donde cada dato es un conjunto homogéneo de rasgos, los
+pixeles, y el modelo final es una red. En tabular hay dos diferencias
 
-Columnas numéricas y categóricas mezcladas, con escalas y significados
-distintos.
+Heterogeneidad de características: las columnas tienen tipos, rangos y
+significados distintos.
 
-Los modelos más usados en tabular son ensambles de árboles y
-vecinos más cercanos, que no son diferenciables, no se puede
-retropropagar a través de ellos
+Agnosticidad al modelo: el modelo que va a usar los datos destilados
+puede ser cualquiera. En general no se puede asumir que sea diferenciable, así que
+no sirve la formulación binivel de siempre
 
+la destilación
+tiene que ser agnóstica al modelo, y eso significa retener tanta
+información de los datos originales como sea posible, porque no
+sabemos de antemano qué información va a aprovechar el modelo final
 :::
 
 ::: aside
@@ -1516,14 +1534,15 @@ Kang et al. (2025); Florea y Barnoviciu (2026)
 Destilar datos **tabulares** alineando la distribución **completa**:
 
 - con columnas heterogéneas,
-- sin depender de un aprendiz diferenciable,
+- agnóstico al modelo final,
 - perdiendo lo menos posible frente al conjunto completo.
 
 ::: {.notes}
 El problema que aborda TAME, destilar un conjunto
 tabular alineando la distribución completa de reales y sintéticos, no
 solo su media como DM. Tiene que funcionar con columnas heterogéneas,
-no puede requerir retropropagar a través del aprendiz final, y la
+tiene que ser agnóstico al modelo final, sin retropropagar a través
+de él, y la
 métrica es cuánto se pierde contra entrenar con todo el conjunto
 :::
 
@@ -1656,7 +1675,7 @@ Actualiza directamente las muestras sintéticas con descenso de
 gradiente, sin ciclo interno y sin entrenar ningún modelo.
 
 Y a diferencia de TDColER, S vive en el espacio original de las
-columnas: cualquier aprendiz lo puede usar, árboles incluidos, sin
+columnas: cualquier modelo lo puede usar, árboles incluidos, sin
 necesitar un codificador.
 :::
 
@@ -2583,10 +2602,8 @@ Conservar la **forma** de los datos reales al sintetizar.
 :::
 
 ::: {.notes}
-Nuestra propuesta ataca directamente esa limitación: conservar la
-forma de los datos reales después de sintetizar, es decir, las colas,
-asimetrías y valores extremos que la proyección gaussianiza y que los
-árboles aprovechan.
+Nuestra propuesta trataria de atacar esa limitacion, conservar la
+forma de los datos reales después de sintetizar
 
 Mantenemos lo que funciona de TAME: embedders aleatorios, emparejamiento
 de media y covarianza, sin ciclo interno.
@@ -2595,6 +2612,9 @@ Agregamos una señal de forma de los datos reales que entra al embedder,
 y la llevamos por una rama que no se gaussianiza hasta la salida, para
 que la pérdida también compare la forma y no solo los dos primeros
 momentos de una proyección casi gaussiana.
+
+si no sabemos qué va a aprovechar el modelo final, no podemos tirar la
+forma de los datos, porque es justo lo que usan los árboles (agnosticidad).
 :::
 
 ## Propuesta: TAME modificado {.nostretch}
