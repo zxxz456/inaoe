@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.5.0
+%   * Version: 2.6.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       30/09/2026      Clase de eigenvalores y eigenvectores
 %  zxxz6       30/09/2026      Clase de inversa de una matriz
 %  zxxz6       30/09/2026      Clase de determinantes, con ejercicios
 %  zxxz6       09/09/2026      Clase 9 Sep, sistemas lineales y rango
@@ -2185,6 +2186,717 @@ rotación o un escalamiento es aplicar la inversa) y el modelo de
 entrada-salida de Leontief en economía. Ahí $A$ dice cuánto consume
 cada sector de los demás para producir una unidad y $d$ es la demanda
 externa; la producción que hace falta es $(I - A)^{-1}d$.
+
+\newpage
+
+% =====================================================================
+%  Clase 28 Sep - Eigenvalores y eigenvectores
+% =====================================================================
+
+\clase{Eigenvalores y eigenvectores}{28 de septiembre de 2026}
+
+\begin{quick_sum}
+    Qué es un eigenvector: una dirección que la matriz no gira, solo
+    estira, encoge o voltea. Cómo se calculan con el polinomio
+    característico $\det(A - \lambda I) = 0$ y luego resolviendo un
+    sistema homogéneo por cada eigenvalor. Multiplicidad algebraica y
+    geométrica, propiedades que conectan con determinante, traza e
+    inversa, diagonalización $A = PDP^{-1}$ para sacar potencias, el
+    método de la potencia y dónde aparece todo esto en computación.
+\end{quick_sum}
+
+\subsection*{La idea: direcciones que la matriz no gira}
+
+Una matriz $A$ de $n \times n$ es una transformación: toma un vector
+$v$ y regresa otro vector $Av$. En general $Av$ apunta hacia otro
+lado, la matriz gira y estira al mismo tiempo. Pero casi siempre hay
+algunas direcciones especiales en las que $A$ \emph{no} gira nada:
+el vector sale sobre la misma recta por el origen, nada más más largo,
+más corto o al revés.
+
+\begin{definicion}[Eigenvalor y eigenvector]
+    Sea $A$ de $n \times n$. Un escalar $\lambda$ es un
+    \textbf{eigenvalor} (o valor propio) de $A$ si existe un vector
+    $v \neq 0$ tal que
+    \[
+        A v = \lambda v .
+    \]
+    Ese $v$ es un \textbf{eigenvector} (o vector propio) asociado a
+    $\lambda$. Al par $(\lambda, v)$ se le llama eigenpar.
+\end{definicion}
+
+El prefijo \emph{eigen} viene del alemán y quiere decir ``propio'':
+son los valores y vectores propios de la matriz, los que dicen cómo
+actúa ella en particular.
+
+\begin{itemize}[itemsep=0.2em]
+    \item $\lambda > 1$: en esa dirección $A$ estira.
+    \item $0 < \lambda < 1$: encoge.
+    \item $\lambda < 0$: voltea el sentido, y además estira o encoge
+          según $\abs{\lambda}$.
+    \item $\lambda = 0$: aplasta esa dirección al origen, $Av = 0$.
+\end{itemize}
+
+\begin{ojo}
+    El vector cero queda excluido a propósito. $A \cdot 0 = \lambda
+    \cdot 0$ se cumple para cualquier $\lambda$, así que si se
+    permitiera, todo número sería eigenvalor y la definición no diría
+    nada. El eigen\emph{valor} $\lambda = 0$ sí está permitido; el
+    eigen\emph{vector} cero, no.
+\end{ojo}
+
+\begin{ejemplo}
+    Comprobar si $u = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$ y
+    $w = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$ son eigenvectores de
+    $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$.
+    \[
+        Au = \begin{pmatrix} 4 + 1 \\ 2 + 3 \end{pmatrix}
+           = \begin{pmatrix} 5 \\ 5 \end{pmatrix}
+           = 5 \begin{pmatrix} 1 \\ 1 \end{pmatrix} ,
+        \qquad
+        Aw = \begin{pmatrix} 4 \\ 2 \end{pmatrix} .
+    \]
+    $Au$ es $5u$, así que $u$ es eigenvector con eigenvalor $5$.
+    $Aw = (4, 2)$ no es múltiplo de $(1, 0)$, porque ningún $\lambda$
+    hace $\lambda \cdot 0 = 2$. Entonces $w$ no es eigenvector: $A$ lo
+    gira.
+\end{ejemplo}
+
+Si $v$ es eigenvector, cualquier múltiplo $cv$ con $c \neq 0$ también
+lo es, porque $A(cv) = c\,Av = c\lambda v = \lambda (cv)$. Por eso no
+se habla de \emph{el} eigenvector sino de una dirección. En el ejemplo,
+$(2, 2)$ y $(-7, -7)$ son igual de válidos que $(1, 1)$.
+
+\begin{ejemplo}[Tres transformaciones del plano]
+    \textbf{Escalamiento.}
+    $A = \begin{pmatrix} 3 & 0 \\ 0 & \tfrac{1}{2} \end{pmatrix}$
+    estira el eje $x$ al triple y encoge el eje $y$ a la mitad. Los
+    eigenvectores son los ejes: $(1, 0)$ con $\lambda = 3$ y $(0, 1)$
+    con $\lambda = \tfrac{1}{2}$. En una matriz diagonal los
+    eigenvalores se leen directo en la diagonal.
+
+    \textbf{Reflexión sobre la recta $y = x$.}
+    $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$ intercambia las
+    coordenadas. Lo que está sobre la recta no se mueve:
+    $A(1, 1) = (1, 1)$, eigenvalor $1$. Lo que está sobre la recta
+    perpendicular se voltea: $A(1, -1) = (-1, 1) = -(1, -1)$,
+    eigenvalor $-1$.
+
+    \textbf{Rotación de $90^\circ$.}
+    $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$ gira todo
+    vector un cuarto de vuelta. Ninguna dirección del plano sale sobre
+    sí misma, así que no hay eigenvectores reales. Más abajo se ve que
+    sus eigenvalores son complejos, $\pm i$.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{El polinomio característico}
+
+La definición no dice cómo encontrar $\lambda$, porque tiene dos
+incógnitas multiplicándose, $\lambda$ y $v$. El truco es pasar todo de
+un lado:
+\[
+    Av = \lambda v
+    \iff Av - \lambda I v = 0
+    \iff (A - \lambda I)\, v = 0 .
+\]
+Hace falta el $I$ porque $A - \lambda$ no tiene sentido: no se le
+resta un número a una matriz. $\lambda v = \lambda I v$ sí.
+
+Lo que queda es un \textbf{sistema homogéneo} con matriz
+$A - \lambda I$. De la clase de sistemas, un homogéneo siempre tiene la
+solución trivial $v = 0$, y tiene otras soluciones exactamente cuando
+la matriz es singular. De la clase de inversa, singular es lo mismo que
+determinante cero. Entonces:
+\[
+    \lambda \text{ es eigenvalor de } A
+    \iff (A - \lambda I)v = 0 \text{ tiene solución } v \neq 0
+    \iff \det(A - \lambda I) = 0 .
+\]
+Con eso la $v$ desaparece y queda una ecuación solo en $\lambda$.
+
+\begin{definicion}[Polinomio y ecuación característica]
+    El \textbf{polinomio característico} de $A$ es
+    $p(\lambda) = \det(A - \lambda I)$. Es un polinomio de grado $n$
+    en $\lambda$. La \textbf{ecuación característica} es
+    $p(\lambda) = 0$, y sus raíces son los eigenvalores de $A$.
+\end{definicion}
+
+\begin{idea}
+    Todo el tema descansa en una cadena de tres clases: eigenvalor
+    $\to$ sistema homogéneo con solución no trivial $\to$ matriz
+    singular $\to$ determinante cero. Si se entiende esa cadena, el
+    procedimiento sale solo.
+\end{idea}
+
+Como $p$ tiene grado $n$, una matriz de $n \times n$ tiene a lo más
+$n$ eigenvalores distintos. Contando repeticiones y admitiendo raíces
+complejas, tiene exactamente $n$, por el teorema fundamental del
+álgebra.
+
+El procedimiento completo es:
+\begin{enumerate}[itemsep=0.2em]
+    \item Calcular $p(\lambda) = \det(A - \lambda I)$: restar
+          $\lambda$ a cada entrada de la diagonal y sacar el
+          determinante con cualquiera de los métodos de la clase de
+          determinantes.
+    \item Resolver $p(\lambda) = 0$. Las raíces son los eigenvalores.
+    \item Para cada eigenvalor $\lambda_i$, resolver el sistema
+          homogéneo $(A - \lambda_i I)v = 0$ por eliminación
+          gaussiana. Sus soluciones no nulas son los eigenvectores.
+\end{enumerate}
+
+\begin{idea}
+    En $2 \times 2$ el polinomio se escribe de memoria:
+    \[
+        \det\begin{pmatrix} a - \lambda & b \\ c & d - \lambda
+        \end{pmatrix}
+        = (a - \lambda)(d - \lambda) - bc
+        = \lambda^2 - (a + d)\,\lambda + (ad - bc) .
+    \]
+    El coeficiente de $\lambda$ es menos la \textbf{traza}
+    $\mathrm{tr}(A) = a + d$, la suma de la diagonal, y el término
+    independiente es $\det A$. O sea
+    $p(\lambda) = \lambda^2 - \mathrm{tr}(A)\,\lambda + \det A$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Ejemplo completo en $2 \times 2$}
+
+\begin{ejemplo}
+    Encontrar eigenvalores y eigenvectores de
+    $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$.
+
+    \textbf{Polinomio.} $\mathrm{tr}(A) = 7$ y
+    $\det A = 12 - 2 = 10$, así que
+    \[
+        p(\lambda) = \lambda^2 - 7\lambda + 10
+                   = (\lambda - 5)(\lambda - 2) .
+    \]
+    Los eigenvalores son $\lambda_1 = 5$ y $\lambda_2 = 2$.
+
+    \textbf{Eigenvector para $\lambda_1 = 5$.} Se resta $5$ en la
+    diagonal y se escalona:
+    \[
+        A - 5I = \begin{pmatrix} -1 & 1 \\ 2 & -2 \end{pmatrix}
+        \xrightarrow{\,R_2 + 2R_1\,}
+        \begin{pmatrix} -1 & 1 \\ 0 & 0 \end{pmatrix} .
+    \]
+    Queda una sola ecuación, $-x + y = 0$, o sea $y = x$. Con $x = t$
+    libre, $v = t\,(1, 1)$. Se toma $v_1 = (1, 1)$.
+
+    \textbf{Eigenvector para $\lambda_2 = 2$.}
+    \[
+        A - 2I = \begin{pmatrix} 2 & 1 \\ 2 & 1 \end{pmatrix}
+        \xrightarrow{\,R_2 - R_1\,}
+        \begin{pmatrix} 2 & 1 \\ 0 & 0 \end{pmatrix} .
+    \]
+    Queda $2x + y = 0$, o sea $y = -2x$. Con $x = t$,
+    $v = t\,(1, -2)$. Se toma $v_2 = (1, -2)$.
+
+    \textbf{Comprobación.}
+    \[
+        A v_1 = \begin{pmatrix} 4 + 1 \\ 2 + 3 \end{pmatrix}
+              = \begin{pmatrix} 5 \\ 5 \end{pmatrix} = 5 v_1 ,
+        \qquad
+        A v_2 = \begin{pmatrix} 4 - 2 \\ 2 - 6 \end{pmatrix}
+              = \begin{pmatrix} 2 \\ -4 \end{pmatrix} = 2 v_2 .
+    \]
+\end{ejemplo}
+
+\begin{resultado}
+    $\lambda_1 = 5$ con $v_1 = (1, 1)$, y $\lambda_2 = 2$ con
+    $v_2 = (1, -2)$.
+\end{resultado}
+
+\begin{ojo}
+    Al escalonar $A - \lambda I$ \textbf{siempre} tiene que aparecer
+    al menos un renglón de ceros. Si sale con pivote en todas las
+    columnas, la única solución es $v = 0$, y eso quiere decir que el
+    $\lambda$ está mal: se equivocó uno al factorizar $p$ o al restar
+    en la diagonal. Es una comprobación gratis a media cuenta.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Ejemplo en $3 \times 3$ y eigenespacios}
+
+\begin{definicion}[Eigenespacio]
+    Para un eigenvalor $\lambda$, el \textbf{eigenespacio}
+    $E_\lambda$ es el conjunto de todas las soluciones de
+    $(A - \lambda I)v = 0$: los eigenvectores de $\lambda$ más el
+    vector cero. Es el espacio nulo de $A - \lambda I$.
+\end{definicion}
+
+Por el teorema de rango de la clase de sistemas, la dimensión de
+$E_\lambda$ es el número de variables libres,
+$n - \mathrm{Ran}(A - \lambda I)$. Puede ser una recta, un plano o
+algo más grande.
+
+\begin{ejemplo}
+    Encontrar eigenvalores y eigenespacios de
+    $A = \begin{pmatrix} 2 & 1 & 1 \\ 1 & 2 & 1 \\ 1 & 1 & 2
+    \end{pmatrix}$.
+
+    \textbf{Polinomio.} Para aligerar la cuenta se escribe
+    $\mu = 2 - \lambda$ en la diagonal y se expande por el primer
+    renglón:
+    \begin{align*}
+        \det\begin{pmatrix} \mu & 1 & 1 \\ 1 & \mu & 1 \\
+                            1 & 1 & \mu \end{pmatrix}
+        &= \mu(\mu^2 - 1) - 1(\mu - 1) + 1(1 - \mu) \\
+        &= \mu^3 - 3\mu + 2
+         = (\mu - 1)^2 (\mu + 2) .
+    \end{align*}
+    Regresando a $\lambda$: $\mu - 1 = 1 - \lambda$ y
+    $\mu + 2 = 4 - \lambda$, entonces
+    \[
+        p(\lambda) = (1 - \lambda)^2 (4 - \lambda) .
+    \]
+    Los eigenvalores son $\lambda = 4$ y $\lambda = 1$, este último
+    como raíz doble.
+
+    \textbf{Eigenespacio de $\lambda = 4$.}
+    \[
+        A - 4I = \begin{pmatrix} -2 & 1 & 1 \\ 1 & -2 & 1 \\
+                                 1 & 1 & -2 \end{pmatrix}
+        \longrightarrow
+        \begin{pmatrix} 1 & 0 & -1 \\ 0 & 1 & -1 \\ 0 & 0 & 0
+        \end{pmatrix} .
+    \]
+    Dos pivotes, una variable libre: $x = z$, $y = z$. Con $z = t$,
+    $E_4$ es la recta generada por $(1, 1, 1)$.
+
+    \textbf{Eigenespacio de $\lambda = 1$.}
+    \[
+        A - I = \begin{pmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\
+                                1 & 1 & 1 \end{pmatrix}
+        \xrightarrow{\,R_2 - R_1,\ R_3 - R_1\,}
+        \begin{pmatrix} 1 & 1 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0
+        \end{pmatrix} .
+    \]
+    Un pivote, dos variables libres. La ecuación es $x + y + z = 0$,
+    así que con $y = s$ y $z = t$:
+    \[
+        v = \begin{pmatrix} -s - t \\ s \\ t \end{pmatrix}
+          = s \begin{pmatrix} -1 \\ 1 \\ 0 \end{pmatrix}
+          + t \begin{pmatrix} -1 \\ 0 \\ 1 \end{pmatrix} .
+    \]
+    $E_1$ es un plano, el que es perpendicular a $(1, 1, 1)$.
+
+    \textbf{Comprobación.} $A(1, 1, 1) = (4, 4, 4)$ y
+    $A(-1, 1, 0) = (-2 + 1, -1 + 2, -1 + 1) = (-1, 1, 0)$.
+\end{ejemplo}
+
+\begin{resultado}
+    $\lambda = 4$ con $E_4 = \mathrm{gen}\{(1, 1, 1)\}$, y
+    $\lambda = 1$ con
+    $E_1 = \mathrm{gen}\{(-1, 1, 0),\, (-1, 0, 1)\}$.
+\end{resultado}
+
+\begin{idea}
+    Para $3 \times 3$ en adelante, factorizar $p$ es lo difícil. Dos
+    atajos: si la matriz tiene un patrón, como aquí la diagonal
+    repetida, conviene un cambio de variable; y si hay que adivinar
+    raíces enteras, solo pueden ser divisores del término
+    independiente, que es $\det A$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Multiplicidad algebraica y geométrica}
+
+Una raíz repetida de $p$ puede dar un eigenespacio grande, como en el
+ejemplo anterior, o uno chico. Para distinguir se usan dos números.
+
+\begin{definicion}[Multiplicidades]
+    Sea $\lambda$ un eigenvalor de $A$.
+    \begin{itemize}[itemsep=0.2em]
+        \item Su \textbf{multiplicidad algebraica} es cuántas veces
+              aparece $\lambda$ como raíz de $p$.
+        \item Su \textbf{multiplicidad geométrica} es la dimensión de
+              $E_\lambda$, o sea cuántos eigenvectores linealmente
+              independientes tiene.
+    \end{itemize}
+    Siempre se cumple
+    $1 \leq \text{geométrica} \leq \text{algebraica}$.
+\end{definicion}
+
+En el ejemplo de $3 \times 3$, $\lambda = 1$ tiene algebraica $2$ y
+geométrica $2$: la raíz doble trajo un plano entero de eigenvectores.
+No siempre pasa.
+
+\begin{ejemplo}[Matriz defectuosa]
+    Sea $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$. Es
+    triangular, así que $p(\lambda) = (3 - \lambda)^2$ y el único
+    eigenvalor es $\lambda = 3$, con multiplicidad algebraica $2$.
+    \[
+        A - 3I = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} .
+    \]
+    Ya está escalonada, con un pivote. La ecuación es $y = 0$ y $x$
+    queda libre: $E_3 = \mathrm{gen}\{(1, 0)\}$, una recta.
+    Multiplicidad geométrica $1$.
+
+    Geométricamente, $A$ estira todo por $3$ y además desliza en
+    horizontal: el eje $x$ se queda en su lugar, pero cualquier vector
+    con $y \neq 0$ se ladea. Solo sobrevive una dirección.
+\end{ejemplo}
+
+Cuando la geométrica es menor que la algebraica se dice que la matriz
+es \textbf{defectuosa}: le faltan eigenvectores. Eso importa en la
+diagonalización, más abajo.
+
+% =====================================================================
+
+\subsection*{Eigenvalores complejos}
+
+\begin{ejemplo}
+    Para la rotación
+    $A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$ se tiene
+    $\mathrm{tr}(A) = 0$ y $\det A = 0 - (-1) = 1$, así que
+    \[
+        p(\lambda) = \lambda^2 + 1 = 0
+        \implies \lambda = \pm i .
+    \]
+    Para $\lambda = i$:
+    \[
+        A - iI = \begin{pmatrix} -i & -1 \\ 1 & -i \end{pmatrix} .
+    \]
+    El primer renglón da $-ix - y = 0$, o sea $y = -ix$, y el segundo
+    es el mismo multiplicado por $i$. Con $x = 1$, $v = (1, -i)$. Para
+    $\lambda = -i$ sale el conjugado, $v = (1, i)$.
+\end{ejemplo}
+
+\begin{ojo}
+    Una matriz con entradas reales puede tener eigenvalores complejos,
+    y cuando los tiene vienen en pares conjugados $a \pm bi$. En la
+    práctica casi siempre indican una rotación escondida en la
+    transformación. En $2 \times 2$ se detectan antes de factorizar:
+    si el discriminante $\mathrm{tr}(A)^2 - 4\det A$ es negativo, las
+    raíces son complejas. Aquí da $0 - 4 = -4$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Propiedades}
+
+Sean $\lambda_1, \ldots, \lambda_n$ los eigenvalores de $A$, contados
+con su multiplicidad algebraica.
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Suma y producto.}
+          \[
+              \lambda_1 + \cdots + \lambda_n = \mathrm{tr}(A) ,
+              \qquad
+              \lambda_1 \cdots \lambda_n = \det A .
+          \]
+          Salen de comparar coeficientes de $p(\lambda)$ con su forma
+          factorizada $(\lambda_1 - \lambda) \cdots
+          (\lambda_n - \lambda)$; evaluando en $\lambda = 0$ queda
+          $p(0) = \det A = \lambda_1 \cdots \lambda_n$. En el ejemplo
+          de $3 \times 3$: $4 + 1 + 1 = 6 = 2 + 2 + 2$ y
+          $4 \cdot 1 \cdot 1 = 4 = \det A$.
+    \item \textbf{Singularidad.} $A$ es invertible si y solo si $0$
+          no es eigenvalor. Es la propiedad anterior: el determinante
+          es el producto de los eigenvalores y se anula justo cuando
+          uno de ellos es cero.
+    \item \textbf{Triangulares.} Si $A$ es triangular (o diagonal),
+          sus eigenvalores son las entradas de la diagonal, porque
+          $A - \lambda I$ también es triangular y su determinante es
+          el producto $(a_{11} - \lambda) \cdots (a_{nn} - \lambda)$.
+    \item \textbf{Potencias.} Si $Av = \lambda v$, entonces
+          $A^k v = \lambda^k v$. Se aplica $A$ una vez más:
+          $A^2 v = A(\lambda v) = \lambda A v = \lambda^2 v$, y así
+          sucesivamente. Mismo eigenvector, eigenvalor elevado a la
+          $k$.
+    \item \textbf{Inversa.} Si $A$ es invertible y $Av = \lambda v$,
+          entonces $A^{-1} v = \tfrac{1}{\lambda} v$. Se multiplica
+          $Av = \lambda v$ por $A^{-1}$ y se divide entre $\lambda$,
+          que no es cero por la propiedad 2.
+    \item \textbf{Transpuesta.} $A$ y $A^{T}$ tienen los mismos
+          eigenvalores, porque $\det(A^{T} - \lambda I)
+          = \det\big((A - \lambda I)^{T}\big) = \det(A - \lambda I)$.
+          Los eigenvectores en general son distintos.
+    \item \textbf{Independencia.} Eigenvectores de eigenvalores
+          distintos son linealmente independientes. Con $n$
+          eigenvalores distintos hay $n$ eigenvectores independientes.
+    \item \textbf{Simétricas.} Si $A$ es real y simétrica, todos sus
+          eigenvalores son reales y los eigenvectores de eigenvalores
+          distintos son ortogonales. El ejemplo de $3 \times 3$ lo
+          muestra: $(1, 1, 1) \cdot (-1, 1, 0) = 0$.
+\end{enumerate}
+
+\begin{idea}
+    Las propiedades 1 y 3 sirven para revisar la cuenta sin volver a
+    hacerla. Si la suma de los eigenvalores que salieron no da la
+    traza, algo está mal antes de siquiera buscar eigenvectores.
+\end{idea}
+
+\begin{ojo}
+    Los eigenvalores \textbf{no} se conservan con operaciones
+    elementales de renglón. Escalonar $A$ primero y luego leer la
+    diagonal da cualquier cosa. La propiedad 3 aplica a una matriz
+    que ya es triangular de origen, no a una que se triangularizó con
+    Gauss. Se escalona $A - \lambda I$, nunca $A$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Diagonalización}
+
+Supóngase que $A$ de $n \times n$ tiene $n$ eigenvectores linealmente
+independientes $v_1, \ldots, v_n$ con eigenvalores
+$\lambda_1, \ldots, \lambda_n$. Se ponen como columnas de una matriz
+$P$ y los eigenvalores en una diagonal $D$, en el mismo orden:
+\[
+    P = \begin{pmatrix} v_1 & v_2 & \cdots & v_n \end{pmatrix} ,
+    \qquad
+    D = \begin{pmatrix} \lambda_1 & & \\ & \ddots & \\
+                        & & \lambda_n \end{pmatrix} .
+\]
+Por la multiplicación por bloques, $AP$ tiene columnas $Av_i$, y
+$PD$ tiene columnas $\lambda_i v_i$. Son iguales, así que $AP = PD$.
+Como las columnas de $P$ son independientes, $P$ es invertible, y
+\[
+    A = P D P^{-1} .
+\]
+
+\begin{definicion}[Matriz diagonalizable]
+    $A$ es \textbf{diagonalizable} si existe $P$ invertible y $D$
+    diagonal con $A = PDP^{-1}$. Esto pasa si y solo si $A$ tiene $n$
+    eigenvectores linealmente independientes, es decir, si la
+    multiplicidad geométrica de cada eigenvalor es igual a la
+    algebraica.
+\end{definicion}
+
+\begin{itemize}[itemsep=0.2em]
+    \item Con $n$ eigenvalores distintos, siempre es diagonalizable
+          (propiedad 7).
+    \item Toda matriz real simétrica es diagonalizable.
+    \item La matriz defectuosa $\left(\begin{smallmatrix} 3 & 1 \\
+          0 & 3 \end{smallmatrix}\right)$ no lo es: solo tiene un
+          eigenvector independiente y $P$ no se puede armar.
+\end{itemize}
+
+\begin{idea}
+    Diagonalizar es cambiar de coordenadas. $P^{-1}$ traduce un vector
+    a coordenadas de eigenvectores, $D$ estira cada coordenada por su
+    eigenvalor sin mezclar nada, y $P$ regresa a las coordenadas
+    originales. En la base de eigenvectores la matriz más enredada se
+    vuelve un escalamiento por ejes.
+\end{idea}
+
+Para lo que más sirve es para las potencias. Al multiplicar
+$A^k = (PDP^{-1})(PDP^{-1}) \cdots (PDP^{-1})$ los $P^{-1}P$ de en
+medio se cancelan y queda
+\[
+    A^k = P D^k P^{-1} ,
+    \qquad
+    D^k = \begin{pmatrix} \lambda_1^k & & \\ & \ddots & \\
+                          & & \lambda_n^k \end{pmatrix} .
+\]
+Elevar una diagonal es elevar cada entrada. En vez de $k - 1$
+productos de matrices, bastan dos.
+
+\begin{ejemplo}
+    Diagonalizar $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$ y
+    dar una fórmula para $A^k$.
+
+    \textbf{$P$ y $D$.} Con los eigenpares del ejemplo de
+    $2 \times 2$, $(5, (1, 1))$ y $(2, (1, -2))$:
+    \[
+        P = \begin{pmatrix} 1 & 1 \\ 1 & -2 \end{pmatrix} ,
+        \qquad
+        D = \begin{pmatrix} 5 & 0 \\ 0 & 2 \end{pmatrix} .
+    \]
+
+    \textbf{$P^{-1}$.} Con la fórmula de $2 \times 2$ de la clase de
+    inversa, $\det P = -2 - 1 = -3$:
+    \[
+        P^{-1} = \frac{1}{-3}
+        \begin{pmatrix} -2 & -1 \\ -1 & 1 \end{pmatrix}
+        = \frac{1}{3} \begin{pmatrix} 2 & 1 \\ 1 & -1 \end{pmatrix} .
+    \]
+
+    \textbf{$A^k$.} Primero $PD^k$, que multiplica cada columna de $P$
+    por su eigenvalor a la $k$:
+    \[
+        PD^k = \begin{pmatrix} 5^k & 2^k \\ 5^k & -2 \cdot 2^k
+        \end{pmatrix} ,
+        \qquad
+        A^k = PD^kP^{-1} = \frac{1}{3}
+        \begin{pmatrix}
+            2 \cdot 5^k + 2^k & 5^k - 2^k \\
+            2 \cdot 5^k - 2 \cdot 2^k & 5^k + 2 \cdot 2^k
+        \end{pmatrix} .
+    \]
+
+    \textbf{Comprobación.} Con $k = 1$ sale
+    $\tfrac{1}{3}\left(\begin{smallmatrix} 12 & 3 \\ 6 & 9
+    \end{smallmatrix}\right) = A$. Con $k = 2$ la fórmula da
+    $\tfrac{1}{3}\left(\begin{smallmatrix} 54 & 21 \\ 42 & 33
+    \end{smallmatrix}\right)
+    = \left(\begin{smallmatrix} 18 & 7 \\ 14 & 11
+    \end{smallmatrix}\right)$, y directo
+    \[
+        A^2 = \begin{pmatrix} 16 + 2 & 4 + 3 \\ 8 + 6 & 2 + 9
+        \end{pmatrix}
+        = \begin{pmatrix} 18 & 7 \\ 14 & 11 \end{pmatrix} .
+    \]
+\end{ejemplo}
+
+\begin{resultado}
+    $A^k = \dfrac{1}{3}
+    \begin{pmatrix}
+        2 \cdot 5^k + 2^k & 5^k - 2^k \\
+        2 \cdot 5^k - 2 \cdot 2^k & 5^k + 2 \cdot 2^k
+    \end{pmatrix}$.
+\end{resultado}
+
+\begin{idea}
+    La fórmula dice algo más: cuando $k$ crece, $5^k$ le gana por
+    mucho a $2^k$, y $A^k$ se parece cada vez más a
+    $\tfrac{5^k}{3}\left(\begin{smallmatrix} 2 & 1 \\ 2 & 1
+    \end{smallmatrix}\right)$. A la larga manda el eigenvalor más
+    grande en valor absoluto. En eso se basa el método de la
+    siguiente sección.
+\end{idea}
+
+\begin{ojo}
+    El orden importa: la columna $i$ de $P$ tiene que ser el
+    eigenvector de la entrada $i$ de $D$. Si se ponen los eigenvalores
+    en un orden y los eigenvectores en otro, $PDP^{-1}$ ya no da $A$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Método de la potencia}
+
+Para matrices grandes nadie calcula $p(\lambda)$: el polinomio de una
+matriz de $1000 \times 1000$ tiene grado $1000$, y encontrar sus
+raíces es numéricamente inestable. Cuando solo interesa el eigenvalor
+dominante, el de mayor valor absoluto, hay un método iterativo muy
+simple.
+
+Se parte de un vector $x_0$ cualquiera y se repite
+\[
+    x_{k+1} = \frac{A x_k}{c_k} ,
+\]
+donde $c_k$ es la entrada de mayor valor absoluto de $A x_k$. Dividir
+entre $c_k$ solo sirve para que los números no crezcan sin control.
+Si hay un eigenvalor dominante $\lambda_1$, $x_k$ tiende a su
+eigenvector y $c_k$ tiende a $\lambda_1$.
+
+\begin{idea}
+    Por qué funciona: $x_0$ se escribe como combinación de
+    eigenvectores, $x_0 = a_1 v_1 + a_2 v_2 + \cdots$. Aplicar $A$ $k$
+    veces da $a_1 \lambda_1^k v_1 + a_2 \lambda_2^k v_2 + \cdots$, y
+    como $\abs{\lambda_1}$ es el más grande, el primer término aplasta
+    a los demás. El error baja en cada paso por un factor
+    $\abs{\lambda_2 / \lambda_1}$.
+\end{idea}
+
+\begin{ejemplo}
+    Aplicar el método a
+    $A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}$ con
+    $x_0 = (1, 0)$.
+    \begin{align*}
+        A x_0 &= (4,\ 2) ,
+            & c_0 &= 4 ,
+            & x_1 &= (1,\ 0.5) , \\
+        A x_1 &= (4.5,\ 3.5) ,
+            & c_1 &= 4.5 ,
+            & x_2 &= (1,\ 0.778) , \\
+        A x_2 &= (4.778,\ 4.333) ,
+            & c_2 &= 4.778 ,
+            & x_3 &= (1,\ 0.907) , \\
+        A x_3 &= (4.907,\ 4.721) ,
+            & c_3 &= 4.907 ,
+            & x_4 &= (1,\ 0.962) .
+    \end{align*}
+    $x_k$ se acerca a $(1, 1)$ y $c_k$ a $5$, que es el eigenpar
+    dominante ya conocido. La distancia de la segunda coordenada a $1$
+    va $0.5$, $0.222$, $0.093$, $0.038$: se multiplica cada vez por
+    $\approx 0.4 = 2/5 = \lambda_2 / \lambda_1$, como predice la
+    teoría.
+\end{ejemplo}
+
+\begin{ojo}
+    Si $\abs{\lambda_2}$ está muy cerca de $\abs{\lambda_1}$, el
+    factor se acerca a $1$ y la convergencia es lentísima. Si hay dos
+    eigenvalores dominantes de igual magnitud, por ejemplo $3$ y $-3$,
+    el método oscila y no converge.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Para qué sirve en computación}
+
+\begin{ejemplo}[Cadena de Markov]
+    Un modelo de clima con dos estados: si hoy hay sol, mañana hay sol
+    con probabilidad $0.9$; si hoy llueve, mañana hay sol con
+    probabilidad $0.5$. Con el vector de probabilidades
+    $x = (\text{sol}, \text{lluvia})$, un día después se tiene
+    $x' = Mx$ con
+    \[
+        M = \begin{pmatrix} 0.9 & 0.5 \\ 0.1 & 0.5 \end{pmatrix} .
+    \]
+    Cada columna suma $1$ porque es una distribución de
+    probabilidad. La pregunta es qué proporción de días soleados hay a
+    la larga, o sea un $x$ que ya no cambie: $Mx = x$. Es un
+    eigenvector con $\lambda = 1$.
+
+    \textbf{Eigenvalores.} $\mathrm{tr}(M) = 1.4$ y
+    $\det M = 0.45 - 0.05 = 0.4$, así que
+    $p(\lambda) = \lambda^2 - 1.4\lambda + 0.4
+    = (\lambda - 1)(\lambda - 0.4)$.
+
+    \textbf{Eigenvector para $\lambda = 1$.}
+    \[
+        M - I = \begin{pmatrix} -0.1 & 0.5 \\ 0.1 & -0.5
+        \end{pmatrix}
+        \xrightarrow{\,R_2 + R_1\,}
+        \begin{pmatrix} -0.1 & 0.5 \\ 0 & 0 \end{pmatrix}
+        \implies x = 5y .
+    \]
+    Como es una distribución, se normaliza para que sume $1$:
+    $5y + y = 1$, $y = \tfrac{1}{6}$.
+\end{ejemplo}
+
+\begin{resultado}
+    A la larga, $\tfrac{5}{6}$ de los días hay sol y $\tfrac{1}{6}$
+    llueve, sin importar cómo esté el clima hoy. El otro eigenvalor,
+    $0.4$, dice qué tan rápido se olvida la condición inicial: la
+    diferencia se multiplica por $0.4$ cada día.
+\end{resultado}
+
+Donde más aparece:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{PageRank.} La web es una cadena de Markov gigante:
+          cada página reparte su probabilidad entre las páginas a las
+          que enlaza. La importancia de cada página es la entrada
+          correspondiente del eigenvector con $\lambda = 1$, y se
+          calcula con el método de la potencia porque la matriz tiene
+          miles de millones de renglones.
+    \item \textbf{Análisis de componentes principales (PCA).} Se toma
+          la matriz de covarianza de los datos, que es simétrica. Sus
+          eigenvectores son las direcciones de mayor varianza y sus
+          eigenvalores dicen cuánta varianza explica cada una. Reducir
+          dimensión es quedarse con los eigenvectores de los
+          eigenvalores más grandes.
+    \item \textbf{Estabilidad de sistemas dinámicos.} En
+          $x_{k+1} = Ax_k$, si todos los eigenvalores cumplen
+          $\abs{\lambda} < 1$, el sistema se apaga hacia cero; si
+          alguno tiene $\abs{\lambda} > 1$, explota. Lo mismo decide si
+          el gradiente de una red recurrente se desvanece o se dispara.
+    \item \textbf{Grafos.} Los eigenvalores de la matriz de adyacencia
+          o de la laplaciana dicen si el grafo es conexo, cuántas
+          componentes tiene y cómo partirlo en comunidades
+          (agrupamiento espectral).
+\end{itemize}
 
 
 \end{document}
