@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.6.0
+%   * Version: 2.7.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       30/09/2026      Clase de SVD, expuesta por compañeros
 %  zxxz6       30/09/2026      Clase de eigenvalores y eigenvectores
 %  zxxz6       30/09/2026      Clase de inversa de una matriz
 %  zxxz6       30/09/2026      Clase de determinantes, con ejercicios
@@ -2896,6 +2897,609 @@ Donde más aparece:
           o de la laplaciana dicen si el grafo es conexo, cuántas
           componentes tiene y cómo partirlo en comunidades
           (agrupamiento espectral).
+\end{itemize}
+
+\newpage
+
+% =====================================================================
+%  Clase 30 Sep - Descomposicion en valores singulares (SVD)
+% =====================================================================
+
+\clase{Descomposición en valores singulares (SVD)}%
+      {30 de septiembre de 2026}
+
+\begin{quick_sum}
+    Exposición de Erick Rodríguez y Osvaldo Cornelio. La SVD escribe
+    \emph{cualquier} matriz, cuadrada o no, como $A = U \Sigma V^{T}$:
+    una rotación, un estiramiento por ejes y otra rotación. Se saca
+    con los eigenvalores y eigenvectores de $A^{T}A$, así que es la
+    continuación directa de la clase anterior. Se vio la definición,
+    las propiedades, la interpretación geométrica, un ejemplo completo
+    de $3 \times 2$ y aplicaciones: compresión de imágenes,
+    indexación semántica y sistemas de recomendación.
+\end{quick_sum}
+
+\subsection*{Por qué hace falta}
+
+La diagonalización $A = PDP^{-1}$ de la clase anterior es muy útil,
+pero tiene tres limitaciones:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item Solo aplica a matrices \textbf{cuadradas}. Una tabla de
+          datos con $1000$ usuarios y $50$ películas es de
+          $1000 \times 50$ y ni siquiera tiene eigenvalores.
+    \item No toda cuadrada es diagonalizable: las defectuosas no lo
+          son.
+    \item Aunque exista, $P$ en general no es ortogonal, y los
+          eigenvalores pueden salir negativos o complejos.
+\end{enumerate}
+
+La SVD resuelve las tres: existe para toda matriz real de
+$m \times n$, las dos matrices de los lados son ortogonales y los
+números de en medio son reales y no negativos.
+
+% =====================================================================
+
+\subsection*{Matrices ortogonales}
+
+Antes de la definición hace falta un concepto.
+
+\begin{definicion}[Matriz ortogonal]
+    Una matriz cuadrada $Q$ es \textbf{ortogonal} si
+    $Q^{T}Q = QQ^{T} = I$, o sea si $Q^{-1} = Q^{T}$. Equivalentemente,
+    sus columnas son \textbf{ortonormales}: cada una mide $1$ y
+    cualesquiera dos distintas son perpendiculares,
+    \[
+        q_i \cdot q_j = \begin{cases} 1 & i = j \\ 0 & i \neq j
+        \end{cases} .
+    \]
+\end{definicion}
+
+La entrada $(i, j)$ de $Q^{T}Q$ es justo $q_i \cdot q_j$, por eso las
+dos formas de decirlo son la misma. Lo importante de una ortogonal es
+que \textbf{no cambia longitudes ni ángulos}:
+\[
+    \norm{Qx}^2 = (Qx)^{T}(Qx) = x^{T}Q^{T}Qx = x^{T}x = \norm{x}^2 .
+\]
+Geométricamente es una rotación o una reflexión. A esto se le llama
+invariancia isométrica.
+
+\begin{ejemplo}
+    La rotación por un ángulo $\theta$,
+    $Q = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta &
+    \cos\theta \end{pmatrix}$, es ortogonal: cada columna cumple
+    $\cos^2\theta + \sin^2\theta = 1$, y el producto punto entre ellas
+    es $-\cos\theta\sin\theta + \sin\theta\cos\theta = 0$.
+\end{ejemplo}
+
+\begin{idea}
+    Invertir una ortogonal es gratis: basta transponerla. Por eso,
+    cuando aparece una en una factorización, deshacerla no cuesta
+    nada ni acumula error numérico.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Definición}
+
+\begin{definicion}[Descomposición en valores singulares]
+    Toda matriz real $A$ de $m \times n$ se puede escribir como
+    \[
+        A = U \Sigma V^{T} ,
+    \]
+    donde
+    \begin{itemize}[itemsep=0.2em]
+        \item $U$ es de $m \times m$ y ortogonal. Sus columnas
+              $u_1, \ldots, u_m$ son los \textbf{vectores singulares
+              izquierdos}.
+        \item $\Sigma$ es de $m \times n$, con ceros fuera de la
+              diagonal principal. En la diagonal van los
+              \textbf{valores singulares}
+              $\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$.
+        \item $V$ es de $n \times n$ y ortogonal. Sus columnas
+              $v_1, \ldots, v_n$, que son los renglones de $V^{T}$,
+              son los \textbf{vectores singulares derechos}.
+    \end{itemize}
+\end{definicion}
+
+\begin{ojo}
+    En las láminas de la exposición las cuatro matrices aparecían
+    como de $m \times m$. Las dimensiones correctas son las de
+    arriba, y se revisan con la regla del producto: $(m \times m)
+    (m \times n)(n \times n) = m \times n$. $U$ tiene el tamaño de los
+    renglones de $A$, $V$ el de sus columnas, y $\Sigma$ el mismo
+    tamaño que $A$.
+\end{ojo}
+
+Cuando $A$ no es cuadrada, $\Sigma$ tampoco. Por ejemplo, con
+$m = 3$ y $n = 2$ solo hay dos valores singulares y sobra un renglón
+de ceros:
+\[
+    \Sigma = \begin{pmatrix} \sigma_1 & 0 \\ 0 & \sigma_2 \\ 0 & 0
+    \end{pmatrix} .
+\]
+En general hay $\min(m, n)$ valores singulares.
+
+% =====================================================================
+
+\subsection*{De dónde sale: la matriz $A^{T}A$}
+
+La idea es convertir el problema de una matriz rectangular en uno de
+eigenvalores de una matriz cuadrada y simétrica. Si $A = U\Sigma V^{T}$,
+entonces
+\[
+    A^{T}A = (U\Sigma V^{T})^{T}(U\Sigma V^{T})
+           = V\Sigma^{T}U^{T}U\Sigma V^{T}
+           = V (\Sigma^{T}\Sigma) V^{T} .
+\]
+$\Sigma^{T}\Sigma$ es diagonal de $n \times n$ con entradas
+$\sigma_i^2$. Eso es una diagonalización de $A^{T}A$ con $P = V$. Así
+que:
+
+\begin{itemize}[itemsep=0.3em]
+    \item Las columnas de $V$ son eigenvectores de $A^{T}A$.
+    \item Los eigenvalores de $A^{T}A$ son los $\sigma_i^2$, y por
+          eso $\sigma_i = \sqrt{\lambda_i}$.
+\end{itemize}
+
+Que esto siempre se pueda hacer depende de dos hechos sobre $A^{T}A$:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Es simétrica}, porque
+          $(A^{T}A)^{T} = A^{T}(A^{T})^{T} = A^{T}A$. Por la propiedad
+          8 de la clase anterior, sus eigenvalores son reales, se
+          puede diagonalizar y sus eigenvectores se pueden escoger
+          ortonormales. Eso da una $V$ ortogonal.
+    \item \textbf{Sus eigenvalores son $\geq 0$.} Si
+          $A^{T}Av = \lambda v$ con $\norm{v} = 1$,
+          \[
+              \lambda = \lambda\, v^{T}v = v^{T}A^{T}Av
+                      = (Av)^{T}(Av) = \norm{Av}^2 \geq 0 .
+          \]
+          Por eso la raíz cuadrada siempre existe y los $\sigma_i$
+          son reales y no negativos.
+\end{enumerate}
+
+Falta $U$. Para cada $\sigma_i \neq 0$ se define
+\[
+    u_i = \frac{A v_i}{\sigma_i} .
+\]
+Estos vectores salen ortonormales solos:
+\[
+    u_i \cdot u_j = \frac{(Av_i)^{T}(Av_j)}{\sigma_i\sigma_j}
+                  = \frac{v_i^{T}(A^{T}Av_j)}{\sigma_i\sigma_j}
+                  = \frac{\sigma_j^2\, v_i \cdot v_j}{\sigma_i\sigma_j}
+                  = \begin{cases} 1 & i = j \\ 0 & i \neq j
+                    \end{cases} .
+\]
+Despejando, $Av_i = \sigma_i u_i$ para cada $i$. Juntando todas las
+columnas, $AV = U\Sigma$, y como $V^{-1} = V^{T}$, queda
+$A = U\Sigma V^{T}$.
+
+\begin{idea}
+    La relación $Av_i = \sigma_i u_i$ es el corazón de la SVD. Se
+    parece a $Av = \lambda v$, pero con dos vectores distintos: $A$
+    manda la dirección $v_i$ del espacio de entrada a la dirección
+    $u_i$ del espacio de salida, multiplicada por $\sigma_i$. Con una
+    matriz rectangular no puede ser el mismo vector, porque $v_i$
+    vive en $\R^n$ y $u_i$ en $\R^m$.
+\end{idea}
+
+Si $m > n$, o si hay valores singulares cero, las fórmulas anteriores
+no alcanzan para llenar las $m$ columnas de $U$. Las que faltan se
+completan con cualquier conjunto de vectores ortonormales
+perpendiculares a los que ya se tienen. No afectan el producto,
+porque en $\Sigma$ multiplican a renglones de ceros.
+
+% =====================================================================
+
+\subsection*{Procedimiento}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item Calcular $A^{T}A$, de $n \times n$.
+    \item Sacar sus eigenvalores con $\det(A^{T}A - \lambda I) = 0$ y
+          ordenarlos de mayor a menor.
+    \item Valores singulares: $\sigma_i = \sqrt{\lambda_i}$. Armar
+          $\Sigma$ del tamaño de $A$ con ellos en la diagonal.
+    \item Para cada $\lambda_i$, resolver $(A^{T}A - \lambda_i I)v = 0$
+          y \textbf{normalizar} el eigenvector,
+          $v_i = v / \norm{v}$. Las $v_i$ son las columnas de $V$.
+    \item Para cada $\sigma_i \neq 0$, calcular
+          $u_i = Av_i / \sigma_i$.
+    \item Si faltan columnas de $U$, completarlas con vectores
+          ortonormales perpendiculares a los anteriores.
+\end{enumerate}
+
+\begin{ojo}
+    Tentación: sacar $U$ por separado como eigenvectores de $AA^{T}$,
+    que también funciona en teoría. El problema es el signo: cada
+    eigenvector se puede tomar como $v$ o $-v$, y si $U$ y $V$ se
+    escogen por separado, puede salir un $u_i$ con el signo
+    equivocado y $U\Sigma V^{T}$ ya no da $A$. Con $u_i = Av_i/\sigma_i$
+    el signo queda amarrado a $v_i$ y no hay forma de fallar.
+\end{ojo}
+
+\begin{idea}
+    Conviene usar $A^{T}A$ o $AA^{T}$ según cuál sea más chica. Si
+    $A$ es de $3 \times 2$, $A^{T}A$ es de $2 \times 2$ y $AA^{T}$ de
+    $3 \times 3$. Las dos tienen los mismos eigenvalores distintos de
+    cero; la grande solo agrega ceros.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Ejemplo completo}
+
+\begin{ejemplo}
+    Calcular la SVD de
+    $A = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}$, de
+    $3 \times 2$.
+
+    \textbf{Paso 1: $A^{T}A$.}
+    \[
+        A^{T}A = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 1
+        \end{pmatrix}
+        \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}
+        = \begin{pmatrix} 1 + 0 + 1 & 0 + 0 + 1 \\ 0 + 0 + 1 &
+                          0 + 1 + 1 \end{pmatrix}
+        = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix} .
+    \]
+    Sale simétrica, como tiene que ser.
+
+    \textbf{Paso 2: eigenvalores.} Con el atajo de $2 \times 2$,
+    traza $4$ y determinante $3$:
+    \[
+        \det(A^{T}A - \lambda I) = (2 - \lambda)^2 - 1
+        = \lambda^2 - 4\lambda + 3 = (\lambda - 3)(\lambda - 1) .
+    \]
+    Ordenados: $\lambda_1 = 3$, $\lambda_2 = 1$.
+
+    \textbf{Paso 3: valores singulares y $\Sigma$.}
+    $\sigma_1 = \sqrt{3} \approx 1.732$ y $\sigma_2 = \sqrt{1} = 1$.
+    Como $A$ es de $3 \times 2$, $\Sigma$ también:
+    \[
+        \Sigma = \begin{pmatrix} \sqrt{3} & 0 \\ 0 & 1 \\ 0 & 0
+        \end{pmatrix} .
+    \]
+
+    \textbf{Paso 4: $V$.} Para $\lambda_1 = 3$:
+    \[
+        A^{T}A - 3I = \begin{pmatrix} -1 & 1 \\ 1 & -1 \end{pmatrix}
+        \xrightarrow{\,R_2 + R_1\,}
+        \begin{pmatrix} -1 & 1 \\ 0 & 0 \end{pmatrix}
+        \implies y = x \implies v = (1, 1) .
+    \]
+    Su norma es $\sqrt{1^2 + 1^2} = \sqrt{2}$, así que
+    $v_1 = \tfrac{1}{\sqrt{2}}(1, 1)$. Para $\lambda_2 = 1$:
+    \[
+        A^{T}A - I = \begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}
+        \xrightarrow{\,R_2 - R_1\,}
+        \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}
+        \implies y = -x \implies v = (1, -1) ,
+    \]
+    y normalizado $v_2 = \tfrac{1}{\sqrt{2}}(1, -1)$. Entonces
+    \[
+        V = \frac{1}{\sqrt{2}}
+        \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} ,
+        \qquad
+        V^{T} = \frac{1}{\sqrt{2}}
+        \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} .
+    \]
+    Aquí $V = V^{T}$ porque $V$ salió simétrica, pero eso es
+    casualidad de este ejemplo.
+
+    \textbf{Paso 5: $u_1$ y $u_2$.}
+    \[
+        Av_1 = \frac{1}{\sqrt{2}}
+        \begin{pmatrix} 1 \\ 1 \\ 2 \end{pmatrix}
+        \implies
+        u_1 = \frac{Av_1}{\sqrt{3}}
+            = \frac{1}{\sqrt{6}} \begin{pmatrix} 1 \\ 1 \\ 2
+            \end{pmatrix} ,
+    \]
+    \[
+        Av_2 = \frac{1}{\sqrt{2}}
+        \begin{pmatrix} 1 \\ -1 \\ 0 \end{pmatrix}
+        \implies
+        u_2 = \frac{Av_2}{1}
+            = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 \\ -1 \\ 0
+            \end{pmatrix} .
+    \]
+    La tercera entrada de $u_1$ es $\tfrac{2}{\sqrt{6}}$, que en las
+    láminas aparece como $\sqrt{2/3}$; es el mismo número.
+
+    \textbf{Paso 6: completar $u_3$.} $U$ debe ser de $3 \times 3$ y
+    solo hay dos columnas. Se busca $u_3 = (x, y, z)$ perpendicular a
+    las dos:
+    \begin{align*}
+        u_2 \cdot u_3 = 0 &\implies \tfrac{1}{\sqrt{2}}(x - y) = 0
+            \implies y = x , \\
+        u_1 \cdot u_3 = 0 &\implies \tfrac{1}{\sqrt{6}}(x + y + 2z)
+            = 0 \implies 2x + 2z = 0 \implies z = -x .
+    \end{align*}
+    Con $x = 1$ queda $w = (1, 1, -1)$, de norma $\sqrt{3}$, así que
+    $u_3 = \tfrac{1}{\sqrt{3}}(1, 1, -1)$.
+\end{ejemplo}
+
+\begin{resultado}
+    \[
+        A =
+        \underbrace{\begin{pmatrix}
+            \tfrac{1}{\sqrt{6}} & \tfrac{1}{\sqrt{2}} &
+                \tfrac{1}{\sqrt{3}} \\[3pt]
+            \tfrac{1}{\sqrt{6}} & -\tfrac{1}{\sqrt{2}} &
+                \tfrac{1}{\sqrt{3}} \\[3pt]
+            \tfrac{2}{\sqrt{6}} & 0 & -\tfrac{1}{\sqrt{3}}
+        \end{pmatrix}}_{U}
+        \underbrace{\begin{pmatrix} \sqrt{3} & 0 \\ 0 & 1 \\ 0 & 0
+        \end{pmatrix}}_{\Sigma}
+        \underbrace{\begin{pmatrix}
+            \tfrac{1}{\sqrt{2}} & \tfrac{1}{\sqrt{2}} \\[3pt]
+            \tfrac{1}{\sqrt{2}} & -\tfrac{1}{\sqrt{2}}
+        \end{pmatrix}}_{V^{T}}
+    \]
+\end{resultado}
+
+\textbf{Comprobación.} $U\Sigma$ solo usa las dos primeras columnas de
+$U$, multiplicadas por $\sigma_1$ y $\sigma_2$; la tercera choca con
+el renglón de ceros:
+\[
+    U\Sigma = \begin{pmatrix}
+        \tfrac{1}{\sqrt{2}} & \tfrac{1}{\sqrt{2}} \\[3pt]
+        \tfrac{1}{\sqrt{2}} & -\tfrac{1}{\sqrt{2}} \\[3pt]
+        \sqrt{2} & 0
+    \end{pmatrix} ,
+    \qquad
+    U\Sigma V^{T} = \begin{pmatrix}
+        \tfrac{1}{2} + \tfrac{1}{2} & \tfrac{1}{2} - \tfrac{1}{2}
+            \\[3pt]
+        \tfrac{1}{2} - \tfrac{1}{2} & \tfrac{1}{2} + \tfrac{1}{2}
+            \\[3pt]
+        1 + 0 & 1 - 0
+    \end{pmatrix}
+    = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix} = A .
+\]
+
+\begin{idea}
+    Hay un atajo para $u_3$. Las columnas de $U$ que sobran son
+    perpendiculares a todo lo que $A$ puede producir, o sea a las
+    columnas de $A$. Eso equivale a resolver $A^{T}u = 0$: aquí
+    $x + z = 0$ y $y + z = 0$, que da $(1, 1, -1)$ directo, sin pasar
+    por $u_1$ y $u_2$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Interpretación geométrica}
+
+Leyendo $Ax = U\Sigma V^{T}x$ de derecha a izquierda, $A$ hace tres
+cosas en orden:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item $V^{T}$ \textbf{rota} (o refleja) el espacio de entrada,
+          llevando los $v_i$ a los ejes coordenados.
+    \item $\Sigma$ \textbf{estira} cada eje por su $\sigma_i$. Si
+          $m \neq n$, además agrega o quita dimensiones.
+    \item $U$ \textbf{rota} el resultado hasta dejar los ejes sobre
+          los $u_i$.
+\end{enumerate}
+
+Las rotaciones no deforman nada, así que toda la deformación de $A$
+está en $\Sigma$. Por eso $A$ convierte el círculo unitario en una
+elipse cuyos semiejes miden $\sigma_1$ y $\sigma_2$ y apuntan en las
+direcciones $u_1$ y $u_2$.
+
+\begin{ejemplo}[El ejemplo gráfico de la exposición]
+    $A = \begin{pmatrix} 3 & 1 \\ 1 & 2 \end{pmatrix}$ tiene traza
+    $5$ y determinante $5$, así que sus eigenvalores son
+    $\tfrac{5 \pm \sqrt{5}}{2}$, o sea $3.62$ y $1.38$. Como es
+    simétrica y sus eigenvalores son positivos, su SVD coincide con
+    su diagonalización: $\sigma_1 = 3.62$, $\sigma_2 = 1.38$, y
+    $U = V$ con columnas $(0.85, 0.53)$ y $(-0.53, 0.85)$, salvo
+    signos.
+
+    \begin{center}
+    \begin{tikzpicture}[scale=0.62, >=stealth]
+        \draw[gray!40, ->] (-4, 0) -- (4, 0);
+        \draw[gray!40, ->] (0, -4) -- (0, 4);
+        \draw[acento, thick] (0, 0) circle (1);
+        \draw[->, very thick, red!70!black] (0, 0) -- (0.85, 0.53)
+            node[right, font=\small] {$v_1$};
+        \draw[->, very thick, green!45!black] (0, 0) -- (-0.53, 0.85)
+            node[above left, font=\small] {$v_2$};
+        \node[font=\small] at (0, -4.6) {Círculo unitario};
+
+        \draw[->, thick] (4.6, 0) -- (6.4, 0)
+            node[midway, above, font=\small] {$A$};
+
+        \begin{scope}[xshift=11cm]
+            \draw[gray!40, ->] (-4, 0) -- (4, 0);
+            \draw[gray!40, ->] (0, -4) -- (0, 4);
+            \draw[acento, thick, rotate=31.72] (0, 0)
+                ellipse (3.618 and 1.382);
+            \draw[->, very thick, red!70!black] (0, 0) -- (3.08, 1.90)
+                node[right, font=\small] {$\sigma_1 u_1$};
+            \draw[->, very thick, green!45!black] (0, 0)
+                -- (-0.73, 1.18)
+                node[above left, font=\small] {$\sigma_2 u_2$};
+            \node[font=\small] at (0, -4.6) {Elipse imagen};
+        \end{scope}
+    \end{tikzpicture}
+    \end{center}
+
+    El vector $v_1$ sale estirado $3.62$ veces y $v_2$ solo $1.38$.
+    Cualquier otro vector del círculo termina en algún punto de la
+    elipse entre esos dos extremos.
+\end{ejemplo}
+
+\begin{ojo}
+    Que SVD y diagonalización coincidan es exclusivo de las matrices
+    simétricas con eigenvalores $\geq 0$. Si $A$ es simétrica pero
+    tiene un eigenvalor negativo, $\sigma = \abs{\lambda}$ y el signo
+    se pasa a $u$ o a $v$. Si $A$ no es simétrica, los eigenvalores y
+    los valores singulares en general no tienen nada que ver.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Propiedades}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Ortogonalidad.} $U^{T}U = UU^{T} = I_m$ y
+          $V^{T}V = VV^{T} = I_n$, o sea $U^{-1} = U^{T}$ y
+          $V^{-1} = V^{T}$.
+    \item \textbf{No negatividad y orden.}
+          $\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$. Los
+          $\sigma_i$ son únicos; $U$ y $V$ no, porque cada par
+          $(u_i, v_i)$ se puede cambiar por $(-u_i, -v_i)$.
+    \item \textbf{Rango.} El rango de $A$ es el número de valores
+          singulares distintos de cero. Es la forma más confiable de
+          calcularlo en computadora: en vez de preguntar si un pivote
+          es exactamente cero, se ve qué $\sigma_i$ son despreciables.
+    \item \textbf{Norma.} $\sigma_1$ es lo más que $A$ puede estirar
+          un vector unitario, $\sigma_1 = \max_{\norm{x} = 1}
+          \norm{Ax}$. Es el semieje mayor de la elipse.
+    \item \textbf{Energía.} La suma de los cuadrados de todas las
+          entradas de $A$ es igual a la suma de los $\sigma_i^2$:
+          \[
+              \sum_{i, j} a_{ij}^2 = \sigma_1^2 + \sigma_2^2 + \cdots .
+          \]
+          En el ejemplo, $A$ tiene cuatro unos, así que da $4$, y
+          $\sigma_1^2 + \sigma_2^2 = 3 + 1 = 4$. Cada $\sigma_i^2$
+          dice qué parte de la ``energía'' de la matriz carga su
+          dirección.
+    \item \textbf{Determinante.} Si $A$ es cuadrada,
+          $\abs{\det A} = \sigma_1 \sigma_2 \cdots \sigma_n$, porque
+          $\det U$ y $\det V$ valen $\pm 1$.
+\end{enumerate}
+
+% =====================================================================
+
+\subsection*{SVD como suma y SVD truncada}
+
+Multiplicando $U\Sigma V^{T}$ por bloques, columna de $U$ por renglón
+de $V^{T}$, la SVD se puede escribir como suma de matrices de rango 1:
+\[
+    A = \sigma_1 u_1 v_1^{T} + \sigma_2 u_2 v_2^{T} + \cdots
+        + \sigma_r u_r v_r^{T} ,
+\]
+donde $r$ es el rango. Cada término $u_i v_i^{T}$ es una matriz de
+$m \times n$ hecha con un solo vector columna por un solo vector
+renglón, y va pesado por $\sigma_i$. Como los $\sigma_i$ vienen
+ordenados, los primeros términos son los que más pesan.
+
+\begin{definicion}[SVD truncada]
+    Quedarse con los primeros $k$ términos,
+    \[
+        A_k = \sigma_1 u_1 v_1^{T} + \cdots + \sigma_k u_k v_k^{T} ,
+    \]
+    da la mejor aproximación de rango $k$ de $A$ (teorema de
+    Eckart-Young): ninguna otra matriz de rango $k$ queda más cerca.
+    El error cometido es
+    $\sigma_{k+1}^2 + \cdots + \sigma_r^2$ en energía.
+\end{definicion}
+
+\begin{ejemplo}
+    La mejor aproximación de rango 1 de
+    $A = \left(\begin{smallmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1
+    \end{smallmatrix}\right)$ es
+    \[
+        A_1 = \sigma_1 u_1 v_1^{T}
+            = \sqrt{3} \cdot \frac{1}{\sqrt{6}}
+              \begin{pmatrix} 1 \\ 1 \\ 2 \end{pmatrix}
+              \frac{1}{\sqrt{2}} \begin{pmatrix} 1 & 1 \end{pmatrix}
+            = \frac{1}{2} \begin{pmatrix} 1 & 1 \\ 1 & 1 \\ 2 & 2
+              \end{pmatrix} ,
+    \]
+    porque $\sqrt{3}/(\sqrt{6}\sqrt{2}) = \sqrt{3}/\sqrt{12} = 1/2$.
+    Lo que se tira es
+    \[
+        A - A_1 = \begin{pmatrix} \tfrac{1}{2} & -\tfrac{1}{2} \\[2pt]
+                  -\tfrac{1}{2} & \tfrac{1}{2} \\[2pt] 0 & 0
+                  \end{pmatrix}
+                = \sigma_2 u_2 v_2^{T} ,
+    \]
+    cuya energía es $4 \cdot \tfrac{1}{4} = 1 = \sigma_2^2$. Se
+    conserva $3/4$ de la energía con la mitad de los términos.
+\end{ejemplo}
+
+\begin{idea}
+    Así funciona la compresión con SVD. Guardar $A_k$ requiere $k$
+    valores singulares, $k$ vectores de tamaño $m$ y $k$ de tamaño
+    $n$: en total $k(m + n + 1)$ números en vez de $mn$. Una imagen en
+    escala de grises de $1000 \times 1000$ con $k = 50$ ocupa
+    $50 \cdot 2001 = 100\,050$ números en lugar de $1\,000\,000$,
+    alrededor del $10\%$. En las imágenes reales los $\sigma_i$ caen
+    rápido, así que con $k$ chico casi no se nota la diferencia.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Pseudoinversa}
+
+Una matriz rectangular no tiene inversa, pero con la SVD se define lo
+más parecido. Si $\Sigma^{+}$ es la matriz de $n \times m$ que tiene
+$1/\sigma_i$ en la diagonal (solo para los $\sigma_i \neq 0$), la
+\textbf{pseudoinversa} es
+\[
+    A^{+} = V \Sigma^{+} U^{T}
+          = \frac{1}{\sigma_1} v_1 u_1^{T} + \cdots
+            + \frac{1}{\sigma_r} v_r u_r^{T} .
+\]
+Deshace a $A$ en todas las direcciones donde $A$ no destruyó
+información.
+
+\begin{ejemplo}
+    Para la $A$ de $3 \times 2$ del ejemplo completo:
+    \[
+        A^{+} = \frac{1}{\sqrt{3}}\, v_1 u_1^{T} + v_2 u_2^{T}
+        = \frac{1}{6}\begin{pmatrix} 1 & 1 & 2 \\ 1 & 1 & 2
+          \end{pmatrix}
+        + \frac{1}{2}\begin{pmatrix} 1 & -1 & 0 \\ -1 & 1 & 0
+          \end{pmatrix}
+        = \frac{1}{3}\begin{pmatrix} 2 & -1 & 1 \\ -1 & 2 & 1
+          \end{pmatrix} .
+    \]
+    Se comprueba que $A^{+}A = I_2$: el primer renglón de $A^{+}$
+    contra las columnas de $A$ da
+    $\tfrac{1}{3}(2 + 0 + 1) = 1$ y $\tfrac{1}{3}(0 - 1 + 1) = 0$.
+\end{ejemplo}
+
+Su uso principal es resolver sistemas $Ax = b$ que no tienen solución,
+como los que salen de ajustar una recta a muchos puntos con ruido.
+$x = A^{+}b$ es la solución de \textbf{mínimos cuadrados}: la que hace
+$\norm{Ax - b}$ lo más chico posible.
+
+% =====================================================================
+
+\subsection*{Para qué sirve en computación}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Compresión de imágenes.} Una imagen es una matriz de
+          intensidades. La SVD truncada se queda con las $k$
+          direcciones de más energía. Además de comprimir, quita
+          ruido: el ruido se reparte entre muchos $\sigma_i$ chicos,
+          que son justo los que se tiran.
+    \item \textbf{Indexación semántica latente (LSI).} Se arma una
+          matriz término-documento, con un renglón por palabra y una
+          columna por documento. Su SVD truncada agrupa palabras que
+          aparecen en contextos parecidos: ``coche'' y ``automóvil''
+          quedan cerca en el espacio de los primeros $v_i$ aunque
+          nunca aparezcan en el mismo documento. Un buscador así
+          encuentra documentos por concepto y no solo por palabra
+          exacta.
+    \item \textbf{Sistemas de recomendación.} La matriz
+          usuario-película tiene casi todas sus entradas vacías. Se
+          aproxima con una factorización de rango bajo; los $k$
+          factores son ``gustos ocultos'' (acción, comedia,
+          películas de autor) que nadie definió a mano. Las entradas
+          vacías de la aproximación son las calificaciones predichas.
+    \item \textbf{PCA.} Si $X$ son los datos centrados, un renglón por
+          muestra, los $v_i$ de su SVD son las componentes
+          principales, y $\sigma_i^2 / (N - 1)$ es la varianza que
+          explica cada una. Es el mismo PCA de la clase anterior, solo
+          que sin formar la matriz de covarianza, lo cual es más
+          estable numéricamente.
 \end{itemize}
 
 
