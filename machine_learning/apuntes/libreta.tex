@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.6.0
+%   * Version: 1.7.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       28/09/2026      Clase 24 Sep, ResNet y autoencoders
+%  zxxz6       28/09/2026      Clase 22 Sep, redes convolucionales
 %  zxxz6       20/09/2026      Clase 17 Sep, gradiente, delta y backprop
 %  zxxz6       20/09/2026      Clase 15 Sep, TLU y separabilidad lineal
 %  zxxz6       14/09/2026      Clase 10 Sep, preparacion de datos y redes
@@ -2441,6 +2443,751 @@ Geoffrey Hinton, David Rumelhart y Ronald Williams.
   misma sin importar la profundidad, y eso es lo que vuelve
   entrenable a una red arbitrariamente honda.
 \end{idea}
+
+
+
+\newpage
+
+% =====================================================================
+%  Clase - Redes convolucionales y limites de backpropagation
+% =====================================================================
+
+\clase{Redes convolucionales}{22 de septiembre de 2026}
+
+\begin{quick_sum}
+    La primera arquitectura que no conecta todo con todo. Se ve por
+    qué una capa densa no sirve para imágenes, qué hace la
+    convolución, cómo cambia la regla delta cuando un peso se reusa en
+    muchos lugares, y cómo se arma una CNN completa. La segunda mitad
+    es el problema que se destapó al querer apilar capas: el gradiente
+    se desvanece, y ReLU solo lo arregla a medias.
+\end{quick_sum}
+
+\subsection*{Por qué no basta una capa densa}
+
+La clase pasada cerró diciendo que se puede tener cuantas capas
+ocultas se quiera. Con imágenes eso choca de inmediato con dos
+problemas.
+
+El primero es el número de pesos. Una imagen de $224 \times 224$ en
+color aplanada da $150\,528$ entradas. Conectarla a una capa oculta de
+mil neuronas son $150$ millones de pesos, en una sola capa.
+
+El segundo es más de fondo: \textbf{aplanar destruye la estructura
+espacial}. Dos pixeles vecinos quedan como dos coordenadas cualquiera
+del vector, sin nada que diga que estaban juntos. Y una característica
+que la red aprende a detectar en una esquina no le sirve de nada en la
+otra, porque son pesos distintos.
+
+\subsection*{La convolución}
+
+En la regla delta de una capa densa, la activación usa la entrada
+entera:
+\[
+    a = \sum_i w_i x_i .
+\]
+
+En una capa convolucional la neurona no mira toda la imagen de golpe.
+Mira solo una ventana chica, llamada \textbf{filtro} o \textbf{kernel}:
+\[
+    a_{i,j} = \sum_m \sum_n w_{m,n} \cdot x_{i+m,\, j+n} .
+\]
+
+Los índices se leen así:
+
+\begin{itemize}[itemsep=0.25em]
+  \item $(i,j)$ es la posición de \emph{salida}. Hay una activación
+        por cada lugar donde se pueda apoyar el filtro.
+  \item $(m,n)$ recorre el filtro, no la imagen. Si el filtro es de
+        $3 \times 3$, son nueve términos y ya.
+  \item $x_{i+m,\,j+n}$ es la ventana de la imagen anclada en $(i,j)$.
+        El $+i$ y el $+j$ son lo que desliza la ventana.
+\end{itemize}
+
+\begin{ejemplo}
+  Una imagen de $5 \times 5$ con un borde vertical, las dos primeras
+  columnas en $0$ y las tres siguientes en $1$, y un filtro de
+  $3 \times 3$ que detecta bordes verticales:
+  \[
+    X = \begin{pmatrix}
+          0 & 0 & 1 & 1 & 1 \\
+          0 & 0 & 1 & 1 & 1 \\
+          0 & 0 & 1 & 1 & 1 \\
+          0 & 0 & 1 & 1 & 1 \\
+          0 & 0 & 1 & 1 & 1
+        \end{pmatrix} ,
+    \qquad
+    W = \begin{pmatrix}
+          1 & 0 & -1 \\
+          1 & 0 & -1 \\
+          1 & 0 & -1
+        \end{pmatrix} .
+  \]
+
+  La activación en la esquina, con la ventana sobre las filas $0$ a
+  $2$ y las columnas $0$ a $2$:
+  \[
+    a_{0,0} = \underbrace{(1)(0) + (0)(0) + (-1)(1)}_{-1}
+            + \underbrace{(1)(0) + (0)(0) + (-1)(1)}_{-1}
+            + \underbrace{(1)(0) + (0)(0) + (-1)(1)}_{-1}
+            = -3 .
+  \]
+
+  Corriendo la ventana por las nueve posiciones posibles queda un mapa
+  de $3 \times 3$:
+  \[
+    A = \begin{pmatrix}
+          -3 & -3 & 0 \\
+          -3 & -3 & 0 \\
+          -3 & -3 & 0
+        \end{pmatrix} .
+  \]
+
+  La última columna vale cero porque ahí la ventana cae entera dentro
+  de la zona uniforme de unos, y el filtro suma tanto como resta. Las
+  otras dos son distintas de cero porque la ventana cruza el borde. El
+  filtro es ciego a lo plano y solo responde a los cambios.
+\end{ejemplo}
+
+\subsubsection*{Canales, paso y relleno}
+
+La fórmula esconde tres cosas que en la práctica hay que fijar.
+
+\textbf{Los canales.} Una imagen no es una matriz, es un volumen de
+alto por ancho por \emph{canales}: tres para color, uno en escala de
+grises. El filtro tiene la misma profundidad que su entrada, o sea es
+de $f \times f \times C$, y la suma de la fórmula corre también sobre
+los canales. Por eso un filtro, por grueso que sea, produce
+\textbf{un solo} mapa de salida de dos dimensiones. Si se quieren $K$
+mapas hacen falta $K$ filtros distintos, y esos $K$ mapas son los
+canales de la capa siguiente.
+
+\textbf{El paso}, o \emph{stride}, es de cuánto en cuánto se desliza
+la ventana. Con paso $1$ se apoya en cada pixel; con paso $2$ se salta
+uno y el mapa de salida sale a la mitad de tamaño.
+
+\textbf{El relleno}, o \emph{padding}, son ceros que se agregan
+alrededor de la imagen. Sin relleno el mapa encoge en cada capa, y los
+pixeles del borde participan en menos ventanas que los del centro, así
+que la red los ve menos.
+
+Juntando los tres, el tamaño de salida de una convolución sobre una
+entrada de $n \times n$ con filtro de $f \times f$, relleno $p$ y paso
+$s$ es
+\[
+    \left\lfloor \frac{n - f + 2p}{s} \right\rfloor + 1 .
+\]
+
+En el ejemplo de arriba, $n = 5$, $f = 3$, sin relleno y con paso
+uno, da $5 - 3 + 1 = 3$: por eso la imagen de $5 \times 5$ produjo un
+mapa de $3 \times 3$. Con relleno $p = 1$ habría dado $5$, o sea el
+mismo tamaño que la entrada, que es lo que se hace casi siempre para
+que la red pueda ser honda sin quedarse sin mapa.
+
+\begin{idea}
+  El conteo de pesos de una capa convolucional sale de ahí:
+  $K(f^2 C + 1)$, contando un sesgo por filtro. Lo que \emph{no}
+  aparece en esa cuenta es $n$. El tamaño de la imagen afecta cuánto
+  se tarda la capa, pero no cuántos parámetros tiene, y esa
+  independencia es justo lo que la capa densa no tiene.
+\end{idea}
+
+\subsubsection*{Lo que se gana}
+
+Tres propiedades, y las tres salen de la misma fórmula:
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Conexión local.} Cada neurona ve solo su ventana, que
+        se llama su campo receptivo. No hay un peso por pixel de la
+        imagen, hay un peso por celda del filtro.
+  \item \textbf{Pesos compartidos.} El \emph{mismo} filtro se desliza
+        por toda la imagen. Un filtro de $3 \times 3$ son nueve pesos
+        sin importar si la imagen es de $28 \times 28$ o de
+        $1000 \times 1000$.
+  \item \textbf{Equivarianza a la traslación.} Si el borde se mueve,
+        la respuesta se mueve con él. Lo que la red aprende a detectar
+        en un lugar le sirve en todos.
+\end{itemize}
+
+\begin{idea}
+  Los números del principio con una capa convolucional: $64$ filtros
+  de $3 \times 3 \times 3$ son $1\,728$ pesos, contra los $150$
+  millones de la capa densa. Cuatro órdenes de magnitud menos, y
+  encima conserva la vecindad de los pixeles.
+\end{idea}
+
+\subsection*{Backpropagation con pesos compartidos}
+
+La regla delta de la clase pasada, para una neurona cualquiera:
+\[
+    \Delta w_{ki} = \alpha\, \delta^k x_{ki}^p .
+\]
+
+Se calcula el error local y se multiplica por la entrada asociada a
+ese peso. En una convolución hay un detalle: un solo peso $w_{m,n}$
+contribuyó a \emph{muchos} pixeles de salida durante el paso hacia
+adelante, así que recibe culpa desde muchos lugares a la vez:
+\[
+    \Delta w_{m,n} = \alpha \sum_i \sum_j
+                     \delta_{i,j} \cdot x_{i+m,\, j+n} .
+\]
+
+La doble suma recorre exactamente las posiciones donde se aplicó el
+filtro. No es una regla nueva: es la misma regla delta, acumulada.
+
+\begin{idea}
+  Eso no es un truco de redes, es cálculo. Cuando una variable aparece
+  varias veces en una expresión, su derivada es la suma de las
+  derivadas parciales de cada aparición. Compartir el peso obliga a
+  sumar, y por eso la CNN es, palabras del profesor, la aplicación de
+  la regla delta y el descenso de gradiente a un conjunto compacto de
+  pesos reusados sobre toda la superficie de la imagen.
+\end{idea}
+
+\subsection*{La arquitectura completa}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.6cm}
+                >{\raggedright\arraybackslash}p{3.4cm}
+                >{\raggedright\arraybackslash}p{9.0cm}}
+  \toprule
+  & \textbf{Etapa} & \textbf{Qué pasa} \\
+  \midrule
+  $1$ & Entrada & La imagen, sin aplanar \\
+  \addlinespace
+  $2$ & Extracción de características &
+  Capas convolucionales alternadas con capas de pooling,
+  típicamente max pooling \\
+  \addlinespace
+  $3$ & Transición &
+  Aplanado: los mapas finales se estiran en una columna de neuronas de
+  una dimensión \\
+  \addlinespace
+  $4$ & Clasificación &
+  Capas densas, y una capa de salida con una neurona por categoría,
+  normalmente con softmax \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+El \textbf{max pooling} lo nombra la diapositiva pero vale la pena
+decir qué hace: toma el máximo sobre una ventana, casi siempre de
+$2 \times 2$ y avanzando de dos en dos, con lo que cada dimensión
+espacial se reduce a la mitad. Sirve para dos cosas. Achica el mapa, y
+da algo de invariancia a traslaciones chicas: si la característica se
+corre un pixel, el máximo de la ventana normalmente no cambia. No
+tiene parámetros que entrenar.
+
+\begin{ejemplo}
+  Un mapa de $4 \times 4$ con ventanas de $2 \times 2$ y paso dos, o
+  sea cuatro ventanas que no se traslapan:
+  \[
+    \begin{pmatrix}
+      1 & 3 & 2 & 0 \\
+      5 & 2 & 1 & 4 \\
+      0 & 1 & 7 & 2 \\
+      3 & 2 & 1 & 0
+    \end{pmatrix}
+    \;\longrightarrow\;
+    \begin{pmatrix} 5 & 4 \\ 3 & 7 \end{pmatrix} .
+  \]
+  De cada bloque queda solo el máximo. Se conserva \emph{qué tan
+  fuerte} respondió el filtro en esa zona y se tira \emph{en qué
+  pixel exacto} respondió, que es precisamente la información que no
+  importa para reconocer el objeto.
+\end{ejemplo}
+
+\subsubsection*{Qué aprende cada capa}
+
+Apilar convolución y pooling tiene una consecuencia que da sentido a
+toda la arquitectura: cada capa ve una región más grande de la imagen
+original que la anterior, aunque su filtro siga siendo de
+$3 \times 3$. El campo receptivo crece con la profundidad, y con él
+crece lo que la capa puede reconocer.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.9cm}
+                >{\raggedright\arraybackslash}p{4.4cm}
+                >{\raggedright\arraybackslash}p{5.7cm}}
+  \toprule
+  \textbf{Profundidad} & \textbf{Qué detecta} & \textbf{Sobre qué} \\
+  \midrule
+  Primeras capas & Bordes, esquinas, manchas de color &
+  Unos pocos pixeles \\
+  \addlinespace
+  Capas intermedias & Texturas y partes: una rueda, un ojo &
+  Combinaciones de lo anterior \\
+  \addlinespace
+  Capas hondas & Objetos completos &
+  Combinaciones de partes \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Nadie programa esa jerarquía. Sale sola del entrenamiento, y es la
+razón por la que en visión la profundidad importa tanto: cada nivel
+solo puede construirse con las piezas que le pasa el de abajo.
+
+La arquitectura que fijó este esquema es \textbf{LeNet}, de Yann LeCun
+en $1998$.
+
+\subsection*{El límite de backpropagation}
+
+El problema serio es que \textbf{el error se diluye exponencialmente}
+conforme atraviesa capas de regreso hacia el principio de la red. En
+una red muy honda solo se entrenan las últimas capas; las primeras
+casi no se mueven.
+
+La causa está en la regla de la cadena: propagar hacia atrás es
+multiplicar. De la clase del $15$ de septiembre,
+$\sigma'(a) = \sigma(a)[1 - \sigma(a)]$, que vale a lo más $0.25$, en
+$a = 0$, y se va a cero en cuanto la neurona se satura.
+
+\begin{ejemplo}
+  Diez capas con sigmoides, todas en su mejor caso:
+  \[
+    0.25^{10} \approx 9.5 \times 10^{-7} .
+  \]
+  El gradiente que llega a la primera capa es un millón de veces más
+  chico que el de la última, y eso suponiendo que ninguna neurona esté
+  saturada. Los números de la diapositiva van en la misma dirección:
+  $0.1$ en la capa $4$, $0.05$ en la $3$, $0.005$ en la $2$ y
+  $0.00025$ en la $1$.
+\end{ejemplo}
+
+Antes de $2012$ todas las redes usaban sigmoide o tangente
+hiperbólica, y las dos se saturan: con entradas muy positivas o muy
+negativas la curva se aplana y su derivada se va a cero. De ahí el
+nombre, \textbf{desvanecimiento del gradiente}.
+
+\subsubsection*{ReLU}
+
+Para resolverlo, los autores de AlexNet metieron ReLU:
+\[
+    f(x) = \max(0, x) .
+\]
+
+Sus dos propiedades, las que según la diapositiva salvaron al
+aprendizaje profundo:
+
+\begin{itemize}[itemsep=0.25em]
+  \item \textbf{Derivada constante e igual a $1$ para $x > 0$.} No
+        encoge nada al multiplicarse en cadena. Para $x < 0$ la
+        derivada es $0$ y el error simplemente no pasa.
+  \item \textbf{Simplicidad de cómputo.} Una sola operación
+        $\max(0,x)$, contra la exponencial de la sigmoide.
+\end{itemize}
+
+La referencia es Krizhevsky, Sutskever y Hinton ($2012$).
+
+\subsubsection*{Por qué ReLU no alcanzó}
+
+Cambiar sigmoide por ReLU permitió que los gradientes fluyeran en
+redes de $16$ o $19$ capas, como la VGG. Pero al intentar $50$ o $100$
+capas el gradiente seguía desvaneciéndose. Tres razones:
+
+\begin{enumerate}[itemsep=0.4em]
+  \item \textbf{ReLU moribunda.} Con más capas sube la probabilidad de
+        que alguna neurona reciba solo entradas negativas. Su salida
+        queda en cero, su derivada también, y como el gradiente que la
+        atraviesa es cero, nunca se corrige. La neurona queda muerta.
+  \item \textbf{Gradientes explosivos.} La derivada de ReLU es
+        exactamente $1$ del lado positivo, pero el gradiente total en
+        una capa temprana es el producto de los \emph{pesos} de las
+        conexiones por esas derivadas. Si los pesos son mayores que
+        uno, el producto no se desvanece, se dispara.
+  \item \textbf{Degradación del flujo de información.} Apilar
+        demasiadas operaciones no lineales hace que las capas finales
+        pierdan correlación directa con las características básicas de
+        la entrada.
+\end{enumerate}
+
+\begin{ojo}
+  Nótese que $1$ y $2$ apuntan en direcciones opuestas. El producto de
+  muchos factores casi nunca se queda cerca de uno: o se colapsa o se
+  dispara. Ese es el problema real, y no se arregla escogiendo mejor
+  la función de activación.
+\end{ojo}
+
+Por eso durante años la recomendación fue al revés de lo que hoy se
+hace: pocas capas ocultas con muchas neuronas, en lugar de muchas
+capas con pocas neuronas. Así estuvo hasta la aparición del
+aprendizaje profundo.
+
+
+\newpage
+
+% =====================================================================
+%  Clase - Redes residuales y autoencoders
+% =====================================================================
+
+\clase{Redes residuales y autoencoders}{24 de septiembre de 2026}
+
+\begin{quick_sum}
+    Las dos respuestas al problema que quedó abierto. Primero ResNet,
+    que le abre al gradiente un camino directo de regreso con una
+    suma. Después los autoencoders, que entrenan sin etiquetas
+    poniendo la entrada como objetivo, y sus dos variantes: el disperso
+    cuando la capa oculta sobra, y el apilado, que arma una red honda
+    entrenando una capa a la vez.
+\end{quick_sum}
+
+\subsection*{Redes residuales}
+
+Una red residual, o \textbf{ResNet}, introduce \textbf{conexiones de
+salto}, también llamadas atajos.
+
+La idea es cambiar lo que se le pide aprender a un bloque de capas. En
+vez de obligarlo a aprender directamente la función $H(x)$, se le pide
+la \textbf{función residual}
+\[
+    F(x) = H(x) - x ,
+\]
+y entonces la salida que de verdad se busca queda
+\[
+    H(x) = F(x) + x .
+\]
+
+Esa suma es la conexión de salto: la entrada $x$ se brinca las capas
+intermedias y se suma directo a su salida.
+
+\subsubsection*{Qué hay dentro del bloque}
+
+$F$ no es una capa suelta, es un grupo de ellas. En la versión clásica
+son dos capas convolucionales con una ReLU en medio, y la suma va
+\emph{antes} de la última ReLU:
+
+\begin{center}
+\begin{tikzpicture}[
+    caja/.style={draw=acento, thick, rounded corners=2pt,
+                 minimum width=2.5cm, minimum height=0.75cm,
+                 font=\small},
+    flecha/.style={->, thick, >=latex}]
+  \node (ent) at (0,3.6) {$x$};
+  \node[caja] (c1) at (0,2.7) {capa $1$};
+  \node[caja] (c2) at (0,1.5) {capa $2$};
+  \node[circle, draw=acento, thick, inner sep=1.5pt]
+        (mas) at (0,0.5) {$+$};
+  \node (sal) at (0,-0.35) {$H(x) = F(x) + x$};
+  \draw[flecha] (ent) -- (c1);
+  \draw[flecha] (c1) -- node[right, font=\tiny] {ReLU} (c2);
+  \draw[flecha] (c2) -- node[right, font=\tiny] {$F(x)$} (mas);
+  \draw[flecha] (mas) -- (sal);
+  \draw[flecha, dashed] (ent) -- ++(2.3,0) -- (2.3,0.5)
+        node[midway, right, font=\tiny] {identidad} -- (mas);
+\end{tikzpicture}
+\end{center}
+
+Hay un detalle práctico que la fórmula esconde. Para poder sumar,
+$F(x)$ y $x$ tienen que tener la misma forma, y eso deja de cumplirse
+en cuanto el bloque cambia el número de canales o reduce el tamaño
+espacial. Cuando pasa, al atajo se le mete una proyección lineal:
+\[
+    H(x) = F(x) + W_s\, x ,
+\]
+que en la práctica es una convolución de $1 \times 1$. Es el único
+lugar donde el atajo tiene parámetros; en todos los demás es
+literalmente un cable.
+
+\subsubsection*{Por qué arregla el gradiente}
+
+Al aplicar backpropagation, si la salida es $H(x) = F(x) + x$, la
+derivada respecto a la entrada es
+\[
+    \frac{\partial H(x)}{\partial x}
+      = \frac{\partial F(x)}{\partial x} + 1 .
+\]
+
+Ahí está todo. Siempre hay un término que vale exactamente $1$ y que
+viaja limpio desde la última capa hasta la primera. Aunque las
+transformaciones del bloque lleven el gradiente a cero, o sea aunque
+$\partial F / \partial x \approx 0$, el $+1$ garantiza que lo que
+llega nunca baje de la señal original.
+
+Comparado con la clase pasada, el contraste es exacto: sin el atajo el
+gradiente es un \emph{producto} de factores menores que uno, y por eso
+se colapsa. Con el atajo es una \emph{suma} en la que uno de los
+sumandos es uno.
+
+Encadenando $L$ bloques, con $x_{l+1} = x_l + F(x_l)$, la regla de la
+cadena da
+\[
+    \frac{\partial E}{\partial x_l}
+      = \frac{\partial E}{\partial x_L}
+        \prod_{i=l}^{L-1}
+        \left( 1 + \frac{\partial F(x_i)}{\partial x_i} \right) .
+\]
+Al desarrollar el producto, uno de los términos es el puro
+$\partial E / \partial x_L$, sin multiplicar por nada. Ese sumando
+sobrevive aunque todos los demás se anulen, y es la ruta directa de la
+que habla la diapositiva.
+
+\begin{ejemplo}
+  Cincuenta capas donde cada una atenúa el gradiente a $0.8$ de lo que
+  recibe. Sin atajos:
+  \[
+    0.8^{50} \approx 1.4 \times 10^{-5} .
+  \]
+  Con atajos, cada factor es $1 + 0.8$ en vez de $0.8$, y el término
+  que solo acumula unos vale exactamente $1$ sin importar cuántos
+  bloques haya. El gradiente que llega a la primera capa es del mismo
+  tamaño que el que salió de la última.
+\end{ejemplo}
+
+\subsubsection*{Aprender la identidad}
+
+El otro argumento es igual de importante. Si un bloque no aporta nada
+al problema, la red puede simplemente ajustar sus pesos para que
+$F(x) = 0$, y la salida queda $H(x) = x$, la identidad.
+
+\begin{idea}
+  Eso explica la observación que originó el método. Una red honda
+  debería ser al menos tan buena como una menos honda, porque siempre
+  podría poner las capas de sobra en identidad. Y sin embargo las
+  redes hondas simples salían \emph{peores}. La conclusión de He y sus
+  coautores fue que el problema no era la capacidad del modelo, era la
+  optimización: aprender la identidad a través de una pila de no
+  linealidades resulta difícil. Con el atajo, la identidad es el caso
+  fácil, el que sale con los pesos en cero.
+\end{idea}
+
+Antes de ResNet ($2015$), las redes de más de $20$ capas sufrían
+degradación severa. Con conexiones residuales se volvió posible
+entrenar de forma estable redes de $152$, $500$ y hasta más de $1\,000$
+capas. La referencia es He, Zhang, Ren y Sun ($2016$).
+
+\subsection*{Autoencoders}
+
+Un \textbf{autoencoder} es un algoritmo de aprendizaje \emph{no
+supervisado} que aplica backpropagation con un solo cambio: los
+valores objetivo se ponen iguales a las entradas.
+\[
+    t^p = x^p .
+\]
+
+Con eso el error de la clase del $17$ de septiembre se vuelve la
+distancia entre la entrada y su reconstrucción:
+\[
+    e^p = \tfrac{1}{2} \sum_i (x_i^p - \hat{x}_i^p)^2 .
+\]
+
+No hace falta etiquetar nada. El dato es su propia etiqueta, y por eso
+cuenta como no supervisado aunque el algoritmo de entrenamiento sea el
+mismo de siempre.
+
+\subsubsection*{Las dos mitades, escritas}
+
+La red son dos funciones encadenadas. El \textbf{codificador} lleva la
+entrada al código, y el \textbf{decodificador} lo trae de vuelta:
+\[
+    h = \sigma(W x + b) ,
+    \qquad
+    \hat{x} = \sigma(W' h + b') .
+\]
+
+A $h$ se le llama el \textbf{código} o la representación latente, y a
+su dimensión el tamaño del cuello. Entrenar es minimizar
+$\lVert x - \hat{x} \rVert^2$ sobre $W$, $W'$, $b$ y $b'$, con la
+misma backpropagation de siempre.
+
+Una elección común es \textbf{amarrar los pesos}, o sea poner
+$W' = W^{T}$. Con eso el decodificador deja de tener parámetros
+propios, la red entrena la mitad de pesos y es más difícil que se
+memorice el conjunto en lugar de aprender de él.
+
+\begin{ojo}
+  El nombre de la capa oculta según su tamaño aparece en la
+  literatura y conviene reconocerlo. Si el cuello es \emph{menor} que
+  la entrada, el autoencoder es \textbf{incompleto}; si es
+  \emph{mayor}, es \textbf{sobrecompleto}. Los dos aprenden, pero por
+  razones distintas, y esa diferencia es justo la que separa esta
+  sección de la que sigue.
+\end{ojo}
+
+\subsubsection*{La clave está en la capa oculta}
+
+Pedirle a una red que copie su entrada suena inútil, y lo sería si no
+fuera por el cuello de botella. Si la capa oculta tiene \emph{menos}
+neuronas que las de entrada y salida, la información está obligada a
+pasar por ese embudo, y la red no tiene más remedio que encontrar una
+\textbf{representación intermedia} que quepa ahí y de la que se pueda
+reconstruir lo original.
+
+Ya entrenada, la red se parte en dos:
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.0cm}
+                >{\raggedright\arraybackslash}p{4.2cm}
+                >{\raggedright\arraybackslash}p{6.0cm}}
+  \toprule
+  \textbf{Mitad} & \textbf{De dónde a dónde} & \textbf{Qué hace} \\
+  \midrule
+  Compresor, o codificador &
+  De la entrada a la capa oculta &
+  Produce la versión comprimida \\
+  \addlinespace
+  Descompresor, o decodificador &
+  De la capa oculta a la salida &
+  Recupera la versión original a partir de la comprimida \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  Vale la pena ver con qué se emparenta esto. Un autoencoder
+  \emph{lineal} con un cuello de $k$ neuronas y error cuadrático
+  termina abarcando el mismo subespacio que las primeras $k$
+  componentes principales, o sea lo mismo que daría una
+  descomposición en valores singulares. Lo que lo vuelve más que eso
+  es la no linealidad de las capas: con sigmoides o ReLU el codificador
+  puede doblar el espacio, y encuentra estructura que una proyección
+  lineal no alcanza.
+\end{idea}
+
+\subsubsection*{Para qué se usan}
+
+El autoencoder casi nunca se entrena por su salida. Lo que se quiere
+es alguna de estas cuatro cosas:
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Reducir la dimensión.} Quedarse con $h$ y tirar el
+        decodificador. Es el uso directo del cuello de botella.
+  \item \textbf{Quitar ruido.} Entrenado con entradas sucias y
+        salidas limpias, reconstruye la versión limpia de una entrada
+        que nunca vio.
+  \item \textbf{Detectar anomalías.} Aprende a reconstruir bien lo
+        que se parece a sus datos de entrenamiento. Una entrada rara
+        sale con error de reconstrucción alto, y ese error sirve
+        directamente como puntaje de qué tan anómala es.
+  \item \textbf{Preentrenar.} Usar los pesos del codificador como
+        punto de arranque de una red supervisada, que es de lo que
+        trata la última parte de la clase.
+\end{itemize}
+
+\subsection*{Autoencoders dispersos}
+
+Y si la capa oculta, en vez de tener menos neuronas, tiene
+\emph{más} que las de entrada y salida?
+
+El riesgo es que la red no aprenda nada: que copie la entrada a un
+subconjunto de las neuronas ocultas, deje las sobrantes sin usar, y
+las copie de vuelta a la salida. Reconstruye perfecto y no aprendió
+absolutamente nada.
+
+La salida es forzar a las neuronas de la capa oculta a activarse
+\emph{pocas veces}. Entonces la red tiene que volver a aprender un
+código alternativo, y además disperso. La idea es que los valores de
+las neuronas ocultas sean cero la mayor parte del tiempo.
+
+Eso limita mucho la expresividad de la capa oculta, pero a cambio
+obliga a cada neurona a especializarse en cierto patrón de la entrada.
+
+\subsubsection*{Dos maneras de conseguirlo}
+
+\begin{itemize}[itemsep=0.4em]
+  \item \textbf{Autoencoder disperso.} Se agrega al error un factor de
+        dispersión. Si la dispersión es baja, o sea si las neuronas se
+        activan mucho, el factor suma bastante error; si es alta, suma
+        poco. El castigo empuja a la red hacia el código disperso.
+  \item \textbf{Autoencoder que quita ruido.} En lugar de dar el mismo
+        valor en la entrada y en la salida, se le mete ruido al vector
+        de entrada y se deja la salida limpia. La red queda obligada a
+        generalizar, porque va a ver varios ejemplos de entrada
+        ligeramente distintos que deben producir la misma salida.
+\end{itemize}
+
+El factor de dispersión no viene escrito en la diapositiva. La forma
+usual, la de las notas de Andrew Ng que están en las lecturas, mide la
+activación promedio $\hat{\rho}_j$ de cada neurona oculta contra un
+objetivo $\rho$ chico, del orden de $0.05$, y castiga la diferencia
+con
+\[
+    \beta \sum_j \left[
+      \rho \log \frac{\rho}{\hat{\rho}_j}
+      + (1 - \rho) \log \frac{1 - \rho}{1 - \hat{\rho}_j}
+    \right] ,
+\]
+que vale cero cuando $\hat{\rho}_j = \rho$ y crece rápido en cuanto la
+neurona se activa más seguido de lo permitido.
+
+\subsection*{Autoencoders apilados}
+
+Un \textbf{autoencoder apilado} es una red formada por varias capas de
+autoencoders dispersos, donde la salida de cada capa se conecta a la
+entrada de la siguiente. El entrenamiento va por etapas:
+
+\begin{enumerate}[itemsep=0.4em]
+  \item Entrenar un autoencoder disperso sobre las entradas crudas
+        $x^{(k)}$, para aprender \textbf{características primarias}
+        $h^{(1)(k)}$.
+  \item Usar esas características primarias como si fueran la entrada
+        cruda de \emph{otro} autoencoder disperso, y aprender
+        \textbf{características secundarias} $h^{(2)(k)}$, que son más
+        complejas que las primeras.
+  \item Tratar las secundarias como entrada cruda de un clasificador,
+        y entrenarlo para mapear de ellas a las etiquetas de clase.
+  \item Juntar las tres piezas en una sola red con dos capas ocultas y
+        una capa final de clasificación.
+\end{enumerate}
+
+El método entrena los parámetros de cada capa por separado, mientras
+mantiene congelados los del resto del modelo. Al terminar esa fase se
+hace un \textbf{ajuste fino} con backpropagation sobre la red
+completa, para mejorar los resultados moviendo ya todos los
+parámetros a la vez.
+
+\subsubsection*{Qué se gana}
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Aprende sin supervisión.} Solo necesita datos, y
+        encuentra por su cuenta las características frecuentes con las
+        cuales etiquetarlos. Las etiquetas hacen falta nada más para
+        el clasificador del final.
+  \item \textbf{Se puede ir tan hondo como se quiera.} El problema del
+        error que se diluye no aparece, porque nunca se propaga a
+        través de muchas capas a la vez: cada autoencoder tiene su
+        propio objetivo y es poco profundo.
+\end{itemize}
+
+\begin{idea}
+  Las dos mitades de esta clase atacan el mismo problema por lados
+  opuestos. El apilado lo \emph{evita}: nunca propaga a lo largo de
+  toda la red, así que el gradiente no tiene por dónde diluirse.
+  ResNet lo \emph{arregla}: deja que el gradiente recorra la red
+  entera, pero le pone un camino donde no se encoge.
+
+  Históricamente el preentrenamiento capa por capa fue lo que hizo
+  viable el aprendizaje profundo a mediados de los dos mil. Dejó de
+  usarse casi por completo cuando ReLU, mejores inicializaciones y más
+  datos permitieron entrenar de punta a punta sin esa muleta.
+\end{idea}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.9cm}
+                >{\raggedright\arraybackslash}p{3.6cm}
+                >{\raggedright\arraybackslash}p{6.7cm}}
+  \toprule
+  \textbf{Variante} & \textbf{Capa oculta} & \textbf{Qué la obliga a
+  aprender} \\
+  \midrule
+  Básico &
+  Más chica que la entrada &
+  El cuello de botella: la información no cabe de otro modo \\
+  \addlinespace
+  Disperso &
+  Más grande que la entrada &
+  El castigo por activarse seguido \\
+  \addlinespace
+  Que quita ruido &
+  De cualquier tamaño &
+  El ruido en la entrada, que impide copiar \\
+  \addlinespace
+  Apilado &
+  Varias, una por etapa &
+  Cada capa se entrena sola sobre la salida de la anterior \\
+  \bottomrule
+\end{tabular}
+\end{center}
 
 
 \end{document}
