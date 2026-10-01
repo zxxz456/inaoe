@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.10.0
+%   * Version: 2.11.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       30/09/2026      Clase 30 Sep, semantica distribucional
 %  zxxz6       28/09/2026      Clase 28 Sep, SVD y el detalle de LSI
 %  zxxz6       25/09/2026      Clase 23 Sep, TCOR, random indexing y LSI
 %  zxxz6       21/09/2026      Clase 21 Sep, WSD e indexado conceptual
@@ -2965,6 +2966,716 @@ traducción automática.
     documento-documento, que son las dos que aparecieron en las clases
     del $21$ y del $23$. LSI es la versión espectral de ambas.
 \end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 14 - Semantica distribucional y word embeddings
+% =====================================================================
+
+\clase{Semántica distribucional y \textit{word embeddings}}%
+      {30 de septiembre de 2026}
+
+\begin{quick_sum}
+    Inicio de las representaciones basadas en redes neuronales. Se
+    partió de la hipótesis distribucional: el significado de una
+    palabra está en cómo se usa. De ahí salen los vectores semánticos,
+    primero contando (matriz término-documento, matriz término-término,
+    one-hot, SVD truncada) y después prediciendo, con un modelo de
+    lenguaje neuronal que aprende los vectores como efecto secundario.
+    A esos vectores densos y de baja dimensión se les llama
+    \textit{word embeddings}.
+\end{quick_sum}
+
+\subsection*{Semántica distribucional}
+
+Hasta ahora una palabra era un índice: la posición $i$ del
+vocabulario, o la dimensión $i$ de un vector de tf-idf. Eso sirve para
+contar, pero no dice nada de lo que la palabra significa. Para la
+máquina, \textit{gato} y \textit{perro} están tan lejos como
+\textit{gato} y \textit{hipoteca}.
+
+La idea que resuelve esto viene de la lingüística de los años
+cincuenta, y se conoce como la \textbf{hipótesis distribucional}:
+
+\begin{definicion}[Hipótesis distribucional]
+    El significado de una palabra está en el uso que se le da en el
+    lenguaje. Las palabras que ocurren en contextos similares tienden
+    a tener significados similares.
+\end{definicion}
+
+La frase clásica es de Firth (1957): \textit{``you shall know a word
+by the company it keeps''}, a una palabra se la conoce por las
+compañías que frecuenta. No hace falta un diccionario que diga que
+\textit{ocelote} es un felino: si aparece rodeado de \textit{selva},
+\textit{manchas}, \textit{cazar} y \textit{presa}, igual que
+\textit{jaguar}, algo tienen en común.
+
+\begin{ejemplo}
+    Nadie sabe qué es \textit{tesgüino}. Pero con estas oraciones:
+    \begin{itemize}[itemsep=0.1em]
+        \item Una botella de \textit{tesgüino} está sobre la mesa.
+        \item A todos les gusta el \textit{tesgüino}.
+        \item El \textit{tesgüino} te pone borracho.
+        \item El \textit{tesgüino} se hace con maíz.
+    \end{itemize}
+    queda bastante claro que es una bebida alcohólica de maíz. Todo lo
+    que se sabe salió del contexto. Eso es exactamente lo que se le
+    pide a la máquina que haga.
+\end{ejemplo}
+
+El contexto captura varios tipos de relación a la vez:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Palabras relacionadas.} No necesariamente sinónimos:
+          \textit{café} y \textit{taza} no significan lo mismo, pero
+          están relacionadas y aparecen juntas.
+    \item \textbf{Campo semántico.} Conjuntos de palabras que cubren un
+          mismo dominio: \textit{mesero}, \textit{menú}, \textit{plato},
+          \textit{cuenta} y \textit{propina} pertenecen al de
+          restaurante.
+    \item \textbf{Connotaciones.} El tono afectivo: \textit{feliz} y
+          \textit{triste} son opuestos, pero los dos son palabras de
+          emoción. \textit{Tacaño} y \textit{ahorrador} describen lo
+          mismo con valoración distinta.
+\end{itemize}
+
+\begin{idea}
+    Esto no es nuevo en el curso. TCOR, de la clase del $23$ de
+    septiembre, ya describía una palabra por las palabras con las que
+    coocurre, y LSI juntaba términos que aparecen en los mismos
+    documentos. Todo eso era semántica distribucional sin decirle así.
+    Lo nuevo de hoy es darle nombre y llevarla a redes neuronales.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{El vector semántico}
+
+Para representar el significado se usa un vector: el
+\textbf{vector semántico}. Cada palabra queda asociada a un punto en
+un espacio de muchas dimensiones, y con esos vectores se representan
+después los textos.
+
+Dos palabras se comparan midiendo qué tan cerca están sus vectores, y
+la medida de siempre es el coseno:
+\[
+    \cos(v, w) = \frac{v \cdot w}{\norm{v}\,\norm{w}}
+               = \frac{\sum_i v_i w_i}{\sqrt{\sum_i v_i^2}\,
+                                        \sqrt{\sum_i w_i^2}} .
+\]
+Vale $1$ si los vectores apuntan igual y $0$ si son perpendiculares.
+Con conteos, que nunca son negativos, se queda entre $0$ y $1$.
+
+\begin{ojo}
+    Se usa el coseno y no la distancia euclidiana porque las palabras
+    frecuentes tienen vectores largos. \textit{good} aparece mucho más
+    que \textit{wit}, y su vector es enorme aunque signifique cosas
+    parecidas. El coseno solo mira la dirección, no el tamaño, y así
+    compara el patrón de uso sin castigar a las palabras raras.
+\end{ojo}
+
+La pregunta de la clase es cómo se construyen esos vectores. Hay dos
+familias, que se ven en orden: los que \textbf{cuentan} y los que
+\textbf{predicen}.
+
+% =====================================================================
+
+\subsection*{Matriz término-documento}
+
+Es la matriz del modelo vectorial de las primeras clases: cada renglón
+es una palabra del vocabulario y cada columna un documento de la
+colección. La celda cuenta cuántas veces aparece la palabra en el
+documento.
+
+\begin{ejemplo}[Cuatro palabras en cuatro obras de Shakespeare]
+    \begin{center}
+    \begin{tabular}{lcccc}
+        \toprule
+        & \textit{As You Like It} & \textit{Twelfth Night}
+        & \textit{Julius Caesar} & \textit{Henry V} \\
+        \midrule
+        \textit{battle} & 1   & 0  & 7  & 13 \\
+        \textit{good}   & 114 & 80 & 62 & 89 \\
+        \textit{fool}   & 36  & 58 & 1  & 4  \\
+        \textit{wit}    & 20  & 15 & 2  & 3  \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+La misma tabla se lee de dos maneras:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Por columnas:} cada documento es un vector de
+          longitud $\abs{V}$. Es lo que se hizo en IR, donde se
+          comparaban documentos contra consultas. Las comedias
+          (\textit{As You Like It}, \textit{Twelfth Night}) tienen
+          mucho \textit{fool} y \textit{wit}; las históricas
+          (\textit{Julius Caesar}, \textit{Henry V}) tienen más
+          \textit{battle}.
+    \item \textbf{Por renglones:} cada palabra es un vector de longitud
+          igual al número de documentos. Esta es la lectura nueva: la
+          palabra queda descrita por \textbf{los documentos en los que
+          tiende a aparecer}.
+\end{itemize}
+
+\begin{ejemplo}
+    Con los renglones como vectores,
+    $\textit{fool} = (36, 58, 1, 4)$,
+    $\textit{wit} = (20, 15, 2, 3)$ y
+    $\textit{battle} = (1, 0, 7, 13)$.
+
+    \textbf{\textit{fool} contra \textit{wit}.}
+    \begin{align*}
+        \textit{fool} \cdot \textit{wit}
+            &= 36 \cdot 20 + 58 \cdot 15 + 1 \cdot 2 + 4 \cdot 3
+             = 720 + 870 + 2 + 12 = 1604 , \\
+        \norm{\textit{fool}} &= \sqrt{1296 + 3364 + 1 + 16}
+             = \sqrt{4677} = 68.39 , \\
+        \norm{\textit{wit}} &= \sqrt{400 + 225 + 4 + 9}
+             = \sqrt{638} = 25.26 , \\
+        \cos(\textit{fool}, \textit{wit})
+            &= \frac{1604}{68.39 \cdot 25.26} = 0.93 .
+    \end{align*}
+
+    \textbf{\textit{fool} contra \textit{battle}.}
+    \[
+        \textit{fool} \cdot \textit{battle} = 36 + 0 + 7 + 52 = 95 ,
+        \quad
+        \norm{\textit{battle}} = \sqrt{219} = 14.80 ,
+        \quad
+        \cos = \frac{95}{68.39 \cdot 14.80} = 0.09 .
+    \]
+    \textit{fool} y \textit{wit} se parecen porque viven en las mismas
+    obras; \textit{fool} y \textit{battle} casi nada. Nadie le dijo al
+    método qué es una comedia.
+\end{ejemplo}
+
+\begin{ojo}
+    El documento es un contexto muy grueso. Dos palabras en la misma
+    obra pueden estar a cincuenta páginas una de otra y cuentan igual
+    que si estuvieran juntas. Además, el vector de cada palabra tiene
+    tantas componentes como documentos haya, que es el mismo problema
+    de dimensionalidad que tenía DOR.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Matriz término-término}
+
+Para afinar el contexto, en lugar de documentos se usan las palabras
+de alrededor. La matriz es de $\abs{V} \times \abs{V}$: los renglones
+son las palabras objetivo, las columnas las palabras de contexto, y
+cada celda cuenta cuántas veces la palabra del renglón y la de la
+columna coocurren en el corpus de entrenamiento.
+
+Coocurrir quiere decir caer dentro de una \textbf{ventana}. Con
+ventana de tamaño $L$, el contexto de una palabra son las $L$ palabras
+a su izquierda y las $L$ a su derecha.
+
+\begin{ejemplo}[Ventana de tamaño 2]
+    En \textit{``\ldots I saw a cute grey \textbf{cat} playing in the
+    garden \ldots''}, los contextos de \textit{cat} son
+    \[
+        \underbrace{\textit{cute} \quad \textit{grey}}_{\text{izquierda}}
+        \quad \textbf{cat} \quad
+        \underbrace{\textit{playing} \quad \textit{in}}_{\text{derecha}}
+    \]
+    Así que esta aparición suma $1$ a las celdas
+    (\textit{cat}, \textit{cute}), (\textit{cat}, \textit{grey}),
+    (\textit{cat}, \textit{playing}) y (\textit{cat}, \textit{in}).
+    Recorriendo todo el corpus, la celda queda en
+    \[
+        N(w, c) = \text{número de veces que la palabra } w
+                  \text{ aparece en el contexto } c .
+    \]
+\end{ejemplo}
+
+\begin{ejemplo}[Ventana de tamaño 4 sobre Wikipedia]
+    Fragmentos del corpus:
+    \begin{center}
+    \small
+    \begin{tabular}{r@{\quad}c@{\quad}l}
+        is traditionally followed by & \textbf{cherry}
+            & pie, a traditional dessert \\
+        often mixed, such as & \textbf{strawberry}
+            & rhubarb pie. Apple pie \\
+        computer peripherals and personal & \textbf{digital}
+            & assistants. These devices usually \\
+        a computer. This includes & \textbf{information}
+            & available on the internet \\
+    \end{tabular}
+    \end{center}
+    y una parte de la matriz resultante:
+    \begin{center}
+    \begin{tabular}{lccccccc}
+        \toprule
+        & \textit{aardvark} & $\cdots$ & \textit{computer}
+        & \textit{data} & \textit{result} & \textit{pie}
+        & \textit{sugar} \\
+        \midrule
+        \textit{cherry}      & 0 & $\cdots$ & 2    & 8    & 9   & 442
+                             & 25 \\
+        \textit{strawberry}  & 0 & $\cdots$ & 0    & 0    & 1   & 60
+                             & 19 \\
+        \textit{digital}     & 0 & $\cdots$ & 1670 & 1683 & 85  & 5
+                             & 4  \\
+        \textit{information} & 0 & $\cdots$ & 3325 & 3982 & 378 & 5
+                             & 13 \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+Se ve a ojo: \textit{cherry} y \textit{strawberry} tienen su masa en
+\textit{pie} y \textit{sugar}; \textit{digital} e
+\textit{information}, en \textit{computer} y \textit{data}. Con los
+seis contextos visibles, los cosenos dan
+
+\begin{center}
+\begin{tabular}{lc}
+    \toprule
+    \textbf{Par} & \textbf{Coseno} \\
+    \midrule
+    \textit{digital}, \textit{information} & $0.996$ \\
+    \textit{cherry}, \textit{strawberry}   & $0.969$ \\
+    \textit{cherry}, \textit{digital}      & $0.019$ \\
+    \textit{strawberry}, \textit{information} & $0.003$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacion}
+    Es la matriz de TCOR. Allá el contexto era el documento; aquí es
+    una ventana, que es más fino. El tamaño de la ventana cambia qué
+    tipo de similitud se captura: con ventanas chicas, de $\pm 1$ a
+    $\pm 3$, las palabras cercanas son del mismo tipo gramatical y
+    salen parecidas las intercambiables (\textit{perro},
+    \textit{gato}); con ventanas grandes sale más la relación de tema
+    (\textit{perro}, \textit{correa}, \textit{veterinario}).
+\end{observacion}
+
+\begin{ojo}
+    La matriz tiene $\abs{V}^2$ celdas. Con un vocabulario de $50\,000$
+    palabras son $2\,500$ millones, y casi todas valen cero: la columna
+    \textit{aardvark} del ejemplo es un buen retrato. Los vectores son
+    largos y dispersos, y eso es lo que motiva todo lo que sigue.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Otras formas de generar vectores de palabras}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Random indexing.} De la clase del $23$ de septiembre:
+          en lugar de una dimensión por contexto, cada contexto recibe
+          un vector aleatorio corto, y la palabra acumula los de sus
+          contextos. Reduce dimensión sin factorizar nada.
+    \item \textbf{Latent Semantic Analysis (LSA).} Es LSI, de las
+          clases del $23$ y $28$ de septiembre, cuando se usa para
+          representar palabras y no para recuperar documentos. Se
+          aplica SVD truncada a la matriz de conteos.
+    \item \textbf{Latent Dirichlet Allocation (LDA).} Un modelo
+          probabilístico de temas: cada documento es una mezcla de
+          temas y cada tema una distribución sobre palabras. La palabra
+          se puede representar por qué tanto pertenece a cada tema. Es
+          la respuesta a la segunda desventaja de LSI, la de forzar una
+          normal sobre conteos.
+    \item \textbf{One-hot encoding.} La más simple de todas, abajo.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{One-hot encoding}
+
+Cada palabra es un vector de longitud $\abs{V}$ con un $1$ en su
+posición y ceros en todo lo demás.
+
+\begin{ejemplo}
+    Con $V = \{\textit{home}, \textit{cat}, \textit{dog},
+    \textit{song}, \textit{car}\}$:
+    \[
+        \begin{array}{l@{\quad}ccccc}
+            \textit{home} & 0 & 0 & 0 & 0 & 1 \\
+            \textit{cat}  & 0 & 0 & 0 & 1 & 0 \\
+            \textit{dog}  & 0 & 0 & 1 & 0 & 0 \\
+            \textit{song} & 0 & 1 & 0 & 0 & 0 \\
+            \textit{car}  & 1 & 0 & 0 & 0 & 0
+        \end{array}
+    \]
+    Las preguntas de la diapositiva: ¿qué tan parecidas son
+    \textit{home} y \textit{cat}? ¿Y \textit{cat} y \textit{dog}? ¿Y
+    \textit{cat} y \textit{car}? El producto punto de dos vectores
+    one-hot distintos es siempre $0$, porque el $1$ de uno cae sobre un
+    $0$ del otro. Las tres similitudes valen exactamente cero.
+    \textit{cat} está igual de lejos de \textit{dog} que de
+    \textit{car}.
+\end{ejemplo}
+
+\begin{ojo}
+    One-hot tiene los dos defectos a la vez. No captura ninguna
+    similitud, porque todos los vectores son perpendiculares entre sí.
+    Y la dimensión es el tamaño del vocabulario: con $50\,000$
+    palabras, cada vector tiene $50\,000$ componentes para guardar un
+    solo bit de información. Es un índice disfrazado de vector.
+\end{ojo}
+
+Aun así no es inútil. Es la forma de \emph{entrar} a una red neuronal,
+como se ve al final de la clase.
+
+% =====================================================================
+
+\subsection*{Métodos basados en conteo}
+
+La receta general tiene dos pasos. Primero se arma una matriz donde
+los renglones son palabras, las columnas son contextos potenciales, y
+cada elemento dice algo de la asociación entre esa palabra y ese
+contexto. Después se reduce su dimensión con SVD truncada:
+\[
+    \underbrace{M}_{\abs{V} \times \abs{C}}
+    \;\approx\;
+    \underbrace{V_d}_{\substack{\text{vectores de}\\\text{palabra}}}
+    \times \Sigma_d \times
+    \underbrace{U_d^{T}}_{\substack{\text{vectores de}\\\text{contexto}}}
+\]
+Cada renglón de $V_d$ es el vector de una palabra, ya con solo $d$
+componentes. Las columnas de $U_d^{T}$ son los vectores de los
+contextos.
+
+\begin{observacion}
+    En la diapositiva los factores se llaman $V_d$ y $U_d^{T}$, al
+    revés de la notación $U\Sigma V^{T}$ de la clase del $28$. Es solo
+    el nombre: el factor de la izquierda es el de los renglones de la
+    matriz, que aquí son las palabras.
+\end{observacion}
+
+Para usar la receta hay que decidir dos cosas:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Qué es el contexto.} Las palabras que rodean a la
+          objetivo dentro de una ventana de tamaño $L$, o el documento
+          completo, o una oración.
+    \item \textbf{Cómo se calcula cada elemento.} Lo más simple es el
+          conteo $N(w, c)$. En la práctica los conteos crudos se
+          repesan, por la misma razón que en IR se usa tf-idf y no tf:
+          palabras como \textit{the} coocurren con todo y dominan los
+          vectores sin decir nada.
+\end{enumerate}
+
+\begin{idea}
+    El repesado más usado con matrices término-término es la
+    \textbf{información mutua puntual positiva} (PPMI):
+    \[
+        \mathrm{PMI}(w, c) = \log_2 \frac{P(w, c)}{P(w)\,P(c)} ,
+        \qquad
+        \mathrm{PPMI}(w, c) = \max\big(\mathrm{PMI}(w, c),\, 0\big) .
+    \]
+    Compara qué tan seguido aparecen juntas contra qué tan seguido lo
+    harían si fueran independientes. Si \textit{cherry} y \textit{pie}
+    coocurren mucho más de lo que explicaría el azar, el PMI es alto;
+    si \textit{cherry} y \textit{the} coocurren justo lo esperado por
+    lo frecuente que es \textit{the}, el PMI es cercano a cero. Los
+    valores negativos se cortan porque con corpus finitos no son
+    confiables.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Qué son los \textit{word embeddings}}
+
+\begin{definicion}[Word embedding]
+    Un \textit{word embedding} representa cada palabra como un vector
+    de \textbf{baja dimensión}, típicamente entre $50$ y $1000$
+    componentes, que conserva la distribución semántica de las
+    palabras: palabras de uso parecido quedan con vectores cercanos.
+\end{definicion}
+
+Se les llama también:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Representaciones distribuidas.} El significado no
+          vive en una sola componente, como en one-hot, sino repartido
+          entre todas. Ninguna dimensión por sí sola quiere decir
+          ``animal'' o ``comida''; es el patrón completo el que
+          significa.
+    \item \textbf{Modelos semánticos distribucionales.} La definición
+          de Baroni, Dinu y Kruszewski (2014): usan vectores que
+          registran los contextos, o sea las palabras que coocurren, en
+          los que aparecen los términos objetivo en un corpus grande,
+          como sustitutos de la representación del significado, y les
+          aplican técnicas geométricas para medir la similitud de
+          significado entre las palabras correspondientes.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lcc}
+    \toprule
+    & \textbf{Vectores de conteo} & \textbf{Embeddings} \\
+    \midrule
+    Dimensión & $\abs{V}$ o número de documentos & $50$ a $1000$ \\
+    Entradas  & Casi todas cero (dispersos) & Casi ninguna cero (densos) \\
+    Cada componente & Un contexto concreto & Nada interpretable sola \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La motivación está en la diapositiva $19$: representar las palabras
+como índices de un vocabulario es común, pero no captura la rica
+estructura relacional del léxico. Los embeddings codifican la
+similitud entre palabras como distancia o ángulo entre vectores de un
+espacio, y esa similitud es continua: no es ``igual'' o ``distinta'',
+sino qué tan parecida.
+
+\subsubsection*{La matriz de embeddings}
+
+En la práctica todos los embeddings se guardan en una sola matriz
+$E$, con un renglón por palabra del vocabulario y una columna por
+dimensión del embedding. Para obtener el vector de una palabra se toma
+su índice en el vocabulario y se lee ese renglón.
+
+\begin{ejemplo}
+    La oración \textit{``I saw a cat .''} se convierte primero en
+    índices del vocabulario:
+    \[
+        \begin{array}{ccccc}
+            \textit{I} & \textit{saw} & \textit{a} & \textit{cat}
+                & \textit{.} \\
+            39 & 1592 & 10 & 2548 & 5
+        \end{array}
+    \]
+    El embedding de \textit{saw} es el renglón $1592$ de $E$. La
+    oración completa queda como cinco vectores densos, uno por token.
+\end{ejemplo}
+
+\begin{idea}
+    Leer el renglón $i$ de $E$ es lo mismo que multiplicar el vector
+    one-hot de la palabra por $E$. Si $x$ es one-hot con el $1$ en la
+    posición $i$, el producto $x^{T} E$ suma los renglones de $E$
+    pesados por las entradas de $x$, y la única que no es cero es la
+    $i$:
+    \[
+        \begin{pmatrix} 0 & 1 & 0 \end{pmatrix}
+        \begin{pmatrix} 2 & 7 \\ 5 & 1 \\ 3 & 8 \end{pmatrix}
+        = \begin{pmatrix} 5 & 1 \end{pmatrix} .
+    \]
+    Por eso one-hot sigue apareciendo: es la entrada formal de una red,
+    y la primera capa de la red es justo $E$. En el código nadie hace
+    la multiplicación, se hace la búsqueda por índice, que da lo mismo
+    y es mucho más barata.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Conteo contra predicción}
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.3cm,
+    level 1/.style={sibling distance=8cm},
+    level 2/.style={sibling distance=1.6cm},
+    every node/.style={font=\small, align=center},
+    edge from parent/.style={draw, gray, ->}]
+    \node[font=\small\bfseries] {Métodos de embedding}
+        child {node[font=\small\bfseries] {Basados en conteo}
+            child {node {TF-IDF}}
+            child {node {One-hot}}
+            child {node {BoW}}
+            child {node {LSA}}
+            child {node {LDA}}}
+        child {node[font=\small\bfseries] {Basados en predicción}
+            child {node {SVM}}
+            child {node {Word2Vec}}
+            child {node {BERT}}
+            child {node {GPT}}};
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Basados en conteo.} Cuentan cuántas veces aparece
+          una palabra en relación con otras y construyen la
+          codificación a partir de esos conteos. Primero recolectan
+          los vectores de contexto y luego los repesan con algún
+          criterio: tf-idf, PPMI, SVD. LSA y LDA son enfoques
+          estadísticos, pero siguen infiriendo las propiedades del
+          conjunto de datos por heurísticas más que por un modelo que
+          se entrena.
+    \item \textbf{Basados en predicción.} No cuentan. Entrenan un
+          modelo para predecir una palabra a partir de su contexto, o
+          el contexto a partir de la palabra, y los embeddings salen
+          como parámetros de ese modelo.
+\end{itemize}
+
+Estos son los dos tipos de embeddings que se mencionaron al inicio de
+la clase. El título del artículo de Baroni et al.\ resume la
+conclusión de su comparación: \textit{``Don't count, predict!''}. En
+sus experimentos los vectores entrenados prediciendo ganaron en casi
+todas las tareas.
+
+\begin{ojo}
+    La SVM aparece en la diapositiva del lado de predicción, pero no
+    genera embeddings: es un clasificador que \emph{usa}
+    representaciones. Está ahí porque se entrena para predecir, no
+    porque produzca vectores de palabras.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Modelo de lenguaje basado en redes neuronales}
+
+Con técnicas de aprendizaje profundo los embeddings se pueden aprender
+sin contar nada. La red recibe palabras y, para hacer bien su tarea,
+tiene que aprender vectores que capturen su semántica. El primer
+modelo de este tipo fue un modelo de lenguaje.
+
+Recordando la clase del $31$ de agosto, un modelo de lenguaje asigna
+probabilidad a la siguiente palabra dada la historia. La historia
+completa es demasiado larga, así que se aproxima con las últimas
+$N - 1$ palabras:
+\[
+    P(w_t \mid w_1, \ldots, w_{t-1})
+    \approx P(w_t \mid w_{t-N+1}, \ldots, w_{t-1}) .
+\]
+El modelo de n-gramas estimaba esa probabilidad contando. El modelo
+neuronal la \emph{calcula}: es una red \textit{feed-forward} que en el
+tiempo $t$ recibe una representación de las palabras previas
+($w_{t-1}$, $w_{t-2}$, etc.) y devuelve una distribución de
+probabilidad sobre todas las posibles palabras siguientes.
+
+\subsubsection*{La arquitectura, capa por capa}
+
+\begin{ejemplo}[Predecir la palabra después de \textit{``for all the''}]
+    Con $N = 4$ la red ve las tres palabras previas. Sean $\abs{V}$ el
+    tamaño del vocabulario, $d$ la dimensión del embedding y $d_h$ el
+    número de neuronas ocultas.
+
+    \begin{center}
+    \begin{tikzpicture}[
+        box/.style={draw, rounded corners=2pt, minimum height=0.8cm,
+                    align=center, font=\small, fill=fondoIdea},
+        >=stealth]
+        \node[box] (x) at (0, 0) {$x$\\[-1pt]{\scriptsize one-hot}};
+        \node[box] (e) at (3, 0)
+            {$e$\\[-1pt]{\scriptsize embedding}};
+        \node[box] (h) at (6, 0) {$h$\\[-1pt]{\scriptsize oculta}};
+        \node[box] (y) at (9, 0)
+            {$\hat{y}$\\[-1pt]{\scriptsize softmax}};
+        \draw[->] (x) -- node[above, font=\small] {$E$} (e);
+        \draw[->] (e) -- node[above, font=\small] {$W$} (h);
+        \draw[->] (h) -- node[above, font=\small] {$U$} (y);
+        \node[font=\scriptsize] at (0, -0.8) {$3$ de $\abs{V} \times 1$};
+        \node[font=\scriptsize] at (3, -0.8) {$3d \times 1$};
+        \node[font=\scriptsize] at (6, -0.8) {$d_h \times 1$};
+        \node[font=\scriptsize] at (9, -0.8) {$\abs{V} \times 1$};
+    \end{tikzpicture}
+    \end{center}
+
+    \textbf{Entrada.} Cada palabra previa entra como vector one-hot de
+    $\abs{V} \times 1$: \textit{for} con el $1$ en la posición $35$,
+    \textit{all} en la $992$ y \textit{the} en la $451$.
+
+    \textbf{Capa de embedding.} Cada one-hot se multiplica por la
+    matriz $E$, de $d \times \abs{V}$, que es la misma para las tres
+    posiciones. Por la idea de la sección anterior, eso solo selecciona
+    una columna de $E$ por palabra. Los tres vectores de $d$
+    componentes se concatenan en $e$, de $3d \times 1$.
+
+    \textbf{Capa oculta.} Una capa densa con función de activación
+    $\sigma$ no lineal:
+    \[
+        h = \sigma(W e + b) , \qquad W \text{ de } d_h \times 3d .
+    \]
+
+    \textbf{Salida.} Un puntaje por palabra del vocabulario,
+    $z = U h$ con $U$ de $\abs{V} \times d_h$, y luego softmax para
+    volverlo probabilidad:
+    \[
+        \hat{y}_i = \frac{e^{z_i}}{\sum_{j=1}^{\abs{V}} e^{z_j}} .
+    \]
+    $\hat{y}_{42}$ es $P(\textit{fish} \mid \textit{for all the})$,
+    $\hat{y}_{\abs{V}}$ es $P(\textit{zebra} \mid \textit{for all
+    the})$, y así con cada palabra.
+\end{ejemplo}
+
+\begin{ejemplo}[Softmax con tres palabras]
+    Si el vocabulario fuera solo \textit{day}, \textit{fish} y
+    \textit{zebra}, y la red diera $z = (2,\ 1,\ 0.1)$:
+    \[
+        e^{2} = 7.389 , \qquad e^{1} = 2.718 , \qquad
+        e^{0.1} = 1.105 , \qquad \text{suma} = 11.212 ,
+    \]
+    \[
+        \hat{y} = \left(\frac{7.389}{11.212},\ \frac{2.718}{11.212},\
+                  \frac{1.105}{11.212}\right)
+                = (0.659,\ 0.242,\ 0.099) .
+    \]
+    Las tres suman $1$ y respetan el orden de los puntajes. La
+    exponencial hace que ninguna salga negativa y exagera las
+    diferencias: un punto más de puntaje multiplica la probabilidad por
+    $e \approx 2.7$.
+\end{ejemplo}
+
+\subsubsection*{De dónde salen los embeddings}
+
+Al principio $E$, $W$ y $U$ son números al azar. La red se entrena
+sobre un corpus grande: en cada posición del texto ve las tres
+palabras previas, predice la siguiente, compara contra la palabra que
+realmente siguió y ajusta todos los pesos con retropropagación para
+que esa palabra reciba más probabilidad. $E$ también se ajusta.
+
+Al terminar, a nadie le importa tanto el modelo de lenguaje: lo que se
+queda es $E$. Cada una de sus columnas es el embedding de una palabra.
+Los modelos de lenguaje neuronales representan las palabras por sus
+embeddings, y los aprenden como efecto secundario de predecir.
+
+\begin{idea}
+    Por qué los vectores salen con significado: si \textit{cat} y
+    \textit{dog} suelen ir seguidos de las mismas palabras
+    (\textit{is sleeping}, \textit{ate the}), a la red le conviene darles
+    embeddings parecidos, porque así las dos producen predicciones
+    parecidas. La hipótesis distribucional no se programó; la impone el
+    objetivo de entrenamiento.
+\end{idea}
+
+\subsubsection*{Por qué es mejor que los n-gramas}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Generaliza a combinaciones que nunca vio.} Si en el
+          entrenamiento apareció \textit{``the cat is walking in the
+          bedroom''} pero nunca \textit{``a dog was running in a
+          room''}, el modelo de n-gramas le da probabilidad casi cero a
+          la segunda. El neuronal no, porque \textit{cat} y
+          \textit{dog}, \textit{walking} y \textit{running},
+          \textit{bedroom} y \textit{room} tienen embeddings cercanos y
+          producen activaciones cercanas.
+    \item \textbf{Soporta historias mucho más largas.} Los parámetros
+          de un n-grama crecen como $\abs{V}^N$: cada historia posible
+          es una fila de la tabla, y casi todas quedan con conteo cero.
+          En la red, agregar una palabra más de historia solo agrega
+          $d$ entradas a $e$ y $d \cdot d_h$ pesos a $W$.
+\end{itemize}
+
+\begin{ejemplo}[Cuántos parámetros]
+    Con $\abs{V} = 10\,000$, $d = 100$, tres palabras de historia y
+    $d_h = 500$:
+    \begin{align*}
+        E &: 100 \times 10\,000 = 1\,000\,000 , \\
+        W &: 500 \times 300 = 150\,000 , \\
+        U &: 10\,000 \times 500 = 5\,000\,000 .
+    \end{align*}
+    Un trigrama sobre el mismo vocabulario tendría hasta
+    $10\,000^3 = 10^{12}$ probabilidades. La mayor parte del costo de
+    la red está en $U$, la capa de salida, porque tiene que dar un
+    puntaje a cada palabra del vocabulario.
+\end{ejemplo}
+
+\begin{ojo}
+    El softmax es el cuello de botella: para cada ejemplo de
+    entrenamiento hay que calcular $e^{z_j}$ para las $\abs{V}$
+    palabras solo para obtener el denominador. Con vocabularios de
+    cientos de miles esto es muy lento, y buena parte de lo que
+    después hizo Word2Vec fue esquivar ese cálculo.
+\end{ojo}
 
 
 \end{document}

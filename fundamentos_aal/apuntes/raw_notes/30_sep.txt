@@ -1,0 +1,44 @@
+-- representaciones basados en redes neuronales 
+
+hay dos tipos de embeddings
+    -
+    -
+semantica distribucional
+el significado de una palabra esta en el uso que se le da en el lenguaje
+
+las palabras que ocurren en contextos similares tienden a tener significadios simimlares
+    -palabras relacionadas: las palabras se relacionan en algun tipos
+    -campo semantico
+    -connotaciones
+
+
+para poder representar el significado se utiliza un vector, el vector de semantica. aqui cada palabre esta asociada
+a un vector y este vector me ayuda a representar mis textos
+
+como se crearon estos vectores? {slide term-document matrix} est amtriz nos permite saber el significado de una palabra segun
+los documentos en los que ocurre
+
+matriz termino a termino {slide ter-ter matrix}, nos dice el contexto, con que palabras tiende a aparecer al rededor, se usa una
+ventana, de aqui se podrian sacar los vectores de palabras 
+
+otras formas de generar vectores {slide de other ways}
+
+las palabras se miden con similitud
+
+como se representan las palabras como vectores?
+    - one hot
+    -count based methods, las filas reptresentas palabreas, columnas representan contextos potenciales 
+
+que son los words embeddings? representa un a palabra con un vector de baja dimensionalidad, maniene la distribucion semantica de las
+palabras {slide what are word embedings}
+
+- word embedings 
+{exolicacion}
+
+hay varias formas de hacer los words embeddings {slide prediciton y predictive }
+
+con tecnicas de DL se pueden aprender los words embeddings sin necesidad de contar, y se puede seguir aprendiendo la semanatica de las palabras
+
+todas las paabras entran a la red y sale un vector de representaciones {diagrama}
+
+modelo de lengauje basados en redesu neuronales 
