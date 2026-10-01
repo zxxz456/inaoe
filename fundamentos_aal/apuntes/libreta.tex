@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.9.0
+%   * Version: 2.10.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       28/09/2026      Clase 28 Sep, SVD y el detalle de LSI
 %  zxxz6       25/09/2026      Clase 23 Sep, TCOR, random indexing y LSI
 %  zxxz6       21/09/2026      Clase 21 Sep, WSD e indexado conceptual
 %  zxxz6       14/09/2026      Clase 14 Sep, indexado mas alla de la palabra
@@ -2650,6 +2651,321 @@ se proyecta con $\hat{q} = \Sigma_k^{-1} U_k^{T} q$.
     quedan con el mismo coseno. El costo es la SVD de una matriz de
     vocabulario por colección, y por eso LSI es caro.
 \end{ojo}
+
+
+\newpage
+% =====================================================================
+%  Clase 13 - Descomposicion en valores singulares
+% =====================================================================
+
+\clase{Descomposición en valores singulares}{28 de septiembre de 2026}
+
+\begin{quick_sum}
+    La maquinaria que hay detrás de LSI. Se abrió la descomposición en
+    valores singulares: qué contiene cada una de las tres matrices, qué
+    significa quedarse con las primeras $k$ columnas y por qué esa
+    truncada es la mejor aproximación posible. El ejemplo de cinco
+    términos reducidos a dos dimensiones se siguió con números, y la
+    clase cerró con las ventajas y las desventajas del método.
+\end{quick_sum}
+
+\subsection*{La factorización}
+
+LSI es la aplicación de la SVD a la matriz término-documento. Lo que
+hace la descomposición es proyectar un espacio de $n$ dimensiones
+sobre uno de $k$, con $n > k$.
+
+La matriz $A$, de $t$ términos por $d$ documentos, se parte en el
+producto de tres:
+\[
+    A_{t \times d} = T_{t \times n}\, S_{n \times n}\,
+                     (D_{d \times n})^{T} ,
+\]
+donde $n$ es el rango de $A$, a lo más $\min(t, d)$.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.4cm}
+                >{\raggedright\arraybackslash}p{2.2cm}
+                >{\raggedright\arraybackslash}p{8.8cm}}
+    \toprule
+    \textbf{Matriz} & \textbf{Forma} & \textbf{Qué contiene} \\
+    \midrule
+    $T$ & $t \times n$ &
+    Los términos en el espacio latente, una columna por dimensión.
+    Sus columnas son ortonormales \\
+    \addlinespace
+    $S$ & $n \times n$ &
+    Diagonal, con los valores singulares de $A$ en orden decreciente \\
+    \addlinespace
+    $D$ & $d \times n$ &
+    Los documentos en el espacio latente, también con columnas
+    ortonormales \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacion}
+    Es la misma factorización que se escribió como
+    $A = U \Sigma V^{T}$ en la clase del $23$ de septiembre. Solo
+    cambian los nombres: $T = U$, $S = \Sigma$ y $D = V$. La notación
+    con letras es la de las diapositivas, y tiene la ventaja de que se
+    recuerda cuál es la de términos y cuál la de documentos.
+\end{observacion}
+
+\subsubsection*{Qué contiene S}
+
+El $i$-ésimo valor singular dice cuánta variación hay a lo largo del
+$i$-ésimo eje. El primero recoge la dirección en la que la colección
+se dispersa más, el segundo la siguiente, y así hasta el último.
+
+Que vengan ordenados es lo que hace posible el truncamiento: las
+dimensiones no valen lo mismo, y la descomposición las entrega de la
+más informativa a la menos sin que nadie tenga que decidirlo.
+
+Una identidad que sirve para verificar una SVD a mano:
+\[
+    \sum_{i=1}^{n} \sigma_i^2 = \norm{A}_F^2 = \sum_{i,j} a_{ij}^2 .
+\]
+
+\subsection*{De cinco a dos dimensiones}
+
+\begin{ejemplo}
+    Cinco términos y seis documentos:
+    \[
+        A = \begin{array}{l|cccccc}
+              & d_1 & d_2 & d_3 & d_4 & d_5 & d_6 \\
+            \hline
+            \textit{cosmonaut} & 1 & 0 & 1 & 0 & 0 & 0 \\
+            \textit{astronaut} & 0 & 1 & 0 & 0 & 0 & 0 \\
+            \textit{moon}      & 1 & 1 & 0 & 0 & 0 & 0 \\
+            \textit{car}       & 1 & 0 & 0 & 1 & 1 & 0 \\
+            \textit{truck}     & 0 & 0 & 0 & 1 & 0 & 1
+            \end{array}
+    \]
+
+    Su descomposición da cinco valores singulares:
+    \[
+        S = \operatorname{diag}(2.16,\; 1.59,\; 1.28,\; 1.00,\; 0.39).
+    \]
+
+    La identidad de arriba cuadra: la suma de sus cuadrados es $10$,
+    que es justo el número de unos de $A$.
+
+    Los seis documentos proyectados a las dos primeras dimensiones,
+    o sea las columnas de $S_2 D_2^{T}$:
+
+    \begin{center}
+    \begin{tabular}{lcccccc}
+        \toprule
+        & $d_1$ & $d_2$ & $d_3$ & $d_4$ & $d_5$ & $d_6$ \\
+        \midrule
+        dim $1$ & $-1.62$ & $-0.61$ & $-0.44$ & $-0.97$ & $-0.70$ &
+                  $-0.26$ \\
+        dim $2$ & $-0.46$ & $-0.84$ & $-0.30$ & $+1.00$ & $+0.35$ &
+                  $+0.65$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \begin{center}
+    \begin{tikzpicture}[scale=2.4]
+        \draw[->,gray] (-1.95,0) -- (0.4,0)
+              node[right,black,font=\small] {dim $1$};
+        \draw[->,gray] (0,-1.15) -- (0,1.3)
+              node[above,black,font=\small] {dim $2$};
+        \foreach \x in {-1.5,-1,-0.5}
+            \draw[gray] (\x,-0.035) -- (\x,0.035)
+                  node[below=3pt,black,font=\tiny] {$\x$};
+        \foreach \y in {-1,-0.5,0.5,1}
+            \draw[gray] (-0.035,\y) -- (0.035,\y)
+                  node[left=3pt,black,font=\tiny] {$\y$};
+        \draw[->,thick,acento] (0,0) -- (-1.619,-0.457)
+              node[below left,font=\small,black] {$d_1$};
+        \draw[->,thick,acento] (0,0) -- (-0.605,-0.843)
+              node[below,font=\small,black] {$d_2$};
+        \draw[->,thick,acento] (0,0) -- (-0.440,-0.296)
+              node[below left,font=\small,black] {$d_3$};
+        \draw[->,thick,acento] (0,0) -- (-0.966,0.997)
+              node[above left,font=\small,black] {$d_4$};
+        \draw[->,thick,acento] (0,0) -- (-0.703,0.351)
+              node[above left,font=\small,black] {$d_5$};
+        \draw[->,thick,acento] (0,0) -- (-0.263,0.647)
+              node[above right,font=\small,black] {$d_6$};
+    \end{tikzpicture}
+    \end{center}
+
+    La figura se parte sola en dos grupos. Abajo quedan $d_1$, $d_2$ y
+    $d_3$, que son los del espacio; arriba $d_4$, $d_5$ y $d_6$, que
+    son los de vehículos. Nadie declaró los dos temas.
+
+    Y ahí está el punto: $d_2$ contiene \textit{astronaut} y
+    \textit{moon}, y $d_3$ solo \textit{cosmonaut}. No comparten ni un
+    término, así que en el espacio original su coseno es exactamente
+    cero. En el de dos dimensiones su coseno es $0.94$.
+\end{ejemplo}
+
+\begin{ojo}
+    Los signos de una SVD son arbitrarios. Si se le cambia el signo a
+    una columna de $T$ y a la misma columna de $D$, el producto no se
+    entera. Aquí el eje $1$ va con el signo de las diapositivas, con
+    los seis documentos del lado negativo.
+\end{ojo}
+
+\subsection*{El truncamiento}
+
+Restringiendo $T$, $S$ y $D$ a sus primeras $k$ columnas, con $k < n$,
+quedan $T_{t \times k}$, $S_{k \times k}$ y $(D_{d \times k})^{T}$. Su
+producto
+\[
+    \hat{A} = T_k\, S_k\, D_k^{T}
+\]
+es la mejor aproximación por mínimos cuadrados de $A$ mediante una
+matriz de rango $k$. Mejor quiere decir que, entre todas las $B$ de
+rango a lo más $k$, $\hat{A}$ es la que minimiza $\norm{A - B}_F$.
+
+El error que se comete se lee directo de los valores singulares que se
+tiraron:
+\[
+    \norm{A - \hat{A}}_F = \sqrt{\sum_{i=k+1}^{n} \sigma_i^2} .
+\]
+
+\begin{ejemplo}
+    Con $k = 2$ en el ejemplo de arriba se tiran $1.28$, $1.00$ y
+    $0.39$, así que el error es
+    $\sqrt{1.28^2 + 1.00^2 + 0.39^2} = 1.67$, y la fracción de la
+    energía que se conserva es
+    $(2.16^2 + 1.59^2)/10 = 0.72$.
+
+    La matriz reconstruida llena huecos. En $\hat{A}$, el término
+    \textit{cosmonaut} tiene peso $0.52$ en $d_2$, un documento donde
+    esa palabra nunca aparece. Eso es lo que hace que el coseno deje
+    de ser cero.
+\end{ejemplo}
+
+\begin{ojo}
+    En esa misma reconstrucción aparecen pesos negativos, por ejemplo
+    $-0.39$ para \textit{truck} en $d_2$. Un peso negativo no
+    significa nada como frecuencia de un término. Es el primer aviso
+    de la segunda desventaja del método, más abajo.
+\end{ojo}
+
+\subsubsection*{Qué valor de k}
+
+Los valores que se usan con frecuencia son $100$ o $150$, y pueden ser
+más altos. No hay regla cerrada: $k$ se escoge probando, y el criterio
+práctico es la fracción de energía retenida, o directamente el MAP
+sobre un conjunto de consultas de prueba.
+
+\subsection*{Ventajas}
+
+\begin{itemize}[itemsep=0.35em]
+    \item \textbf{Marco formal fuerte y completamente automático.} No
+          hace falta ningún recurso externo, ni tesauro, ni
+          diccionario, ni corpus anotado. Todo sale de la matriz y de
+          un teorema de álgebra lineal.
+    \item \textbf{No requiere truncamiento, y tolera errores de
+          escritura.} \textit{connect}, \textit{connected} y
+          \textit{connection} aparecen en los mismos documentos, así
+          que la SVD las manda a las mismas dimensiones sin que nadie
+          corra a Porter. Con una palabra mal escrita pasa lo mismo:
+          la rodean los mismos vecinos que a la forma correcta, y cae
+          junto a ella.
+    \item \textbf{Sirve para recuperación multilingüe.} Va abajo.
+    \item \textbf{Mejora el recuerdo, lo que se llama IR conceptual.}
+          Se pueden recuperar documentos relevantes que no contienen
+          ni un término de la consulta. Es exactamente lo que hizo
+          $d_2$ con $d_3$ en el ejemplo.
+\end{itemize}
+
+\begin{ojo}
+    Lo de los errores de escritura tiene un límite que conviene tener
+    claro: funciona si la palabra mal escrita aparece lo suficiente
+    como para tener un contexto estable. Un dedazo que ocurre una sola
+    vez no le da a la SVD de dónde agarrarse para colocarlo.
+\end{ojo}
+
+\subsubsection*{Por qué sirve para multilingüe}
+
+El truco no está en la descomposición, está en cómo se arma la matriz
+antes de descomponerla.
+
+Se necesita una colección paralela o comparable, donde cada documento
+exista en los dos idiomas. Se pega la versión de un idioma con la
+versión del otro y el par se trata como \textbf{un solo documento}.
+
+Con eso, los renglones de $A$ traen términos de los dos idiomas a la
+vez, y dos palabras que son traducción una de la otra coocurren en
+todos esos documentos dobles. La SVD las manda a las mismas
+dimensiones latentes, igual que haría con dos sinónimos del mismo
+idioma. Para el método no hay diferencia entre sinonimia y traducción:
+las dos son palabras distintas que aparecen siempre juntas.
+
+Ya entrenado el espacio, la consulta se escribe en un idioma, se
+proyecta, y recupera documentos escritos en el otro. Al momento de
+consultar no interviene ningún diccionario bilingüe ni ninguna
+traducción automática.
+
+\begin{ojo}
+    Lo que sí hace falta es el corpus paralelo para entrenar, y eso no
+    es gratis. LSI no descubre la correspondencia entre dos idiomas de
+    la nada: la aprende de documentos que alguien ya alineó. Lo que
+    ahorra es el diccionario en tiempo de consulta, no el trabajo de
+    conseguir los datos.
+\end{ojo}
+
+\subsection*{Desventajas}
+
+\begin{enumerate}[itemsep=0.5em]
+    \item \textbf{El cálculo es caro.} La SVD de una matriz densa
+          de $m \times n$ cuesta del orden de
+          $\min(m,n)^2 \cdot \max(m,n)$, y el vocabulario por la
+          colección da matrices enormes. Hay dos agravantes: $\hat{A}$ es densa aunque $A$ fuera
+          dispersa, así que el índice crece en vez de encogerse, y la
+          descomposición no es incremental, un documento nuevo obliga
+          a recalcular o a proyectarlo de forma aproximada.
+    \item \textbf{Los métodos basados en la distribución normal
+          continua no son apropiados para datos de conteo.} Minimizar
+          la norma de Frobenius es mínimos cuadrados, y eso supone por
+          debajo que los errores son normales y de varianza constante.
+          Las celdas de $A$ son conteos: enteros no negativos, muy
+          sesgados, y con varianza que crece con la media. De ahí
+          salen los pesos negativos del ejemplo, y de ahí vienen pLSA
+          y LDA, que modelan los conteos con distribuciones discretas
+          en lugar de forzar una normal.
+    \item \textbf{Muchas veces importa más subir la precisión,} y para
+          eso hacen falta desambiguar la consulta y desambiguar los
+          sentidos. LSI ayuda al recuerdo, pero un término polisémico
+          recibe un solo vector que promedia todos sus sentidos.
+          \textit{bank} de río y \textit{bank} de dinero quedan en un
+          único punto intermedio, y documentos de los dos sentidos se
+          mezclan.
+\end{enumerate}
+
+\begin{idea}
+    Esa última desventaja es el espejo de la clase del $21$ de
+    septiembre. LSI colapsa sinónimos muy bien, que era el problema de
+    recuerdo, y trata mal la polisemia, que era el de precisión. La
+    desambiguación hacía justo lo contrario.
+\end{idea}
+
+\begin{idea}
+    Vale la pena ver cómo encaja con las dos clases anteriores. DOR y
+    TCOR arman el espacio conceptual a mano: uno toma los documentos
+    como dimensiones, el otro los términos. LSI no lo decide, lo
+    deduce de los datos.
+
+    Y la relación es literal. De $A = T S D^{T}$, usando que las
+    columnas de $T$ y de $D$ son ortonormales, sale
+    \[
+        A A^{T} = T S^2 T^{T} ,
+        \qquad
+        A^{T} A = D S^2 D^{T} .
+    \]
+    O sea que $T$ diagonaliza la matriz término-término y $D$ la
+    documento-documento, que son las dos que aparecieron en las clases
+    del $21$ y del $23$. LSI es la versión espectral de ambas.
+\end{idea}
+
 
 \end{document}
 
