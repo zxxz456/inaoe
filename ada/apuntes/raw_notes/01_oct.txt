@@ -1,0 +1,9 @@
+-- greedy algoritmos
+
+cuando estan en un problema de optimizazion, toman el primer elemento bueno
+
+greedy snon lineales o poilinomiales, si son exponenciales algo esta mal xd
+
+codigos de huffman
+{explicacion}
+- construccion del cosigo
