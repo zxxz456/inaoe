@@ -1776,6 +1776,15 @@ display:block!important;
 <p>en M3D, Zhang establece q los métodos DM pasan por alto el alineamiento de orden superior. Dos distribuciones con la misma media pueden diferir en varianza o en asimetría.</p>
 <p>Su solución: incrustar ambas distribuciones en un espacio de Hilbert con kernel reproductor. mu sub P es la incrustación de la media de la distribución P: la esperanza del kernel evaluado en un punto de P. La MMD es la distancia entre las dos incrustaciones.</p>
 <p>Con un kernel característico, como el gaussiano que usan por defecto, la incrustación es inyectiva: MMD cero solo si las distribuciones son iguales. Así se alinean todos los momentos a la vez sin escribir un término por momento.</p>
+<p>Un espacio vectorial de funciones, con producto punto, donde evaluar una función es lo mismo que hacer un producto punto.</p>
+<p>Tres piezas:</p>
+<p>Hilbert. Un espacio vectorial con producto interno, completo. Piénsalo como un espacio euclidiano de dimensión infinita: puedes sumar elementos, escalarlos, medir ángulos y distancias. Lo raro es que sus elementos no son flechas, son funciones.</p>
+<p>Kernel. Una función k(x,y) que mide parecido entre dos puntos. La gaussiana, por ejemplo: vale 1 si x = y y decae con la distancia.</p>
+<p>Reproductor. Cada punto x de tus datos se manda a la función k(x, .), que vive en el espacio. La propiedad que le da el nombre es esta:</p>
+<p>&lt;f, k(x,.)&gt; = f(x) O sea que el producto punto de cualquier función f con k(x,.) te devuelve f evaluada en x. El kernel “reproduce” la evaluación.</p>
+<p>Por qué sirve aquí k(x,.) es el vector de rasgos de x, solo que de dimensión infinita. Nunca lo escribes: la consecuencia del producto punto de dos de ellos es</p>
+<p>&lt;k(x,.), k(y,.)&gt; = k(x,y) un solo número, barato. Eso es el truco del kernel.</p>
+<p>Entonces mu_P es el promedio de esos vectores de rasgos sobre la distribución P. Un punto del espacio que representa a toda la distribución. Y MMD es la distancia entre los dos puntos, el de T y el de S.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;

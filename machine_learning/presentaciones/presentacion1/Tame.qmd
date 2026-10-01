@@ -898,6 +898,29 @@ Con un kernel característico, como el gaussiano que usan por defecto,
 la incrustación es inyectiva: MMD cero solo si las distribuciones son
 iguales. Así se alinean todos los momentos a la vez sin escribir un
 término por momento.
+
+Un espacio vectorial de funciones, con producto punto, donde evaluar una función es lo mismo que hacer un producto punto.
+
+Tres piezas:
+
+Hilbert. Un espacio vectorial con producto interno, completo. Piénsalo como un espacio euclidiano de dimensión infinita: puedes sumar elementos, escalarlos, medir ángulos y distancias. Lo raro es que sus elementos no son flechas, son funciones.
+
+Kernel. Una función k(x,y) que mide parecido entre dos puntos. La gaussiana, por ejemplo: vale 1 si x = y y decae con la distancia.
+
+Reproductor. Cada punto x de tus datos se manda a la función k(x, .), que vive en el espacio. La propiedad que le da el nombre es esta:
+
+
+<f, k(x,.)> = f(x)
+O sea que el producto punto de cualquier función f con k(x,.) te devuelve f evaluada en x. El kernel "reproduce" la evaluación.
+
+Por qué sirve aquí
+k(x,.) es el vector de rasgos de x, solo que de dimensión infinita. Nunca lo escribes: la consecuencia del producto punto de dos de ellos es
+
+
+<k(x,.), k(y,.)> = k(x,y)
+un solo número, barato. Eso es el truco del kernel.
+
+Entonces mu_P es el promedio de esos vectores de rasgos sobre la distribución P. Un punto del espacio que representa a toda la distribución. Y MMD es la distancia entre los dos puntos, el de T y el de S.
 :::
 
 ::: aside
