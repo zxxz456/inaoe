@@ -1,0 +1,22 @@
+# Entorno del proyecto 1 de Matematicas para la Computacion.
+# Se recrea con:
+#
+#   python3 -m venv .venv
+#   ./.venv/bin/pip install -r requirements.txt
+#
+# El .venv no se versiona, este archivo si. Las versiones van fijadas
+# para que la entrega corra igual en otra maquina.
+#
+# wfdb es el lector de PhysioNet: baja los registros de MIT-BIH y los
+# entrega ya en milivolts.
+#
+# matplotlib genera las figuras del reporte en PDF; plotly las del
+# notebook, que son interactivas. nbformat lo pide plotly para
+# dibujar dentro de un notebook.
+
+ipykernel==7.4.0
+matplotlib==3.11.2
+nbformat==5.11.1
+numpy==2.5.3
+plotly==7.1.0
+wfdb==4.3.1

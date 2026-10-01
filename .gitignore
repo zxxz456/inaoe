@@ -83,3 +83,7 @@ machine_learning/presentaciones/**/*_files/
 
 # Guiones de presentacion, notas para exponer que no se versionan
 .Guion*.txt
+
+# Modelo entrenado de matcomp/proyecto1: 2.2 MB binarios que se
+# regeneran corriendo src/Experimento.py, y cambian en cada corrida
+matcomp/proyecto1/out/modelo.npz
