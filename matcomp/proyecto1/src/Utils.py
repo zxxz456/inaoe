@@ -28,12 +28,13 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       01/10/2026      Lista de los 48 registros de MIT-BIH
 zxxz6       30/09/2026      Creation
 
 
@@ -45,6 +46,19 @@ import numpy as np
 # media hora, 360 Hz, dos canales
 BASE_PHYSIONET = "mitdb"
 REGISTRO = "100"
+
+# Los 48 registros de mitdb, la lista que da wfdb.get_record_list. Son
+# 47 personas: 201 y 202 son del mismo paciente. La serie 100 es una
+# muestra al azar de pacientes ambulatorios; la 200 se escogio por
+# tener arritmias raras, asi que sus latidos son menos tipicos
+REGISTROS_MITDB = (
+    "100", "101", "102", "103", "104", "105", "106", "107", "108",
+    "109", "111", "112", "113", "114", "115", "116", "117", "118",
+    "119", "121", "122", "123", "124", "200", "201", "202", "203",
+    "205", "207", "208", "209", "210", "212", "213", "214", "215",
+    "217", "219", "220", "221", "222", "223", "228", "230", "231",
+    "232", "233", "234",
+)
 CANAL = 0
 FRECUENCIA_HZ = 360
 
@@ -63,6 +77,7 @@ SEMILLA = 7
 
 # Rutas de salida, relativas a src/
 RUTA_SALIDA = "../out"
+
 
 # Debajo de esto una norma se considera cero, para no dividir entre
 # un residual que ya se agoto

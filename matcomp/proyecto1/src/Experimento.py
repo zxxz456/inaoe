@@ -23,59 +23,115 @@ Considerations:
   max_atomos en OMP con el diccionario ya entrenado, no reentrenando
 - Todo se guarda en un solo .npz para que Figuras.py no dependa del
   orden en que se corran las cosas
+- Por omision usa solo el registro 100. Con --todos usa los 48 de
+  MIT-BIH y con --registros los que se le pasen. La particion se hace
+  dentro de cada paciente: la primera mitad de cada uno entrena y la
+  segunda prueba, para que todos esten representados en los dos lados
+- Con los 48 registros el entrenamiento tarda unas 48 veces mas que
+  con uno, del orden de horas. Conviene probar antes con unos cuantos
+- Correr con otros registros sobreescribe out/modelo.npz, y con el las
+  figuras que genera Figuras.py
 
 
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       01/10/2026      Opcion de entrenar con varios pacientes
 zxxz6       30/09/2026      Creation
 
 
 """
 
+import argparse
 import os
 import time
 
 import numpy as np
 
-from Datos import cargar_ecg, construir_x
+from Datos import construir_x_registros
 from Ksvd import ksvd
 from Omp import omp_matriz
 from Utils import (ERROR_OMP, ITERACIONES_KSVD, MAX_ATOMOS_OMP,
-                   N_ATOMOS, REGISTRO, RUTA_SALIDA, TAM_VENTANA,
-                   dispersion_media, error_relativo)
+                   N_ATOMOS, REGISTRO, REGISTROS_MITDB, RUTA_SALIDA,
+                   TAM_VENTANA, dispersion_media, error_relativo)
 
 ARCHIVO_MODELO = f"{RUTA_SALIDA}/modelo.npz"
 ATOMOS_CURVA = (1, 2, 4, 6, 8, 10, 12, 16, 24, 32)
 
 
-def partir_entrenamiento(x, fraccion=0.5):
+def partir_entrenamiento(x, fraccion=0.5, origen=None):
     """
     Separa X en entrenamiento y prueba por posicion.
     El corte es temporal y no aleatorio: las ventanas contiguas de un
     ECG se parecen mucho entre si, y repartirlas al azar dejaria en
     prueba vecinas directas de las de entrenamiento, lo que infla el
-    resultado
+    resultado. Con varios pacientes el corte se hace dentro de cada
+    uno; cortar la X pegada a la mitad dejaria pacientes enteros solo
+    en entrenamiento y otros solo en prueba
 
     Inputs:
     -------
     x: Matriz de senales, k por n
     fraccion: Que parte se usa para entrenar
+    origen: Registro de cada columna, como lo da
+            construir_x_registros. None si X es de un solo paciente
 
     Returns:
     -------
     tuple: (X de entrenamiento, X de prueba)
 
     """
-    corte = int(x.shape[1] * fraccion)
+    if origen is None:
+        corte = int(x.shape[1] * fraccion)
+        return x[:, :corte], x[:, corte:]
 
-    return x[:, :corte], x[:, corte:]
+    entrena, prueba = [], []
+    for registro in dict.fromkeys(origen):
+        bloque = x[:, origen == registro]
+        corte = int(bloque.shape[1] * fraccion)
+        entrena.append(bloque[:, :corte])
+        prueba.append(bloque[:, corte:])
+
+    return np.hstack(entrena), np.hstack(prueba)
+
+
+def leer_registros():
+    """
+    Decide de que pacientes se entrena, segun la linea de comandos.
+
+    Inputs:
+    -------
+    None: Lee sys.argv
+
+    Returns:
+    -------
+    tuple: Identificadores de los registros a cargar
+
+    """
+    parser = argparse.ArgumentParser(
+        description="Entrena el diccionario con K-SVD sobre ECG de "
+                    "MIT-BIH")
+    grupo = parser.add_mutually_exclusive_group()
+    grupo.add_argument("--todos", action="store_true",
+                       help="usa los 48 registros de MIT-BIH")
+    grupo.add_argument("--registros", nargs="+", metavar="ID",
+                       choices=REGISTROS_MITDB,
+                       help="usa solo estos registros, por ejemplo "
+                            "--registros 100 101 103")
+    args = parser.parse_args()
+
+    if args.todos:
+        return REGISTROS_MITDB
+    if args.registros:
+        return tuple(args.registros)
+
+    return (REGISTRO,)
 
 
 def curva_error(d, x, atomos=ATOMOS_CURVA):
@@ -120,13 +176,15 @@ def main():
     None: Escribe out/modelo.npz
 
     """
+    registros = leer_registros()
     os.makedirs(RUTA_SALIDA, exist_ok=True)
 
-    senal, fs = cargar_ecg()
-    x = construir_x(senal)
-    entrena, prueba = partir_entrenamiento(x)
+    print(f"cargando {len(registros)} registro(s): "
+          f"{', '.join(registros)}")
+    x, origen, fs = construir_x_registros(registros)
+    entrena, prueba = partir_entrenamiento(x, origen=origen)
 
-    print(f"registro {REGISTRO}: {len(senal)} muestras a {fs} Hz")
+    print(f"{len(registros)} paciente(s) a {fs} Hz")
     print(f"X de {x.shape[0]} x {x.shape[1]}, ventanas de "
           f"{TAM_VENTANA} muestras")
     print(f"  entrenamiento {entrena.shape[1]}, "
@@ -163,7 +221,7 @@ def main():
         historia_dispersion=np.array(
             [h["dispersion"] for h in historia]),
         prueba=prueba,
-        senal=senal,
+        registros=np.array(registros),
         fs=fs,
         permitidos=np.array([f["permitidos"] for f in curva]),
         usados=np.array([f["usados"] for f in curva]),

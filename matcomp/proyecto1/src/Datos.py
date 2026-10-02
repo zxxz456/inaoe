@@ -24,17 +24,23 @@ Considerations:
 - Se quita la media de cada ventana antes de normalizar: el ECG trae
   deriva de linea base y sin quitarla el primer atomo que aprende el
   diccionario es una constante, que no describe ninguna forma de onda
+- Con varios registros, el canal 0 no es la misma derivacion en
+  todos: en 102 y 104 es V5 y no MLII, porque a esos pacientes no se
+  les pudo poner el electrodo de MLII. Sus latidos se ven distintos
+- Los 48 registros dan unas 244 mil ventanas, 48 veces lo de uno solo.
+  wfdb los baja cada vez que se cargan, sin cache
 
 
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       01/10/2026      Opcion de armar X con varios pacientes
 zxxz6       30/09/2026      Creation
 
 
@@ -116,6 +122,42 @@ def construir_x(senal, tam=TAM_VENTANA, paso=PASO_VENTANA):
     centradas = ventanas - ventanas.mean(axis=0, keepdims=True)
 
     return normalizar_columnas(centradas)
+
+
+def construir_x_registros(registros, base=BASE_PHYSIONET, canal=CANAL,
+                          tam=TAM_VENTANA, paso=PASO_VENTANA):
+    """
+    Arma X con las ventanas de varios pacientes.
+    Cada registro se carga y se ventanea por separado, y las matrices se
+    pegan por columnas. Ventanear la concatenacion de las senales daria
+    ventanas que empiezan en un paciente y terminan en otro, una forma
+    de onda que no existe
+
+    Inputs:
+    -------
+    registros: Identificadores de los registros, por ejemplo
+               ("100", "101") o REGISTROS_MITDB para todos
+    base: Coleccion de PhysioNet
+    canal: Cual de los dos canales de cada registro se usa
+    tam: Cuantas muestras por ventana
+    paso: Separacion entre inicios de ventana
+
+    Returns:
+    -------
+    tuple: (X de tam por total de ventanas, arreglo con el registro de
+            origen de cada columna, frecuencia de muestreo en Hz)
+
+    """
+    bloques, origen = [], []
+    fs = None
+
+    for registro in registros:
+        senal, fs = cargar_ecg(registro, base, canal)
+        x = construir_x(senal, tam, paso)
+        bloques.append(x)
+        origen.extend([registro] * x.shape[1])
+
+    return np.hstack(bloques), np.array(origen), fs
 
 
 def main():
