@@ -34,11 +34,13 @@ Metadata:
 History:
 ------------
 Author      Date            Description
-zxxz6       01/10/2026      Lista de los 48 registros de MIT-BIH
+zxxz6       01/10/2026      Registros de MIT-BIH y ruta de su cache local
 zxxz6       30/09/2026      Creation
 
 
 """
+
+import os
 
 import numpy as np
 
@@ -78,6 +80,11 @@ SEMILLA = 7
 # Rutas de salida, relativas a src/
 RUTA_SALIDA = "../out"
 
+# Copia local de los registros de PhysioNet, en proyecto1/datos. Se
+# arma desde este archivo y no desde el directorio de trabajo, porque
+# el notebook y la terminal no siempre corren desde src/
+RUTA_DATOS = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          os.pardir, "datos")
 
 # Debajo de esto una norma se considera cero, para no dividir entre
 # un residual que ya se agoto

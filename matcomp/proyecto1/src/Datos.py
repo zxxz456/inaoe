@@ -16,9 +16,12 @@ sobre la que se aprende el diccionario.
 
 Considerations:
 ------------
-- wfdb baja el registro del servidor de PhysioNet la primera vez; si
-  no hay red, hay que tener el registro en local y pasar ruta en vez
-  de pn_dir
+- Leer con pn_dir baja el registro del servidor cada vez, unos 25
+  segundos por registro. Por eso la primera vez se descarga a
+  RUTA_DATOS y despues se lee del disco, en menos de un segundo. Sin
+  red solo funcionan los registros que ya esten descargados
+- Si una descarga se corta queda el .hea sin el .dat. Por eso se
+  revisan los dos archivos antes de dar el registro por descargado
 - Las ventanas no se traslapan por omision. Traslaparlas da mas
   columnas de entrenamiento a cambio de que se parezcan mas entre si
 - Se quita la media de cada ventana antes de normalizar: el ECG trae
@@ -28,7 +31,7 @@ Considerations:
   todos: en 102 y 104 es V5 y no MLII, porque a esos pacientes no se
   les pudo poner el electrodo de MLII. Sus latidos se ven distintos
 - Los 48 registros dan unas 244 mil ventanas, 48 veces lo de uno solo.
-  wfdb los baja cada vez que se cargan, sin cache
+  En disco ocupan unos 100 MB
 
 
 Metadata:
@@ -40,22 +43,57 @@ Metadata:
 History:
 ------------
 Author      Date            Description
-zxxz6       01/10/2026      Opcion de armar X con varios pacientes
+zxxz6       01/10/2026      Varios pacientes y cache local de registros
 zxxz6       30/09/2026      Creation
 
 
 """
 
+import os
+
 import numpy as np
 import wfdb
 
 from Utils import (BASE_PHYSIONET, CANAL, PASO_VENTANA, REGISTRO,
-                   TAM_VENTANA, normalizar_columnas)
+                   RUTA_DATOS, TAM_VENTANA, normalizar_columnas)
+
+
+def descargar_registro(registro=REGISTRO, base=BASE_PHYSIONET,
+                       destino=RUTA_DATOS):
+    """
+    Asegura que el registro este en disco y devuelve su ruta.
+    Solo descarga si falta el .hea o el .dat. Las anotaciones de
+    latidos (.atr) no se bajan porque el proyecto no las usa
+
+    Inputs:
+    -------
+    registro: Identificador del registro, por ejemplo "100"
+    base: Coleccion de PhysioNet, por ejemplo "mitdb"
+    destino: Carpeta raiz de la cache; cada coleccion va en su
+             subcarpeta
+
+    Returns:
+    -------
+    str: Ruta del registro sin extension, lista para wfdb.rdrecord
+
+    """
+    carpeta = os.path.join(destino, base)
+    ruta = os.path.join(carpeta, registro)
+
+    completo = all(os.path.exists(ruta + ext) for ext in (".hea", ".dat"))
+    if not completo:
+        os.makedirs(carpeta, exist_ok=True)
+        wfdb.dl_database(base, carpeta, records=[registro],
+                         annotators=None, overwrite=True)
+
+    return ruta
 
 
 def cargar_ecg(registro=REGISTRO, base=BASE_PHYSIONET, canal=CANAL):
     """
-    Baja un registro de PhysioNet y devuelve un canal.
+    Lee un registro de PhysioNet y devuelve un canal.
+    La primera vez lo descarga a la cache local; las siguientes lo lee
+    del disco
 
     Inputs:
     -------
@@ -69,7 +107,7 @@ def cargar_ecg(registro=REGISTRO, base=BASE_PHYSIONET, canal=CANAL):
             frecuencia de muestreo en Hz)
 
     """
-    lectura = wfdb.rdrecord(registro, pn_dir=base)
+    lectura = wfdb.rdrecord(descargar_registro(registro, base))
 
     return lectura.p_signal[:, canal], lectura.fs
 
