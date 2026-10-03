@@ -35,12 +35,13 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       02/10/2026      Pausas del modo paso a paso en cada vuelta
 zxxz6       30/09/2026      Creation
 
 
@@ -48,12 +49,55 @@ zxxz6       30/09/2026      Creation
 
 import numpy as np
 
-from Utils import (ERROR_OMP, MAX_ATOMOS_OMP, TOLERANCIA,
-                   error_relativo,
-                   normalizar_columnas)
+import Depuracion
+from Utils import (DEPURACION_TOP, ERROR_OMP, MAX_ATOMOS_OMP,
+                   TOLERANCIA, error_relativo, normalizar_columnas)
 
 
-def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
+def _mostrar_vuelta(depurador, etiqueta, correlacion, nuevo, elegidos,
+                    coeficientes, residual, norma_x, error):
+    """
+    Pausa del modo paso a paso despues de una vuelta de OMP.
+    Muestra los candidatos, el atomo que gano, los coeficientes que
+    salieron de minimos cuadrados y lo que queda por explicar
+
+    Inputs:
+    -------
+    depurador: Depurador activo
+    etiqueta: Que senal es, por ejemplo "ventana 0 de 2539"
+    correlacion: |D' r| de esta vuelta, con los ya elegidos en -1
+    nuevo: Indice del atomo que se escogio
+    elegidos: Todos los atomos escogidos hasta ahora, en orden
+    coeficientes: Pesos de los elegidos, en el mismo orden
+    residual: Lo que falta por explicar despues de esta vuelta
+    norma_x: Norma de la senal original
+    error: Error relativo objetivo
+
+    Returns:
+    -------
+    None
+
+    """
+    top = np.argsort(-correlacion)[:DEPURACION_TOP]
+    candidatos = "  ".join(f"{i}:{correlacion[i]:.3f}" for i in top)
+    relativo = np.linalg.norm(residual) / norma_x
+    sigue = "sigue" if relativo > error else "ya alcanza"
+
+    depurador.mostrar("omp", f"OMP {etiqueta}, vuelta {len(elegidos)}", [
+        "1. correlacion |d_i . residual| de cada atomo, los mas altos:",
+        f"     {candidatos}",
+        f"2. gana el atomo {nuevo}",
+        f"3. minimos cuadrados sobre los elegidos {elegidos}:",
+        f"     pesos {Depuracion.vector(coeficientes)}",
+        "4. residual = x - D_elegidos @ pesos",
+        f"     {Depuracion.vector(residual)}",
+        f"     error relativo {relativo:.4f} contra objetivo {error} "
+        f"-> {sigue}",
+    ])
+
+
+def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP,
+        depurador=None, etiqueta="senal"):
     """
     Dispersion de una senal sobre un diccionario.
     Devuelve el vector completo de coeficientes, con ceros en los
@@ -66,6 +110,8 @@ def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
     x: Senal de longitud k
     error: Error relativo al que se deja de iterar
     max_atomos: Tope de atomos, por si el error nunca baja
+    depurador: Depurador del modo paso a paso, o None
+    etiqueta: Nombre de la senal en las pausas del depurador
 
     Returns:
     -------
@@ -74,15 +120,28 @@ def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
     """
     alpha = np.zeros(d.shape[1])
     elegidos = []
+    mira = depurador is not None and depurador.quiere("omp")
 
     norma_x = np.linalg.norm(x)
     if norma_x < TOLERANCIA:
         return alpha, elegidos
 
+    if mira:
+        depurador.mostrar("omp", f"OMP {etiqueta}, inicio", [
+            f"senal x: {Depuracion.vector(x)}",
+            f"norma de x: {norma_x:.4f}",
+            f"diccionario D: {d.shape}",
+            f"para cuando el error relativo baje de {error} o use "
+            f"{max_atomos} atomos",
+            "al inicio el residual es la senal completa",
+        ])
+
     residual = x.astype("float64").copy()
+    motivo = f"llego al tope de {max_atomos} atomos"
 
     while len(elegidos) < max_atomos:
         if np.linalg.norm(residual) / norma_x <= error:
+            motivo = f"el error bajo de {error}"
             break
 
         # A mayor producto interno, mayor correlacion. El valor
@@ -92,6 +151,7 @@ def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
         nuevo = int(np.argmax(correlacion))
 
         if correlacion[nuevo] < TOLERANCIA:
+            motivo = "ningun atomo se parece a lo que falta"
             break
 
         elegidos.append(nuevo)
@@ -102,13 +162,28 @@ def omp(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
                                            rcond=None)
         residual = x - d[:, elegidos] @ coeficientes
 
+        if mira:
+            _mostrar_vuelta(depurador, etiqueta, correlacion, nuevo,
+                            elegidos, coeficientes, residual, norma_x,
+                            error)
+
     if elegidos:
         alpha[elegidos] = coeficientes
+
+    if mira:
+        depurador.mostrar("omp", f"OMP {etiqueta}, fin", [
+            f"se detuvo porque {motivo}",
+            f"uso {len(elegidos)} atomos: {elegidos}",
+            f"alpha tiene {alpha.size} entradas, "
+            f"{np.count_nonzero(alpha)} distintas de cero",
+            f"error final {error_relativo(x, d @ alpha):.4f}",
+        ])
 
     return alpha, elegidos
 
 
-def omp_matriz(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
+def omp_matriz(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP,
+               depurador=None):
     """
     Dispersion de todas las senales de una matriz.
     Va columna por columna. Es el paso caro de K-SVD, porque se repite
@@ -120,6 +195,7 @@ def omp_matriz(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
     x: Matriz de k por n, una senal por columna
     error: Error relativo al que se deja de iterar cada senal
     max_atomos: Tope de atomos por senal
+    depurador: Depurador del modo paso a paso, o None
 
     Returns:
     -------
@@ -127,9 +203,27 @@ def omp_matriz(d, x, error=ERROR_OMP, max_atomos=MAX_ATOMOS_OMP):
 
     """
     alpha = np.zeros((d.shape[1], x.shape[1]))
+    n = x.shape[1]
 
-    for j in range(x.shape[1]):
-        alpha[:, j], _ = omp(d, x[:, j], error, max_atomos)
+    for j in range(n):
+        alpha[:, j], _ = omp(d, x[:, j], error, max_atomos, depurador,
+                             f"ventana {j} de {n}")
+
+    if depurador is not None and depurador.quiere("alpha"):
+        usados = np.count_nonzero(alpha, axis=0)
+        filas = np.flatnonzero(alpha[:, 0])
+        pesos = "  ".join(f"{i}:{alpha[i, 0]:.3f}" for i in filas)
+        depurador.mostrar("alpha", "OMP terminado sobre todas las "
+                          "ventanas", [
+            f"alpha: {alpha.shape}, una columna de pesos por ventana",
+            f"atomos por ventana: promedio {usados.mean():.2f}, "
+            f"min {usados.min()}, max {usados.max()}",
+            f"de {alpha.size} entradas, {np.count_nonzero(alpha)} son "
+            f"distintas de cero ({np.count_nonzero(alpha) / alpha.size:.1%})",
+            f"ventana 0 usa los atomos (indice:peso): {pesos}",
+            f"error de todas las ventanas: "
+            f"{error_relativo(x, d @ alpha):.4f}",
+        ])
 
     return alpha
 

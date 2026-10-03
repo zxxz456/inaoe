@@ -34,6 +34,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       02/10/2026      Constantes del modo paso a paso
 zxxz6       01/10/2026      Registros de MIT-BIH y ruta de su cache local
 zxxz6       30/09/2026      Creation
 
@@ -85,6 +86,15 @@ RUTA_SALIDA = "../out"
 # el notebook y la terminal no siempre corren desde src/
 RUTA_DATOS = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           os.pardir, "datos")
+
+# Modo paso a paso. Cuantos valores de un vector se imprimen, cuantas
+# filas y columnas de una matriz, y cuantos atomos candidatos de OMP o
+# valores singulares se listan en cada pausa
+DEPURACION_VALORES = 8
+DEPURACION_FILAS = 5
+DEPURACION_COLUMNAS = 6
+DEPURACION_TOP = 5
+DEPURACION_ANCHO = 72
 
 # Debajo de esto una norma se considera cero, para no dividir entre
 # un residual que ya se agoto

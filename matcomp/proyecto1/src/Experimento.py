@@ -29,6 +29,10 @@ Considerations:
   segunda prueba, para que todos esten representados en los dos lados
 - Con los 48 registros el entrenamiento tarda unas 48 veces mas que
   con uno, del orden de horas. Conviene probar antes con unos cuantos
+- --paso-a-paso detiene la corrida en cada paso importante y muestra
+  los datos con que trabaja: cada paciente, la particion, D_0, cada
+  vuelta de OMP, cada atomo actualizado y el resumen de cada
+  iteracion. Se combina con las demas banderas
 - Correr con otros registros sobreescribe out/modelo.npz, y con el las
   figuras que genera Figuras.py
 
@@ -36,12 +40,13 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.1.0
+* Version: 1.2.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       02/10/2026      Bandera --paso-a-paso para seguir cada paso
 zxxz6       01/10/2026      Opcion de entrenar con varios pacientes
 zxxz6       30/09/2026      Creation
 
@@ -55,6 +60,7 @@ import time
 import numpy as np
 
 from Datos import construir_x_registros
+from Depuracion import INSTRUCCIONES, Depurador
 from Ksvd import ksvd
 from Omp import omp_matriz
 from Utils import (ERROR_OMP, ITERACIONES_KSVD, MAX_ATOMOS_OMP,
@@ -101,9 +107,9 @@ def partir_entrenamiento(x, fraccion=0.5, origen=None):
     return np.hstack(entrena), np.hstack(prueba)
 
 
-def leer_registros():
+def leer_argumentos():
     """
-    Decide de que pacientes se entrena, segun la linea de comandos.
+    Lee la linea de comandos: que pacientes y si va paso a paso.
 
     Inputs:
     -------
@@ -111,7 +117,8 @@ def leer_registros():
 
     Returns:
     -------
-    tuple: Identificadores de los registros a cargar
+    tuple: (identificadores de los registros a cargar, True si se
+            pidio el modo paso a paso)
 
     """
     parser = argparse.ArgumentParser(
@@ -124,14 +131,19 @@ def leer_registros():
                        choices=REGISTROS_MITDB,
                        help="usa solo estos registros, por ejemplo "
                             "--registros 100 101 103")
+    parser.add_argument("--paso-a-paso", action="store_true",
+                        help="se detiene en cada paso y muestra los "
+                             "datos; Enter para continuar")
     args = parser.parse_args()
 
     if args.todos:
-        return REGISTROS_MITDB
-    if args.registros:
-        return tuple(args.registros)
+        registros = REGISTROS_MITDB
+    elif args.registros:
+        registros = tuple(args.registros)
+    else:
+        registros = (REGISTRO,)
 
-    return (REGISTRO,)
+    return registros, args.paso_a_paso
 
 
 def curva_error(d, x, atomos=ATOMOS_CURVA):
@@ -176,12 +188,20 @@ def main():
     None: Escribe out/modelo.npz
 
     """
-    registros = leer_registros()
+    registros, paso_a_paso = leer_argumentos()
+    depurador = Depurador(activo=paso_a_paso)
     os.makedirs(RUTA_SALIDA, exist_ok=True)
+
+    if paso_a_paso:
+        print("modo paso a paso: la corrida se detiene en cada paso.")
+        print(f"  {INSTRUCCIONES}")
+        print("  s salta lo que queda de ese tipo de paso hasta la "
+              "siguiente iteracion\n")
 
     print(f"cargando {len(registros)} registro(s): "
           f"{', '.join(registros)}")
-    x, origen, fs = construir_x_registros(registros)
+    x, origen, fs = construir_x_registros(registros,
+                                          depurador=depurador)
     entrena, prueba = partir_entrenamiento(x, origen=origen)
 
     print(f"{len(registros)} paciente(s) a {fs} Hz")
@@ -190,11 +210,20 @@ def main():
     print(f"  entrenamiento {entrena.shape[1]}, "
           f"prueba {prueba.shape[1]}\n")
 
+    depurador.mostrar("datos", "X completa y particion", [
+        f"X: {x.shape}, de {len(registros)} paciente(s)",
+        "cada paciente se parte a la mitad, en orden de tiempo:",
+        f"   entrenamiento: {entrena.shape}  (primera mitad de cada uno)",
+        f"   prueba:        {prueba.shape}  (segunda mitad)",
+        "K-SVD solo ve el entrenamiento; la prueba se usa al final para",
+        "medir si el diccionario sirve con ventanas que nunca vio",
+    ])
+
     print(f"K-SVD con {N_ATOMOS} atomos, {ITERACIONES_KSVD} "
           f"iteraciones, error objetivo {ERROR_OMP}, "
           f"tope {MAX_ATOMOS_OMP} atomos")
     inicio = time.perf_counter()
-    d, alpha, historia = ksvd(entrena)
+    d, alpha, historia = ksvd(entrena, depurador=depurador)
     minutos = (time.perf_counter() - inicio) / 60
 
     alpha_prueba = omp_matriz(d, prueba)

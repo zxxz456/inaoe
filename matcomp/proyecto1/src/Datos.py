@@ -37,12 +37,13 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.1.0
+* Version: 1.2.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       02/10/2026      Pausas del modo paso a paso al armar X
 zxxz6       01/10/2026      Varios pacientes y cache local de registros
 zxxz6       30/09/2026      Creation
 
@@ -54,6 +55,7 @@ import os
 import numpy as np
 import wfdb
 
+import Depuracion
 from Utils import (BASE_PHYSIONET, CANAL, PASO_VENTANA, REGISTRO,
                    RUTA_DATOS, TAM_VENTANA, normalizar_columnas)
 
@@ -163,7 +165,8 @@ def construir_x(senal, tam=TAM_VENTANA, paso=PASO_VENTANA):
 
 
 def construir_x_registros(registros, base=BASE_PHYSIONET, canal=CANAL,
-                          tam=TAM_VENTANA, paso=PASO_VENTANA):
+                          tam=TAM_VENTANA, paso=PASO_VENTANA,
+                          depurador=None):
     """
     Arma X con las ventanas de varios pacientes.
     Cada registro se carga y se ventanea por separado, y las matrices se
@@ -179,6 +182,7 @@ def construir_x_registros(registros, base=BASE_PHYSIONET, canal=CANAL,
     canal: Cual de los dos canales de cada registro se usa
     tam: Cuantas muestras por ventana
     paso: Separacion entre inicios de ventana
+    depurador: Depurador del modo paso a paso, o None
 
     Returns:
     -------
@@ -195,7 +199,49 @@ def construir_x_registros(registros, base=BASE_PHYSIONET, canal=CANAL,
         bloques.append(x)
         origen.extend([registro] * x.shape[1])
 
+        if depurador is not None and depurador.quiere("datos"):
+            _mostrar_registro(depurador, registro, senal, fs, x, tam,
+                              paso)
+
     return np.hstack(bloques), np.array(origen), fs
+
+
+def _mostrar_registro(depurador, registro, senal, fs, x, tam, paso):
+    """
+    Pausa del modo paso a paso con un paciente ya cargado.
+    Sigue los datos en sus tres etapas: la senal, las ventanas crudas
+    y las ventanas ya centradas y normalizadas
+
+    Inputs:
+    -------
+    depurador: Depurador activo
+    registro: Identificador del paciente
+    senal: Su ECG completo
+    fs: Frecuencia de muestreo en Hz
+    x: Sus ventanas ya procesadas
+    tam: Muestras por ventana
+    paso: Separacion entre ventanas
+
+    Returns:
+    -------
+    None
+
+    """
+    crudas = partir_en_ventanas(senal, tam, paso)
+
+    depurador.mostrar("datos", f"registro {registro}", [
+        f"1. senal: {len(senal)} muestras a {fs} Hz = "
+        f"{len(senal) / fs / 60:.1f} minutos",
+        f"     {Depuracion.vector(senal)}",
+        f"2. ventanas de {tam} muestras ({tam / fs * 1000:.0f} ms), "
+        f"una por columna:",
+        "   " + Depuracion.matriz(crudas).replace("\n", "\n   "),
+        "3. cada columna centrada (promedio 0) y normalizada (norma 1):",
+        "   " + Depuracion.matriz(x).replace("\n", "\n   "),
+        f"     promedios: {Depuracion.vector(x.mean(axis=0))}",
+        f"     normas:    "
+        f"{Depuracion.vector(np.linalg.norm(x, axis=0))}",
+    ])
 
 
 def main():
