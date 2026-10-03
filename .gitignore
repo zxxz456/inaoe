@@ -71,7 +71,7 @@ progra_ds/Arbol/arbol_animacion.html
 
 .claude/
 CLAUDE.md
-docs/
+/docs/
 *.o
 
 # Quarto (salida de render; los .qmd SI se versionan)

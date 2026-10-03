@@ -7,29 +7,21 @@ Descripcion:
 ------------
 Enunciado del proyecto 1 de Matematicas para la Computacion:
 representaciones dispersas con Dictionary Learning, implementando
-K-SVD sobre la descomposicion en valores singulares.
-
-
-Considerations:
-------------
-- Las formulas van en bloques de codigo con notacion ASCII, para que
-  se lean igual en GitHub y en el editor
-- Las slides escriben (D_I)^-1 y argmax|D r|; aqui se anotan como
-  pseudoinversa y D' r, que es lo que hay que programar. Ver la
-  seccion de notas al final
-- La eleccion de senal, el tamano de ventana y el numero de atomos
-  los decide uno, el enunciado no los fija
+K-SVD sobre la descomposicion en valores singulares
 
 
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
+zxxz6       03/10/2026      La documentacion pasa a un solo PDF
+zxxz6       02/10/2026      Enlace a la documentacion de docs/
 zxxz6       30/09/2026      Creation
 
 
@@ -42,6 +34,10 @@ zxxz6       30/09/2026      Creation
 Implementar K-SVD y obtener una base entrenada para algun tipo de senal, de
 manera que se pueda comparar la entrada (senal original) con su reconstruccion
 respectiva, hecha a partir de la senal dispersa.
+
+La explicacion completa del metodo, desde cero y con ejemplos resueltos a mano,
+esta en [docs/ExplicacionKsvd.pdf](docs/ExplicacionKsvd.pdf). Su fuente es
+`docs/ExplicacionKsvd.tex`, y se compila desde `docs/` con `latexmk -pdf`.
 
 ## Representaciones dispersas
 
