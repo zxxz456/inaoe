@@ -16,22 +16,6 @@ actualiza el residual. Para cuando el error relativo baja del umbral
 o cuando ya gasto el presupuesto de atomos.
 
 
-Considerations:
-------------
-- El "orthogonal" del nombre viene de resolver minimos cuadrados sobre
-  TODO el conjunto elegido en cada vuelta, no solo de restar el atomo
-  nuevo. Eso deja el residual ortogonal al espacio generado por los
-  atomos elegidos, y por eso ninguno se repite
-- Se usa lstsq y no la pseudoinversa explicita: las slides escriben
-  (D_I)^-1, pero D_I es alta y rectangular y no tiene inversa. Lo que
-  se resuelve ahi es un problema de minimos cuadrados
-- alpha = D' x no sirve como atajo. Solo invierte x = D alpha cuando D
-  es ortogonal, y aqui es sobrecompleto a proposito
-- El paro por MAX_ATOMOS_OMP no es decorativo: sin el, una senal
-  ruidosa sigue pidiendo atomos hasta volver densa la representacion,
-  que es justo lo contrario de lo que se busca
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -41,6 +25,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Pausas del modo paso a paso en cada vuelta
 zxxz6       30/09/2026      Creation
 

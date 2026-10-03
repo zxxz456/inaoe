@@ -13,20 +13,6 @@ original y su reconstruccion, la curva de error contra numero de
 atomos, y el avance de la dispersion durante el entrenamiento.
 
 
-Considerations:
-------------
-- La paleta es la misma validada para separacion en daltonismo que se
-  uso en los reportes de Fundamentos. Azul para lo reconstruido, tinta
-  para lo original
-- Las reconstrucciones con distinto numero de atomos van en una rampa
-  de un solo tono de claro a oscuro, no en colores distintos: ahi el
-  numero de atomos es una magnitud, no una identidad
-- Las figuras se guardan en PDF porque es vectorial y no se pixela al
-  escalarlas en LaTeX
-- Este modulo no entrena. Si no existe out/modelo.npz hay que correr
-  Experimento.py primero
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -36,6 +22,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       30/09/2026      Creation
 
 

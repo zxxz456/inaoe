@@ -14,23 +14,6 @@ de cada atomo es una aproximacion de rango 1 del residual, y por eso
 se resuelve con una SVD.
 
 
-Considerations:
-------------
-- El atomo j y sus coeficientes salen del primer par de vectores
-  singulares del residual, porque d_j alpha_j' es columna por renglon,
-  o sea rango 1, y la mejor aproximacion de rango 1 la da
-  Eckart-Young. Ahi es donde el algoritmo gana su nombre
-- La actualizacion se restringe a las senales que ya usaban el atomo.
-  Si usara todas, el atomo entraria en senales que no lo tenian y se
-  destruiria la dispersion que OMP acababa de construir
-- Un atomo que nadie usa deja el residual vacio y la SVD truena. En
-  vez de saltarlo se reinicializa con la senal peor reconstruida, que
-  es donde mas falta hace un atomo nuevo
-- El error de entrenamiento baja monotonamente solo si OMP encuentra
-  la solucion optima, que siendo voraz no garantiza. En la practica
-  sube de vez en cuando y no es sintoma de un error de programacion
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -40,6 +23,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Pausas del modo paso a paso en cada atomo
 zxxz6       30/09/2026      Creation
 

@@ -15,21 +15,6 @@ del algoritmo reciben un Depurador opcional; si no se les pasa, o si
 esta inactivo, corren igual que siempre y no imprimen nada extra.
 
 
-Considerations:
-------------
-- Cada pausa pertenece a una categoria: datos, inicio, iteracion,
-  omp, alpha, atomo o resumen. Escribir s en la pausa salta el resto
-  de esa categoria hasta la siguiente iteracion de K-SVD. Sin eso,
-  revisar OMP seria presionar Enter miles de veces por iteracion
-- c corre sin pausas hasta el final y q sale del programa
-- Si la entrada estandar no es una terminal (por ejemplo, con la
-  salida redirigida), input() falla con EOFError. En ese caso se pasa
-  a modo continuo en vez de tronar
-- Los resumenes de cada paso se arman solo si se van a mostrar.
-  quiere() se consulta antes de calcular algo caro, como los cosenos
-  entre el diccionario viejo y el nuevo
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -39,6 +24,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Creation
 
 

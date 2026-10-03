@@ -14,17 +14,6 @@ dispersion objetivo), y los helpers que usan dos o mas modulos. Si un
 numero aparece en el codigo, su lugar es este archivo.
 
 
-Considerations:
-------------
-- MIT-BIH va a 360 Hz, asi que una ventana de 128 muestras son unos
-  356 ms, poco mas que un latido completo
-- El diccionario es sobrecompleto a proposito: N_ATOMOS > TAM_VENTANA,
-  si no el sistema x = D alpha no tiene de donde elegir la solucion
-  mas dispersa
-- normalizar_columnas opera sobre columnas porque esa es la forma en
-  que se guardan tanto las senales de X como los atomos de D
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -34,6 +23,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Constantes del modo paso a paso
 zxxz6       01/10/2026      Registros de MIT-BIH y ruta de su cache local
 zxxz6       30/09/2026      Creation

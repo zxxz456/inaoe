@@ -14,26 +14,6 @@ columna de X, y cada columna se normaliza. El resultado es la matriz
 sobre la que se aprende el diccionario.
 
 
-Considerations:
-------------
-- Leer con pn_dir baja el registro del servidor cada vez, unos 25
-  segundos por registro. Por eso la primera vez se descarga a
-  RUTA_DATOS y despues se lee del disco, en menos de un segundo. Sin
-  red solo funcionan los registros que ya esten descargados
-- Si una descarga se corta queda el .hea sin el .dat. Por eso se
-  revisan los dos archivos antes de dar el registro por descargado
-- Las ventanas no se traslapan por omision. Traslaparlas da mas
-  columnas de entrenamiento a cambio de que se parezcan mas entre si
-- Se quita la media de cada ventana antes de normalizar: el ECG trae
-  deriva de linea base y sin quitarla el primer atomo que aprende el
-  diccionario es una constante, que no describe ninguna forma de onda
-- Con varios registros, el canal 0 no es la misma derivacion en
-  todos: en 102 y 104 es V5 y no MLII, porque a esos pacientes no se
-  les pudo poner el electrodo de MLII. Sus latidos se ven distintos
-- Los 48 registros dan unas 244 mil ventanas, 48 veces lo de uno solo.
-  En disco ocupan unos 100 MB
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -43,6 +23,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Pausas del modo paso a paso al armar X
 zxxz6       01/10/2026      Varios pacientes y cache local de registros
 zxxz6       30/09/2026      Creation

@@ -13,30 +13,6 @@ coeficientes, el historial de error y la senal original, para que las
 figuras del reporte se generen sin volver a entrenar.
 
 
-Considerations:
-------------
-- El entrenamiento se hace sobre la primera mitad de las ventanas y
-  la evaluacion sobre la segunda. Medir el error sobre las mismas
-  senales con las que se entreno no dice si el diccionario generaliza,
-  solo si memorizo
-- La curva de error contra numero de atomos se calcula variando
-  max_atomos en OMP con el diccionario ya entrenado, no reentrenando
-- Todo se guarda en un solo .npz para que Figuras.py no dependa del
-  orden en que se corran las cosas
-- Por omision usa solo el registro 100. Con --todos usa los 48 de
-  MIT-BIH y con --registros los que se le pasen. La particion se hace
-  dentro de cada paciente: la primera mitad de cada uno entrena y la
-  segunda prueba, para que todos esten representados en los dos lados
-- Con los 48 registros el entrenamiento tarda unas 48 veces mas que
-  con uno, del orden de horas. Conviene probar antes con unos cuantos
-- --paso-a-paso detiene la corrida en cada paso importante y muestra
-  los datos con que trabaja: cada paciente, la particion, D_0, cada
-  vuelta de OMP, cada atomo actualizado y el resumen de cada
-  iteracion. Se combina con las demas banderas
-- Correr con otros registros sobreescribe out/modelo.npz, y con el las
-  figuras que genera Figuras.py
-
-
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
@@ -46,6 +22,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Bandera --paso-a-paso para seguir cada paso
 zxxz6       01/10/2026      Opcion de entrenar con varios pacientes
 zxxz6       30/09/2026      Creation
