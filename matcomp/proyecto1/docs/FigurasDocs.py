@@ -17,6 +17,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       04/10/2026      El aqua se importa de Figuras.py
 zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       02/10/2026      Creation
 
@@ -36,14 +37,13 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(AQUI, os.pardir, "src"))
 
 from Datos import cargar_ecg, construir_x, partir_en_ventanas  # noqa
-from Figuras import (SERIE_AZUL, SERIE_NARANJA, SUPERFICIE,  # noqa
-                     TINTA, estilo)
+from Figuras import (SERIE_AQUA, SERIE_AZUL, SERIE_NARANJA,  # noqa
+                     SUPERFICIE, TINTA, estilo)
 from Ksvd import actualizar_atomo  # noqa
 from Omp import omp  # noqa
 from Utils import FRECUENCIA_HZ, TAM_VENTANA  # noqa
 
 RUTA_IMG = os.path.join(AQUI, "img")
-SERIE_AQUA = "#1baf7a"
 DPI = 150
 
 # El ejemplo de juguete de los documentos. Cada atomo es una columna

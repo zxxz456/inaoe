@@ -22,6 +22,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       04/10/2026      El aqua pasa a la paleta compartida
 zxxz6       03/10/2026      Quite la seccion Considerations del encabezado
 zxxz6       30/09/2026      Creation
 
@@ -38,13 +39,14 @@ from Utils import FRECUENCIA_HZ, RUTA_SALIDA, TAM_VENTANA
 
 ARCHIVO_MODELO = f"{RUTA_SALIDA}/modelo.npz"
 
-# Paleta validada: superficie, tinta, rejilla y los dos primeros
-# slots categoricos
+# Paleta validada: superficie, tinta, rejilla y los tres primeros
+# slots categoricos, que son los que separan bien en todos los pares
 SUPERFICIE = "#fcfcfb"
 TINTA = "#52514e"
 REJILLA = "#e8e7e2"
 SERIE_AZUL = "#2a78d6"
 SERIE_NARANJA = "#eb6834"
+SERIE_AQUA = "#1baf7a"
 
 ATOMOS_MUESTRA = (2, 4, 8, 16)
 N_ATOMOS_DIBUJADOS = 24
