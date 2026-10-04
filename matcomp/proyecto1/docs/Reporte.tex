@@ -1,0 +1,324 @@
+% =====================================================================
+%  Reporte.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Reporte breve del proyecto 1 de Matemáticas para la Computación:
+%  objetivo, información utilizada, proceso y análisis de resultados
+%  de K-SVD aplicado a señales de ECG de MIT-BIH. Cinco páginas como
+%  máximo. Las figuras salen de src/Figuras.py y src/Analisis.py.
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       04/10/2026      Coautores y la serie SEE Matrix en referencias
+%  zxxz6       04/10/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Matemáticas para la Computación}
+\newcommand{\profesor}{Dra. Hayde Peregrina Barreto \\
+                       Dr. Luis Villaseñor Pineda}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../../templates/Preambulo.tex}
+
+\graphicspath{{../out/}}
+\hypersetup{pdfauthor={Carlos Luis Bruzual Roa, Arturo Zabdí Reyes
+            Pérez, Sergio Cesar Villanueva Estrada, Bryan Ezequiel
+            Violante Arriaga}}
+\newcommand{\T}{^{\mathsf{T}}}
+
+% Las dos figuras grandes caben juntas arriba de una pagina con texto
+% debajo; con los limites por omision LaTeX las mandaba solas a una
+% pagina de flotantes medio vacia, y el reporte pasaba de cinco hojas
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+
+% El preambulo compartido pone el numero de pagina en el pie. Un
+% reporte de cinco hojas no lo necesita, asi que se limpia solo aqui.
+\fancyfoot[C]{}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\begin{center}
+  {\LARGE\bfseries Proyecto 1\par}
+  \vspace{0.3em}
+  {\large Representaciones dispersas con K-SVD sobre señales de
+   ECG\par}
+  \vspace{0.5em}
+  {\small Carlos Luis Bruzual Roa \quad Arturo Zabdí Reyes Pérez\\
+   Sergio Cesar Villanueva Estrada \quad Bryan Ezequiel Violante
+   Arriaga\par}
+  \vspace{0.2em}
+  {\small \periodo\par}
+  \vspace{0.4em}
+  \rule{\linewidth}{0.5pt}
+\end{center}
+
+\section*{Resumen}
+
+Se implementó K-SVD para aprender un diccionario de 256 átomos sobre
+ventanas de 128 muestras de un electrocardiograma de MIT-BIH, con OMP
+como método de representación dispersa. El diccionario aprendido
+reconstruye las ventanas de prueba al 11.5\,\% de error con 9.5 átomos
+en promedio, contra 128 muestras originales, y sus átomos resultan ser
+complejos QRS. Comparado con un diccionario fijo de cosenos, con 8
+átomos tiene la tercera parte del error; con 32 átomos el fijo lo
+alcanza. Entre pacientes el resultado depende del paciente y no de la
+serie de la base de datos.
+
+\section{Objetivo}
+
+Implementar K-SVD y obtener una base entrenada para un tipo de señal,
+de manera que se pueda comparar la señal original con su
+reconstrucción a partir de la representación dispersa.
+
+Una señal $x$ se modela como combinación lineal de unas pocas
+columnas, los \emph{átomos}, de un diccionario $D$:
+\[
+    x \approx D\,\alpha ,
+    \qquad D \in \R^{k \times m},\quad m > k ,
+\]
+donde $\alpha$ tiene casi todas sus entradas en cero. Como el
+diccionario es sobrecompleto, el sistema tiene infinitas soluciones y
+de ellas se busca la más dispersa. Se eligió el ECG porque es una
+señal con estructura repetida, el latido, que un diccionario aprendido
+debería capturar con pocos átomos mejor que uno genérico.
+
+\section{Información utilizada}
+
+Se usó la base \textbf{MIT-BIH Arrhythmia} de PhysioNet: 48 registros
+de media hora, muestreados a 360\,Hz, con dos canales. El
+entrenamiento usa el registro 100, canal 0 (derivación MLII); la
+prueba entre pacientes, los registros 101, 103, 200 y 208. La serie
+100 son pacientes ambulatorios elegidos al azar y la serie 200 se
+escogió en la base por contener arritmias poco comunes. Los registros
+102 y 104 se descartaron porque su canal 0 es V5 y no MLII.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lr}
+    \toprule
+    \textbf{Concepto} & \textbf{Valor} \\
+    \midrule
+    Muestras del registro 100            & 650\,000 (30.1 min) \\
+    Longitud de ventana $k$              & 128 muestras (356 ms) \\
+    Ventanas, sin traslape               & 5078 \\
+    Matriz de señales $X$                & $128 \times 5078$ \\
+    Entrenamiento / prueba               & 2539 / 2539 \\
+    Átomos del diccionario $m$           & 256 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Datos y dimensiones del problema.}
+  \label{tab:datos}
+\end{table}
+
+A cada ventana se le resta su media y se normaliza a norma 1. Lo
+primero quita la deriva de línea base del electrodo, que de otro modo
+sería lo primero que aprendería el diccionario; lo segundo hace que
+las ventanas se distingan solo por su forma. La partición es
+\textbf{temporal}: la primera mitad del registro entrena y la segunda
+prueba. Repartir al azar dejaría en prueba ventanas contiguas a las de
+entrenamiento, casi idénticas, e inflaría el resultado.
+
+\section{Proceso}
+
+\textbf{Representación dispersa con OMP.} Dado $D$, Orthogonal
+Matching Pursuit construye $\alpha$ de forma voraz. En cada vuelta
+escoge el átomo de mayor $|d_i\T r|$, con $r$ el residual, y recalcula
+por mínimos cuadrados los pesos de \emph{todos} los átomos escogidos;
+eso deja el residual ortogonal a ellos y ningún átomo se repite. Se
+detiene cuando $\|r\| / \|x\| \le 0.1$ o al llegar a 16 átomos.
+
+\textbf{Aprendizaje del diccionario con K-SVD.} Se alternan dos pasos
+durante 20 iteraciones. Con $D$ fijo se calcula $\alpha$ para todas
+las ventanas con OMP. Con el patrón de ceros de $\alpha$ fijo se
+actualiza cada átomo $d_j$: se toman solo las ventanas $w$ que lo usan
+y se forma el residual sin su contribución,
+\[
+    R = X_w - D\,\alpha_w , \qquad \text{con la fila } j
+    \text{ de } \alpha_w \text{ en cero.}
+\]
+El producto $d_j \alpha_j\T$ es una matriz de rango 1, así que el
+mejor átomo es la mejor aproximación de rango 1 de $R$, que por el
+teorema de Eckart-Young da la SVD:
+\[
+    R = U \Sigma V\T
+    \qquad\Longrightarrow\qquad
+    d_j = u_1 , \quad \alpha_j = \sigma_1 v_1 .
+\]
+Restringir a $w$ conserva los ceros que encontró OMP. Un átomo que
+ninguna ventana usa se reemplaza por la ventana peor reconstruida. El
+diccionario inicial $D_0$ son 256 ventanas de entrenamiento tomadas al
+azar.
+
+\textbf{Verificación.} Antes de usar el ECG, ambos algoritmos se
+probaron con datos sintéticos generados desde un diccionario conocido.
+OMP recuperó el conjunto exacto de átomos en el 99.3\,\% de 300
+señales, y K-SVD recuperó 42 de 50 átomos con coseno mayor a 0.99
+contra los originales.
+
+La implementación está en Python con NumPy; los registros se leen con
+la biblioteca \texttt{wfdb} de PhysioNet.
+
+\section{Análisis de resultados}
+
+\subsection*{Lo que aprendió el diccionario}
+
+El error de entrenamiento queda en 0.101 desde la primera iteración,
+porque es el umbral de paro de OMP. Lo que mejora con las iteraciones
+es la \textbf{dispersión}: el promedio de átomos por ventana baja de
+10.62 a 8.42 para alcanzar el mismo error. En la mitad de prueba el
+error sube a 0.115 con 9.46 átomos por ventana, una brecha chica que
+indica que el diccionario no memorizó las ventanas de entrenamiento.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.8\linewidth]{atomos.pdf}
+  \caption{Los átomos más usados del diccionario entrenado, con el
+    número de ventanas de prueba en que participa cada uno. Son
+    complejos QRS en distintas posiciones y polaridades.}
+  \label{fig:atomos}
+\end{figure}
+
+Los átomos más usados (figura~\ref{fig:atomos}) son complejos QRS
+desplazados dentro de la ventana y con ambas polaridades. El
+diccionario no guardó ventanas sino la forma del latido en distintas
+posiciones, que es lo que permite describir cualquier ventana con
+pocos de ellos.
+
+\subsection*{Original contra reconstrucción}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.9\linewidth]{reconstruccion.pdf}
+  \caption{Una ventana de prueba con un latido completo. Izquierda: los
+    primeros átomos en que se descompone. Derecha: su reconstrucción
+    con 2, 4, 8 y 16 átomos, desplazada en vertical para que no se
+    tape con la original.}
+  \label{fig:reconstruccion}
+\end{figure}
+
+La figura~\ref{fig:reconstruccion} es la comparación que pide el
+objetivo. El primer átomo que escoge OMP ya tiene la forma del QRS;
+los siguientes corrigen detalles. El error baja de 0.185 con 2 átomos a
+0.110 con 4, 0.062 con 8 y 0.034 con 16. Guardar la ventana con 9
+átomos cuesta 9 coeficientes y 9 índices en lugar de 128 muestras.
+
+\subsection*{Contra diccionarios que no aprendieron}
+
+El error de 0.115 no dice mucho sin una referencia. Se comparó contra
+dos diccionarios del mismo tamaño: $D_0$, las ventanas sin entrenar, y
+una DCT sobrecompleta, el caso típico de diccionario fijo.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{rrrr}
+    \toprule
+    \textbf{Átomos} & \textbf{Aprendido} & \textbf{$D_0$}
+      & \textbf{DCT} \\
+    \midrule
+     1 & \textbf{0.327} & 0.342 & 0.798 \\
+     2 & \textbf{0.232} & 0.257 & 0.682 \\
+     4 & \textbf{0.174} & 0.205 & 0.540 \\
+     8 & \textbf{0.130} & 0.162 & 0.363 \\
+    16 & \textbf{0.101} & 0.125 & 0.184 \\
+    32 & 0.081 & 0.088 & \textbf{0.074} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Error relativo sobre las 2539 ventanas de prueba según el
+    número de átomos permitidos. En negritas el menor de cada renglón.}
+  \label{tab:diccionarios}
+\end{table}
+
+Con pocos átomos, que es el régimen que importa en una representación
+dispersa, el diccionario aprendido gana en todos los casos: con 8
+átomos tiene un 20\,\% menos de error que $D_0$ y la tercera parte que
+la DCT. Que $D_0$ quede tan cerca muestra que tomar ventanas reales ya
+es un buen punto de partida, y lo que agrega K-SVD es ajustarlas.
+
+Con 32 átomos la DCT termina ganando. La explicación probable es que
+el diccionario aprendido se especializó en la forma del latido, y lo
+que queda sin explicar después de muchos átomos es ruido de alta
+frecuencia, que los cosenos representan mejor. No se verificó
+directamente, pero es consistente con que la DCT mejore mucho más
+rápido que los otros dos al pasar de 16 a 32 átomos.
+
+\subsection*{Otros pacientes}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\linewidth]{pacientes.pdf}
+  \caption{Error con 8 átomos en cada paciente, usando el diccionario
+    entrenado solo con el registro 100.}
+  \label{fig:pacientes}
+\end{figure}
+
+El diccionario del registro 100 se aplicó sin reentrenar a otros
+cuatro pacientes (figura~\ref{fig:pacientes}). En los registros 103 y
+208 el error es igual o menor que en la propia mitad de prueba del
+100, y en 101 y 200 sube a 0.188 y 0.211, que se traduce en 11.5 y
+12.6 átomos para llegar al umbral en lugar de 9.5. La serie no
+predice el resultado: el 208, de la serie de arritmias, se reconstruye
+tan bien como el 100, y el 101, de la misma serie que el 100, no. Un
+diccionario de un solo paciente cubre las morfologías parecidas a la
+suya pero no todas, y el siguiente paso natural es entrenar con varios
+pacientes, opción que ya admite la implementación.
+
+\section{Conclusiones}
+
+K-SVD aprendió un diccionario cuyos átomos son la forma del latido, y
+con él una ventana de 128 muestras se reconstruye al 10\,\% de error
+con unos 9 coeficientes. La ventaja sobre un diccionario fijo es
+grande precisamente donde importa, con pocos átomos, y desaparece
+cuando se permiten muchos. La SVD aparece como la solución exacta del
+paso de actualización: cada átomo es la mejor aproximación de rango 1
+de lo que le toca explicar.
+
+\section*{Referencias}
+
+\begin{enumerate}[label={[\arabic*]}, itemsep=0.1em, leftmargin=*]
+  \small
+  \item M. Aharon, M. Elad y A. Bruckstein, \emph{K-SVD: An algorithm
+        for designing overcomplete dictionaries for sparse
+        representation}, IEEE Transactions on Signal Processing,
+        54(11), 4311-4322, 2006.
+  \item Y. C. Pati, R. Rezaiifar y P. S. Krishnaprasad,
+        \emph{Orthogonal matching pursuit: recursive function
+        approximation with applications to wavelet decomposition},
+        27th Asilomar Conference on Signals, Systems and Computers,
+        40-44, 1993.
+  \item C. Eckart y G. Young, \emph{The approximation of one matrix by
+        another of lower rank}, Psychometrika, 1(3), 211-218, 1936.
+  \item G. B. Moody y R. G. Mark, \emph{The impact of the MIT-BIH
+        Arrhythmia Database}, IEEE Engineering in Medicine and Biology
+        Magazine, 20(3), 45-50, 2001.
+  \item A. L. Goldberger et al., \emph{PhysioBank, PhysioToolkit, and
+        PhysioNet}, Circulation, 101(23), e215-e220, 2000.
+  \item Visual Kernel, \emph{SEE Matrix}, serie de videos en YouTube
+        sobre matrices, descomposición espectral y SVD.\\
+  \url{https://www.youtube.com/playlist?list=PLWhu9osGd2dB9uMG5gKBARmk73oHUUQZS}
+\end{enumerate}
+
+\end{document}
+
+%############################# END OF REPORTE.TEX ##############################
+%###############################################################################
