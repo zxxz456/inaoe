@@ -1,0 +1,54 @@
+-- continuacion
+
+{explicar como se generan los embedings, como se entrena la red de embedings}
+
+la red es self supervised {explicar que es self supervised}
+
+cuando se empezo con esto de los embedings se propusieron diferentes algos, uno es word2vec
+
+- word2vec
+    aqui la idea era aprender vectores para predecir sus contextos {explicar mejor con BOW y Skipgrams} 
+    son embedingss estaticos, el metodo aprende un embeding fijo para cada palabra en el vocabulario
+
+    - continous bag of words: lo que se hace aqui es que tengo mi ventanad de palabras
+      pero no solo veo hacia atras, sino solo hacia adelante
+
+    - skip-gram: equi se predice el contexto dada la palabra, como entrada voy a tanaer una palabra
+    y como salida cual serian las palabras que estan al rededor de esta dependiendo de la ventana
+
+    luego se le hixo un cambio al skipgram ya que era muy costoso, la varaicion es
+    del negative sampling, solo se toma un conjuno de palabra y se determina si aparecen cerca {explicar mejor con ejemplo}
+
+    La tarea es siempre generar una representacion de las palabras 
+    En la pate del softmax es mas costoso si se usan contextos muy grandes, para solucioanr esto se propone el 
+    softmax jerarquico, se hace una especie de arbol de probabilidades que reduce los calculos a hacer 
+
+- fast text 
+    que pasa ssi tengo palabras fuera del vocabulario? existen vectores para una palabra y para otra pero no para una
+    palabra nueva
+    que pasa con la morfologia de las palabras? por ejemplo las conjugaciones de el mismo verbo? se tomarian como vectores diferentes
+
+    si encuentro una manera en que pueda representar mis palabras de una forma mas eficiente 
+
+    en fast text opatn por un sub word generation 
+
+    se usa una ventana pero en tamano de caracter 
+
+    en lugar de entrenar a nivel palabra voy a entrenar a nivel sub palabra, se multiplican las. operaciones pero se van a poder generar
+    mas palabras
+
+cual funciona mejor? depende de la tarea que estemos haciendo
+despues surgio GloVe
+
+-GloVe
+esta basado en co ocurrencias de palabras en un corpus, no esta tan basada en redes neuronales 
+{explicar a detalle}
+{ejemplo}
+
+
+- Propiedades semanticas de los embeddings
+{explicar que es}
+
+-- Embedings contextualizados 
+    un vector representa una palabra, pero que pasa con la polisemos, el uso de palabras depende del contexto 
+
