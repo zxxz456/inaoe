@@ -3119,36 +3119,87 @@ display:block!important;
 }</style></aside>
 </section>
 <section id="svd-juguete-c" class="slide level2">
-<h2>Átomo C: B ya cambió</h2>
+<h2>Átomo C: qué le toca explicar</h2>
 <div class="omp-j">
-<p class="intro">Fila C de α <span class="math inline">= (0.5,\ 0)</span>: solo <b>v₁</b>. Ojo: <b class="nar">B ya cambió</b>, y <span class="math inline">R</span> se calcula con el B nuevo y su peso nuevo.</p>
-<div class="paso"><span class="num">1</span>Qué le falta explicar</div>
+<p class="intro">Fila C de α <span class="math inline">= (0.5,\ 0)</span>: solo la usa <b>v₁</b>, así que <span class="math inline">R</span> tiene una columna. Ojo: <b class="nar">B ya cambió</b>, y D y α ya traen el B nuevo y su peso nuevo.</p>
+<div class="paso"><span class="num">1</span>Lo que aportan los demás átomos: <span class="math inline">D\,\alpha_w</span> con la fila C en cero</div>
 <div class="fila" style="margin-bottom:46px;">
-<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
-<div class="op">−</div>
-<div class="op">0.25 ·</div>
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:1;">1</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
-<div class="op">−</div>
-<div class="op">1.249 ·</div>
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">B nuevo</div><div class="c hn" style="grid-row:2;grid-column:1;">0.638</div><div class="c hn" style="grid-row:3;grid-column:1;">0.770</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 78px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch" style="grid-row:1;grid-column:3;">B nuevo</div><div class="ch chl" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.638</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.770</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> con el B nuevo</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 72px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:2;">0.25</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c" style="grid-row:3;grid-column:2;">1.249</div><div class="rh chl" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 1;"></div></div><div class="mxc">α<sub>w</sub>, C apagado</div></div>
 <div class="op">=</div>
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
-<div class="nota" style="margin-left:22px;">Con el B viejo esto daba<br>(0, 0, 0.5) exacto.<br><br>Al mover B, a v₁ le quedó<br>un sobrante chico en las<br>muestras 1 y 2.</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="c" style="grid-row:2;grid-column:1;">1.046</div><div class="c" style="grid-row:3;grid-column:1;">0.962</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div><div class="mxc">parte fija</div></div>
+<div class="nota" style="margin-left:22px;">Apagar C: lo que queda es<br>lo que aportan A y el <b>B nuevo</b>:<br><span class="math inline">0.25\,A + 1.249\,B = (1.046,\ 0.962,\ 0)</span></div>
 </div>
-<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>SVD de una columna: normalizar</div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Lo que le falta a v₁: <span class="math inline">R = X_w - D\,\alpha_w</span></div>
 <div class="fila fragment" data-fragment-index="1">
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
-<div class="op">÷ 0.504 =</div>
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 90px);"><div class="ch" style="grid-row:1;grid-column:1;">C nuevo</div><div class="c hg" style="grid-row:2;grid-column:1;">−0.092</div><div class="c hg" style="grid-row:3;grid-column:1;">0.076</div><div class="c hg" style="grid-row:4;grid-column:1;">0.993</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
-<div class="op">  contra  </div>
-<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">C viejo</div><div class="c" style="grid-row:2;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
-<div class="nota" style="margin-left:36px;"><span class="math inline">\sigma = \lVert R \rVert = 0.504</span> es el peso nuevo.<br><br>C se inclina un poco para tapar el<br>hueco que dejó B. Por eso el <b>orden</b><br>importa: cada átomo aprovecha<br>cómo quedaron los anteriores.</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hb" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hb" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc"><b>X<sub>w</sub></b></div></div>
+<div class="op">−</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="c" style="grid-row:2;grid-column:1;">1.046</div><div class="c" style="grid-row:3;grid-column:1;">0.962</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div><div class="mxc">parte fija</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div><div class="mxc"><b>R</b> · 3 × 1</div></div>
+<div class="nota fragment" data-fragment-index="2" style="margin-left:30px;">¿Le sirve el C viejo?<br><span class="math inline">0.5\,C = (0,\ 0,\ 0.5) \neq R</span><br><br>Con el B viejo, <span class="math inline">R</span> habría sido (0, 0, 0.5) y C<br>no cambiaría. El B nuevo <b>se pasa</b> 0.046 en la<br>muestra 1 y <b>se queda corto</b> 0.038 en la 2.<br><br>Se busca un átomo <span class="math inline">c</span> y un peso <span class="math inline">p</span>: <span class="math inline">p\,c \approx R</span>.</div>
 </div>
 </div>
 <aside class="notes">
-<p>Átomo C. Su fila es (0.5, 0): solo lo usa la ventana 1.</p>
-<p>Y aquí hay un detalle: B ya cambió. El residual se calcula con el B nuevo y su peso nuevo, no con los de antes. A la ventana 1 le quito 0.25 de A y 1.249 del B nuevo, y queda (-0.046, 0.038, 0.5). Con el B viejo esto habría sido exactamente (0, 0, 0.5); al mover B quedó un sobrante chico.</p>
-<p>Otra vez una sola columna, así que la SVD es normalizar: el largo es 0.504, que es el peso nuevo, y el C nuevo es R entre ese largo. Comparado con el C viejo, se inclinó un poco para tapar el hueco que dejó B. Por eso los átomos se actualizan en orden: cada uno aprovecha cómo quedaron los anteriores.</p>
+<p>Átomo C, con el mismo procedimiento que B. Su fila en alfa es (0.5, 0): solo lo usa la ventana 1, así que R va a tener una sola columna.</p>
+<p>Y aquí hay un detalle: B ya cambió. D ya trae el B nuevo, y alfa su peso nuevo, 1.249. Cada átomo se actualiza sobre cómo quedaron los anteriores.</p>
+<p>Paso 1. Apago C, pongo su fila en cero, y calculo lo que aportan los demás a la ventana 1: 0.25 de A más 1.249 del B nuevo, que da (1.046, 0.962, 0).</p>
+<p>Paso 2. R es la ventana menos esa parte fija: (-0.046, 0.038, 0.5). Con el B viejo esto habría sido exactamente (0, 0, 0.5), que es justo 0.5 veces el C viejo, y C no cambiaría. Pero el B nuevo se pasa un poquito en la muestra 1 y se queda corto en la 2. Ese sobrante le toca a C.</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
+</section>
+<section id="svd-juguete-c2" class="slide level2">
+<h2>Átomo C: la SVD de una columna</h2>
+<div class="omp-j">
+<div class="paso"><span class="num">1</span><span class="math inline">R^{\mathsf T} R</span>: con una columna es un solo número</div>
+<div class="fila" style="margin-bottom:44px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh" style="grid-row:2;grid-column:1;">R</div><div class="c" style="grid-row:2;grid-column:2;">−0.046</div><div class="c" style="grid-row:2;grid-column:3;">0.038</div><div class="c" style="grid-row:2;grid-column:4;">0.5</div><div class="cor" style="grid-row:2 / span 1;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">R^{\mathsf T}</span> · 1 × 3</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div><div class="mxc">R · 3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 96px);"><div class="ch" style="grid-row:1;grid-column:2;">R</div><div class="rh" style="grid-row:2;grid-column:1;">R</div><div class="c hn" style="grid-row:2;grid-column:2;">0.2536</div><div class="cor" style="grid-row:2 / span 1;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">R^{\mathsf T} R</span> · 1 × 1</div></div>
+<div class="nota" style="margin-left:22px;"><span class="math inline">R \cdot R = (-0.046)^2 + 0.038^2 + 0.5^2</span><br><span class="math inline">= 0.0021 + 0.0015 + 0.25 = 0.2536</span><br><br>Es el largo de <span class="math inline">R</span> al cuadrado.</div>
+</div>
+<div class="abajo">
+<div style="width:520px;">
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Eigenvalor, σ₁ y <span class="math inline">v_1</span></div>
+<div class="sistema fragment" data-fragment-index="1">
+<span class="math inline">\lambda_1 = 0.2536</span><br>
+<span class="math inline">\sigma_1 = \sqrt{0.2536} = 0.504 = \lVert R \rVert</span><br>
+<span class="math inline">v_1 = (1)</span>
+</div>
+<div class="nota fragment" data-fragment-index="1" style>Una matriz de 1 × 1 es su propio eigenvalor. No hay σ₂: una sola columna ya es de rango 1, así que la pieza <span class="math inline">\sigma_1 u_1 v_1^{\mathsf T}</span> es <span class="math inline">R</span> completa y no sobra nada.</div>
+</div>
+<div>
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span><span class="math inline">u_1 = R\,v_1 / \sigma_1</span>: normalizar</div>
+<div class="fila fragment" data-fragment-index="2" style="margin-bottom:40px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">÷ 0.504 =</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 90px);"><div class="ch" style="grid-row:1;grid-column:1;">C nuevo = u₁</div><div class="c hg" style="grid-row:2;grid-column:1;">−0.092</div><div class="c hg" style="grid-row:3;grid-column:1;">0.076</div><div class="c hg" style="grid-row:4;grid-column:1;">0.993</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op"> contra </div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">C viejo</div><div class="c" style="grid-row:2;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+</div>
+<div class="nota fragment" data-fragment-index="2" style>Peso nuevo <span class="math inline">= \sigma_1 v_1 = 0.504</span>, antes 0.5.</div>
+</div>
+</div>
+<p class="fragment linea" data-fragment-index="3" style="margin-top:6px;">Comprobación: <span class="math inline">0.25\,A + 1.249\,B + 0.504\,C = (1,\ 1,\ 0.5)</span>, v₁ vuelve a quedar exacta. C se inclinó para tapar el hueco que dejó B: por eso el <b>orden</b> importa.</p>
+</div>
+<aside class="notes">
+<p>La SVD de R. Es el mismo procedimiento que con B, solo que con una columna todo se vuelve de uno por uno.</p>
+<p>Paso 1. R transpuesta por R es un solo número: R punto R, la suma de los cuadrados, 0.2536. Es el largo de R al cuadrado.</p>
+<p>Paso 2. Una matriz de uno por uno es su propio eigenvalor, así que lambda1 es 0.2536 y sigma1 es su raíz, 0.504, que es justo el largo de R. v1 es simplemente (1). No hay sigma2: una columna ya es de rango 1, así que la primera pieza es R completa y no sobra nada.</p>
+<p>Paso 3. u1 es R por v1 entre sigma1: R normalizada. Ese es el C nuevo, (-0.092, 0.076, 0.993). Comparado con el viejo, (0, 0, 1), se inclinó un poco. Su peso es sigma1 por v1, 0.504.</p>
+<p>Comprobación: con A, el B nuevo y el C nuevo, la ventana 1 vuelve a quedar exacta. C se inclinó justo para tapar el hueco que dejó B. Por eso los átomos se actualizan en orden: cada uno aprovecha cómo quedaron los anteriores.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
