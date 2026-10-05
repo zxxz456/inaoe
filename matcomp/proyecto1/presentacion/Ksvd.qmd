@@ -30,6 +30,7 @@
 #  History:
 #  ------------
 #  Author      Date            Description
+#  zxxz6       04/10/2026      Ejemplo de juguete de OMP paso a paso
 #  zxxz6       04/10/2026      El paso SVD paso a paso y el diccionario mejorado
 #  zxxz6       04/10/2026      Coautores y la serie SEE Matrix en referencias
 #  zxxz6       04/10/2026      Creation
@@ -165,6 +166,69 @@ format:
         .refs .columns { font-size: 21px; line-height: 1.3; }
         .refs li { margin-bottom: 12px; }
         .refs a { word-break: break-all; }
+        .omp-j { font-size: 20px; color: #52514e; }
+        .omp-j p { margin: 0; }
+        .omp-j .intro { font-size: 22px; margin: 0 0 6px; }
+        .omp-j .linea { font-size: 22px; margin: 8px 0 0; }
+        .omp-j .nar { color: #eb6834; }
+        .omp-j .paso { font-size: 21px; font-weight: 600; color: #2a78d6;
+          margin: 6px 0 4px; }
+        .omp-j .paso .num { display: inline-block; width: 28px;
+          height: 28px; line-height: 28px; border-radius: 50%;
+          background: #2a78d6; color: #fff; text-align: center;
+          font-size: 17px; margin-right: 8px; }
+        .omp-j .nota { font-size: 18px; line-height: 1.35;
+          color: #52514e; }
+        .omp-j .fila { display: flex; align-items: flex-start; gap: 8px;
+          margin-bottom: 52px; }
+        .omp-j .abajo { display: flex; gap: 48px;
+          align-items: flex-start; }
+        .omp-j .op { font-size: 30px; padding-top: 50px;
+          white-space: nowrap; }
+        .omp-j .mxw { position: relative; display: inline-flex;
+          flex-direction: column; align-items: center; }
+        .omp-j .mxc { position: absolute; top: 100%; left: -30px;
+          right: -30px; font-size: 15px; line-height: 1.2;
+          color: #6b6a65; text-align: center; margin-top: 4px; }
+        .omp-j .mx { display: grid; position: relative; }
+        .omp-j .mx > div { height: 34px; line-height: 34px;
+          text-align: center; font-size: 22px; color: #2b2b2b; }
+        .omp-j .mx .ch { height: 26px; line-height: 26px;
+          font-size: 15px; color: #8a8984; white-space: nowrap; }
+        .omp-j .mx .rh { font-size: 15px; color: #8a8984;
+          white-space: nowrap;
+          text-align: right; padding-right: 9px; }
+        .omp-j .mx .chl { color: #eb6834; font-weight: 700; }
+        .omp-j .mx > .cor { height: auto !important; align-self: stretch; position: relative;
+          border-left: 2.5px solid #52514e;
+          border-right: 2.5px solid #52514e; pointer-events: none; }
+        .omp-j .mx .cor::before, .omp-j .mx .cor::after {
+          content: ""; position: absolute; top: 0; bottom: 0;
+          width: 7px; border-top: 2.5px solid #52514e;
+          border-bottom: 2.5px solid #52514e; }
+        .omp-j .mx .cor::before { left: 0; }
+        .omp-j .mx .cor::after { right: 0; }
+        .omp-j .mx .hn { background: #fbe0d4; }
+        .omp-j .mx .ha { background: #d4f1e5; }
+        .omp-j .mx .hb { background: #dbe7f6; }
+        .omp-j .mx .hg { background: #eb6834; color: #fff;
+          font-weight: 700; }
+        .omp-j .mx .z { color: #b8b7b0; }
+        .omp-j.g .mx > div { height: 40px; line-height: 40px;
+          font-size: 26px; }
+        .omp-j.g .mx .ch { height: 30px; line-height: 30px;
+          font-size: 18px; }
+        .omp-j.g .mx .rh { font-size: 18px; }
+        .omp-j.g .mxc { font-size: 18px; }
+        .omp-j.g .op { font-size: 36px; padding-top: 70px; }
+        .omp-j .sistema { font-size: 21px; line-height: 1.55;
+          margin: 4px 0 10px 8px; }
+        .omp-j .sistema .eq { color: #8a8984; font-size: 17px;
+          margin-left: 10px; }
+        .omp-j table.resumen { font-size: 19px; margin: 8px 0 0;
+          border-collapse: collapse; }
+        .omp-j table.resumen th, .omp-j table.resumen td {
+          padding: 3px 16px; border-bottom: 1px solid #ddd; }
         </style>
     include-after-body:
       text: |
@@ -870,6 +934,390 @@ nuevo, se recalculan todos. Por eso se llama orthogonal, y por eso un
 él.
 
 Para cuando el error relativo baja de 0.1 o llega a 16 átomos.
+:::
+
+## OMP paso a paso: un ejemplo de juguete {#omp-juguete-datos}
+
+```{=html}
+<div class="omp-j g">
+<p class="intro">Átomos de <b>3</b> números (en vez de 128) y <b>4</b>
+átomos (en vez de 256). El procedimiento es exactamente el mismo.</p>
+<div class="fila" style="margin-top:26px;margin-bottom:110px;justify-content:center;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hb" style="grid-row:2;grid-column:2;">1</div><div class="c hb" style="grid-row:2;grid-column:3;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="c hb" style="grid-row:3;grid-column:3;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hb" style="grid-row:4;grid-column:2;">0.5</div><div class="c hb" style="grid-row:4;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 2;"></div></div><div class="mxc"><b>X</b> · 3 × 2<br>filas: muestras<br>columnas: ventanas</div></div>
+<div class="op">≈</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch" style="grid-row:1;grid-column:3;">B</div><div class="ch" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.6</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> · 3 × 4<br>filas: muestras<br>columnas: átomos</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hn" style="grid-row:2;grid-column:2;">?</div><div class="c hn" style="grid-row:2;grid-column:3;">?</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">?</div><div class="c hn" style="grid-row:3;grid-column:3;">?</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">?</div><div class="c hn" style="grid-row:4;grid-column:3;">?</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c hn" style="grid-row:5;grid-column:2;">?</div><div class="c hn" style="grid-row:5;grid-column:3;">?</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> · 4 × 2<br>filas: átomos<br>columnas: ventanas</div></div></div>
+<div class="fragment" data-fragment-index="1">
+<p class="linea">Cada átomo mide 1: <span class="math inline">\lVert B \rVert = \sqrt{0.6^2 + 0.8^2} = 1</span>.
+OMP para cuando el error relativo <span class="math inline">\lVert r \rVert / \lVert x \rVert</span>
+baja de <b>0.1</b> (o al llegar a 16 átomos).</p>
+</div>
+<div class="fragment" data-fragment-index="2">
+<p class="linea">En el proyecto: <b>X</b> es 128 × 2539, <b>D</b> es
+128 × 256 y <b>α</b> es 256 × 2539. Mismas reglas, solo más grande.</p>
+</div>
+</div>
+```
+
+::: {.notes}
+Antes de ver OMP con el ECG real, lo hacemos a mano con un ejemplo
+que cabe en una hoja.
+
+Tres matrices. X son las ventanas: tiene dos columnas, v1 y v2, y cada
+columna tiene tres números, uno por muestra. D es el diccionario: cuatro
+columnas, los átomos A, B, C y E, y las filas son las mismas tres
+muestras. Que las filas coincidan es lo que permite sumar átomos para
+armar una ventana.
+
+Lo que OMP tiene que encontrar es alfa: una fila por átomo y una columna
+por ventana. Cada columna de alfa es la receta de una ventana: cuánto de
+cada átomo usa.
+
+Todos los átomos miden 1, y OMP para cuando lo que falta por explicar es
+menos del 10 por ciento de la ventana, o cuando ya usó 16 átomos.
+
+En el proyecto es igual, solo que con 128 muestras, 256 átomos y 2539
+ventanas.
+:::
+
+## Ventana 1, vuelta 1 {#omp-juguete-v1-1}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Ventana <span class="math inline">x = v_1 = (1,\, 1,\, 0.5)</span>, con <span class="math inline">\lVert x \rVert = 1.5</span>.
+Al inicio falta explicar todo: <span class="math inline">r = x</span> y <span class="math inline">S = \{\,\}</span>.</p>
+<div class="paso"><span class="num">1</span>Comparar <b>todos</b> los átomos con lo que falta: <span class="math inline">D^{\mathsf T} r</span></div>
+<div class="fila" >
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh" style="grid-row:2;grid-column:1;">átomo A</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="rh chl" style="grid-row:3;grid-column:1;">átomo B</div><div class="c hn" style="grid-row:3;grid-column:2;">0.6</div><div class="c hn" style="grid-row:3;grid-column:3;">0.8</div><div class="c hn" style="grid-row:3;grid-column:4;">0</div><div class="rh" style="grid-row:4;grid-column:1;">átomo C</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c" style="grid-row:5;grid-column:2;">0</div><div class="c" style="grid-row:5;grid-column:3;">1</div><div class="c" style="grid-row:5;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T}</span> · 4 × 3<br>cada fila es un átomo</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:2;">r</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c ha" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c ha" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc">r = x · 3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 78px);"><div class="ch" style="grid-row:1;grid-column:2;">parecido</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hg" style="grid-row:3;grid-column:2;">1.4</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c" style="grid-row:5;grid-column:2;">1</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T} r</span> · 4 × 1<br>uno por átomo</div></div>
+<div class="nota" style="margin-left:22px;">Fila de <span class="math inline">D^{\mathsf T}</span> por <span class="math inline">r</span> = producto punto:<br><span class="math inline">B \cdot r = 0.6(1)+0.8(1)+0(0.5)</span><br><span class="math inline">= 1.4</span><br><br>Gana el mayor |valor|: <b class='nar'>B</b><br><span class="math inline">S = \{B\}</span></div></div>
+<div class="abajo">
+<div style="width:390px;">
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Calcular el peso</div>
+<div class="fragment nota" data-fragment-index="1">
+Con un solo átomo el sistema es de 1 × 1:<br>
+<span class="math inline">(B \cdot B)\, w_B = B \cdot x</span><br>
+<span class="math inline">1 \cdot w_B = 1.4 \;\Rightarrow\; w_B = 1.4</span>
+</div>
+</div>
+<div>
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span>Residual y error</div>
+<div class="fila" class="fila fragment" data-fragment-index="2">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">x</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">1.4 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">B</div><div class="c hn" style="grid-row:2;grid-column:1;">0.6</div><div class="c hn" style="grid-row:3;grid-column:1;">0.8</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">r nuevo</div><div class="c ha" style="grid-row:2;grid-column:1;">0.16</div><div class="c ha" style="grid-row:3;grid-column:1;">−0.12</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="nota" style="margin-left:18px;"><span class="math inline">\lVert r \rVert = \sqrt{0.16^2+0.12^2+0.5^2} = 0.539</span><br><span class="math inline">0.539 / 1.5 = 0.359 > 0.1</span><br><b>sigue</b></div></div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Vuelta 1 con la ventana 1, x igual a (1, 1, 0.5). Al principio no se ha
+explicado nada, así que el residual r es la ventana completa.
+
+Paso 1, comparar. En lugar de hacer cuatro productos punto por separado,
+es una sola multiplicación: D transpuesta por r. Cada fila de D
+transpuesta es un átomo, así que cada renglón del resultado es el
+producto punto de un átomo con lo que falta. Por ejemplo, para B: 0.6
+por 1, más 0.8 por 1, más 0 por 0.5, da 1.4. Es el mayor, gana B.
+
+Paso 2, el peso. Con un solo átomo la ecuación es de uno por uno: B
+punto B, que vale 1 porque B mide 1, por w igual a B punto x. Sale 1.4.
+
+Paso 3. A la ventana le quito 1.4 veces B y queda el residual nuevo:
+(0.16, -0.12, 0.5). Mide 0.539, que es el 36 por ciento de la ventana.
+Más que 10 por ciento, así que sigue.
+:::
+
+## Ventana 1, vuelta 2 {#omp-juguete-v1-2}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Se compara contra el residual <b>nuevo</b>, no contra
+<span class="math inline">x</span>. Escogidos hasta ahora: <span class="math inline">S = \{B\}</span>.</p>
+<div class="paso"><span class="num">1</span>Comparar con lo que falta: <span class="math inline">D^{\mathsf T} r</span></div>
+<div class="fila" >
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh" style="grid-row:2;grid-column:1;">átomo A</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="rh" style="grid-row:3;grid-column:1;">átomo B</div><div class="c" style="grid-row:3;grid-column:2;">0.6</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="rh chl" style="grid-row:4;grid-column:1;">átomo C</div><div class="c hn" style="grid-row:4;grid-column:2;">0</div><div class="c hn" style="grid-row:4;grid-column:3;">0</div><div class="c hn" style="grid-row:4;grid-column:4;">1</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c" style="grid-row:5;grid-column:2;">0</div><div class="c" style="grid-row:5;grid-column:3;">1</div><div class="c" style="grid-row:5;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T}</span> · 4 × 3<br>cada fila es un átomo</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:2;">r</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c ha" style="grid-row:2;grid-column:2;">0.16</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c ha" style="grid-row:3;grid-column:2;">−0.12</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c ha" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc">r · 3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 78px);"><div class="ch" style="grid-row:1;grid-column:2;">parecido</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:2;">0.16</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c z" style="grid-row:3;grid-column:2;">0</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hg" style="grid-row:4;grid-column:2;">0.5</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c" style="grid-row:5;grid-column:2;">−0.12</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T} r</span> · 4 × 1<br>uno por átomo</div></div>
+<div class="nota" style="margin-left:22px;"><b>B da 0</b>: el residual ya no tiene<br>nada de B, así que no se repite.<br><br>Gana <b class='nar'>C</b>: lo que más falta<br>es el 0.5 de la muestra 3.<br><span class="math inline">S = \{B, C\}</span></div></div>
+<div class="abajo">
+<div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Pesos de <b>todos</b> los escogidos: ecuaciones normales</div>
+<div class="fila" class="fila fragment" data-fragment-index="1">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch chl" style="grid-row:1;grid-column:2;">B</div><div class="ch chl" style="grid-row:1;grid-column:3;">C</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hn" style="grid-row:2;grid-column:2;">0.6</div><div class="c hn" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hn" style="grid-row:3;grid-column:2;">0.8</div><div class="c hn" style="grid-row:3;grid-column:3;">0</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hn" style="grid-row:4;grid-column:2;">0</div><div class="c hn" style="grid-row:4;grid-column:3;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 2;"></div></div><div class="mxc"><span class="math inline">D_S</span> · 3 × 2<br>átomos escogidos</div></div><div style="width:22px"></div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">B</div><div class="ch" style="grid-row:1;grid-column:3;">C</div><div class="rh" style="grid-row:2;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">C</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">1</div><div class="cor" style="grid-row:2 / span 2;grid-column:2 / span 2;"></div></div><div class="mxc"><span class="math inline">D_S^{\mathsf T} D_S</span> · 2 × 2</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">w</div><div class="rh" style="grid-row:2;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:2;">w<sub>B</sub></div><div class="rh" style="grid-row:3;grid-column:1;">C</div><div class="c" style="grid-row:3;grid-column:2;">w<sub>C</sub></div><div class="cor" style="grid-row:2 / span 2;grid-column:2 / span 1;"></div></div><div class="mxc">2 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;"></div><div class="rh" style="grid-row:2;grid-column:1;">B·x</div><div class="c" style="grid-row:2;grid-column:2;">1.4</div><div class="rh" style="grid-row:3;grid-column:1;">C·x</div><div class="c" style="grid-row:3;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 2;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D_S^{\mathsf T} x</span> · 2 × 1</div></div>
+<div class="op">⇒</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">w</div><div class="c hn" style="grid-row:2;grid-column:1;">1.4</div><div class="c hn" style="grid-row:3;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 2;grid-column:1 / span 1;"></div></div></div></div>
+</div>
+<div>
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span>Residual y error</div>
+<div class="fila" class="fila fragment" data-fragment-index="2">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">x</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">D<sub>S</sub>w</div><div class="c" style="grid-row:2;grid-column:1;">0.84</div><div class="c" style="grid-row:3;grid-column:1;">1.12</div><div class="c" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">r</div><div class="c ha" style="grid-row:2;grid-column:1;">0.16</div><div class="c ha" style="grid-row:3;grid-column:1;">−0.12</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div></div>
+<div class="fragment nota" data-fragment-index="2" style="margin-top:-30px;">
+<span class="math inline">\lVert r \rVert = \sqrt{0.16^2 + 0.12^2} = 0.2</span><br>
+<span class="math inline">0.2 / 1.5 = 0.133 > 0.1</span> → <b>sigue</b></div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Vuelta 2. Ojo: ahora se compara contra el residual nuevo, lo que falta,
+no contra la ventana original.
+
+B da exactamente cero. No es casualidad: el residual quedó perpendicular
+a B, ya no tiene nada de él, y por eso un átomo nunca se repite. Gana C,
+con 0.5, que tiene sentido: lo que más faltaba era el 0.5 de la tercera
+muestra. Al principio C era el que menos se parecía a la ventana.
+
+Paso 2. Ahora hay dos átomos escogidos, y se recalculan los pesos de los
+dos. D sub S son solo las columnas escogidas, B y C. Las ecuaciones
+normales piden D_S transpuesta por D_S, que son productos punto entre
+los átomos escogidos, y del otro lado D_S transpuesta por x. Como B y C
+son perpendiculares, esa matriz es la identidad: cada peso es su producto
+punto con x, 1.4 y 0.5. El peso de B no cambia.
+
+Paso 3. Queda (0.16, -0.12, 0), un error de 13 por ciento. Sigue.
+:::
+
+## Ventana 1, vuelta 3 {#omp-juguete-v1-3}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Escogidos: <span class="math inline">S = \{B, C\}</span>. Lo que falta:
+<span class="math inline">r = (0.16,\, -0.12,\, 0)</span>.</p>
+<div class="paso"><span class="num">1</span>Comparar con lo que falta: <span class="math inline">D^{\mathsf T} r</span></div>
+<div class="fila" >
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh chl" style="grid-row:2;grid-column:1;">átomo A</div><div class="c hn" style="grid-row:2;grid-column:2;">1</div><div class="c hn" style="grid-row:2;grid-column:3;">0</div><div class="c hn" style="grid-row:2;grid-column:4;">0</div><div class="rh" style="grid-row:3;grid-column:1;">átomo B</div><div class="c" style="grid-row:3;grid-column:2;">0.6</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="rh" style="grid-row:4;grid-column:1;">átomo C</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c" style="grid-row:5;grid-column:2;">0</div><div class="c" style="grid-row:5;grid-column:3;">1</div><div class="c" style="grid-row:5;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T}</span> · 4 × 3<br>cada fila es un átomo</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:2;">r</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c ha" style="grid-row:2;grid-column:2;">0.16</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c ha" style="grid-row:3;grid-column:2;">−0.12</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc">r · 3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 78px);"><div class="ch" style="grid-row:1;grid-column:2;">parecido</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hg" style="grid-row:2;grid-column:2;">0.16</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c z" style="grid-row:3;grid-column:2;">0</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c z" style="grid-row:4;grid-column:2;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c" style="grid-row:5;grid-column:2;">−0.12</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T} r</span> · 4 × 1<br>uno por átomo</div></div>
+<div class="nota" style="margin-left:22px;">B y C dan 0: ya están escogidos.<br><br>Gana <b class='nar'>A</b>, porque<br>|0.16| > |−0.12|<br><span class="math inline">S = \{B, C, A\}</span></div></div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Pesos de los tres: ecuaciones normales</div>
+<div class="fila" class="fila fragment" data-fragment-index="1">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 64px);"><div class="ch chl" style="grid-row:1;grid-column:2;">B</div><div class="ch chl" style="grid-row:1;grid-column:3;">C</div><div class="ch chl" style="grid-row:1;grid-column:4;">A</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hn" style="grid-row:2;grid-column:2;">0.6</div><div class="c hn" style="grid-row:2;grid-column:3;">0</div><div class="c hn" style="grid-row:2;grid-column:4;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hn" style="grid-row:3;grid-column:2;">0.8</div><div class="c hn" style="grid-row:3;grid-column:3;">0</div><div class="c hn" style="grid-row:3;grid-column:4;">0</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hn" style="grid-row:4;grid-column:2;">0</div><div class="c hn" style="grid-row:4;grid-column:3;">1</div><div class="c hn" style="grid-row:4;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D_S</span> · 3 × 3<br>átomos escogidos</div></div><div style="width:26px"></div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">B</div><div class="ch" style="grid-row:1;grid-column:3;">C</div><div class="ch" style="grid-row:1;grid-column:4;">A</div><div class="rh" style="grid-row:2;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0</div><div class="c hg" style="grid-row:2;grid-column:4;">0.6</div><div class="rh" style="grid-row:3;grid-column:1;">C</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">1</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="rh" style="grid-row:4;grid-column:1;">A</div><div class="c hg" style="grid-row:4;grid-column:2;">0.6</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D_S^{\mathsf T} D_S</span> · 3 × 3<br>productos punto entre átomos</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">w</div><div class="rh" style="grid-row:2;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:2;">w<sub>B</sub></div><div class="rh" style="grid-row:3;grid-column:1;">C</div><div class="c" style="grid-row:3;grid-column:2;">w<sub>C</sub></div><div class="rh" style="grid-row:4;grid-column:1;">A</div><div class="c" style="grid-row:4;grid-column:2;">w<sub>A</sub></div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc">3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;"></div><div class="rh" style="grid-row:2;grid-column:1;">B·x</div><div class="c" style="grid-row:2;grid-column:2;">1.4</div><div class="rh" style="grid-row:3;grid-column:1;">C·x</div><div class="c" style="grid-row:3;grid-column:2;">0.5</div><div class="rh" style="grid-row:4;grid-column:1;">A·x</div><div class="c" style="grid-row:4;grid-column:2;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D_S^{\mathsf T} x</span> · 3 × 1</div></div>
+<div class="nota" style="margin-left:22px;"><span class="math inline">A \cdot B = 0.6 \neq 0</span><br><b>A y B no son<br>perpendiculares</b>:<br>ya no basta un producto<br>punto por peso, hay que<br>resolver el sistema.</div></div>
+</div>
+```
+
+::: {.notes}
+Vuelta 3. B y C dan cero porque ya están escogidos. Entre A y E gana A,
+porque 0.16 es mayor en valor absoluto que -0.12.
+
+Ahora hay tres átomos escogidos: B, C y A. Se arma otra vez el sistema
+con las ecuaciones normales. La matriz de la izquierda tiene en cada
+casilla el producto punto entre dos átomos escogidos. En la diagonal hay
+unos, porque cada átomo mide 1.
+
+Lo importante son los dos 0.6 en naranja: A punto B vale 0.6, no cero. A
+y B no son perpendiculares, se pisan: los dos aportan en la primera
+muestra. Por eso la matriz ya no es la identidad, y los pesos no se
+pueden sacar con un producto punto cada uno. Hay que resolver el
+sistema, que es lo que vemos en la siguiente.
+:::
+
+## Ventana 1, vuelta 3: resolver {#omp-juguete-v1-4}
+
+```{=html}
+<div class="omp-j">
+<div class="abajo" style="margin-top:6px;align-items:flex-start;">
+<div style="width:520px;">
+<div class="paso"><span class="num">2</span>Resolver el sistema (continuación)</div>
+<p class="nota">El sistema de la diapositiva anterior, renglón por
+renglón (renglones B, C y A):</p>
+<div class="sistema">
+<span class="math inline">w_B + 0.6\,w_A = 1.4</span> <span class="eq">(1)</span><br>
+<span class="math inline">w_C = 0.5</span> <span class="eq">(2)</span><br>
+<span class="math inline">0.6\,w_B + w_A = 1</span> <span class="eq">(3)</span>
+</div>
+<div class="fragment sistema" data-fragment-index="1">
+De (3): <span class="math inline">w_A = 1 - 0.6\,w_B</span>. Sustituyendo en (1):<br>
+<span class="math inline">w_B + 0.6\,(1 - 0.6\,w_B) = 1.4</span><br>
+<span class="math inline">w_B + 0.6 - 0.36\,w_B = 1.4</span><br>
+<span class="math inline">0.64\,w_B = 0.8 \;\Rightarrow\; w_B = 1.25</span><br>
+<span class="math inline">w_A = 1 - 0.6(1.25) = 0.25</span>
+</div>
+<div class="fragment" data-fragment-index="3">
+<table class="resumen">
+<tr><th>Vuelta</th><th>Gana</th><th>Pesos</th><th>Error</th></tr>
+<tr><td>1</td><td>B</td><td>B = 1.4</td><td>0.359</td></tr>
+<tr><td>2</td><td>C</td><td>B = 1.4, C = 0.5</td><td>0.133</td></tr>
+<tr><td>3</td><td>A</td><td>B = 1.25, C = 0.5, A = 0.25</td><td>0</td></tr>
+</table>
+</div>
+</div>
+<div class="fragment" data-fragment-index="2">
+<div class="paso"><span class="num">3</span>Residual y error</div>
+<div class="fila" style="margin-bottom:40px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">x</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(3, 64px);"><div class="ch chl" style="grid-row:1;grid-column:1;">B</div><div class="ch chl" style="grid-row:1;grid-column:2;">C</div><div class="ch chl" style="grid-row:1;grid-column:3;">A</div><div class="c hn" style="grid-row:2;grid-column:1;">0.6</div><div class="c hn" style="grid-row:2;grid-column:2;">0</div><div class="c hn" style="grid-row:2;grid-column:3;">1</div><div class="c hn" style="grid-row:3;grid-column:1;">0.8</div><div class="c hn" style="grid-row:3;grid-column:2;">0</div><div class="c hn" style="grid-row:3;grid-column:3;">0</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="c hn" style="grid-row:4;grid-column:2;">1</div><div class="c hn" style="grid-row:4;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 3;"></div></div><div class="mxc">D<sub>S</sub></div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">w</div><div class="rh" style="grid-row:2;grid-column:1;">B</div><div class="c hg" style="grid-row:2;grid-column:2;">1.25</div><div class="rh" style="grid-row:3;grid-column:1;">C</div><div class="c" style="grid-row:3;grid-column:2;">0.5</div><div class="rh" style="grid-row:4;grid-column:1;">A</div><div class="c" style="grid-row:4;grid-column:2;">0.25</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">r</div><div class="c ha" style="grid-row:2;grid-column:1;">0</div><div class="c ha" style="grid-row:3;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div></div>
+<p class="nota" style="margin:0 0 2px;"><span class="math inline">D_S\,w</span> es sumar cada
+átomo por su peso:</p>
+<div class="fila" style="margin-bottom:14px;">
+<div class="op">1.25 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:1;">0.6</div><div class="c" style="grid-row:3;grid-column:1;">0.8</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">+ 0.5 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">C</div><div class="c" style="grid-row:2;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">+ 0.25 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:1;">1</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">x</div><div class="c hb" style="grid-row:2;grid-column:1;">1</div><div class="c hb" style="grid-row:3;grid-column:1;">1</div><div class="c hb" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div></div>
+<div class="nota">Error <span class="math inline">= 0</span> → <b>para</b>. La ventana 1 sale exacta
+con 3 átomos.</div>
+
+<div class="nota" style="margin-top:14px;">
+<b class="nar">El peso de B cambió de 1.4 a 1.25:</b> ahora A le ayuda
+en la muestra 1 y B ya no carga con todo.</div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Resolver el sistema. Escrito como ecuaciones: la segunda ya da w_C igual
+a 0.5. De la tercera despejo w_A y lo sustituyo en la primera. Queda
+0.64 w_B igual a 0.8, o sea w_B igual a 1.25, y de regreso w_A igual a
+0.25.
+
+Comprobación: x menos D_S por w da cero. La ventana sale exacta con tres
+átomos y el error es cero, así que se detiene.
+
+Fíjense en el peso de B: empezó en 1.4 y ahora vale 1.25. En la vuelta 1
+B explicaba sola la primera muestra. Ahora A también aporta ahí, así que
+B ya no carga con todo. Eso es lo ortogonal de OMP: cada vuelta se
+reajustan todos los pesos. Si nos quedáramos con 1.4 y le sumáramos A con
+peso 1, la reconstrucción quedaría mal.
+
+La tabla resume las tres vueltas: cada vez entra un átomo y el error
+baja.
+:::
+
+## Ventana 2: basta un átomo {#omp-juguete-v2}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Ventana <span class="math inline">x = v_2 = (0.9,\, 1,\, 0)</span>, con
+<span class="math inline">\lVert x \rVert = \sqrt{0.81 + 1} = 1.345</span>. Al inicio <span class="math inline">r = x</span>.</p>
+<div class="paso"><span class="num">1</span>Comparar: <span class="math inline">D^{\mathsf T} r</span></div>
+<div class="fila" >
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh" style="grid-row:2;grid-column:1;">átomo A</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="rh chl" style="grid-row:3;grid-column:1;">átomo B</div><div class="c hn" style="grid-row:3;grid-column:2;">0.6</div><div class="c hn" style="grid-row:3;grid-column:3;">0.8</div><div class="c hn" style="grid-row:3;grid-column:4;">0</div><div class="rh" style="grid-row:4;grid-column:1;">átomo C</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c" style="grid-row:5;grid-column:2;">0</div><div class="c" style="grid-row:5;grid-column:3;">1</div><div class="c" style="grid-row:5;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T}</span> · 4 × 3<br>cada fila es un átomo</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 76px);"><div class="ch" style="grid-row:1;grid-column:2;">r</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c ha" style="grid-row:2;grid-column:2;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div><div class="mxc">r = x · 3 × 1</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 78px);"><div class="ch" style="grid-row:1;grid-column:2;">parecido</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:2;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hg" style="grid-row:3;grid-column:2;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c" style="grid-row:5;grid-column:2;">1</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 1;"></div></div><div class="mxc"><span class="math inline">D^{\mathsf T} r</span> · 4 × 1<br>uno por átomo</div></div>
+<div class="nota" style="margin-left:22px;"><span class="math inline">B \cdot r = 0.54 + 0.8 = 1.34</span><br><br>Gana <b class='nar'>B</b>: <span class="math inline">S = \{B\}</span></div></div>
+<div class="abajo">
+<div style="width:330px;">
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Peso</div>
+<div class="fragment nota" data-fragment-index="1">
+<span class="math inline">1 \cdot w_B = B \cdot x = 1.34</span><br><span class="math inline">w_B = 1.34</span></div>
+</div>
+<div>
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span>Residual y error</div>
+<div class="fila" class="fila fragment" data-fragment-index="2">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">x</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">1.34 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">B</div><div class="c hn" style="grid-row:2;grid-column:1;">0.6</div><div class="c hn" style="grid-row:3;grid-column:1;">0.8</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 88px);"><div class="ch" style="grid-row:1;grid-column:1;">r</div><div class="c ha" style="grid-row:2;grid-column:1;">0.096</div><div class="c ha" style="grid-row:3;grid-column:1;">−0.072</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="nota" style="margin-left:18px;"><span class="math inline">\lVert r \rVert = 0.12</span><br><span class="math inline">0.12 / 1.345 = 0.089 < 0.1</span><br><b>para</b> con un solo átomo.<br>No es exacta, pero ya<br>cumple el objetivo.</div></div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+La ventana 2 es (0.9, 1, 0). Mismo procedimiento.
+
+Comparar: otra vez gana B, con 1.34. Su peso es 1.34.
+
+Residual: le quito 1.34 veces B y queda (0.096, -0.072, 0). Mide 0.12,
+que dividido entre 1.345 da 0.089. Ya es menos del 10 por ciento, así
+que OMP se detiene con un solo átomo. No queda exacta, pero cumple el
+objetivo, y OMP no gasta átomos de más. Así se consigue la dispersión.
+:::
+
+## El resultado de OMP: la matriz α {#omp-juguete-alpha}
+
+```{=html}
+<div class="omp-j">
+<div class="abajo" style="margin-top:4px;align-items:center;">
+<div class="fila" style="margin-bottom:60px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 70px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">átomo A</div><div class="c hn" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">átomo B</div><div class="c hn" style="grid-row:3;grid-column:2;">1.25</div><div class="c hn" style="grid-row:3;grid-column:3;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">átomo C</div><div class="c hn" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> · 4 × 2<br>filas: átomos · columnas: ventanas</div></div></div>
+
+<div class="nota" style="font-size:21px;line-height:1.45;">
+<b>Por columna</b>: la receta de cada ventana.<br>
+<span class="math inline">v_1 = 0.25\,A + 1.25\,B + 0.5\,C</span> y <span class="math inline">v_2 \approx 1.34\,B</span><br><br>
+<b>Por fila</b>: qué ventanas usan cada átomo.<br>
+B lo usan las dos; E, ninguna. Esta lectura la usa el paso SVD.<br><br>
+Casi todo es <b>cero</b>: es una representación dispersa.
+</div>
+</div>
+<div class="fragment" data-fragment-index="1">
+<div class="paso"><span class="num">✓</span>Comprobar: <span class="math inline">D\,\alpha \approx X</span></div>
+<div class="fila" >
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch" style="grid-row:1;grid-column:3;">B</div><div class="ch" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.6</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> · 3 × 4</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hn" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">1.25</div><div class="c hn" style="grid-row:3;grid-column:3;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> · 4 × 2</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c ha" style="grid-row:2;grid-column:1;">1</div><div class="c" style="grid-row:2;grid-column:2;">0.804</div><div class="c ha" style="grid-row:3;grid-column:1;">1</div><div class="c" style="grid-row:3;grid-column:2;">1.072</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc"><b>Dα</b> · 3 × 2</div></div>
+<div class="op">≈</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c hb" style="grid-row:2;grid-column:1;">1</div><div class="c hb" style="grid-row:2;grid-column:2;">0.9</div><div class="c hb" style="grid-row:3;grid-column:1;">1</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="c hb" style="grid-row:4;grid-column:1;">0.5</div><div class="c hb" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc"><b>X</b> · 3 × 2</div></div>
+<div class="nota" style="margin-left:22px;">v₁ sale exacta.<br>A v₂ le falta<br>(0.096, −0.072, 0):<br>error 0.089 &lt; 0.1</div></div>
+</div>
+<p class="fragment linea" data-fragment-index="2" style="margin-top:58px;">
+OMP solo produce <b>α</b>: el diccionario <b>D</b> no cambió. Ahora,
+lo mismo con una ventana real del ECG.</p>
+</div>
+```
+
+::: {.notes}
+Juntando las dos recetas como columnas sale alfa: cuatro filas, una
+por átomo, y dos columnas, una por ventana.
+
+Se lee de dos maneras. Por columna es la receta: la ventana 1 es 0.25 de
+A más 1.25 de B más 0.5 de C; la ventana 2 es casi 1.34 de B. Por fila
+dice quién usa cada átomo: B lo usan las dos ventanas y E nadie. Esa
+lectura por fila es la que necesita el paso SVD para mejorar cada átomo.
+
+Comprobación: D por alfa reconstruye todas las ventanas en una sola
+multiplicación. Tres por cuatro, por cuatro por dos, da tres por dos, el
+tamaño de X. La ventana 1 sale exacta y la 2 casi.
+
+Lo importante: OMP solo produce alfa, el diccionario no se tocó. Ahora
+veamos lo mismo con una ventana real del ECG, de 128 muestras y con 256
+átomos.
 :::
 
 ## OMP en una ventana real {auto-animate=true}
