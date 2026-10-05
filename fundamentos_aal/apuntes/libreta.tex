@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.11.0
+%   * Version: 2.12.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       05/10/2026      Clase 5 Oct, Word2Vec, FastText y GloVe
 %  zxxz6       30/09/2026      Clase 30 Sep, semantica distribucional
 %  zxxz6       28/09/2026      Clase 28 Sep, SVD y el detalle de LSI
 %  zxxz6       25/09/2026      Clase 23 Sep, TCOR, random indexing y LSI
@@ -3676,6 +3677,1026 @@ embeddings, y los aprenden como efecto secundario de predecir.
     cientos de miles esto es muy lento, y buena parte de lo que
     después hizo Word2Vec fue esquivar ese cálculo.
 \end{ojo}
+
+
+\newpage
+% =====================================================================
+%  Clase 15 - Word2Vec, FastText y GloVe
+% =====================================================================
+
+\clase{Word2Vec, FastText y GloVe}{5 de octubre de 2026}
+
+\begin{quick_sum}
+    Continuación de los \textit{word embeddings}. Primero cómo se
+    entrena la red que los produce: con autosupervisión, usando el
+    texto mismo como etiqueta. Luego los métodos que hicieron práctico
+    el entrenamiento: Word2Vec con sus dos arquitecturas, CBOW y
+    skip-gram, y los dos atajos para no pagar el softmax completo,
+    negative sampling y softmax jerárquico. FastText agrega
+    subpalabras para cubrir palabras que nunca vio, y GloVe cambia la
+    predicción por un ajuste directo a la matriz de coocurrencias. Se
+    cerró con las propiedades semánticas de los vectores y con su
+    límite: un solo vector por palabra no distingue sentidos.
+\end{quick_sum}
+
+\subsection*{Cómo se entrena la red de embeddings}
+
+La clase pasada terminó con el modelo de lenguaje neuronal: tres
+palabras entran como one-hot, pasan por $E$, por una capa oculta y por
+un softmax que da la probabilidad de cada palabra siguiente. Faltaba
+decir cómo se ajustan sus pesos y de dónde salen los datos para
+ajustarlos.
+
+\subsubsection*{Autosupervisión}
+
+\begin{definicion}[Aprendizaje autosupervisado]
+    Un modelo es autosupervisado (\textit{self-supervised}) cuando las
+    etiquetas con las que se entrena salen de los propios datos, sin
+    que nadie las anote. Se esconde una parte de la entrada y se le
+    pide al modelo que la recupere a partir del resto.
+\end{definicion}
+
+En el modelo de lenguaje la parte escondida es la siguiente palabra.
+Se toma un corpus y se recorre con una ventana: las palabras de la
+ventana son la entrada y la que sigue es la respuesta correcta. No
+hace falta ninguna etiqueta especial (\textit{gold label}), solo la
+secuencia natural de las palabras.
+
+\begin{ejemplo}[Ejemplos de entrenamiento a partir de una frase]
+    Con $N = 4$, la red ve tres palabras y predice la cuarta. La frase
+    \textit{``and thanks for all the fish''} da tres ejemplos:
+    \begin{center}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Entrada} & \textbf{Respuesta} \\
+        \midrule
+        \textit{and thanks for} & \textit{all}  \\
+        \textit{thanks for all} & \textit{the}  \\
+        \textit{for all the}    & \textit{fish} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La ventana avanza una palabra a la vez. Un corpus de mil millones
+    de palabras da casi mil millones de ejemplos etiquetados gratis.
+\end{ejemplo}
+
+\begin{idea}
+    Esto es lo que hace posibles los embeddings. Un clasificador
+    normal necesita que alguien etiquete cada ejemplo, y eso limita los
+    datos a miles o millones. El texto se etiqueta solo, así que el
+    límite es cuánto texto hay.
+\end{idea}
+
+\subsubsection*{La pérdida y el ajuste}
+
+Para cada ejemplo la red devuelve $\hat{y}$, una probabilidad por
+palabra del vocabulario. La pérdida mide qué probabilidad le dio a la
+palabra que de verdad seguía. Es la entropía cruzada, que con una sola
+respuesta correcta se reduce a
+\[
+    L = -\log \hat{y}_{\text{correcta}} .
+\]
+Si la red le dio probabilidad $1$, la pérdida es $0$; si le dio casi
+$0$, la pérdida se dispara.
+
+\begin{ejemplo}[Pérdida con el softmax de la clase pasada]
+    Con el vocabulario \textit{day}, \textit{fish}, \textit{zebra} la
+    red dio $\hat{y} = (0.659,\ 0.242,\ 0.099)$. Si la palabra que
+    seguía era \textit{fish}:
+    \[
+        L = -\ln 0.242 = 1.42 .
+    \]
+    Si hubiera sido \textit{day}, $L = -\ln 0.659 = 0.42$: la red ya
+    apostaba por ella y se equivocó poco.
+
+    El gradiente de la pérdida respecto a los puntajes $z$ tiene una
+    forma muy limpia, $\hat{y} - y$, donde $y$ es el one-hot de la
+    respuesta:
+    \[
+        \hat{y} - y = (0.659,\ 0.242 - 1,\ 0.099)
+                    = (0.659,\ -0.758,\ 0.099) .
+    \]
+    El descenso de gradiente resta este vector: sube el puntaje de
+    \textit{fish}, la única componente negativa, y baja el de las
+    demás, cada una en proporción a la probabilidad que se llevó sin
+    merecerla.
+\end{ejemplo}
+
+Ese gradiente se propaga hacia atrás por $U$ y por $W$ hasta llegar a
+$E$. En $E$ solo cambian tres columnas, las de \textit{for},
+\textit{all} y \textit{the}, porque son las únicas que participaron en
+este ejemplo. Se repite con cada posición del corpus, varias pasadas,
+y al final $E$ contiene los embeddings.
+
+\begin{ojo}
+    Nadie le dice a la red cómo debe quedar $E$. Solo se le pide
+    predecir bien, y predecir bien obliga a darles vectores parecidos
+    a las palabras que se usan parecido. Es la hipótesis distribucional
+    de la clase pasada, impuesta por la pérdida.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Word2Vec}
+
+Cuando se empezó a trabajar con embeddings se propusieron varios
+algoritmos. El más influyente fue Word2Vec (Mikolov et al., 2013). Su
+idea, en la diapositiva $33$:
+
+\begin{itemize}[itemsep=0.3em]
+    \item Entrenar un clasificador sobre una tarea de predicción
+          binaria: ¿es probable que la palabra $w_t$ aparezca cerca de
+          otra palabra $w_c$?
+    \item Aprender vectores que sirvan para predecir contextos.
+    \item Los pesos que aprende el clasificador \textbf{son} los
+          embeddings.
+\end{itemize}
+
+La tarea siempre es generar una representación de las palabras; la
+predicción es un pretexto para obtener los pesos. Comparado con el
+modelo de lenguaje neuronal, Word2Vec quita todo lo que no ayuda a los
+vectores y se queda con un modelo mucho más barato, y eso le permitió
+entrenar con miles de millones de palabras.
+
+\begin{definicion}[Embeddings estáticos]
+    Word2Vec aprende \textbf{un solo embedding fijo para cada palabra}
+    del vocabulario. El vector de \textit{banco} es el mismo en
+    \textit{``me senté en el banco''} y en \textit{``abrí una cuenta
+    en el banco''}.
+\end{definicion}
+
+Tiene dos arquitecturas, que son la misma idea al revés:
+\textbf{continuous bag-of-words} (CBOW) y \textbf{skip-gram}.
+
+\subsubsection*{Continuous bag-of-words (CBOW)}
+
+Predice la palabra central a partir de las que la rodean. Se parece al
+modelo de lenguaje neuronal, con tres cambios:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{El contexto va a los dos lados.} No solo ve las
+          palabras anteriores, también las siguientes: $C$ a la
+          izquierda y $C$ a la derecha de la palabra objetivo.
+    \item \textbf{Se quita la capa oculta no lineal.} Ya no hay $W$ ni
+          $\sigma$.
+    \item \textbf{La proyección es compartida y se promedia.} Los
+          embeddings del contexto no se concatenan; se promedian en un
+          solo vector.
+\end{enumerate}
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Entrada:} las palabras del contexto de $w_t$,
+          definido por una ventana de tamaño $C$.
+    \item \textbf{Salida:} una sola palabra, $w_t$.
+\end{itemize}
+
+En fórmulas, con $v_w$ el embedding de $w$ (su columna de $E$):
+\[
+    h = \frac{1}{2C} \sum_{\substack{-C \le j \le C \\ j \ne 0}}
+        v_{w_{t+j}} ,
+    \qquad
+    P(w_t \mid w_{t-C}, \ldots, w_{t-1}, w_{t+1}, \ldots, w_{t+C})
+    = \operatorname{softmax}(U h)_{w_t} .
+\]
+
+\begin{ojo}
+    Como se promedia, el orden de las palabras del contexto no influye
+    en la proyección: \textit{``el perro muerde''} y \textit{``muerde
+    el perro''} dan el mismo $h$. De ahí el nombre, la misma bolsa de
+    palabras de las primeras clases de IR. Lo de \textit{continuous} es
+    porque la bolsa es de vectores densos y no de conteos.
+\end{ojo}
+
+\subsubsection*{Skip-gram}
+
+Es al revés: dada la palabra central, predice las que la rodean.
+
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Entrada:} una sola palabra, $w_t$.
+    \item \textbf{Salida:} las palabras del contexto de $w_t$, definido
+          por una ventana de tamaño $C$.
+\end{itemize}
+
+La palabra actual entra a un clasificador log-lineal con una capa de
+proyección, y se predicen las palabras que caen en cierto rango antes
+y después de ella. Log-lineal quiere decir que, sin capa oculta, el
+logaritmo de la probabilidad es lineal en los vectores:
+\[
+    h = v_{w_t} ,
+    \qquad
+    P(w_{t+j} \mid w_t) = \operatorname{softmax}(U h)_{w_{t+j}}
+    \quad \text{para } -C \le j \le C,\ j \ne 0 .
+\]
+Cada posición del contexto es un ejemplo aparte, y el entrenamiento
+maximiza la suma de $\log P(w_{t+j} \mid w_t)$ sobre todas las
+posiciones del corpus y todos los $j$ de la ventana.
+
+\subsubsection*{CBOW contra skip-gram}
+
+\begin{ejemplo}[\textit{``This is a visual comparison''}]
+    Con \textit{visual} como palabra objetivo y una ventana que alcanza
+    toda la frase:
+    \begin{center}
+    \begin{tikzpicture}[
+        pal/.style={draw, rounded corners=2pt, minimum width=1.9cm,
+                    minimum height=0.55cm, font=\small},
+        obj/.style={pal, fill=fondoOjo},
+        proy/.style={pal, fill=fondoIdea, minimum width=1.5cm},
+        >=stealth, scale=0.9, every node/.append style={scale=0.9}]
+        \node[font=\small\bfseries] at (2.6, 2.2) {CBOW};
+        \node[proy] (prom) at (2.9, 0) {promedio};
+        \node[obj] (vis1) at (5.2, 0) {\textit{visual}};
+        \foreach \p/\y in {this/1.35, is/0.45, a/-0.45,
+                           comparison/-1.35} {
+            \node[pal] (c-\p) at (0, \y) {\textit{\p}};
+            \draw[->] (c-\p.east) -- (prom.west);
+        }
+        \draw[->] (prom) -- (vis1);
+        \node[font=\small\bfseries] at (10, 2.2) {Skip-gram};
+        \node[obj] (vis2) at (7.6, 0) {\textit{visual}};
+        \node[proy] (proy) at (9.9, 0) {$v_{w_t}$};
+        \draw[->] (vis2) -- (proy);
+        \foreach \p/\y in {this/1.35, is/0.45, a/-0.45,
+                           comparison/-1.35} {
+            \node[pal] (s-\p) at (12.4, \y) {\textit{\p}};
+            \draw[->] (proy.east) -- (s-\p.west);
+        }
+    \end{tikzpicture}
+    \end{center}
+    CBOW junta las cuatro palabras del contexto en un solo vector y
+    hace \textbf{una} predicción: \textit{visual}. Skip-gram parte de
+    \textit{visual} y hace \textbf{cuatro} predicciones, una por cada
+    palabra del contexto, o sea cuatro pares de entrenamiento:
+    (\textit{visual}, \textit{this}), (\textit{visual}, \textit{is}),
+    (\textit{visual}, \textit{a}) y (\textit{visual},
+    \textit{comparison}).
+\end{ejemplo}
+
+\begin{center}
+\begin{tabular}{lcc}
+    \toprule
+    & \textbf{CBOW} & \textbf{Skip-gram} \\
+    \midrule
+    Predice & la palabra central & el contexto \\
+    Ejemplos por posición & $1$ & $2C$ \\
+    Velocidad & más rápido & más lento \\
+    Palabras raras & se diluyen en el promedio & salen mejor \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La última fila es consecuencia de la segunda. En CBOW una palabra rara
+es una de $2C$ que se promedian, y su señal se pierde. En skip-gram
+cada aparición de la palabra rara genera $2C$ ejemplos donde ella es
+la entrada, así que su vector se ajusta más veces.
+
+% =====================================================================
+
+\subsection*{Negative sampling}
+
+Skip-gram tal cual hereda el problema con el que cerró la clase
+pasada. Cada paso de entrenamiento tiene tres partes
+(diapositiva $41$):
+
+\begin{enumerate}[itemsep=0.2em]
+    \item Buscar el embedding de la palabra de entrada.
+    \item Calcular la predicción.
+    \item Proyectar al vocabulario de salida: un puntaje y una
+          exponencial por \textbf{cada} palabra, para el denominador
+          del softmax.
+\end{enumerate}
+
+El tercer paso es el caro. Con $\abs{V} = 100\,000$ son cien mil
+productos punto por cada par de entrenamiento, y un corpus grande
+tiene miles de millones de pares.
+
+La salida de Mikolov et al.\ fue cambiar la tarea. En lugar de
+preguntar \textit{``¿cuál de las $\abs{V}$ palabras es la vecina?''},
+se pregunta \textit{``¿son vecinas estas dos palabras, sí o no?''}. Es
+la tarea binaria de la diapositiva $33$. Para entrenarla hacen falta
+ejemplos de las dos clases:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Positivos}, con etiqueta $1$: los pares de skip-gram
+          de siempre, la palabra y uno de sus vecinos reales.
+    \item \textbf{Negativos}, con etiqueta $0$: la palabra y otra
+          sacada al azar del vocabulario, que casi seguro no es su
+          vecina.
+\end{itemize}
+
+Por cada positivo se sacan $k$ negativos. De ahí el nombre: muestreo
+de negativos.
+
+\begin{ejemplo}[Los datos de entrenamiento]
+    Frase: \textit{``thou shalt not make a machine''}, palabra de
+    entrada \textit{make} y ventana de $\pm 2$.
+
+    \textbf{Skip-gram} genera cuatro pares, todos positivos:
+    \begin{center}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Entrada} & \textbf{Salida} \\
+        \midrule
+        \textit{make} & \textit{shalt} \\
+        \textit{make} & \textit{not} \\
+        \textit{make} & \textit{a} \\
+        \textit{make} & \textit{machine} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \textbf{Negative sampling} toma cada par positivo y le agrega $k$
+    negativos al azar. Con $k = 2$, el par (\textit{make},
+    \textit{shalt}) queda así:
+    \begin{center}
+    \begin{tabular}{llc}
+        \toprule
+        \textbf{Palabra} & \textbf{Otra palabra} & \textbf{Etiqueta} \\
+        \midrule
+        \textit{make} & \textit{shalt} & $1$ \\
+        \textit{make} & \textit{aaron} & $0$ \\
+        \textit{make} & \textit{taco}  & $0$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \textit{aaron} y \textit{taco} no aparecen en la frase; salieron
+    del vocabulario al azar.
+\end{ejemplo}
+
+\subsubsection*{El clasificador}
+
+Cada palabra tiene ahora \textbf{dos} vectores: $w$ cuando es la
+palabra de entrada y $c$ cuando es la otra palabra del par. Viven en
+dos matrices, la de embeddings y la de contexto. La probabilidad de
+que el par sea real sale del producto punto y la sigmoide:
+\[
+    P(+ \mid w, c) = \sigma(c \cdot w) = \frac{1}{1 + e^{-c \cdot w}} ,
+    \qquad
+    P(- \mid w, c) = 1 - \sigma(c \cdot w) = \sigma(-c \cdot w) .
+\]
+Producto punto alto quiere decir vectores parecidos, y entonces
+probabilidad alta de ser vecinas. Para un positivo $c_{+}$ y sus $k$
+negativos $c_{1}, \ldots, c_{k}$, la pérdida es
+\[
+    L = -\log \sigma(c_{+} \cdot w)
+        - \sum_{i=1}^{k} \log \sigma(-c_{i} \cdot w) .
+\]
+Pide que el positivo tenga probabilidad alta de ser real y que cada
+negativo tenga probabilidad alta de no serlo.
+
+\begin{ejemplo}[Un paso de entrenamiento con vectores de dos
+                componentes]
+    Sean
+    \[
+        w_{\textit{make}} = (1,\ 0.5) , \quad
+        c_{\textit{shalt}} = (0.8,\ 0.6) , \quad
+        c_{\textit{aaron}} = (0.2,\ -0.4) , \quad
+        c_{\textit{taco}} = (0.6,\ 0.4) .
+    \]
+
+    \textbf{Probabilidades.}
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Par} & $c \cdot w$ & $\sigma(c \cdot w)$
+            & \textbf{Debería ser} \\
+        \midrule
+        \textit{make}, \textit{shalt} & $0.8 + 0.3 = 1.1$
+            & $0.750$ & cerca de $1$ \\
+        \textit{make}, \textit{aaron} & $0.2 - 0.2 = 0$
+            & $0.500$ & cerca de $0$ \\
+        \textit{make}, \textit{taco}  & $0.6 + 0.2 = 0.8$
+            & $0.690$ & cerca de $0$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    El modelo cree que \textit{taco} es vecino de \textit{make} con
+    probabilidad $0.69$. Es el error más grande.
+
+    \textbf{Pérdida.}
+    \[
+        L = -\ln 0.750 - \ln (1 - 0.500) - \ln (1 - 0.690)
+          = 0.287 + 0.693 + 1.171 = 2.152 .
+    \]
+
+    \textbf{Gradientes.} Derivando $L$:
+    \[
+        \frac{\partial L}{\partial c_{+}}
+            = \big(\sigma(c_{+} \cdot w) - 1\big)\, w ,
+        \qquad
+        \frac{\partial L}{\partial c_{i}}
+            = \sigma(c_{i} \cdot w)\, w ,
+    \]
+    \[
+        \frac{\partial L}{\partial w}
+            = \big(\sigma(c_{+} \cdot w) - 1\big)\, c_{+}
+            + \sum_{i=1}^{k} \sigma(c_{i} \cdot w)\, c_{i} .
+    \]
+    Los coeficientes son $0.750 - 1 = -0.25$ para \textit{shalt},
+    $0.5$ para \textit{aaron} y $0.69$ para \textit{taco}.
+
+    \textbf{Actualización} con tasa de aprendizaje $\eta = 1$, restando
+    el gradiente:
+    \begin{align*}
+        c_{\textit{shalt}} &\leftarrow (0.8,\ 0.6) + 0.25\,(1,\ 0.5)
+            = (1.05,\ 0.725) , \\
+        c_{\textit{aaron}} &\leftarrow (0.2,\ -0.4) - 0.5\,(1,\ 0.5)
+            = (-0.3,\ -0.65) , \\
+        c_{\textit{taco}} &\leftarrow (0.6,\ 0.4) - 0.69\,(1,\ 0.5)
+            = (-0.09,\ 0.055) , \\
+        w_{\textit{make}} &\leftarrow (1,\ 0.5)
+            - \big[ -0.25\,(0.8,\ 0.6) + 0.5\,(0.2,\ -0.4)
+                    + 0.69\,(0.6,\ 0.4) \big] \\
+            &= (1,\ 0.5) - (0.314,\ -0.074) = (0.686,\ 0.574) .
+    \end{align*}
+
+    \textbf{Después del paso.}
+    \begin{center}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Par} & \textbf{Antes} & \textbf{Después} \\
+        \midrule
+        \textit{make}, \textit{shalt} & $0.750$ & $0.757$ \\
+        \textit{make}, \textit{aaron} & $0.500$ & $0.359$ \\
+        \textit{make}, \textit{taco}  & $0.690$ & $0.492$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La pérdida baja de $2.152$ a $1.402$. El vecino real se acercó un
+    poco a \textit{make} y los dos falsos se alejaron bastante, que es
+    donde estaba el error. Todo con tres productos punto, sin tocar el
+    resto del vocabulario.
+\end{ejemplo}
+
+\begin{idea}
+    El costo por par pasa de $\abs{V}$ productos punto a $k + 1$. Con
+    $\abs{V} = 100\,000$ y $k = 5$, de cien mil a seis. Los valores
+    usuales son $k$ entre $5$ y $20$ con pocos datos, y entre $2$ y
+    $5$ con corpus grandes.
+\end{idea}
+
+Los negativos no se sacan con la frecuencia tal cual. Si así fuera,
+casi todos serían \textit{the}, \textit{of} y \textit{a}. Se usa la
+frecuencia elevada a $0.75$, que les quita peso a las palabras muy
+frecuentes y se lo da a las raras:
+\[
+    P_{0.75}(w) = \frac{\operatorname{count}(w)^{0.75}}
+                       {\sum_{u} \operatorname{count}(u)^{0.75}} .
+\]
+
+\begin{ejemplo}
+    Con dos palabras de probabilidad $0.99$ y $0.01$:
+    \[
+        0.99^{0.75} = 0.992 , \qquad 0.01^{0.75} = 0.032 ,
+    \]
+    \[
+        P_{0.75} = \left( \frac{0.992}{1.024},\ \frac{0.032}{1.024}
+                   \right) = (0.969,\ 0.031) .
+    \]
+    La rara pasa de salir $1$ de cada $100$ veces a $3$ de cada $100$.
+\end{ejemplo}
+
+Al terminar quedan dos matrices. Lo común es quedarse con la de
+embeddings y tirar la de contexto, o sumar los dos vectores de cada
+palabra.
+
+% =====================================================================
+
+\subsection*{Softmax jerárquico}
+
+La otra forma de esquivar el costo conserva el softmax, pero lo
+calcula de otra manera. CBOW y skip-gram estándar usan una capa
+softmax en la salida, y es muy cara: para calcular y normalizar cada
+probabilidad hace falta el puntaje de todas las demás palabras del
+vocabulario, en cada contexto y en cada paso de entrenamiento.
+
+El softmax jerárquico pone las palabras en las hojas de un árbol
+binario. Cada nodo interno tiene su propio vector $n$, y en cada nodo
+se decide ir a la izquierda con probabilidad $\sigma(n \cdot h)$ o a
+la derecha con $1 - \sigma(n \cdot h)$. La probabilidad de una palabra
+es el producto de las decisiones en el camino de la raíz a su hoja.
+
+\begin{ejemplo}[Cuatro palabras]
+    Un vocabulario de cuatro palabras y su árbol, con la probabilidad
+    de tomar cada rama:
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.25cm,
+        level 1/.style={sibling distance=4.2cm},
+        level 2/.style={sibling distance=2.1cm},
+        nodo/.style={draw, circle, inner sep=1.5pt, font=\small,
+                     fill=fondoIdea},
+        hoja/.style={font=\small\itshape},
+        etq/.style={font=\scriptsize, fill=white, inner sep=1pt,
+                    text=black},
+        edge from parent/.style={draw, gray}]
+        \node[nodo] {$n_1$}
+            child {node[nodo] {$n_2$}
+                child {node[hoja] {day}
+                       edge from parent node[etq] {$0.8$}}
+                child {node[hoja] {fish}
+                       edge from parent node[etq] {$0.2$}}
+                edge from parent node[etq] {$0.7$}}
+            child {node[nodo] {$n_3$}
+                child {node[hoja] {zebra}
+                       edge from parent node[etq] {$0.4$}}
+                child {node[hoja] {cat}
+                       edge from parent node[etq] {$0.6$}}
+                edge from parent node[etq] {$0.3$}};
+    \end{tikzpicture}
+    \end{center}
+    Con $\sigma(n_1 \cdot h) = 0.7$, $\sigma(n_2 \cdot h) = 0.8$ y
+    $\sigma(n_3 \cdot h) = 0.4$:
+    \begin{align*}
+        P(\textit{day})   &= 0.7 \cdot 0.8 = 0.56 , &
+        P(\textit{fish})  &= 0.7 \cdot 0.2 = 0.14 , \\
+        P(\textit{zebra}) &= 0.3 \cdot 0.4 = 0.12 , &
+        P(\textit{cat})   &= 0.3 \cdot 0.6 = 0.18 .
+    \end{align*}
+    Suman $1$ sin dividir entre nada: en cada nodo las dos ramas suman
+    $1$, así que la probabilidad se reparte entera hasta las hojas.
+    Para la de \textit{fish} se calcularon dos sigmoides, no cuatro
+    exponenciales.
+\end{ejemplo}
+
+\begin{idea}
+    El camino a cualquier hoja mide unos $\log_2 \abs{V}$ nodos. Con un
+    millón de palabras son $20$ sigmoides en lugar de un millón de
+    exponenciales. Word2Vec usa un árbol de Huffman, el de compresión:
+    las palabras frecuentes quedan cerca de la raíz con caminos cortos,
+    y como son las que más se entrenan, el promedio baja todavía más.
+\end{idea}
+
+\begin{ojo}
+    Los dos atajos persiguen lo mismo por caminos distintos. El
+    softmax jerárquico sigue dando una distribución completa sobre el
+    vocabulario. Negative sampling ya no: cambia la pregunta por una
+    binaria y no le importa que el modelo deje de ser un modelo de
+    lenguaje, porque lo único que se quería eran los vectores.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{FastText}
+
+Word2Vec deja dos problemas abiertos (diapositiva $47$):
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Palabras fuera del vocabulario} (\textit{OOV}). Si
+          en el entrenamiento aparecieron \textit{tensor} y
+          \textit{flow}, hay vector para cada una, pero si después
+          llega \textit{tensorflow} no hay nada. La palabra no existe
+          para el modelo.
+    \item \textbf{Morfología.} \textit{eat}, \textit{eats},
+          \textit{eaten}, \textit{eater} y \textit{eating} son cinco
+          palabras distintas con cinco vectores independientes. Que
+          compartan raíz no le sirve de nada al modelo: cada una se
+          aprende por su cuenta, y las formas raras se aprenden mal.
+\end{itemize}
+
+El segundo pesa más en español que en inglés. Un verbo regular tiene
+decenas de formas conjugadas, y muchas aparecen muy pocas veces en
+cualquier corpus.
+
+FastText (Bojanowski, Grave, Joulin y Mikolov, 2017) los resuelve
+entrenando por debajo de la palabra. Es una extensión de skip-gram que
+toma en cuenta información de subpalabras.
+
+\subsubsection*{Generación de subpalabras}
+
+Se usa una ventana, pero de caracteres. La palabra se encierra entre
+\texttt{<} y \texttt{>} para marcar dónde empieza y dónde termina, y
+se parte en todos sus n-gramas de caracteres.
+
+\begin{ejemplo}[Los n-gramas de \textit{eating}]
+    Con los marcadores la palabra queda \texttt{<eating>}.
+    \begin{center}
+    \begin{tabular}{cl}
+        \toprule
+        $n$ & \textbf{N-gramas de caracteres} \\
+        \midrule
+        $3$ & \texttt{<ea, eat, ati, tin, ing, ng>} \\
+        $4$ & \texttt{<eat, eati, atin, ting, ing>} \\
+        $5$ & \texttt{<eati, eatin, ating, ting>} \\
+        $6$ & \texttt{<eatin, eating, ating>} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Los marcadores distinguen posiciones: \texttt{<ea} es \textit{ea}
+    al principio de la palabra y \texttt{ng>} es \textit{ng} al final.
+    Sin ellos, el \texttt{her} de \textit{where} sería el mismo
+    n-grama que la palabra \textit{her}, que con marcadores es
+    \texttt{<her>}.
+\end{ejemplo}
+
+Cada n-grama tiene su propio vector, y la palabra se representa como
+la \textbf{suma} de los vectores de sus n-gramas, más uno para la
+palabra completa \texttt{<eating>}. En la práctica se usan todos los
+n-gramas con $n$ de $3$ a $6$. Lo demás es skip-gram con negative
+sampling, con esa suma en el lugar donde antes estaba $v_{w_t}$.
+
+\begin{ejemplo}[Una palabra que nunca vio]
+    Con $n = 3$:
+    \begin{center}
+    \small
+    \begin{tabular}{ll}
+        \toprule
+        \textit{tensor}     & \texttt{<te, ten, ens, nso, sor, or>} \\
+        \textit{flow}       & \texttt{<fl, flo, low, ow>} \\
+        \textit{tensorflow} & \texttt{<te, ten, ens, nso, sor, orf,
+                                      rfl, flo, low, ow>} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    De los $10$ n-gramas de \textit{tensorflow}, $8$ ya tienen vector
+    porque salieron en \textit{tensor} o en \textit{flow}; solo
+    \texttt{orf} y \texttt{rfl} no están en esas dos palabras. Sumando
+    lo que hay, la palabra nueva recibe un vector que cae entre los de
+    sus dos partes, sin haberla visto nunca.
+\end{ejemplo}
+
+Con la morfología pasa lo mismo: \textit{eats}, \textit{eaten} y
+\textit{eating} comparten \texttt{<ea} y \texttt{eat}, así que sus
+vectores tienen una parte en común y lo que se aprende de una ayuda a
+las otras.
+
+\begin{ojo}
+    El precio es que se multiplican las operaciones. Cada palabra ya
+    no es un vector sino la suma de diez o veinte, y hay muchos más
+    vectores que entrenar, porque los n-gramas distintos de un corpus
+    son millones. Para que la memoria no crezca sin límite, FastText no
+    guarda un vector por n-grama: los reparte con una función hash en
+    un número fijo de cubetas, unos dos millones, y dos n-gramas pueden
+    terminar compartiendo vector. A cambio, puede generar vectores para
+    cualquier palabra.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{GloVe}
+
+GloVe, de \textbf{Glo}bal \textbf{Ve}ctors (Pennington, Socher y
+Manning, 2014), regresa a contar. Está basado en las coocurrencias de
+palabras en un corpus y no en una red neuronal: es la matriz
+término-término de la clase pasada, con una ventana, contada una sola
+vez sobre todo el corpus. La diapositiva $50$ usa justo la tabla de
+\textit{cherry}, \textit{strawberry}, \textit{digital} e
+\textit{information}.
+
+La diferencia con Word2Vec está en qué ve el modelo. Skip-gram recorre
+el corpus ventana por ventana, y cada paso ve un solo contexto local.
+GloVe ve las estadísticas \textbf{globales}: cuántas veces coocurrió
+cada par en todo el corpus.
+
+\subsubsection*{El significado está en las razones}
+
+La idea de partida es que las probabilidades de coocurrencia pueden
+codificar algo de significado, pero no por sí solas, sino comparadas.
+Sea $X_{ij}$ el número de veces que $j$ aparece en el contexto de $i$,
+y $P(j \mid i) = X_{ij} / \sum_k X_{ik}$.
+
+\begin{ejemplo}[\textit{ice} contra \textit{steam}]
+    Del artículo original, sobre un corpus de $6\,000$ millones de
+    palabras:
+    \begin{center}
+    \begin{tabular}{lcccc}
+        \toprule
+        $k$ & \textit{solid} & \textit{gas} & \textit{water}
+            & \textit{fashion} \\
+        \midrule
+        $P(k \mid \textit{ice})$   & $1.9 \times 10^{-4}$
+            & $6.6 \times 10^{-5}$ & $3.0 \times 10^{-3}$
+            & $1.7 \times 10^{-5}$ \\
+        $P(k \mid \textit{steam})$ & $2.2 \times 10^{-5}$
+            & $7.8 \times 10^{-4}$ & $2.2 \times 10^{-3}$
+            & $1.8 \times 10^{-5}$ \\
+        \midrule
+        Razón & $8.9$ & $0.085$ & $1.36$ & $0.96$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Las probabilidades sueltas son todas chiquitas y difíciles de
+    leer. La razón sí dice algo: \textit{solid} va con \textit{ice} y
+    no con \textit{steam}, razón grande; \textit{gas} al revés, razón
+    chica; \textit{water} va con las dos y \textit{fashion} con
+    ninguna, y las dos dan cerca de $1$. Las razones del artículo salen
+    de los conteos sin redondear; por eso $1.9 / 0.22$ no da
+    exactamente $8.9$.
+\end{ejemplo}
+
+\subsubsection*{El modelo}
+
+GloVe busca vectores cuyo producto punto reproduzca el logaritmo del
+conteo:
+\[
+    w_i \cdot \tilde{w}_j + b_i + \tilde{b}_j \approx \log X_{ij} .
+\]
+$w_i$ es el vector de la palabra $i$, $\tilde{w}_j$ el de $j$ como
+contexto, y $b_i$, $\tilde{b}_j$ son sesgos que absorben qué tan
+frecuente es cada palabra. Con el logaritmo, una razón de
+probabilidades se vuelve una resta, y la resta de productos punto es
+el producto punto con la resta de vectores:
+\[
+    \log \frac{P(k \mid \textit{ice})}{P(k \mid \textit{steam})}
+    \approx (w_{\textit{ice}} - w_{\textit{steam}}) \cdot \tilde{w}_k
+    + \text{términos que no dependen de } k .
+\]
+Así, la diferencia entre los vectores de \textit{ice} y
+\textit{steam} queda apuntando en la dirección que separa lo sólido de
+lo gaseoso. Por eso se le llama modelo \textbf{log-bilineal}: el
+logaritmo del conteo se modela con una expresión lineal en cada uno de
+los dos vectores.
+
+\begin{definicion}[Objetivo de GloVe]
+    \[
+        J = \sum_{i, j} f(X_{ij})
+            \left( w_i \cdot \tilde{w}_j + b_i + \tilde{b}_j
+                   - \log X_{ij} \right)^2 ,
+    \]
+    con la función de peso
+    \[
+        f(x) = \begin{cases}
+                   (x / x_{\max})^{3/4} & \text{si } x < x_{\max} , \\
+                   1 & \text{si } x \ge x_{\max} ,
+               \end{cases}
+        \qquad x_{\max} = 100 .
+    \]
+\end{definicion}
+
+Es mínimos cuadrados ponderados: el error al cuadrado entre lo que
+predice el modelo y el logaritmo del conteo, pesado por $f$. El peso
+resuelve tres cosas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item $f(0) = 0$, así que las celdas con conteo cero no entran a la
+          suma. Hace falta, porque $\log 0$ no existe, y además son la
+          mayor parte de la matriz: solo se ajustan las celdas
+          distintas de cero.
+    \item Los pares raros pesan poco. Un par que coocurrió dos veces
+          puede ser casualidad, y su logaritmo es ruido.
+    \item Los pares muy frecuentes no dominan: arriba de $100$ el peso
+          se queda en $1$ en lugar de seguir creciendo.
+\end{itemize}
+
+\begin{ejemplo}[Dos celdas del renglón de \textit{cherry}]
+    De la tabla de la clase pasada,
+    $X_{\textit{cherry}, \textit{pie}} = 442$ y
+    $X_{\textit{cherry}, \textit{computer}} = 2$.
+
+    \textbf{Pesos.}
+    \[
+        f(442) = 1 , \qquad
+        f(2) = (2 / 100)^{0.75} = 0.053 .
+    \]
+
+    \textbf{Objetivos.} $\ln 442 = 6.09$ y $\ln 2 = 0.69$.
+
+    Supongamos que con los vectores actuales el lado izquierdo da
+    $5.5$ para (\textit{cherry}, \textit{pie}) y $2.0$ para
+    (\textit{cherry}, \textit{computer}). Los dos términos de $J$ son
+    \begin{align*}
+        \textit{pie:}      &\quad 1 \cdot (5.5 - 6.09)^2
+                            = 1 \cdot 0.348 = 0.348 , \\
+        \textit{computer:} &\quad 0.053 \cdot (2.0 - 0.69)^2
+                            = 0.053 \cdot 1.72 = 0.091 .
+    \end{align*}
+    El error de \textit{computer} es más del doble, pero cuesta la
+    cuarta parte. El ajuste se concentra en que \textit{cherry} y
+    \textit{pie} queden bien, que es el par con evidencia. La celda de
+    \textit{aardvark}, con conteo $0$, ni siquiera aparece en $J$.
+\end{ejemplo}
+
+\begin{idea}
+    GloVe es factorización de matrices, como LSA en la clase del $28$:
+    busca dos matrices de vectores, $W$ y $\tilde{W}$, cuyo producto
+    reproduzca la matriz de log-conteos. La diferencia con la SVD
+    truncada es que no trata igual a todas las celdas: ignora los ceros
+    y pesa cada celda según cuánta evidencia tiene. Es lo que la
+    diapositiva $52$ llama extraer la estructura latente de la matriz
+    de coocurrencias. Junta las estadísticas globales de los métodos de
+    conteo con el tipo de vectores que dan los de predicción.
+\end{idea}
+
+Igual que en negative sampling, al final cada palabra tiene dos
+vectores, $w_i$ y $\tilde{w}_i$, y se usa la suma
+$w_i + \tilde{w}_i$.
+
+% =====================================================================
+
+\subsection*{Cuál funciona mejor}
+
+Depende de la tarea que se esté haciendo. Ninguno gana siempre.
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.4cm}%
+                 >{\raggedright\arraybackslash}p{2.6cm}%
+                 >{\raggedright\arraybackslash}p{5.2cm}}
+    \toprule
+    & \textbf{Qué aprende} & \textbf{Palabras nuevas}
+    & \textbf{Costo} \\
+    \midrule
+    CBOW & Predecir la palabra central con su contexto & No
+         & El más barato: un ejemplo por posición \\
+    Skip-gram & Predecir el contexto con la palabra central & No
+         & $2C$ ejemplos por posición; mejores vectores para
+           palabras raras \\
+    FastText & Skip-gram con n-gramas de caracteres
+         & Sí, con sus n-gramas
+         & Cada palabra es una suma de n-gramas \\
+    GloVe & Ajustar la matriz de coocurrencias global & No
+         & Se cuenta una vez; se ajustan solo las celdas distintas de
+           cero \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Con poco texto o mucho vocabulario raro conviene skip-gram. Si el
+idioma tiene mucha morfología o el texto trae errores de dedo,
+FastText, porque las variantes comparten n-gramas. GloVe entrena sobre
+las celdas distintas de cero y no sobre el corpus, así que después de
+contar, entrenar es rápido. La forma segura de escoger es probar con
+la tarea final.
+
+% =====================================================================
+
+\subsection*{Visualizar embeddings}
+
+Los embeddings tienen cientos de dimensiones y no se pueden ver
+directamente. Para inspeccionarlos se proyectan a dos. Con PCA o SVD,
+la de la clase del $28$, se conservan las direcciones de mayor
+varianza; con t-SNE se conservan las vecindades: lo que estaba cerca en
+el espacio original queda cerca en el plano.
+
+\begin{ejemplo}[Diapositiva $53$]
+    Una proyección t-SNE de embeddings de $60$ dimensiones entrenados
+    para análisis de sentimiento (Li et al., 2015). Salen tres grupos:
+    \begin{itemize}[itemsep=0.2em]
+        \item palabras funcionales: \textit{to}, \textit{by},
+              \textit{that}, \textit{now}, \textit{a}, \textit{i},
+              \textit{you}, \textit{than}, \textit{with}, \textit{is};
+        \item positivas: \textit{good}, \textit{nice},
+              \textit{very good}, \textit{amazing}, \textit{terrific},
+              \textit{fantastic}, \textit{wonderful},
+              \textit{incredibly good};
+        \item negativas: \textit{bad}, \textit{worse}, \textit{worst},
+              \textit{dislike}, \textit{not good},
+              \textit{incredibly bad}.
+    \end{itemize}
+    Las palabras de significado parecido quedan cerca en el espacio.
+\end{ejemplo}
+
+\begin{ojo}
+    Que \textit{good} y \textit{bad} queden lejos es por la tarea con
+    la que se entrenaron, sentimiento. En embeddings generales, como
+    los de Word2Vec o GloVe, los antónimos suelen quedar
+    \textbf{cerca}: \textit{good} y \textit{bad} aparecen en los mismos
+    contextos (\textit{the movie was \_\_\_}), y para la hipótesis
+    distribucional eso es parecido. Además, t-SNE deforma las
+    distancias grandes: dos grupos lejanos en el dibujo no dicen cuánto
+    están separados en el espacio original.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Propiedades semánticas de los embeddings}
+
+Son los tipos de relación entre palabras que quedan capturados en la
+geometría de los vectores: qué quiere decir que dos vectores estén
+cerca, y qué quieren decir las direcciones entre ellos.
+
+\subsubsection*{El tamaño de la ventana cambia la similitud}
+
+Hay distintos tipos de similitud o asociación, y cuál capturan los
+vectores depende sobre todo de la ventana de contexto:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Ventanas cortas} dan representaciones un poco más
+          sintácticas: las palabras más parecidas son del mismo tipo y
+          se pueden intercambiar en la oración.
+    \item \textbf{Ventanas largas} hacen que las palabras de mayor
+          coseno con la objetivo sean palabras relacionadas por tema,
+          pero no parecidas.
+\end{itemize}
+
+\begin{ejemplo}[\textit{hogwarts}, de Levy y Goldberg (2014)]
+    Vecinos más cercanos con skip-gram y dos tamaños de ventana:
+    \begin{center}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Ventana $\pm 5$} & \textbf{Ventana $\pm 2$} \\
+        \midrule
+        \textit{dumbledore} & \textit{evernight} \\
+        \textit{hallows}    & \textit{sunnydale} \\
+        \textit{half-blood} & \textit{garderobe} \\
+        \textit{malfoy}     & \textit{blandings} \\
+        \textit{snape}      & \textit{collinwood} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con $\pm 5$ sale el mundo de Harry Potter: personajes y palabras de
+    los títulos de los libros. Con $\pm 2$ salen otros lugares y
+    escuelas de ficción, como \textit{Sunnydale}, de \textit{Buffy}, o
+    \textit{Evernight}, de una saga de vampiros. Son cosas
+    \textbf{del mismo tipo} que Hogwarts, aunque no tengan nada que ver
+    con Harry Potter.
+\end{ejemplo}
+
+Es lo que ya se había visto con las matrices término-término de la
+clase pasada: ventanas chicas juntan palabras intercambiables y
+ventanas grandes juntan palabras del mismo tema. Las dos asociaciones
+tienen nombre:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Coocurrencia de primer orden}, o asociación
+          sintagmática: las palabras suelen aparecer una cerca de la
+          otra. \textit{escribió} con \textit{libro} o \textit{poema}.
+    \item \textbf{Coocurrencia de segundo orden}, o asociación
+          paradigmática: las palabras tienen vecinos parecidos, aunque
+          casi nunca aparezcan juntas. \textit{escribió} con
+          \textit{dijo} o \textit{comentó}.
+\end{itemize}
+
+\subsubsection*{Analogías}
+
+La propiedad más famosa: algunas relaciones entre palabras quedan
+como direcciones constantes en el espacio. La diferencia entre
+\textit{rey} y \textit{hombre} se parece a la diferencia entre
+\textit{reina} y \textit{mujer}, así que
+\[
+    v_{\textit{rey}} - v_{\textit{hombre}} + v_{\textit{mujer}}
+    \approx v_{\textit{reina}} .
+\]
+Para resolver \textit{``hombre es a rey como mujer es a ?''} se
+calcula el lado izquierdo y se busca la palabra de mayor coseno con el
+resultado. Funciona igual con
+$v_{\textit{París}} - v_{\textit{Francia}} + v_{\textit{Italia}}
+\approx v_{\textit{Roma}}$.
+
+\begin{ejemplo}[Con vectores de juguete]
+    Si la primera componente fuera qué tan masculina es la palabra y la
+    segunda qué tanto tiene que ver con la realeza:
+    \[
+        v_{\textit{rey}} = (0.9,\ 0.8) , \quad
+        v_{\textit{hombre}} = (0.9,\ 0.1) , \quad
+        v_{\textit{mujer}} = (0.1,\ 0.1) ,
+    \]
+    \[
+        v_{\textit{rey}} - v_{\textit{hombre}} + v_{\textit{mujer}}
+        = (0.9 - 0.9 + 0.1,\ 0.8 - 0.1 + 0.1) = (0.1,\ 0.8) ,
+    \]
+    que es justo donde estaría \textit{reina}: poco masculina, muy de
+    la realeza. Restar \textit{hombre} quita lo masculino y sumar
+    \textit{mujer} pone lo femenino; la realeza no se toca.
+\end{ejemplo}
+
+\begin{ojo}
+    En embeddings reales ninguna componente sola significa
+    ``masculino''; la dirección existe, pero repartida entre todas. Y
+    las analogías funcionan menos de lo que sugieren los ejemplos
+    famosos: sirven sobre todo con palabras frecuentes y con ciertas
+    relaciones, y al buscar la respuesta hay que excluir las tres
+    palabras de entrada, porque la más cercana al resultado suele ser
+    \textit{rey} misma. También heredan los sesgos del corpus:
+    Bolukbasi et al.\ (2016) encontraron que \textit{man} es a
+    \textit{computer programmer} como \textit{woman} es a
+    \textit{homemaker}.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Embeddings contextualizados}
+
+Todo lo de hoy produce embeddings estáticos: un vector representa cada
+palabra. El problema son las palabras polisémicas, como
+\textit{mouse}, ratón animal o ratón de computadora, o \textit{bat},
+murciélago o bate. El uso de una palabra depende de su contexto, pero
+su vector no.
+
+\begin{ejemplo}[\textit{mouse}]
+    Word2Vec le da a \textit{mouse} un solo vector, entrenado con todas
+    sus apariciones. Termina en algún punto entre el sentido de roedor
+    y el de computadora, cargado hacia el que sea más frecuente en el
+    corpus, y no representa bien a ninguno.
+
+    Un embedding contextualizado calcula un vector distinto para cada
+    aparición, a partir de la oración en la que está:
+    \textit{cheese-loving mouse} queda cerca del roedor y
+    \textit{click on the mouse} cerca de la computadora. Es lo que
+    dibuja la diapositiva $57$: una flecha por cada uso.
+\end{ejemplo}
+
+A esto también se le llama \textbf{representación dinámica}: la
+palabra ya no tiene un vector, tiene una función que le da uno según el
+contexto.
+
+\begin{idea}
+    Es el problema de desambiguación de sentidos de la clase del $21$
+    de septiembre, atacado desde la representación: en lugar de escoger
+    un sentido de WordNet, el vector mismo cambia con el contexto. Los
+    modelos que hacen esto, como ELMo y BERT, ya no son una tabla de
+    vectores sino una red completa que hay que correr sobre la oración.
+\end{idea}
 
 
 \end{document}
