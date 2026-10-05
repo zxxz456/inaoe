@@ -30,6 +30,7 @@
 #  History:
 #  ------------
 #  Author      Date            Description
+#  zxxz6       04/10/2026      Ejemplo de juguete del paso SVD
 #  zxxz6       04/10/2026      Ejemplo de juguete de OMP paso a paso
 #  zxxz6       04/10/2026      El paso SVD paso a paso y el diccionario mejorado
 #  zxxz6       04/10/2026      Coautores y la serie SEE Matrix en referencias
@@ -1927,9 +1928,400 @@ $$
 El concepto antes del ejemplo. R es lo que el átomo j tendría que
 explicar. Como un átomo por sus pesos es de rango 1, el mejor átomo es
 la mejor aproximación de rango 1 de R, y Eckart-Young dice cuál es: u1,
-con sus pesos sigma1 por v1. Ahora lo vemos paso a paso con un átomo de
-verdad.
+con sus pesos sigma1 por v1. Primero lo vemos a mano con el ejemplo de
+juguete de OMP, y luego con un átomo de verdad.
 :::
+
+## El paso SVD con el ejemplo de juguete {#svd-juguete-datos}
+
+```{=html}
+<div class="omp-j g">
+<p class="intro">Se sigue con el ejemplo de OMP. Ahora <b>α</b> se queda fijo en sus ceros y se corrige <b>D</b>, un átomo a la vez y en orden: A, B, C, E.</p>
+<div class="fila" style="margin-top:26px;margin-bottom:90px;justify-content:center;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hb" style="grid-row:2;grid-column:2;">1</div><div class="c hb" style="grid-row:2;grid-column:3;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="c hb" style="grid-row:3;grid-column:3;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hb" style="grid-row:4;grid-column:2;">0.5</div><div class="c hb" style="grid-row:4;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 2;"></div></div><div class="mxc"><b>X</b> · 3 × 2<br>no cambia</div></div>
+<div class="op">≈</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch" style="grid-row:1;grid-column:3;">B</div><div class="ch" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.6</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> · 3 × 4<br>se va a corregir</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 74px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hn" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">1.25</div><div class="c hn" style="grid-row:3;grid-column:3;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> · 4 × 2<br>sale de OMP</div></div>
+</div>
+<div class="fragment" data-fragment-index="1">
+<p class="linea">Punto de partida: <b>v₁</b> sale exacta y a <b>v₂</b> le falta <span class="math inline">(0.096,\, -0.072,\, 0)</span>, que mide <b>0.12</b>.</p>
+</div>
+<div class="fragment" data-fragment-index="2">
+<p class="linea">Para cada átomo: <b>1</b> qué ventanas lo usan, <b>2</b> qué les falta explicar, <span class="math inline">R</span>, y <b>3</b> la SVD de <span class="math inline">R</span>: átomo <span class="math inline">u_1</span>, pesos <span class="math inline">\sigma_1 v_1</span>.</p>
+</div>
+</div>
+```
+
+::: {.notes}
+El segundo paso de K-SVD con el mismo ejemplo de juguete. Tenemos las
+mismas ventanas X, el mismo diccionario D, y la alfa que acaba de salir
+de OMP.
+
+Ahora se invierte la pregunta: alfa se queda fija, al menos en dónde
+tiene ceros, y lo que se corrige es D. Se va átomo por átomo, en orden:
+A, B, C y E.
+
+Antes de empezar, el error: la ventana 1 sale exacta y a la ventana 2 le
+falta un poquito, (0.096, -0.072, 0), que mide 0.12. Ese es el número
+que queremos bajar.
+
+Para cada átomo son siempre tres pasos: ver qué ventanas lo usan, ver
+qué les falta explicar a esas ventanas, que es R, y sacarle la SVD a R.
+:::
+
+## Átomo A: una sola ventana {#svd-juguete-a}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Las ventanas que usan un átomo se leen en <b>su fila de α</b>: las que tienen peso distinto de cero.</p>
+<div class="paso"><span class="num">1</span>Qué ventanas lo usan: la fila A de α</div>
+<div class="fila" style="margin-bottom:40px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 70px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh chl" style="grid-row:2;grid-column:1;">átomo A</div><div class="c hg" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">átomo B</div><div class="c" style="grid-row:3;grid-column:2;">1.25</div><div class="c" style="grid-row:3;grid-column:3;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">átomo C</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">átomo E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> · 4 × 2</div></div>
+<div class="nota" style="margin-left:22px;">Fila A <span class="math inline">= (0.25,\ 0)</span><br>Solo la usa <b class='nar'>v₁</b>.<br><br>Entonces <span class="math inline">R</span> tiene <b>una</b> columna.</div>
+</div>
+<div class="abajo">
+<div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Qué le falta explicar: quitar los otros átomos</div>
+<div class="fila fragment" data-fragment-index="1" style="margin-bottom:10px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">1.25 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">B</div><div class="c" style="grid-row:2;grid-column:1;">0.6</div><div class="c" style="grid-row:3;grid-column:1;">0.8</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">0.5 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">C</div><div class="c" style="grid-row:2;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">0.25</div><div class="c ha" style="grid-row:3;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+</div>
+<div class="nota fragment" data-fragment-index="1" style="width:600px;">v₁ usa A, B y C. B y C se quedan como están; lo que sobra es lo único que A puede mejorar.</div>
+</div>
+<div style="width:400px;">
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span>SVD de una sola columna</div>
+<div class="nota fragment" data-fragment-index="2" style=""><span class="math inline">\sigma = \lVert R \rVert = 0.25,\quad v = (1)</span><br><span class="math inline">u = R / \sigma = (1,\ 0,\ 0)</span><br><br>Con una columna, la SVD solo normaliza.<br><br><b class='nar'>A nuevo = (1, 0, 0)</b>, peso 0.25: <b>no cambia</b>. Lo que le tocaba ya apuntaba en su dirección.</div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Empezamos con A. Para saber qué ventanas lo usan se lee su fila en
+alfa: (0.25, 0). Solo la ventana 1 tiene peso, así que solo la ventana 1
+cuenta.
+
+Paso 2. La ventana 1 usa A, B y C. B y C se quedan fijos, así que les
+quito su parte: 1.25 de B y 0.5 de C. Lo que sobra, (0.25, 0, 0), es lo
+que A tiene que explicar. Eso es R.
+
+Paso 3. R tiene una sola columna, y la SVD de una columna es lo más
+simple que hay: sigma es su largo, 0.25, y u es R normalizado, (1, 0, 0).
+Es exactamente el A que ya teníamos, con el mismo peso. A no cambia,
+porque lo que le tocaba explicar ya apuntaba en su dirección.
+:::
+
+## Átomo B: qué le toca explicar {#svd-juguete-b1}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Fila B de α <span class="math inline">= (1.25,\ 1.34)</span>: lo usan <b>las dos</b> ventanas, así que <span class="math inline">R</span> tiene dos columnas.</p>
+<div class="paso"><span class="num">1</span>Lo que aportan los demás átomos: <span class="math inline">D\,\alpha_w</span> con la fila B en cero</div>
+<div class="fila" style="margin-bottom:46px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch chl" style="grid-row:1;grid-column:3;">B</div><div class="ch" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.6</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> · 3 × 4</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh chl" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">0</div><div class="c hn" style="grid-row:3;grid-column:3;">0</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc">α<sub>w</sub>, B apagado</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c" style="grid-row:2;grid-column:1;">0.25</div><div class="c" style="grid-row:2;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:1;">0.5</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">parte fija</div></div>
+<div class="nota" style="margin-left:22px;">Poner la fila B en 0 es<br><b>apagar B</b> y ver qué queda:<br>lo que aportan A y C.</div>
+</div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Lo que le falta a cada ventana: <span class="math inline">R = X_w - D\,\alpha_w</span></div>
+<div class="fila fragment" data-fragment-index="1">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hb" style="grid-row:2;grid-column:2;">1</div><div class="c hb" style="grid-row:2;grid-column:3;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="c hb" style="grid-row:3;grid-column:3;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hb" style="grid-row:4;grid-column:2;">0.5</div><div class="c hb" style="grid-row:4;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 2;"></div></div><div class="mxc"><b>X<sub>w</sub></b></div></div>
+<div class="op">−</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c" style="grid-row:2;grid-column:1;">0.25</div><div class="c" style="grid-row:2;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:1;">0.5</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">parte fija</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:1;">R₁</div><div class="ch" style="grid-row:1;grid-column:2;">R₂</div><div class="c ha" style="grid-row:2;grid-column:1;">0.75</div><div class="c ha" style="grid-row:2;grid-column:2;">0.9</div><div class="c ha" style="grid-row:3;grid-column:1;">1</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc"><b>R</b> · 3 × 2</div></div>
+<div class="nota fragment" data-fragment-index="2" style="margin-left:30px;">¿Les sirve el B viejo?<br><span class="math inline">1.25\,B = (0.75,\ 1,\ 0) = R_1</span> exacto<br><span class="math inline">1.34\,B = (0.804,\ 1.072,\ 0) \neq R_2</span><br><br>Se busca <b>un</b> átomo <span class="math inline">b</span> y dos pesos:<br><span class="math inline">b\,(p_1\ \ p_2) \approx R</span>, columna por fila:<br><b class='nar'>rango 1</b>.</div>
+</div>
+</div>
+```
+
+::: {.notes}
+B es el caso interesante, porque lo usan las dos ventanas.
+
+Paso 1. Primero calculo lo que aportan los otros átomos. Es D por alfa,
+pero con la fila de B en cero: así B no aporta nada y lo que queda es la
+parte fija, lo que ponen A y C. A la ventana 1 le aportan (0.25, 0, 0.5);
+a la ventana 2 nada, porque solo usaba B.
+
+Paso 2. R es X menos esa parte fija: lo que le falta a cada ventana.
+R1 = (0.75, 1, 0) y R2 = (0.9, 1, 0). Cada columna es lo que B tiene que
+cubrir en esa ventana.
+
+¿Le sirve el B viejo? A la ventana 1 sí, 1.25 veces B da exactamente R1.
+A la ventana 2 no: 1.34 veces B no es R2, y esa diferencia es el error
+de 0.12. Queremos una sola dirección, con un peso por ventana, que les
+quede bien a las dos. Átomo por pesos es columna por fila: rango 1. Y la
+mejor aproximación de rango 1 de R la da la SVD.
+:::
+
+## Átomo B: la SVD de R a mano {#svd-juguete-b2}
+
+```{=html}
+<div class="omp-j">
+<div class="paso"><span class="num">1</span><span class="math inline">R^{\mathsf T} R</span>: productos punto entre las columnas de <span class="math inline">R</span></div>
+<div class="fila" style="margin-bottom:44px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(3, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">muestra 1</div><div class="ch" style="grid-row:1;grid-column:3;">muestra 2</div><div class="ch" style="grid-row:1;grid-column:4;">muestra 3</div><div class="rh" style="grid-row:2;grid-column:1;">R₁</div><div class="c" style="grid-row:2;grid-column:2;">0.75</div><div class="c" style="grid-row:2;grid-column:3;">1</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="rh" style="grid-row:3;grid-column:1;">R₂</div><div class="c" style="grid-row:3;grid-column:2;">0.9</div><div class="c" style="grid-row:3;grid-column:3;">1</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="cor" style="grid-row:2 / span 2;grid-column:2 / span 3;"></div></div><div class="mxc"><span class="math inline">R^{\mathsf T}</span> · 2 × 3</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">R₁</div><div class="ch" style="grid-row:1;grid-column:2;">R₂</div><div class="c ha" style="grid-row:2;grid-column:1;">0.75</div><div class="c ha" style="grid-row:2;grid-column:2;">0.9</div><div class="c ha" style="grid-row:3;grid-column:1;">1</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">R · 3 × 2</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">R₁</div><div class="ch" style="grid-row:1;grid-column:3;">R₂</div><div class="rh" style="grid-row:2;grid-column:1;">R₁</div><div class="c hn" style="grid-row:2;grid-column:2;">1.5625</div><div class="c hn" style="grid-row:2;grid-column:3;">1.675</div><div class="rh" style="grid-row:3;grid-column:1;">R₂</div><div class="c hn" style="grid-row:3;grid-column:2;">1.675</div><div class="c hn" style="grid-row:3;grid-column:3;">1.81</div><div class="cor" style="grid-row:2 / span 2;grid-column:2 / span 2;"></div></div><div class="mxc"><span class="math inline">R^{\mathsf T} R</span> · 2 × 2</div></div>
+<div class="nota" style="margin-left:22px;"><span class="math inline">R_1 \cdot R_1 = 0.75^2 + 1^2 = 1.5625</span><br><span class="math inline">R_1 \cdot R_2 = 0.75(0.9) + 1(1) = 1.675</span><br><span class="math inline">R_2 \cdot R_2 = 0.9^2 + 1^2 = 1.81</span></div>
+</div>
+<div class="abajo">
+<div style="width:500px;">
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Eigenvalores y valores singulares</div>
+<div class="sistema fragment" data-fragment-index="1">
+<span class="math inline">\text{traza} = 1.5625 + 1.81 = 3.3725</span><br>
+<span class="math inline">\det = 1.5625(1.81) - 1.675^2 = 0.0225</span><br>
+<span class="math inline">\lambda = \dfrac{3.3725 \pm \sqrt{3.3725^2 - 4(0.0225)}}{2}</span><br>
+<span class="math inline">\lambda_1 = 3.3658, \quad \lambda_2 = 0.0067</span><br>
+<span class="math inline">\sigma_1 = \sqrt{\lambda_1} = 1.8346, \quad \sigma_2 = 0.0818</span>
+</div>
+<div class="nota fragment" data-fragment-index="1" style="">σ₁ carga el <b>99.8 %</b> de la energía: R₁ y R₂ apuntan casi a lo mismo.</div>
+</div>
+<div>
+<div class="paso fragment" data-fragment-index="2"><span class="num">3</span>Las direcciones <span class="math inline">v_1</span> y <span class="math inline">u_1</span></div>
+<div class="sistema fragment" data-fragment-index="2">
+<span class="math inline">(R^{\mathsf T} R - \lambda_1 I)\,v = 0 \;\Rightarrow\; v_1 = (0.6806,\ 0.7327)</span>
+</div>
+<div class="fila fragment" data-fragment-index="2">
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">R₁</div><div class="ch" style="grid-row:1;grid-column:2;">R₂</div><div class="c ha" style="grid-row:2;grid-column:1;">0.75</div><div class="c ha" style="grid-row:2;grid-column:2;">0.9</div><div class="c ha" style="grid-row:3;grid-column:1;">1</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">R</div></div>
+<div class="op">·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="c" style="grid-row:2;grid-column:1;">0.6806</div><div class="c" style="grid-row:3;grid-column:1;">0.7327</div><div class="cor" style="grid-row:2 / span 2;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R v₁</div><div class="c" style="grid-row:2;grid-column:1;">1.1698</div><div class="c" style="grid-row:3;grid-column:1;">1.4133</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">÷ 1.8346 =</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">u₁</div><div class="c hg" style="grid-row:2;grid-column:1;">0.6377</div><div class="c hg" style="grid-row:3;grid-column:1;">0.7703</div><div class="c hg" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+</div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Ahora la SVD de R, a mano.
+
+Paso 1. R transpuesta por R. Cada casilla es un producto punto entre
+columnas de R: R1 con R1 da 1.5625, R1 con R2 da 1.675, y R2 con R2 da
+1.81. Es simétrica, como siempre.
+
+Paso 2. Sus eigenvalores. Para una matriz de dos por dos salen de la
+traza y el determinante: lambda1 = 3.3658 y lambda2 = 0.0067. Los valores
+singulares son sus raíces: sigma1 = 1.8346 y sigma2 = 0.0818. Sigma1 es
+unas 22 veces sigma2, se lleva el 99.8 por ciento de la energía: las dos
+ventanas piden casi la misma dirección.
+
+Paso 3. v1 sale de resolver (RtR - lambda1 I) v = 0 y normalizar:
+(0.6806, 0.7327). Y u1 es R por v1, dividido entre sigma1: (0.6377,
+0.7703, 0). Ese u1 es el candidato a B nuevo, y ya mide 1.
+:::
+
+## Átomo B: la primera pieza {#svd-juguete-b3}
+
+```{=html}
+<div class="omp-j">
+<div class="paso"><span class="num">4</span>Quedarse con la primera pieza: <span class="math inline">\sigma_1\, u_1 v_1^{\mathsf T}</span></div>
+<div class="fila" style="margin-bottom:40px;">
+<div class="op">1.8346 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">u₁</div><div class="c" style="grid-row:2;grid-column:1;">0.6377</div><div class="c" style="grid-row:3;grid-column:1;">0.7703</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">·</div>
+<div class="mxw" style="padding-top:34px;"><div class="mx" style="grid-template-columns:repeat(2, 84px);"><div class="ch" style="grid-row:1;grid-column:1;"></div><div class="ch" style="grid-row:1;grid-column:2;"></div><div class="c" style="grid-row:2;grid-column:1;">0.6806</div><div class="c" style="grid-row:2;grid-column:2;">0.7327</div><div class="cor" style="grid-row:2 / span 1;grid-column:1 / span 2;"></div></div><div class="mxc">v₁ᵀ</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 76px);"><div class="ch" style="grid-row:1;grid-column:1;"></div><div class="ch" style="grid-row:1;grid-column:2;"></div><div class="c hn" style="grid-row:2;grid-column:1;">0.796</div><div class="c hn" style="grid-row:2;grid-column:2;">0.857</div><div class="c hn" style="grid-row:3;grid-column:1;">0.962</div><div class="c hn" style="grid-row:3;grid-column:2;">1.036</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="c hn" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">pieza de rango 1</div></div>
+<div class="op">≈</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:1;">R₁</div><div class="ch" style="grid-row:1;grid-column:2;">R₂</div><div class="c ha" style="grid-row:2;grid-column:1;">0.75</div><div class="c ha" style="grid-row:2;grid-column:2;">0.9</div><div class="c ha" style="grid-row:3;grid-column:1;">1</div><div class="c ha" style="grid-row:3;grid-column:2;">1</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">R</div></div>
+<div class="nota" style="margin-left:22px;">Lo que sobra, <span class="math inline">R - \sigma_1 u_1 v_1^{\mathsf T}</span>,<br>mide <b>0.082 = σ₂</b>.<br><br>Es lo único que una sola dirección<br>no puede explicar.</div>
+</div>
+<div class="abajo">
+<div style="width:560px;">
+<div class="paso fragment" data-fragment-index="1"><span class="num">5</span>Actualizar: átomo <span class="math inline">= u_1</span>, pesos <span class="math inline">= \sigma_1 v_1</span></div>
+<div class="fragment" data-fragment-index="1">
+<table class="resumen">
+<tr><th></th><th>Antes</th><th>Después</th></tr>
+<tr><td>B</td><td>(0.6, 0.8, 0)</td><td><b class="nar">(0.638, 0.770, 0)</b></td></tr>
+<tr><td>peso en v₁</td><td>1.25</td><td>1.249</td></tr>
+<tr><td>peso en v₂</td><td>1.34</td><td>1.344</td></tr>
+</table>
+<div class="nota" style="margin-top:12px;">σ₁ se va a los pesos y no al átomo porque u₁ ya mide 1, como todo átomo.</div>
+</div>
+</div>
+<div class="fragment" data-fragment-index="2" style="display:flex;gap:16px;align-items:center;">
+<svg width="300" height="250" viewBox="0 0 300 250" style="overflow:visible;">
+<defs><marker id="svd-punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker></defs>
+<line x1="40" y1="240" x2="290" y2="240" stroke="#ddd"/>
+<line x1="40" y1="240" x2="40" y2="10" stroke="#ddd"/>
+<line x1="40" y1="240" x2="197.6" y2="29.8" stroke="#eb6834" stroke-width="4"/>
+<line x1="40" y1="240" x2="207.5" y2="37.6" stroke="#2a78d6" stroke-width="4"/>
+<line x1="40" y1="240" x2="178.8" y2="55.0" stroke="#52514e" stroke-width="1.8" marker-end="url(#svd-punta)"/>
+<line x1="40" y1="240" x2="206.5" y2="55.0" stroke="#52514e" stroke-width="1.8" marker-end="url(#svd-punta)"/>
+<text x="191.62" y="23.840000000000032" fill="#eb6834" font-size="15" text-anchor="end">B viejo</text>
+<text x="213.52379000000002" y="33.64219" fill="#2a78d6" font-size="15" text-anchor="start">B nuevo = u₁</text>
+<text x="164.75" y="69" fill="#52514e" font-size="15" text-anchor="end">R₁</text>
+<text x="214.5" y="65" fill="#52514e" font-size="15" text-anchor="start">R₂</text>
+</svg>
+<div class="nota" style="">R₁ y R₂ son lo que pide<br>cada ventana. El B viejo<br>le atina a R₁ y no a R₂.<br>El nuevo queda <b>entre<br>las dos</b>.</div>
+</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Paso 4. De toda la SVD solo nos quedamos con la primera pieza: sigma1
+por u1 por v1 transpuesta. Columna por fila, rango 1. Si la comparamos
+con R se parecen mucho. Lo que sobra mide 0.082, que es exactamente
+sigma2: lo que una sola dirección no puede explicar. Eckart-Young dice
+que ninguna otra matriz de rango 1 deja menos.
+
+Paso 5. Se reparte así: el átomo nuevo es u1, que ya mide 1, y sigma1
+se va a los pesos: 1.249 para la ventana 1 y 1.344 para la ventana 2.
+
+En la figura: las flechas grises son lo que pide cada ventana. El B
+viejo, naranja, coincide con R1 pero no con R2. El nuevo, azul, queda
+entre las dos: es la dirección que mejor les queda a ambas a la vez.
+
+Si corren esto con numpy, u1 y los pesos salen con el signo al revés.
+Es la misma solución: menos por menos da más.
+:::
+
+## Átomo C: B ya cambió {#svd-juguete-c}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Fila C de α <span class="math inline">= (0.5,\ 0)</span>: solo <b>v₁</b>. Ojo: <b class="nar">B ya cambió</b>, y <span class="math inline">R</span> se calcula con el B nuevo y su peso nuevo.</p>
+<div class="paso"><span class="num">1</span>Qué le falta explicar</div>
+<div class="fila" style="margin-bottom:46px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">0.25 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">A</div><div class="c" style="grid-row:2;grid-column:1;">1</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">−</div>
+<div class="op">1.249 ·</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">B nuevo</div><div class="c hn" style="grid-row:2;grid-column:1;">0.638</div><div class="c hn" style="grid-row:3;grid-column:1;">0.770</div><div class="c hn" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="nota" style="margin-left:22px;">Con el B viejo esto daba<br>(0, 0, 0.5) exacto.<br><br>Al mover B, a v₁ le quedó<br>un sobrante chico en las<br>muestras 1 y 2.</div>
+</div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>SVD de una columna: normalizar</div>
+<div class="fila fragment" data-fragment-index="1">
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">R</div><div class="c ha" style="grid-row:2;grid-column:1;">−0.046</div><div class="c ha" style="grid-row:3;grid-column:1;">0.038</div><div class="c ha" style="grid-row:4;grid-column:1;">0.5</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">÷ 0.504 =</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 90px);"><div class="ch" style="grid-row:1;grid-column:1;">C nuevo</div><div class="c hg" style="grid-row:2;grid-column:1;">−0.092</div><div class="c hg" style="grid-row:3;grid-column:1;">0.076</div><div class="c hg" style="grid-row:4;grid-column:1;">0.993</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">&nbsp;&nbsp;contra&nbsp;&nbsp;</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">C viejo</div><div class="c" style="grid-row:2;grid-column:1;">0</div><div class="c" style="grid-row:3;grid-column:1;">0</div><div class="c" style="grid-row:4;grid-column:1;">1</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="nota" style="margin-left:36px;"><span class="math inline">\sigma = \lVert R \rVert = 0.504</span> es el peso nuevo.<br><br>C se inclina un poco para tapar el<br>hueco que dejó B. Por eso el <b>orden</b><br>importa: cada átomo aprovecha<br>cómo quedaron los anteriores.</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Átomo C. Su fila es (0.5, 0): solo lo usa la ventana 1.
+
+Y aquí hay un detalle: B ya cambió. El residual se calcula con el B
+nuevo y su peso nuevo, no con los de antes. A la ventana 1 le quito 0.25
+de A y 1.249 del B nuevo, y queda (-0.046, 0.038, 0.5). Con el B viejo
+esto habría sido exactamente (0, 0, 0.5); al mover B quedó un sobrante
+chico.
+
+Otra vez una sola columna, así que la SVD es normalizar: el largo es
+0.504, que es el peso nuevo, y el C nuevo es R entre ese largo. Comparado
+con el C viejo, se inclinó un poco para tapar el hueco que dejó B. Por
+eso los átomos se actualizan en orden: cada uno aprovecha cómo quedaron
+los anteriores.
+:::
+
+## Átomo E: nadie lo usa {#svd-juguete-e}
+
+```{=html}
+<div class="omp-j">
+<p class="intro">Fila E de α <span class="math inline">= (0,\ 0)</span>: <b>ninguna</b> ventana lo usa. No hay <span class="math inline">R</span> al que sacarle la SVD, y si se deja así, E nunca se usaría.</p>
+<div class="paso"><span class="num">1</span>Buscar la ventana peor reconstruida, con D y α como van</div>
+<div class="fila" style="margin-bottom:46px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 64px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c hb" style="grid-row:2;grid-column:2;">1</div><div class="c hb" style="grid-row:2;grid-column:3;">0.9</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c hb" style="grid-row:3;grid-column:2;">1</div><div class="c hb" style="grid-row:3;grid-column:3;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c hb" style="grid-row:4;grid-column:2;">0.5</div><div class="c hb" style="grid-row:4;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 2;"></div></div><div class="mxc"><b>X</b></div></div>
+<div class="op">−</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c" style="grid-row:2;grid-column:1;">1</div><div class="c" style="grid-row:2;grid-column:2;">0.857</div><div class="c" style="grid-row:3;grid-column:1;">1</div><div class="c" style="grid-row:3;grid-column:2;">1.036</div><div class="c" style="grid-row:4;grid-column:1;">0.5</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc"><b>Dα</b> con A, B y C nuevos</div></div>
+<div class="op">=</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(2, 76px);"><div class="ch" style="grid-row:1;grid-column:1;">v₁</div><div class="ch" style="grid-row:1;grid-column:2;">v₂</div><div class="c ha" style="grid-row:2;grid-column:1;">0</div><div class="c hg" style="grid-row:2;grid-column:2;">0.043</div><div class="c ha" style="grid-row:3;grid-column:1;">0</div><div class="c hg" style="grid-row:3;grid-column:2;">−0.036</div><div class="c ha" style="grid-row:4;grid-column:1;">0</div><div class="c ha" style="grid-row:4;grid-column:2;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 2;"></div></div><div class="mxc">lo que falta</div></div>
+<div class="nota" style="margin-left:22px;"><span class="math inline">\lVert r_1 \rVert = 0</span><br><span class="math inline">\lVert r_2 \rVert = 0.056</span><br><br>La peor es <b class='nar'>v₂</b>.</div>
+</div>
+<div class="paso fragment" data-fragment-index="1"><span class="num">2</span>Reiniciar E con esa ventana, normalizada</div>
+<div class="fila fragment" data-fragment-index="1">
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 64px);"><div class="ch" style="grid-row:1;grid-column:1;">v₂</div><div class="c hb" style="grid-row:2;grid-column:1;">0.9</div><div class="c hb" style="grid-row:3;grid-column:1;">1</div><div class="c hb" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="op">÷ 1.345 =</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:repeat(1, 84px);"><div class="ch" style="grid-row:1;grid-column:1;">E nuevo</div><div class="c hg" style="grid-row:2;grid-column:1;">0.669</div><div class="c hg" style="grid-row:3;grid-column:1;">0.743</div><div class="c hg" style="grid-row:4;grid-column:1;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:1 / span 1;"></div></div></div>
+<div class="nota" style="margin-left:36px;">Su fila de α sigue en cero: nadie lo usa hasta<br>la siguiente vuelta de OMP. Pero ya tiene<br>una forma útil: apunta justo a donde v₂<br>necesitaba ayuda.</div>
+</div>
+</div>
+```
+
+::: {.notes}
+Átomo E. Su fila es toda ceros: OMP no lo escogió para ninguna ventana.
+No hay residual al que sacarle la SVD. Si lo dejamos así, nunca se va a
+usar: es un átomo desperdiciado.
+
+Lo que se hace es reiniciarlo. Con D y alfa como van, con A, B y C ya
+nuevos, veo cuánto le falta a cada ventana. A la ventana 1 nada; a la
+ventana 2, 0.056. La peor es la 2.
+
+E se vuelve esa ventana, normalizada para que mida 1. Su fila de alfa
+sigue en cero, porque quién usa qué lo decide OMP, pero en la siguiente
+vuelta la ventana 2 lo va a encontrar muy parecido.
+:::
+
+## El resultado del paso SVD {#svd-juguete-resultado}
+
+```{=html}
+<div class="omp-j">
+<div class="fila" style="margin-bottom:46px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 72px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch" style="grid-row:1;grid-column:3;">B</div><div class="ch" style="grid-row:1;grid-column:4;">C</div><div class="ch" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c" style="grid-row:2;grid-column:3;">0.6</div><div class="c" style="grid-row:2;grid-column:4;">0</div><div class="c" style="grid-row:2;grid-column:5;">0</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c" style="grid-row:3;grid-column:3;">0.8</div><div class="c" style="grid-row:3;grid-column:4;">0</div><div class="c" style="grid-row:3;grid-column:5;">1</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c" style="grid-row:4;grid-column:3;">0</div><div class="c" style="grid-row:4;grid-column:4;">1</div><div class="c" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> antes</div></div>
+<div class="op">→</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(4, 84px);"><div class="ch" style="grid-row:1;grid-column:2;">A</div><div class="ch chl" style="grid-row:1;grid-column:3;">B</div><div class="ch chl" style="grid-row:1;grid-column:4;">C</div><div class="ch chl" style="grid-row:1;grid-column:5;">E</div><div class="rh" style="grid-row:2;grid-column:1;">muestra 1</div><div class="c" style="grid-row:2;grid-column:2;">1</div><div class="c hn" style="grid-row:2;grid-column:3;">0.638</div><div class="c hn" style="grid-row:2;grid-column:4;">−0.092</div><div class="c hn" style="grid-row:2;grid-column:5;">0.669</div><div class="rh" style="grid-row:3;grid-column:1;">muestra 2</div><div class="c" style="grid-row:3;grid-column:2;">0</div><div class="c hn" style="grid-row:3;grid-column:3;">0.770</div><div class="c hn" style="grid-row:3;grid-column:4;">0.076</div><div class="c hn" style="grid-row:3;grid-column:5;">0.743</div><div class="rh" style="grid-row:4;grid-column:1;">muestra 3</div><div class="c" style="grid-row:4;grid-column:2;">0</div><div class="c hn" style="grid-row:4;grid-column:3;">0</div><div class="c hn" style="grid-row:4;grid-column:4;">0.993</div><div class="c hn" style="grid-row:4;grid-column:5;">0</div><div class="cor" style="grid-row:2 / span 3;grid-column:2 / span 4;"></div></div><div class="mxc"><b>D</b> después</div></div>
+<div class="nota" style="margin-left:22px;">Cambiaron B, C y E.<br>A ya estaba bien.</div>
+</div>
+<div class="abajo" style="align-items:center;">
+<div class="fila" style="margin-bottom:46px;">
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 66px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hn" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">1.25</div><div class="c hn" style="grid-row:3;grid-column:3;">1.34</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">0.5</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> antes</div></div>
+<div class="op">→</div>
+<div class="mxw"><div class="mx" style="grid-template-columns:auto repeat(2, 72px);"><div class="ch" style="grid-row:1;grid-column:2;">v₁</div><div class="ch" style="grid-row:1;grid-column:3;">v₂</div><div class="rh" style="grid-row:2;grid-column:1;">A</div><div class="c hn" style="grid-row:2;grid-column:2;">0.25</div><div class="c z" style="grid-row:2;grid-column:3;">0</div><div class="rh" style="grid-row:3;grid-column:1;">B</div><div class="c hn" style="grid-row:3;grid-column:2;">1.249</div><div class="c hn" style="grid-row:3;grid-column:3;">1.344</div><div class="rh" style="grid-row:4;grid-column:1;">C</div><div class="c hn" style="grid-row:4;grid-column:2;">0.504</div><div class="c z" style="grid-row:4;grid-column:3;">0</div><div class="rh" style="grid-row:5;grid-column:1;">E</div><div class="c z" style="grid-row:5;grid-column:2;">0</div><div class="c z" style="grid-row:5;grid-column:3;">0</div><div class="cor" style="grid-row:2 / span 4;grid-column:2 / span 2;"></div></div><div class="mxc"><b>α</b> después</div></div>
+</div>
+<div>
+<table class="resumen">
+<tr><th>Error ‖r‖</th><th>Antes</th><th>Después</th></tr>
+<tr><td>ventana 1</td><td>0</td><td>0</td></tr>
+<tr><td>ventana 2</td><td>0.12</td><td><b class="nar">0.056</b></td></tr>
+</table>
+<div class="nota" style="margin-top:14px;">Los <b>ceros de α</b> siguen en su lugar:<br>quién usa qué átomo lo decide OMP.</div>
+</div>
+</div>
+<p class="fragment linea" data-fragment-index="1" style="margin-top:0;">Sin agregar átomos, el error de v₂ baja a menos de la mitad. La siguiente iteración vuelve a OMP con el <b>D</b> nuevo. Ahora, lo mismo con un átomo real del ECG.</p>
+</div>
+```
+
+::: {.notes}
+Así queda la iteración. En D cambiaron B, C y E; A ya estaba bien.
+
+En alfa cambiaron los pesos, pero los ceros siguen exactamente en el
+mismo lugar. El paso SVD solo ajusta los números que ya eran distintos
+de cero; quién usa qué átomo lo decide OMP.
+
+Y el error: la ventana 1 sigue exacta y la 2 pasa de 0.12 a 0.056, menos
+de la mitad, sin agregar ni un átomo. Con eso termina una iteración. La
+siguiente vuelve a correr OMP con el D nuevo, y quizá la ventana 2 ahora
+escoja a E.
+
+En el proyecto es lo mismo con 256 átomos de 128 muestras, 2539 ventanas
+y 20 iteraciones. Veamos un átomo real.
+:::
+
 
 ## El paso SVD con un átomo real {auto-animate=true}
 
