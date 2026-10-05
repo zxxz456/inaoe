@@ -1933,7 +1933,7 @@ con sus pesos sigma1 por v1. Primero lo vemos a mano con el ejemplo de
 juguete de OMP, y luego con un átomo de verdad.
 :::
 
-## El paso SVD con el ejemplo de juguete {#svd-juguete-datos}
+## El paso SVD in a nutshell {#svd-juguete-datos}
 
 ```{=html}
 <div class="omp-j g">
