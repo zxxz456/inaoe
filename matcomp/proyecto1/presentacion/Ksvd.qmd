@@ -1900,12 +1900,12 @@ y se repite: 20 iteraciones
 :::
 
 ::: {.notes}
-K-SVD alterna dos pasos, igual que k-means. Primero, con el
-diccionario fijo, OMP le encuentra a cada ventana sus átomos. Luego,
-con esas decisiones fijas, se corrige cada átomo con una SVD. Y se
-repite.
+K-SVD alterna dos pasos, igual que k-means. 
+Primero, con el
+diccionario fijo, OMP le encuentra a cada ventana sus átomos.
 
-El primer paso ya lo vimos. El segundo es donde entra Eckart-Young.
+y luego con los ceros de los pesos fijos se hace SVD en cada atomo, que es donde
+entra el teorema de ekart young
 :::
 
 ## Actualizar un átomo es buscar el mejor rango 1 {.smaller}
@@ -1929,11 +1929,23 @@ $$
   entraría donde no estaba y se perderían los ceros de $\alpha$
 
 ::: {.notes}
-El concepto antes del ejemplo. R es lo que el átomo j tendría que
-explicar. Como un átomo por sus pesos es de rango 1, el mejor átomo es
-la mejor aproximación de rango 1 de R, y Eckart-Young dice cuál es: u1,
-con sus pesos sigma1 por v1. Primero lo vemos a mano con el ejemplo de
-juguete de OMP, y luego con un átomo de verdad.
+
+R es lo que les falta a las ventanas, es decir... para un atomo cualquiera
+R es la diferencia entre la ventana real y lo que ya arman los demas atomos, sin el atomo j
+
+
+Si los otros átomos ya reconstruyeran toda la ventana, no faltaría nada y R sería cero. 
+Lo que no alcanzan a cubrir es el hueco, y ese hueco es lo único que el átomo j puede llenar.
+
+COmo un atomo por sus pesos es de rango 1 (atomo es columna y pesos son filas y pesos por filas es de
+rango 1) el mejor átomo es la mejor aproximación de rango 1 de R, y Eckart-Young dice cuál es: u1
+
+La SVD parte cualquier matriz R en piezas de rango 1, ordenadas de mayor a menor σ:
+
+
+R = σ1·u1·v1ᵀ + σ2·u2·v2ᵀ + ...
+Eckart-Young dice que, de todas las matrices de rango 1, la que más se parece a 
+R es la primera pieza, σ₁u₁v₁ᵀ. El error que deja es el resto de las piezas, y mide σ₂
 :::
 
 ## El paso SVD in a nutshell {#svd-juguete-datos}
