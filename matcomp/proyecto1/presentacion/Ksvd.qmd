@@ -30,6 +30,7 @@
 #  History:
 #  ------------
 #  Author      Date            Description
+#  zxxz6       05/10/2026      Notas del presentador breves, salvo K-SVD
 #  zxxz6       04/10/2026      El atomo A con el mismo desglose que B
 #  zxxz6       04/10/2026      El atomo C con el mismo desglose que B
 #  zxxz6       04/10/2026      La reconstruccion de partida del paso SVD
@@ -264,9 +265,8 @@ format:
 4. Resultados
 
 ::: {.notes}
-Primero qué se quiere: describir una señal con pocas piezas. Luego las
-cuatro herramientas que hacen falta, solo lo necesario. Después cómo se
-montó sobre el ECG y qué salió.
+Tres partes: qué se quiere, las herramientas justas y cómo salió en
+el ECG.
 :::
 
 # El problema
@@ -289,13 +289,10 @@ montó sobre el ECG y qué salió.
 ::::
 
 ::: {.notes}
-El enunciado pide tres cosas: implementar K-SVD, entrenar una base para
-un tipo de señal y comparar original contra reconstrucción. La figura
-de la derecha es justo el entregable, la vamos a ver con calma al
-final.
-
-Escogí ECG porque tiene estructura repetida. Esa repetición es lo que
-un diccionario aprendido puede aprovechar y uno genérico no.
+- El enunciado pide tres cosas: implementar K-SVD, entrenar una base
+  y comparar original contra reconstrucción.
+- La figura es el entregable; la vemos al final.
+- ECG porque se repite, y eso lo aprovecha un diccionario aprendido.
 :::
 
 ## Una ventana, pocas piezas {auto-animate=true}
@@ -339,8 +336,7 @@ una ventana del ECG: 128 números
 <!-- fin:representacion_1 -->
 
 ::: {.notes}
-Esto es una ventana real del ECG, 128 números. La pregunta del proyecto
-es si se puede describir con muchos menos.
+Una ventana real: 128 números. ¿Se puede describir con muchos menos?
 :::
 
 ## Una ventana, pocas piezas {auto-animate=true}
@@ -483,10 +479,8 @@ una ventana del ECG: 128 números
 <!-- fin:representacion_2 -->
 
 ::: {.notes}
-Tres átomos del diccionario entrenado, cada uno multiplicado por su
-peso. Cada átomo también es una ventana de 128 números, pero el
-diccionario es fijo: lo que hay que guardar por ventana son solo los
-tres pesos y cuáles átomos.
+Tres átomos, cada uno por su peso. El diccionario es fijo: por ventana
+solo se guardan los tres pesos y cuáles átomos.
 :::
 
 ## Una ventana, pocas piezas {auto-animate=true}
@@ -669,9 +663,8 @@ $x \approx 1.06\,d_{204} - 0.21\,d_{105} + 0.11\,d_{178}$
 <!-- fin:representacion_3 -->
 
 ::: {.notes}
-Sumados, los tres átomos dan la curva azul, que ya se parece mucho a la
-original. Tres números en lugar de 128, con 15 por ciento de error. Con
-más átomos el error baja, lo vemos en los resultados.
+Sumados dan la curva azul: tres números en lugar de 128, con 15 por
+ciento de error.
 :::
 
 ## En forma de matrices
@@ -761,13 +754,10 @@ De 256 pesos, casi todos valen **cero**: solo trabajan unos cuantos
 :::
 
 ::: {.notes}
-Lo mismo en matrices. La ventana x es una columna de 128. El
-diccionario D tiene 256 columnas, una por átomo. Y alfa trae un peso
-por átomo.
-
-Como hay más átomos que muestras, el sistema tiene infinitas soluciones.
-De todas buscamos la más dispersa, la que usa menos átomos: en naranja,
-las tres columnas que trabajan y sus tres pesos.
+- x es la ventana, D tiene 256 átomos y alfa un peso por átomo.
+- Más átomos que muestras: infinitas soluciones. Buscamos la más
+  dispersa.
+- En naranja, las tres columnas que trabajan.
 :::
 
 # Las bases
@@ -853,13 +843,9 @@ justo esto. **Siempre es de rango 1.**
 :::
 
 ::: {.notes}
-El rango es cuántas columnas son de verdad independientes. Aquí la
-segunda columna es la primera por 2 y la tercera por 3: una sola
-dirección, rango 1.
-
-Lo importante para el proyecto es la última frase: un átomo por sus
-pesos tiene exactamente esta forma, columna por fila. Eso va a decidir
-cómo se actualiza cada átomo.
+- Rango 1: todas las columnas son múltiplos de una sola.
+- Lo clave: un átomo por sus pesos es columna por fila. Eso decide cómo
+  se actualiza cada átomo.
 :::
 
 ## La SVD como suma de piezas de rango 1 {.smaller}
@@ -887,15 +873,10 @@ $$
 :::
 
 ::: {.notes}
-La SVD parte cualquier matriz en piezas de rango 1, cada una pesada
-por un valor singular, ordenadas de mayor a menor.
-
-Eckart-Young dice algo muy fuerte: la mejor aproximación de rango k no
-es solo la mejor entre las truncaciones de esta suma, es la mejor entre
-todas las matrices de rango k que existen. Y el error son los sigma que
-se tiraron.
-
-Para K-SVD solo vamos a necesitar k igual a 1: la primera pieza.
+- La SVD parte la matriz en piezas de rango 1, de mayor a menor sigma.
+- Eckart-Young: truncar da la mejor aproximación de rango k entre todas
+  las matrices, y el error son los sigma que se tiran.
+- K-SVD solo necesita la primera pieza.
 :::
 
 ## OMP: cada ventana escoge sus átomos
@@ -930,15 +911,11 @@ a todos los átomos escogidos, así que **ninguno se repite**.
 :::
 
 ::: {.notes}
-OMP es voraz. En cada vuelta escoge el átomo con mayor producto punto
-contra el residual, lo que falta por explicar.
-
-El detalle está en la línea 5: no solo se calcula el peso del átomo
-nuevo, se recalculan todos. Por eso se llama orthogonal, y por eso un
-átomo ya escogido nunca vuelve a ganar: el residual ya no tiene nada de
-él.
-
-Para cuando el error relativo baja de 0.1 o llega a 16 átomos.
+- Voraz: cada vuelta gana el átomo con mayor producto punto contra el
+  residual.
+- Línea 5: se recalculan todos los pesos. Por eso es ortogonal y ningún
+  átomo se repite.
+- Para con error menor a 0.1 o con 16 átomos.
 :::
 
 ## OMP paso a paso: un ejemplo de juguete {#omp-juguete-datos}
@@ -966,24 +943,10 @@ baja de <b>0.1</b> (o al llegar a 16 átomos).</p>
 ```
 
 ::: {.notes}
-Antes de ver OMP con el ECG real, lo hacemos a mano con un ejemplo
-que cabe en una hoja.
-
-Tres matrices. X son las ventanas: tiene dos columnas, v1 y v2, y cada
-columna tiene tres números, uno por muestra. D es el diccionario: cuatro
-columnas, los átomos A, B, C y E, y las filas son las mismas tres
-muestras. Que las filas coincidan es lo que permite sumar átomos para
-armar una ventana.
-
-Lo que OMP tiene que encontrar es alfa: una fila por átomo y una columna
-por ventana. Cada columna de alfa es la receta de una ventana: cuánto de
-cada átomo usa.
-
-Todos los átomos miden 1, y OMP para cuando lo que falta por explicar es
-menos del 10 por ciento de la ventana, o cuando ya usó 16 átomos.
-
-En el proyecto es igual, solo que con 128 muestras, 256 átomos y 2539
-ventanas.
+- Primero a mano, con un ejemplo que cabe en una hoja.
+- X: dos ventanas de tres muestras. D: cuatro átomos de norma 1.
+- OMP busca alfa: cada columna es la receta de una ventana.
+- En el proyecto: 128 muestras, 256 átomos y 2539 ventanas.
 :::
 
 ## Ventana 1, vuelta 1 {#omp-juguete-v1-1}
@@ -1025,21 +988,11 @@ Con un solo átomo el sistema es de 1 × 1:<br>
 ```
 
 ::: {.notes}
-Vuelta 1 con la ventana 1, x igual a (1, 1, 0.5). Al principio no se ha
-explicado nada, así que el residual r es la ventana completa.
-
-Paso 1, comparar. En lugar de hacer cuatro productos punto por separado,
-es una sola multiplicación: D transpuesta por r. Cada fila de D
-transpuesta es un átomo, así que cada renglón del resultado es el
-producto punto de un átomo con lo que falta. Por ejemplo, para B: 0.6
-por 1, más 0.8 por 1, más 0 por 0.5, da 1.4. Es el mayor, gana B.
-
-Paso 2, el peso. Con un solo átomo la ecuación es de uno por uno: B
-punto B, que vale 1 porque B mide 1, por w igual a B punto x. Sale 1.4.
-
-Paso 3. A la ventana le quito 1.4 veces B y queda el residual nuevo:
-(0.16, -0.12, 0.5). Mide 0.539, que es el 36 por ciento de la ventana.
-Más que 10 por ciento, así que sigue.
+- Al inicio el residual es la ventana completa.
+- D transpuesta por r da los cuatro productos punto de una vez. Gana B,
+  con 1.4.
+- B mide 1, así que su peso es B punto x: 1.4.
+- Queda un residual del 36 por ciento. Sigue.
 :::
 
 ## Ventana 1, vuelta 2 {#omp-juguete-v1-2}
@@ -1086,22 +1039,11 @@ Más que 10 por ciento, así que sigue.
 ```
 
 ::: {.notes}
-Vuelta 2. Ojo: ahora se compara contra el residual nuevo, lo que falta,
-no contra la ventana original.
-
-B da exactamente cero. No es casualidad: el residual quedó perpendicular
-a B, ya no tiene nada de él, y por eso un átomo nunca se repite. Gana C,
-con 0.5, que tiene sentido: lo que más faltaba era el 0.5 de la tercera
-muestra. Al principio C era el que menos se parecía a la ventana.
-
-Paso 2. Ahora hay dos átomos escogidos, y se recalculan los pesos de los
-dos. D sub S son solo las columnas escogidas, B y C. Las ecuaciones
-normales piden D_S transpuesta por D_S, que son productos punto entre
-los átomos escogidos, y del otro lado D_S transpuesta por x. Como B y C
-son perpendiculares, esa matriz es la identidad: cada peso es su producto
-punto con x, 1.4 y 0.5. El peso de B no cambia.
-
-Paso 3. Queda (0.16, -0.12, 0), un error de 13 por ciento. Sigue.
+- Se compara contra el residual, no contra la ventana.
+- B da cero: el residual ya no tiene nada de él. Gana C, con 0.5.
+- B y C son perpendiculares: la matriz es la identidad y los pesos
+  salen directos, 1.4 y 0.5.
+- Error del 13 por ciento. Sigue.
 :::
 
 ## Ventana 1, vuelta 3 {#omp-juguete-v1-3}
@@ -1131,19 +1073,9 @@ Paso 3. Queda (0.16, -0.12, 0), un error de 13 por ciento. Sigue.
 ```
 
 ::: {.notes}
-Vuelta 3. B y C dan cero porque ya están escogidos. Entre A y E gana A,
-porque 0.16 es mayor en valor absoluto que -0.12.
-
-Ahora hay tres átomos escogidos: B, C y A. Se arma otra vez el sistema
-con las ecuaciones normales. La matriz de la izquierda tiene en cada
-casilla el producto punto entre dos átomos escogidos. En la diagonal hay
-unos, porque cada átomo mide 1.
-
-Lo importante son los dos 0.6 en naranja: A punto B vale 0.6, no cero. A
-y B no son perpendiculares, se pisan: los dos aportan en la primera
-muestra. Por eso la matriz ya no es la identidad, y los pesos no se
-pueden sacar con un producto punto cada uno. Hay que resolver el
-sistema, que es lo que vemos en la siguiente.
+- Gana A: 0.16 pesa más que -0.12 en valor absoluto.
+- Los 0.6 en naranja: A y B no son perpendiculares, se pisan.
+- La matriz ya no es la identidad; hay que resolver el sistema.
 :::
 
 ## Ventana 1, vuelta 3: resolver {#omp-juguete-v1-4}
@@ -1209,22 +1141,9 @@ en la muestra 1 y B ya no carga con todo.</div>
 ```
 
 ::: {.notes}
-Resolver el sistema. Escrito como ecuaciones: la segunda ya da w_C igual
-a 0.5. De la tercera despejo w_A y lo sustituyo en la primera. Queda
-0.64 w_B igual a 0.8, o sea w_B igual a 1.25, y de regreso w_A igual a
-0.25.
-
-Comprobación: x menos D_S por w da cero. La ventana sale exacta con tres
-átomos y el error es cero, así que se detiene.
-
-Fíjense en el peso de B: empezó en 1.4 y ahora vale 1.25. En la vuelta 1
-B explicaba sola la primera muestra. Ahora A también aporta ahí, así que
-B ya no carga con todo. Eso es lo ortogonal de OMP: cada vuelta se
-reajustan todos los pesos. Si nos quedáramos con 1.4 y le sumáramos A con
-peso 1, la reconstrucción quedaría mal.
-
-La tabla resume las tres vueltas: cada vez entra un átomo y el error
-baja.
+- Sale w_C = 0.5, w_B = 1.25 y w_A = 0.25. Error cero, se detiene.
+- B bajó de 1.4 a 1.25 porque ahora A comparte la primera muestra.
+  Eso es lo ortogonal: cada vuelta se reajustan todos los pesos.
 :::
 
 ## Ventana 2: basta un átomo {#omp-juguete-v2}
@@ -1263,14 +1182,9 @@ baja.
 ```
 
 ::: {.notes}
-La ventana 2 es (0.9, 1, 0). Mismo procedimiento.
-
-Comparar: otra vez gana B, con 1.34. Su peso es 1.34.
-
-Residual: le quito 1.34 veces B y queda (0.096, -0.072, 0). Mide 0.12,
-que dividido entre 1.345 da 0.089. Ya es menos del 10 por ciento, así
-que OMP se detiene con un solo átomo. No queda exacta, pero cumple el
-objetivo, y OMP no gasta átomos de más. Así se consigue la dispersión.
+- Gana B otra vez, con peso 1.34.
+- Queda un 8.9 por ciento, menos del 10: se detiene con un solo átomo.
+- No sale exacta, pero cumple. Así se logra la dispersión.
 :::
 
 ## El resultado de OMP: la matriz α {#omp-juguete-alpha}
@@ -1308,21 +1222,10 @@ lo mismo con una ventana real del ECG.</p>
 ```
 
 ::: {.notes}
-Juntando las dos recetas como columnas sale alfa: cuatro filas, una
-por átomo, y dos columnas, una por ventana.
-
-Se lee de dos maneras. Por columna es la receta: la ventana 1 es 0.25 de
-A más 1.25 de B más 0.5 de C; la ventana 2 es casi 1.34 de B. Por fila
-dice quién usa cada átomo: B lo usan las dos ventanas y E nadie. Esa
-lectura por fila es la que necesita el paso SVD para mejorar cada átomo.
-
-Comprobación: D por alfa reconstruye todas las ventanas en una sola
-multiplicación. Tres por cuatro, por cuatro por dos, da tres por dos, el
-tamaño de X. La ventana 1 sale exacta y la 2 casi.
-
-Lo importante: OMP solo produce alfa, el diccionario no se tocó. Ahora
-veamos lo mismo con una ventana real del ECG, de 128 muestras y con 256
-átomos.
+- Por columna, la receta de cada ventana. Por fila, quién usa cada
+  átomo: B las dos, E nadie.
+- La lectura por fila es la que usa el paso SVD.
+- OMP solo produce alfa; el diccionario no se tocó.
 :::
 
 ## OMP en una ventana real {auto-animate=true}
@@ -1446,9 +1349,8 @@ Cada vuelta, el residual se encoge
 <!-- fin:omp_1 -->
 
 ::: {.notes}
-Vuelta 1. Gana el átomo 204, que ya tiene la forma del QRS. La curva
-azul es la reconstrucción y la naranja de abajo lo que sobra. Error de
-0.25, todavía alto.
+Vuelta 1: gana el 204, ya con forma de QRS. Azul es la reconstrucción,
+naranja lo que sobra. Error de 0.25.
 :::
 
 ## OMP en una ventana real {auto-animate=true}
@@ -1575,8 +1477,8 @@ reajustan <strong>todos</strong>
 <!-- fin:omp_2 -->
 
 ::: {.notes}
-Vuelta 2. Entra el 105, con peso negativo. Fíjense en el peso del 204:
-cambió. Es el paso 5, se reajustan todos.
+Vuelta 2: entra el 105, con peso negativo, y cambia el peso del 204: se
+reajustan todos.
 :::
 
 ## OMP en una ventana real {auto-animate=true}
@@ -1835,8 +1737,7 @@ de 0.1
 <!-- fin:omp_4 -->
 
 ::: {.notes}
-Vuelta 4. Con cuatro átomos el error ya es 0.11. Dos vueltas más y baja
-del umbral de 0.1.
+Vuelta 4: error de 0.11. Dos vueltas más y baja del umbral.
 :::
 
 ## K-SVD: aprender el diccionario
@@ -5151,9 +5052,8 @@ en azul, las primeras 5 ventanas de 128 muestras
 <!-- fin:datos_tira -->
 
 ::: {.notes}
-La base estándar de ECG. Usamos el registro 100, media hora a 360
-muestras por segundo. Tres segundos de la señal, y en azul las primeras
-ventanas de 128 muestras, poco más que un latido cada una.
+MIT-BIH, registro 100: media hora a 360 muestras por segundo. En azul,
+ventanas de 128 muestras, poco más que un latido.
 :::
 
 ## Los datos {auto-animate=true}
@@ -5449,13 +5349,10 @@ $X$ es de $128 \times 5078$: la primera mitad entrena y la segunda prueba
 <!-- fin:datos_columnas -->
 
 ::: {.notes}
-Cada ventana se centra, para quitar la deriva de la línea base, y se
-normaliza a norma 1, para que solo cuente la forma. Cada una es una
-columna de X: 5078 en total.
-
-La primera mitad del registro entrena y la segunda prueba. El corte es
-por tiempo y no al azar: ventanas vecinas son casi iguales, y
-repartirlas al azar inflaría el resultado.
+- Cada ventana se centra y se normaliza: solo cuenta la forma.
+- 5078 ventanas, cada una es una columna de X.
+- Primera mitad entrena, segunda prueba. Corte por tiempo, no al azar:
+  ventanas vecinas son casi iguales e inflarían el resultado.
 :::
 
 ## El montaje
@@ -5473,9 +5370,8 @@ repartirlas al azar inflaría el resultado.
 :::
 
 ::: {.notes}
-Los parámetros que el enunciado deja abiertos. El más importante es
-que hay más átomos que muestras: sin eso el sistema tiene una sola
-solución y no hay nada disperso que buscar.
+Lo clave: más átomos que muestras. Sin eso hay una sola solución y nada
+disperso que buscar.
 :::
 
 # Resultados
@@ -5567,11 +5463,8 @@ Lo que baja es cuántos átomos hacen falta para alcanzarlo: de
 <!-- fin:entrenamiento -->
 
 ::: {.notes}
-Algo que confunde si no se dice: el error de entrenamiento no baja, se
-queda en 0.10 porque ese es el umbral de paro de OMP.
-
-Lo que mejora es cuántos átomos hacen falta para llegar a ese error: de
-10.6 a 8.4. Ese es el aprendizaje.
+- El error de entrenamiento no baja: 0.10 es el umbral de paro de OMP.
+- Lo que mejora es cuántos átomos hacen falta: de 10.6 a 8.4.
 :::
 
 ## Lo que aprendió el diccionario
@@ -5579,9 +5472,8 @@ Lo que mejora es cuántos átomos hacen falta para llegar a ese error: de
 ![](img/atomos.png){width="92%" fig-align="center"}
 
 ::: {.notes}
-Los átomos más usados. No son ventanas cualquiera: son complejos QRS en
-distintas posiciones dentro de la ventana y con ambas polaridades. El
-diccionario aprendió la forma del latido, no los latidos.
+Complejos QRS en distintas posiciones y polaridades. Aprendió la forma
+del latido, no los latidos.
 :::
 
 ## Original contra reconstrucción
@@ -5589,9 +5481,8 @@ diccionario aprendió la forma del latido, no los latidos.
 ![](img/reconstruccion.png){width="100%" fig-align="center"}
 
 ::: {.notes}
-El entregable que pide el enunciado. A la izquierda la descomposición
-en átomos, a la derecha la reconstrucción con 2, 4, 8 y 16 átomos.
-Error de 0.185 con 2 átomos y de 0.034 con 16.
+El entregable del enunciado. Error de 0.185 con 2 átomos y de 0.034
+con 16.
 :::
 
 ## Contra diccionarios que no aprendieron
@@ -5723,17 +5614,11 @@ Con 32 átomos la DCT lo alcanza: 0.074 contra 0.081.
 <!-- fin:comparacion -->
 
 ::: {.notes}
-Para saber si entrenar sirvió, el mismo error contra dos diccionarios
-del mismo tamaño: las ventanas sin entrenar, D0, y una DCT, el
-diccionario fijo clásico.
-
-Con pocos átomos, que es lo que importa en una representación dispersa,
-el aprendido gana siempre: con 8 átomos tiene la tercera parte del
-error de la DCT.
-
-Pero con 32 átomos la DCT lo alcanza y lo pasa. El diccionario se
-especializó en el latido, y lo que queda después de muchos átomos es
-ruido de alta frecuencia, que los cosenos describen mejor.
+- Mismo tamaño: D0, las ventanas sin entrenar, y la DCT.
+- Con pocos átomos gana el aprendido: con 8, un tercio del error de la
+  DCT.
+- Con 32 la DCT lo pasa: lo que sobra es ruido de alta frecuencia, y
+  eso lo describen mejor los cosenos.
 :::
 
 ## ¿Sirve para otros pacientes?
@@ -5823,14 +5708,10 @@ La serie no lo predice: el 208 es de arritmias y sale igual de bien.
 <!-- fin:pacientes -->
 
 ::: {.notes}
-El diccionario del registro 100 aplicado sin reentrenar a otros cuatro
-pacientes. En 103 y 208 funciona igual que en el propio 100. En 101 y
-200 el error sube.
-
-Lo interesante es que la serie no lo predice: el 208 es de la serie de
-arritmias y sale igual de bien. Un diccionario de un solo paciente
-cubre morfologías parecidas a la suya, no todas. El paso siguiente es
-entrenar con varios pacientes.
+- Sin reentrenar: 103 y 208 igual que el 100; 101 y 200 empeoran.
+- La serie no lo predice: el 208 es de arritmias y sale bien.
+- Un paciente cubre morfologías parecidas a la suya, no todas.
+  Siguiente paso: entrenar con varios.
 :::
 
 ## Cuánto se comprime {auto-animate=true}
@@ -6497,9 +6378,8 @@ reconstruye
 <!-- fin:compresion_2 -->
 
 ::: {.notes}
-Con el diccionario aprendido basta con unos 9 pesos y los índices de
-sus 9 átomos, con un error del 10 por ciento. El diccionario se guarda
-una sola vez y lo comparten quien comprime y quien reconstruye.
+Con el diccionario aprendido bastan unos 9 pesos y sus 9 índices, con
+10 por ciento de error. El diccionario se guarda una sola vez.
 :::
 
 ## Conclusiones {.smaller}
@@ -6517,8 +6397,8 @@ una sola vez y lo comparten quien comprime y quien reconstruye.
   que le toca explicar
 
 ::: {.notes}
-Cierre. Lo más importante: la SVD aparece porque la forma del problema
-la exige, columna por fila, no porque sea conveniente.
+Lo más importante: la SVD aparece porque el problema la exige, columna
+por fila, no por conveniencia.
 :::
 
 ## Referencias {.refs}
