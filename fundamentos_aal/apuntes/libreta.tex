@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.12.0
+%   * Version: 2.13.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       07/10/2026      Clase 7 Oct, de las RNN al Transformer
 %  zxxz6       05/10/2026      Clase 5 Oct, Word2Vec, FastText y GloVe
 %  zxxz6       30/09/2026      Clase 30 Sep, semantica distribucional
 %  zxxz6       28/09/2026      Clase 28 Sep, SVD y el detalle de LSI
@@ -4696,6 +4697,968 @@ contexto.
     un sentido de WordNet, el vector mismo cambia con el contexto. Los
     modelos que hacen esto, como ELMo y BERT, ya no son una tabla de
     vectores sino una red completa que hay que correr sobre la oración.
+\end{idea}
+
+% =====================================================================
+%  Clase 16 - Redes recurrentes, atención y Transformer
+% =====================================================================
+
+\clase{De las redes recurrentes al Transformer}{7 de octubre de 2026}
+
+\begin{quick_sum}
+    Segunda parte de los embeddings: los contextualizados, donde el
+    vector de una palabra depende de la oración en la que aparece. Se
+    recorrió la línea de modelos que llevó a ellos. Las redes
+    recurrentes leen la oración palabra por palabra con una memoria; la
+    LSTM le arregla a esa memoria lo corta; ELMo, el primer modelo de
+    embeddings contextualizados, corre LSTM en las dos direcciones. El
+    codificador-decodificador transforma una secuencia en otra, la
+    atención le quita su cuello de botella, y el Transformer tira la
+    recurrencia y se queda solo con la atención.
+\end{quick_sum}
+
+\subsection*{Estáticos contra contextualizados}
+
+Word2Vec, FastText y GloVe producen embeddings estáticos: cada palabra
+tiene un vector fijo. En el fondo son una tabla: se busca la palabra y
+sale su vector, sin importar en qué oración esté.
+
+Un embedding contextualizado no es una tabla sino una función de la
+oración completa (diapositiva $58$). Recibe las $n$ palabras y
+devuelve un vector por cada una:
+\[
+    g : (w_1, w_2, \dots, w_n) \longmapsto x_1, x_2, \dots, x_n
+    \in \R^d ,
+\]
+y el vector de la palabra $k$ depende de todas las demás
+(diapositiva $59$):
+\[
+    x_k = f(w_k \mid w_1, w_2, \dots, w_n) .
+\]
+
+\begin{ejemplo}[\textit{perro}]
+    En \textit{``ese carro se ve muy perro''}, \textit{perro} quiere
+    decir que se ve bien; en \textit{``el perro ladra''}, es el animal.
+    Un embedding estático le da a \textit{perro} un solo vector,
+    entrenado con todas sus apariciones, y como el animal es mucho más
+    frecuente, ese vector queda casi todo del lado del animal. Un
+    embedding contextualizado calcula un vector distinto en cada
+    oración: en la primera, \textit{se ve muy} lo acerca a adjetivos
+    como \textit{bonito} o \textit{chido}; en la segunda,
+    \textit{ladra} lo deja junto a \textit{gato} y \textit{perrito}.
+
+    La diapositiva $59$ trae el mismo caso en inglés:
+    \textit{play} en \textit{``Elmo and Cookie Monster play a game''}
+    es el verbo jugar, y en \textit{``The Broadway play premiered
+    yesterday''} es una obra de teatro.
+\end{ejemplo}
+
+Para construir $f$ hace falta un modelo que lea la oración completa y
+cuya salida en cada posición dependa de las otras palabras. El primero
+que se usó para eso fueron las redes recurrentes.
+
+% =====================================================================
+
+\subsection*{Redes neuronales recurrentes}
+
+\begin{definicion}[Red neuronal recurrente]
+    Una RNN procesa una secuencia un elemento a la vez. En cada paso
+    $t$ su capa oculta recibe dos cosas: la entrada actual $x_t$ y su
+    propia salida del paso anterior, $h_{t-1}$. Con eso calcula el
+    nuevo estado $h_t$, que pasa al paso siguiente.
+\end{definicion}
+
+El estado $h_t$ es la \textbf{memoria interna} de la red: un vector de
+tamaño fijo que resume todo lo que ha leído hasta la palabra $t$, la
+experiencia previa con la que interpreta la palabra actual. Las
+ecuaciones de un paso son
+\[
+    h_t = \tanh\!\left(W_h\, h_{t-1} + W_x\, x_t + b\right) ,
+    \qquad
+    y_t = \operatorname{softmax}\!\left(U h_t\right) ,
+\]
+con $x_t$ el embedding de la palabra $t$ y $h_0 = 0$. Si la red es un
+modelo de lenguaje, $y_t$ es la distribución de la palabra siguiente,
+como en la red de la clase pasada.
+
+Las matrices $W_h$, $W_x$ y $U$ son las mismas en todos los pasos. Por
+eso se dibuja desenrollada: no son cuatro redes, es una sola red
+aplicada cuatro veces, y las flechas horizontales son la memoria que
+pasa de un paso al siguiente.
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners=2pt, minimum width=1.1cm,
+                minimum height=0.8cm, align=center, font=\small,
+                fill=fondoIdea},
+    >=stealth]
+    \foreach \i/\w in {1/se, 2/ve, 3/muy, 4/perro} {
+        \node[box] (h\i) at ({2.6*\i}, 0) {$h_{\i}$};
+        \node[font=\small] (x\i) at ({2.6*\i}, -1.5) {\textit{\w}};
+        \node[font=\small] (y\i) at ({2.6*\i}, 1.5) {$y_{\i}$};
+        \draw[->] (x\i) -- node[right, font=\scriptsize] {$W_x$} (h\i);
+        \draw[->] (h\i) -- node[right, font=\scriptsize] {$U$} (y\i);
+    }
+    \node[font=\small] (h0) at (0.9, 0) {$h_0$};
+    \draw[->] (h0) -- (h1);
+    \foreach \i/\j in {1/2, 2/3, 3/4}
+        \draw[->] (h\i) -- node[above, font=\scriptsize] {$W_h$} (h\j);
+\end{tikzpicture}
+\end{center}
+
+Frente al modelo de lenguaje neuronal de la clase pasada, que solo veía
+una ventana fija de $N - 1$ palabras, la RNN puede, en principio,
+condicionar en todas las anteriores: su historia no tiene un tamaño
+máximo.
+
+\begin{idea}
+    Cada salida $h_t$ ya es un embedding contextualizado de la palabra
+    $t$: representa la palabra de entrada junto con las anteriores. Pero
+    solo con las anteriores. En \textit{``se ve muy perro''}, $h_3$
+    sabe que antes vino \textit{se ve}, pero no sabe que después viene
+    \textit{perro}. Ese hueco es lo que va a cerrar ELMo leyendo
+    también de derecha a izquierda.
+\end{idea}
+
+\begin{ejemplo}[Cuánto dura la memoria]
+    Una RNN de juguete con estado escalar, $W_h = 0.5$, $W_x = 1$ y
+    $b = 0$. La primera palabra deja una marca, $x_1 = 1$, y las tres
+    siguientes no aportan nada a esta componente, $x_2 = x_3 = x_4 = 0$:
+    \begin{align*}
+        h_1 &= \tanh(0.5 \cdot 0 + 1) = \tanh(1) = 0.762 , \\
+        h_2 &= \tanh(0.5 \cdot 0.762) = \tanh(0.381) = 0.363 , \\
+        h_3 &= \tanh(0.5 \cdot 0.363) = \tanh(0.182) = 0.180 , \\
+        h_4 &= \tanh(0.5 \cdot 0.180) = \tanh(0.090) = 0.090 .
+    \end{align*}
+    La marca de la primera palabra se reduce a la mitad en cada paso.
+    Tres palabras después queda el $12\%$ de lo que había.
+\end{ejemplo}
+
+\subsubsection*{Arquitecturas}
+
+Según cuántas entradas y salidas se conecten, la misma idea da
+distintas arquitecturas (diapositiva $62$):
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Arquitectura} & \textbf{Qué hace} & \textbf{Ejemplo} \\
+    \midrule
+    Uno a uno      & una entrada, una salida   & red densa común \\
+    Uno a muchos   & genera una secuencia      & describir una imagen \\
+    Muchos a uno   & resume una secuencia      & sentimiento de una
+                                                reseña \\
+    Muchos a muchos & una salida por entrada   & etiquetado POS \\
+    Codificador-decodificador & secuencia a secuencia & traducción \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+En \textit{muchos a uno} solo se usa el último estado, $h_n$, que
+resume la oración entera. En \textit{muchos a muchos} hay una salida
+por palabra, que es lo que pide el etiquetado POS de la clase del $9$
+de septiembre. El codificador-decodificador tiene sección propia más
+abajo.
+
+\subsubsection*{Desventajas}
+
+\textbf{Memoria de corto plazo.} En cada paso $h_t$ se reescribe
+completo, mezclando la memoria con la palabra nueva y pasando todo por
+$\tanh$. Lo reciente pesa mucho más que lo viejo, y la información del
+principio de la oración se va borrando, como en el ejemplo de arriba.
+Es la desproporción de la información pasada: no es que la RNN decida
+olvidar, es que no puede evitarlo.
+
+\begin{ejemplo}[Una dependencia larga]
+    En \textit{``los perros que viven en la casa de la esquina
+    ladran''}, para conjugar \textit{ladran} en plural hay que recordar
+    \textit{perros}, que quedó siete palabras atrás, y no confundirse
+    con \textit{casa} ni con \textit{esquina}, que están más cerca y son
+    singulares.
+\end{ejemplo}
+
+\textbf{Desvanecimiento del gradiente.} La RNN se entrena con
+retropropagación a través del tiempo: el error de una predicción
+tardía tiene que viajar hacia atrás, paso por paso, hasta las palabras
+que la causaron. En cada paso el gradiente se multiplica por
+\[
+    \frac{\partial h_t}{\partial h_{t-1}}
+    = W_h \left(1 - h_t^2\right) .
+\]
+En el ejemplo de juguete eso da $0.434$, $0.484$ y $0.496$, así que
+\[
+    \frac{\partial h_4}{\partial h_1}
+    = 0.434 \cdot 0.484 \cdot 0.496 = 0.104 .
+\]
+Cada factor vale a lo más $0.5$, de modo que tras $20$ palabras el
+gradiente queda multiplicado por a lo más $0.5^{20} \approx 10^{-6}$.
+La red recibe una señal casi nula para ajustar lo que pasó $20$
+palabras antes, y no aprende dependencias largas. Si los factores son
+mayores que $1$ pasa lo contrario, el gradiente explota.
+
+% =====================================================================
+
+\subsection*{LSTM}
+
+Las redes de memoria de largo y corto plazo (\textit{Long Short-Term
+Memory}, Hochreiter y Schmidhuber, 1997) son una RNN diseñada contra
+esos dos problemas: permiten aprender dependencias largas sin que el
+gradiente se desvanezca o explote.
+
+\begin{idea}
+    La idea central es una \textbf{celda de memoria} que puede mantener
+    su estado a lo largo del tiempo (diapositiva $63$). Tiene dos
+    partes: una memoria explícita, el vector de estado de la celda
+    $c_t$, y unas \textbf{compuertas} que regulan qué información
+    entra a la memoria y qué sale de ella.
+\end{idea}
+
+Una compuerta es un vector de números entre $0$ y $1$, salido de una
+sigmoide $\sigma$, que se multiplica componente a componente ($\odot$)
+contra otro vector: donde vale $0$ bloquea y donde vale $1$ deja pasar.
+Las tres compuertas y el candidato se calculan a partir de la memoria
+de trabajo anterior y la palabra actual, concatenadas:
+\begin{align*}
+    f_t &= \sigma\!\left(W_f\, [h_{t-1}; x_t] + b_f\right)
+        & &\text{compuerta de olvido} \\
+    i_t &= \sigma\!\left(W_i\, [h_{t-1}; x_t] + b_i\right)
+        & &\text{compuerta de entrada} \\
+    \tilde{c}_t &= \tanh\!\left(W_c\, [h_{t-1}; x_t] + b_c\right)
+        & &\text{candidato a guardar} \\
+    o_t &= \sigma\!\left(W_o\, [h_{t-1}; x_t] + b_o\right)
+        & &\text{compuerta de salida}
+\end{align*}
+y con ellas se actualizan la celda y la salida:
+\[
+    c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t ,
+    \qquad
+    h_t = o_t \odot \tanh(c_t) .
+\]
+
+\begin{center}
+\begin{tikzpicture}[
+    gate/.style={draw, rounded corners=2pt, minimum width=0.85cm,
+                 minimum height=0.6cm, font=\small, fill=white},
+    op/.style={draw, circle, inner sep=1pt, font=\small, fill=white},
+    >=stealth]
+    \draw[rounded corners=4pt, fill=fondoIdea] (0, 0) rectangle
+        (7.4, 4);
+    % el camino de la memoria
+    \node[op] (fx) at (1.5, 3.3) {$\times$};
+    \node[op] (suma) at (4, 3.3) {$+$};
+    \draw[->] (-1.1, 3.3) node[left] {$c_{t-1}$} -- (fx);
+    \draw[->] (fx) -- (suma);
+    \draw[->] (suma) -- (8.5, 3.3) node[right] {$c_t$};
+    % las compuertas
+    \node[gate] (f) at (1.5, 1.6) {$\sigma$};
+    \node[gate] (i) at (2.75, 1.6) {$\sigma$};
+    \node[gate] (g) at (4, 1.6) {$\tanh$};
+    \node[gate] (o) at (5.25, 1.6) {$\sigma$};
+    \node[op] (ix) at (4, 2.45) {$\times$};
+    \node[gate] (th) at (6.5, 2.45) {$\tanh$};
+    \node[op] (ox) at (6.5, 1.6) {$\times$};
+    % la entrada
+    \draw (-1.1, 0.5) node[left] {$h_{t-1}$} -- (5.25, 0.5);
+    \draw (0.6, -0.9) node[below] {$x_t$} -- (0.6, 0.5);
+    \fill (0.6, 0.5) circle (1.5pt);
+    \foreach \x/\n in {1.5/f, 2.75/i, 4/g, 5.25/o}
+        \draw[->] (\x, 0.5) -- (\n);
+    \draw[->] (f) -- node[left, font=\scriptsize] {$f_t$} (fx);
+    \draw[->] (i) |- node[pos=0.3, left, font=\scriptsize] {$i_t$}
+        (ix);
+    \draw[->] (g) -- node[right, font=\scriptsize] {$\tilde{c}_t$}
+        (ix);
+    \draw[->] (ix) -- (suma);
+    \draw[->] (o) -- node[below, font=\scriptsize] {$o_t$} (ox);
+    \fill (6.5, 3.3) circle (1.5pt);
+    \draw[->] (6.5, 3.3) -- (th);
+    \draw[->] (th) -- (ox);
+    \draw[->] (ox) -- (8.5, 1.6) node[right] {$h_t$};
+    % nombres de las compuertas
+    \foreach \x/\t in {1.5/olvido, 2.75/entrada, 4/candidato,
+                       5.25/salida}
+        \node[font=\tiny] at (\x, 1.0) {\t};
+\end{tikzpicture}
+\end{center}
+
+Se lee así. La línea de arriba es la memoria de la celda: cruza el
+paso entero sufriendo solo una multiplicación, por $f_t$, que decide
+cuánto de lo viejo se conserva, y una suma, que agrega lo nuevo que
+$i_t$ dejó pasar del candidato. No se reescribe completa ni se aplasta
+con $\tanh$ en cada paso, como el $h_t$ de la RNN. Abajo, las
+compuertas se calculan con $h_{t-1}$ y $x_t$. A la derecha, $o_t$
+decide qué parte de la memoria se muestra como salida $h_t$ en este
+paso.
+
+\textbf{Por qué ya no se desvanece el gradiente.} Por el camino de la
+memoria,
+\[
+    \frac{\partial c_t}{\partial c_{t-1}} = f_t .
+\]
+Si la red aprende a poner $f_t \approx 1$, la información y el
+gradiente cruzan muchos pasos casi intactos. En la RNN el factor era
+$W_h (1 - h_t^2)$, que no depende de lo que la red quiera recordar y
+siempre aplasta.
+
+\begin{ejemplo}[La misma marca, ahora en una celda]
+    Se repite el ejemplo de la RNN con una LSTM escalar. Para verlo
+    claro, los valores de las compuertas se dan directamente en lugar
+    de calcularlos con pesos. En el primer paso la entrada se abre del
+    todo, $i_1 = 1$, y el candidato es
+    $\tilde{c}_1 = \tanh(1) = 0.762$:
+    \[
+        c_1 = f_1 \cdot 0 + 1 \cdot 0.762 = 0.762 .
+    \]
+    En los tres pasos siguientes la red decide conservar, con
+    $f_t = 0.95$, y casi no deja entrar nada, con $i_t = 0.05$ y
+    $\tilde{c}_t = 0$:
+    \begin{align*}
+        c_2 &= 0.95 \cdot 0.762 = 0.724 , \\
+        c_3 &= 0.95 \cdot 0.724 = 0.687 , \\
+        c_4 &= 0.95 \cdot 0.687 = 0.653 .
+    \end{align*}
+    Tres palabras después sigue el $86\%$ de la marca, contra el $12\%$
+    de la RNN, y el gradiente por la memoria es
+    $0.95^3 = 0.857$ contra $0.104$.
+
+    Las compuertas no son fijas: la red las calcula en cada paso a
+    partir de la palabra actual, así que aprende cuándo guardar y
+    cuándo soltar. En \textit{``los perros que viven en la casa de la
+    esquina ladran''} puede abrir la entrada en \textit{perros} para
+    guardar el plural, mantener $f_t \approx 1$ durante la
+    subordinada, usar el plural en \textit{ladran} con $o_t$, y luego
+    olvidarlo.
+\end{ejemplo}
+
+\begin{ojo}
+    La LSTM alarga la memoria, pero no la vuelve infinita, y sigue
+    siendo secuencial: para calcular $h_{100}$ hay que tener
+    $h_{99}$, así que las palabras de una oración no se pueden
+    procesar en paralelo. Esa es la limitación que va a eliminar el
+    Transformer.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{ELMo}
+
+ELMo (\textit{Embeddings from Language Models}, Peters et al., 2018)
+es el primer modelo que dio embeddings contextualizados de uso
+general. Sus vectores son los estados internos de un modelo de
+lenguaje bidireccional profundo (biLM), hecho con LSTM.
+
+\subsubsection*{El modelo de lenguaje bidireccional}
+
+Un biLM son dos modelos de lenguaje (diapositiva $65$). El que va
+hacia adelante lee de izquierda a derecha y predice cada palabra a
+partir de las anteriores; el que va hacia atrás lee de derecha a
+izquierda y predice cada palabra a partir de las siguientes:
+\[
+    p(t_1, \dots, t_N) = \prod_{k=1}^{N} p(t_k \mid t_1, \dots,
+    t_{k-1}) ,
+    \qquad
+    p(t_1, \dots, t_N) = \prod_{k=1}^{N} p(t_k \mid t_{k+1}, \dots,
+    t_N) .
+\]
+Se entrenan juntos, maximizando la suma de las dos log-verosimilitudes,
+con autosupervisión como el modelo de lenguaje de la clase pasada. Son
+dos LSTM separadas y cada una ve un solo lado; lo bidireccional sale de
+juntar sus estados en cada palabra. Así el vector de una palabra ve
+hacia adelante y hacia atrás.
+
+\subsubsection*{La arquitectura}
+
+Tiene tres capas (diapositiva $66$):
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Capa 0}: un embedding de la palabra sin contexto,
+          construido a partir de sus caracteres con una red
+          convolucional (char-CNN). Igual que FastText, así no hay
+          palabras fuera del vocabulario.
+    \item \textbf{Capas 1 y 2}: dos capas de LSTM bidireccional. En
+          cada una se concatenan el estado hacia adelante y el estado
+          hacia atrás de la palabra:
+          $h_{k,j} = [\overrightarrow{h}_{k,j};
+          \overleftarrow{h}_{k,j}]$ para la palabra $k$ en la capa $j$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners=2pt, minimum width=1.2cm,
+                minimum height=0.65cm, font=\small, fill=fondoIdea},
+    base/.style={box, fill=white},
+    >=stealth]
+    \foreach \i/\w in {0/Elmo, 1/play, 2/a, 3/game} {
+        \node[font=\small] (w\i) at ({1.9*\i}, -1.1) {\textit{\w}};
+        \node[base] (c\i) at ({1.9*\i}, 0) {$x_{\i}$};
+        \node[box] (a\i) at ({1.9*\i}, 1.4)
+            {$\rightarrow\ \leftarrow$};
+        \node[box] (b\i) at ({1.9*\i}, 2.8)
+            {$\rightarrow\ \leftarrow$};
+        \draw[->] (w\i) -- (c\i);
+        \draw[->] (c\i) -- (a\i);
+        \draw[->] (a\i) -- (b\i);
+    }
+    \foreach \i/\j in {0/1, 1/2, 2/3} {
+        \foreach \c in {a, b} {
+            \draw[->] ([yshift=2pt]\c\i.east) -- ([yshift=2pt]\c\j.west);
+            \draw[<-] ([yshift=-2pt]\c\i.east)
+                -- ([yshift=-2pt]\c\j.west);
+        }
+    }
+    \node[font=\scriptsize, anchor=west] (l0) at (6.6, 0)
+        {capa $0$, char-CNN};
+    \node[font=\scriptsize, anchor=west] (l1) at (6.6, 1.4)
+        {capa $1$, biLSTM};
+    \node[font=\scriptsize, anchor=west] (l2) at (6.6, 2.8)
+        {capa $2$, biLSTM};
+    \node[draw, circle, inner sep=1pt] (mas) at (10.3, 1.4) {$+$};
+    \draw[->] (l0.east) -- node[below, font=\scriptsize] {$s_0$}
+        (mas);
+    \draw[->] (l1.east) -- node[above, font=\scriptsize] {$s_1$}
+        (mas);
+    \draw[->] (l2.east) -- node[above, font=\scriptsize] {$s_2$}
+        (mas);
+    \draw[->] (mas) -- (11.2, 1.4) node[right, font=\small]
+        {ELMo};
+\end{tikzpicture}
+\end{center}
+
+La representación ELMo de la palabra $k$ combina sus tres capas con
+pesos que aprende la tarea que la va a usar:
+\[
+    \text{ELMo}_k = \gamma \sum_{j=0}^{2} s_j\, h_{k,j} ,
+\]
+donde los $s_j$ (los $\lambda_j$ de la diapositiva) salen de un
+softmax y suman $1$, y $\gamma$ ajusta la escala.
+
+\textbf{Cómo se usa.} Primero se entrena el biLM sobre un corpus grande
+y se congela. Para una tarea, digamos análisis de sentimiento, cada
+oración se pasa por el biLM, se calcula $\text{ELMo}_k$ de cada palabra
+y se le da al modelo de la tarea junto con su embedding de siempre. El
+modelo de la tarea solo aprende la combinación lineal: los $s_j$ y
+$\gamma$.
+
+\textbf{Por qué combinar capas.} Cada capa captura algo distinto.
+Peters et al.\ encontraron que la primera capa de LSTM funciona mejor
+para etiquetado POS, que es sintaxis, y la segunda para
+desambiguación de sentidos, que es semántica. Con los pesos, cada tarea
+toma la mezcla que le sirve.
+
+\begin{ejemplo}[\textit{play}, en las dos oraciones]
+    En la capa $0$ el vector de \textit{play} es idéntico en
+    \textit{``Elmo and Cookie Monster play a game''} y en \textit{``The
+    Broadway play premiered yesterday''}: todavía no hay contexto.
+
+    En la capa $1$ ya no. La LSTM hacia adelante llega a
+    \textit{play} después de leer \textit{Elmo and Cookie Monster}, un
+    sujeto que pide un verbo, en una oración, y después de leer
+    \textit{The Broadway}, un artículo y un modificador que piden un
+    sustantivo, en la otra. La LSTM hacia atrás llega desde \textit{a
+    game} en una y desde \textit{premiered yesterday} en la otra. Las
+    dos direcciones difieren, así que $h_{\textit{play},1}$ y
+    $h_{\textit{play},2}$ son distintos en cada oración. En el
+    artículo, los vecinos de \textit{play} en GloVe son puras palabras
+    de deporte, como \textit{playing}, \textit{game} y
+    \textit{players}; con el biLM, el \textit{play} de una oración de
+    teatro queda junto a otro \textit{play} de teatro.
+\end{ejemplo}
+
+\begin{ejemplo}[Dos tareas, dos mezclas]
+    Con vectores de juguete de dos componentes para \textit{play},
+    $h_0 = (0.2,\ 0.9)$, $h_1 = (0.6,\ 0.1)$ y $h_2 = (0.8,\ 0.5)$, y
+    $\gamma = 1$. Una tarea sintáctica que aprendió
+    $s = (0.2,\ 0.6,\ 0.2)$ usa
+    \[
+        0.2\,(0.2,\ 0.9) + 0.6\,(0.6,\ 0.1) + 0.2\,(0.8,\ 0.5)
+        = (0.56,\ 0.34) ,
+    \]
+    y una semántica que aprendió $s = (0.1,\ 0.2,\ 0.7)$ usa
+    \[
+        0.1\,(0.2,\ 0.9) + 0.2\,(0.6,\ 0.1) + 0.7\,(0.8,\ 0.5)
+        = (0.70,\ 0.46) .
+    \]
+    El mismo biLM congelado le da a cada tarea un vector distinto
+    para la misma palabra en la misma oración.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Codificador-decodificador}
+
+Un modelo secuencia a secuencia (\textit{sequence-to-sequence}) toma
+una secuencia como entrada y produce otra secuencia como salida,
+posiblemente de otro largo. El caso típico es la traducción automática
+(diapositiva $67$): \textit{``Je suis étudiant''} entra y
+\textit{``I am a student''} sale.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{El codificador} es una RNN o LSTM que lee la entrada
+          completa. Su último estado oculto es el \textbf{vector de
+          contexto} $c$: todo lo que entendió de la oración, agrupado
+          en un solo vector de tamaño fijo.
+    \item \textbf{El decodificador} es otra RNN que arranca con $c$ como
+          estado inicial y genera la salida una palabra a la vez. En
+          cada paso recibe la palabra que acaba de generar, da una
+          distribución sobre el vocabulario, escoge una palabra y
+          sigue, hasta producir el símbolo de fin \texttt{<eos>}.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners=2pt, minimum width=1cm,
+                minimum height=0.7cm, font=\small, fill=fondoIdea},
+    dec/.style={box, fill=fondoOjo},
+    >=stealth]
+    \foreach \i/\w in {0/Je, 1/suis, 2/étudiant} {
+        \node[box] (e\i) at ({1.4*\i}, 0) {};
+        \node[font=\small] (we\i) at ({1.4*\i}, -1.1) {\textit{\w}};
+        \draw[->] (we\i) -- (e\i);
+    }
+    \draw[->] (e0) -- (e1);
+    \draw[->] (e1) -- (e2);
+    \node[draw, circle, fill=fondoPend, font=\small] (c) at (4.3, 0)
+        {$c$};
+    \draw[->] (e2) -- (c);
+    \foreach \i/\x/\y in {0/\texttt{<bos>}/I, 1/I/am, 2/am/a,
+                          3/a/student, 4/student/\texttt{<eos>}} {
+        \node[dec] (d\i) at ({5.9 + 1.55*\i}, 0) {};
+        \node[font=\small] (xd\i) at ({5.9 + 1.55*\i}, -1.1)
+            {\textit{\x}};
+        \node[font=\small] (yd\i) at ({5.9 + 1.55*\i}, 1.1)
+            {\textit{\y}};
+        \draw[->] (xd\i) -- (d\i);
+        \draw[->] (d\i) -- (yd\i);
+    }
+    \draw[->] (c) -- (d0);
+    \foreach \i/\j in {0/1, 1/2, 2/3, 3/4}
+        \draw[->] (d\i) -- (d\j);
+    \node[font=\scriptsize] at (1.4, 0.75) {codificador};
+    \node[font=\scriptsize] at (9, -1.75) {decodificador};
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Traducir \textit{``Je suis étudiant''}, paso a paso]
+    Lo que hace el modelo, en orden:
+    \begin{enumerate}[itemsep=0.2em]
+        \item El codificador lee \textit{Je}, \textit{suis} y
+              \textit{étudiant}. Su último estado es $c$.
+        \item El decodificador arranca en $c$ y recibe \texttt{<bos>},
+              el símbolo de inicio. La palabra más probable es
+              \textit{I}.
+        \item Recibe \textit{I} y genera \textit{am}.
+        \item Recibe \textit{am} y genera \textit{a}.
+        \item Recibe \textit{a} y genera \textit{student}.
+        \item Recibe \textit{student} y genera \texttt{<eos>}. Se
+              detiene.
+    \end{enumerate}
+    Entraron tres palabras y salieron cuatro: por eso no sirve la
+    arquitectura de una salida por entrada. Al entrenar, en cada paso
+    se le da al decodificador la palabra correcta anterior, no la que
+    él generó, para que un error al principio no arruine el resto de la
+    oración.
+\end{ejemplo}
+
+La diferencia con ELMo es el producto. ELMo da una representación,
+un vector por palabra de la entrada, y ahí termina. El
+codificador-decodificador produce una secuencia nueva; la
+representación, el vector $c$, es solo el paso intermedio.
+
+\begin{ojo}
+    El vector $c$ es un cuello de botella. La oración entera, sea de
+    tres palabras o de sesenta, tiene que caber en el mismo vector de
+    tamaño fijo, y el decodificador no ve nada más. La calidad de la
+    traducción cae con el largo de la oración, y lo primero en
+    perderse son las palabras del principio, por la memoria de la LSTM.
+    Además todas las palabras de la salida usan el mismo $c$, aunque
+    cada una corresponda a palabras distintas de la entrada.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Atención}
+
+La atención (Bahdanau, Cho y Bengio, 2014) ataca los dos problemas del
+vector de contexto (diapositiva $68$): que no cabe una oración larga en
+él, y que la parte de la entrada que importa cambia en cada paso de la
+salida. La solución es pasarle al decodificador \textbf{todos} los
+estados ocultos del codificador, y que en cada paso decida a cuáles
+prestarles atención.
+
+En el paso $t$ el decodificador tiene su estado $h_t$, y el
+codificador dejó un estado $s_k$ por cada palabra de la entrada
+(diapositiva $69$). Entonces:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Puntaje.} Para cada palabra de la entrada se calcula
+          $\operatorname{score}(h_t, s_k)$: qué tan relevante es la
+          palabra $k$ para el paso $t$.
+    \item \textbf{Pesos.} Un softmax vuelve los puntajes una
+          distribución sobre las palabras de la entrada:
+          \[
+              a_k^{(t)} = \frac{\exp \operatorname{score}(h_t, s_k)}
+                               {\sum_{j} \exp \operatorname{score}(h_t,
+                                s_j)} .
+          \]
+    \item \textbf{Contexto.} El vector de contexto del paso $t$ es la
+          suma de los estados del codificador ponderada por esos pesos:
+          \[
+              c_t = \sum_{k} a_k^{(t)}\, s_k .
+          \]
+    \item \textbf{Predicción.} El decodificador usa $c_t$ junto con
+          $h_t$ para predecir la palabra siguiente.
+\end{enumerate}
+
+Ya no hay un solo $c$: hay un $c_t$ nuevo en cada paso, armado con las
+palabras de la entrada que ese paso necesita. El puntaje se puede
+calcular de varias formas (diapositiva $70$):
+\[
+    \underbrace{h_t^{\top} s_k}_{\text{producto punto}} ,
+    \qquad
+    \underbrace{h_t^{\top} W s_k}_{\text{bilineal}} ,
+    \qquad
+    \underbrace{w_2^{\top} \tanh\!\left(W_1 [h_t; s_k]\right)}
+               _{\text{perceptrón multicapa}} .
+\]
+El producto punto no tiene parámetros; la bilineal aprende una matriz
+$W$ que relaciona los dos espacios, y el perceptrón aprende una red
+completa. Bahdanau et al.\ usaron el perceptrón.
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners=2pt, minimum width=1.1cm,
+                minimum height=0.7cm, font=\small, fill=fondoIdea},
+    >=stealth]
+    \foreach \i/\w in {0/Je, 1/suis, 2/étudiant} {
+        \node[box] (s\i) at ({2*\i}, 0) {$s_{\the\numexpr\i+1\relax}$};
+        \node[font=\small] at ({2*\i}, -0.8) {\textit{\w}};
+    }
+    \node[draw, circle, fill=fondoPend, font=\small] (ct) at (2, 2.8)
+        {$c_t$};
+    \draw[->, line width=0.5pt] (s0) -- node[left, pos=0.45,
+        font=\scriptsize] {$0.151$} (ct);
+    \draw[->, line width=0.8pt] (s1) -- node[left, pos=0.3,
+        font=\scriptsize] {$0.237$} (ct);
+    \draw[->, line width=2pt] (s2) -- node[right, pos=0.45,
+        font=\scriptsize] {$0.612$} (ct);
+    \node[box, fill=fondoOjo] (ht) at (7, 0) {$h_t$};
+    \node[font=\scriptsize, align=center] at (7, -0.9)
+        {decodificador\\en el paso $t$};
+    \node[box, fill=fondoOjo] (pred) at (7, 2.8)
+        {\textit{student}};
+    \draw[->] (ct) -- (pred);
+    \draw[->] (ht) -- (pred);
+    \draw[->, dashed] (ht.north west) to[bend right=25] node[above,
+        font=\scriptsize] {puntajes} (s2.north east);
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Atención al generar \textit{student}]
+    Con vectores de juguete de dos componentes, los estados del
+    codificador son
+    \[
+        s_{\textit{Je}} = (1.0,\ 0.2) , \quad
+        s_{\textit{suis}} = (0.3,\ 1.0) , \quad
+        s_{\textit{étudiant}} = (1.2,\ 1.5) ,
+    \]
+    y el decodificador, a punto de generar la cuarta palabra, está en
+    $h_t = (0.5,\ 1.0)$. Con producto punto:
+    \begin{align*}
+        h_t^{\top} s_{\textit{Je}} &= 0.5 \cdot 1.0 + 1.0 \cdot 0.2
+            = 0.70 , \\
+        h_t^{\top} s_{\textit{suis}} &= 0.5 \cdot 0.3 + 1.0 \cdot 1.0
+            = 1.15 , \\
+        h_t^{\top} s_{\textit{étudiant}} &= 0.5 \cdot 1.2
+            + 1.0 \cdot 1.5 = 2.10 .
+    \end{align*}
+    El softmax:
+    \[
+        e^{0.70} = 2.014 , \quad e^{1.15} = 3.158 , \quad
+        e^{2.10} = 8.166 , \quad \text{suma} = 13.338 ,
+    \]
+    \[
+        a = \left(\frac{2.014}{13.338},\ \frac{3.158}{13.338},\
+            \frac{8.166}{13.338}\right) = (0.151,\ 0.237,\ 0.612) .
+    \]
+    El contexto de este paso:
+    \begin{align*}
+        c_t &= 0.151\,(1.0,\ 0.2) + 0.237\,(0.3,\ 1.0)
+               + 0.612\,(1.2,\ 1.5) \\
+            &= (0.151,\ 0.030) + (0.071,\ 0.237) + (0.734,\ 0.918)
+             = (0.956,\ 1.185) .
+    \end{align*}
+    El $61\%$ de la atención cae en \textit{étudiant}, justo la
+    palabra que se está traduciendo. Al generar \textit{I}, los pesos
+    habrían cargado hacia \textit{Je}.
+\end{ejemplo}
+
+\begin{idea}
+    Los pesos de atención son una \textbf{alineación suave} entre las
+    dos oraciones: para cada palabra de la salida dicen qué palabras de
+    la entrada se miraron. En el artículo de Bahdanau la tabla de pesos
+    sale casi diagonal, con las inversiones donde los idiomas cambian el
+    orden: \textit{zone économique européenne} queda alineada con
+    \textit{European Economic Area} al revés. Nadie le enseñó la
+    alineación; la aprendió porque le servía para traducir.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Transformer}
+
+El Transformer (Vaswani et al., 2017, \textit{``Attention is all you
+need''}) es un modelo basado únicamente en mecanismos de atención
+(diapositiva $71$). Tira la recurrencia por dos razones:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Es secuencial.} En una RNN, $h_t$ necesita a
+          $h_{t-1}$: una oración de $50$ palabras son $50$ pasos uno
+          tras otro, sin forma de repartirlos en paralelo.
+    \item \textbf{Las dependencias largas cruzan muchos pasos.} Para
+          que la palabra $1$ influya en la $50$, la información tiene
+          que atravesar $49$ estados. Con atención, cualquier par de
+          palabras se conecta en un solo paso.
+\end{itemize}
+
+En el codificador, las palabras se miran entre sí con autoatención,
+intercambian información y tratan de entenderse en el contexto de la
+oración completa. En el decodificador también se miran entre sí, y
+además miran los estados del codificador.
+
+\subsubsection*{Autoatención}
+
+La diferencia con la atención de la sección anterior está en quién
+mira a quién (diapositiva $72$). En la atención, el decodificador mira
+al codificador: dos secuencias distintas. En la
+\textbf{autoatención} (\textit{self-attention}) las representaciones
+son de la misma naturaleza: cada palabra de una oración mira a todas
+las palabras de esa misma oración, ella incluida, junta contexto y
+actualiza su propia representación. Lo hacen todas a la vez, en
+paralelo.
+
+\subsubsection*{Consulta, clave y valor}
+
+Cada vector de entrada $x_i$ recibe tres papeles, cada uno con su
+propia matriz aprendida (diapositiva $73$):
+\begin{align*}
+    q_i &= W_Q\, x_i
+        & &\text{consulta: \textit{``¿quién tiene lo que busco?''}} \\
+    k_i &= W_K\, x_i
+        & &\text{clave: \textit{``yo tengo esto, dame peso si te
+              sirve''}} \\
+    v_i &= W_V\, x_i
+        & &\text{valor: \textit{``esta es la información que
+              entrego''}}
+\end{align*}
+Para actualizar la palabra $i$ se compara su consulta con la clave de
+cada palabra, el softmax de esos puntajes da los pesos, y la salida es
+la suma ponderada de los valores. Con todas las palabras a la vez, en
+forma de matriz:
+\[
+    \operatorname{Attention}(Q, K, V)
+    = \operatorname{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}}
+      \right) V ,
+\]
+con $d_k$ la dimensión de las claves.
+
+\textbf{Por qué tres papeles y no usar $x_i$ directo.} Lo que una
+palabra busca no es lo mismo que lo que ofrece. \textit{Ladra} busca a
+su sujeto, un sustantivo que pueda ladrar; lo que les ofrece a las
+demás es ser un verbo. Con matrices separadas, consulta y clave pueden
+ser distintas.
+
+\textbf{Por qué dividir entre $\sqrt{d_k}$.} El producto punto suma
+$d_k$ términos, así que crece con la dimensión. Con puntajes grandes el
+softmax se satura: casi todo el peso cae en una palabra y el gradiente
+de las demás se vuelve casi cero. Dividir entre $\sqrt{d_k}$ mantiene
+los puntajes en la misma escala sin importar la dimensión.
+
+\begin{ejemplo}[Autoatención en \textit{``el perro ladra''}]
+    Con $d_k = 2$, la nueva representación de \textit{ladra}. Su
+    consulta es $q_{\textit{ladra}} = (1,\ 2)$ y las claves y valores
+    de las tres palabras son
+    \begin{center}
+    \begin{tabular}{lll}
+        \toprule
+        & \textbf{Clave} $k$ & \textbf{Valor} $v$ \\
+        \midrule
+        \textit{el}    & $(0.5,\ 0)$   & $(0.2,\ 0.1)$ \\
+        \textit{perro} & $(0,\ 1.5)$   & $(0.9,\ 0.3)$ \\
+        \textit{ladra} & $(1,\ 0.5)$   & $(0.1,\ 0.8)$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Puntajes, $q \cdot k$, y escalados entre $\sqrt{2} = 1.414$:
+    \[
+        (0.5,\ 3.0,\ 2.0) \;\longrightarrow\;
+        (0.354,\ 2.121,\ 1.414) .
+    \]
+    El softmax:
+    \[
+        e^{0.354} = 1.424 , \quad e^{2.121} = 8.342 , \quad
+        e^{1.414} = 4.113 , \quad \text{suma} = 13.879 ,
+    \]
+    \[
+        a = (0.103,\ 0.601,\ 0.296) .
+    \]
+    La salida es la suma ponderada de los valores:
+    \begin{align*}
+        z_{\textit{ladra}}
+          &= 0.103\,(0.2,\ 0.1) + 0.601\,(0.9,\ 0.3)
+             + 0.296\,(0.1,\ 0.8) \\
+          &= (0.021,\ 0.010) + (0.541,\ 0.180) + (0.030,\ 0.237)
+           = (0.592,\ 0.427) .
+    \end{align*}
+    El nuevo vector de \textit{ladra} es $60\%$ \textit{perro}: la
+    representación del verbo ya incluye quién ladra. Sin dividir entre
+    $\sqrt{2}$, el softmax de $(0.5,\ 3.0,\ 2.0)$ habría dado
+    $(0.057,\ 0.690,\ 0.254)$, más concentrado; con las $64$
+    dimensiones del Transformer original la diferencia sería mucho
+    mayor.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners=2pt, minimum width=1.2cm,
+                minimum height=0.7cm, font=\small, fill=fondoIdea},
+    >=stealth]
+    \foreach \i/\w in {0/el, 1/perro, 2/ladra} {
+        \node[box] (t\i) at ({2.2*\i}, 0) {\textit{\w}};
+    }
+    \node[box, fill=fondoOjo] (z) at (4.4, 2.6)
+        {$z_{\textit{ladra}}$};
+    \draw[->, line width=0.5pt] (t0) -- node[above left, pos=0.3,
+        font=\scriptsize] {$0.103$} (z);
+    \draw[->, line width=2pt] (t1) -- node[left, pos=0.55,
+        font=\scriptsize] {$0.601$} (z);
+    \draw[->, line width=1pt] (t2) -- node[right, font=\scriptsize]
+        {$0.296$} (z);
+    \node[font=\scriptsize] at (2.2, -0.75)
+        {capa $k$: los valores $v$ de cada palabra};
+    \node[font=\scriptsize] at (4.4, 3.3) {capa $k + 1$};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Atención multi-cabeza}
+
+Un solo softmax da una sola distribución: \textit{ladra} solo puede
+repartir su atención de una manera. La atención multi-cabeza
+(diapositiva $74$) corre varias autoatenciones en paralelo, cada una
+con sus propias $W_Q$, $W_K$ y $W_V$. Las cabezas trabajan de forma
+independiente y al final sus salidas se concatenan y se proyectan con
+una matriz $W_O$. Cada cabeza puede seguir una relación distinta: una
+la de verbo con sujeto, otra la de pronombre con el sustantivo al que
+se refiere, otra la de cada palabra con sus vecinas. El Transformer
+original usa $8$ cabezas de $d_k = 64$.
+
+\subsubsection*{Codificación posicional}
+
+La autoatención no ve el orden: es una suma ponderada sobre un
+conjunto de palabras. \textit{``El perro mordió al hombre''} y
+\textit{``el hombre mordió al perro''} le darían a cada palabra el
+mismo vector. Por eso la entrada de cada palabra es la suma de dos
+embeddings (diapositiva $76$): el de la palabra y el de su posición,
+\textit{``la palabra $x$ en la posición $k$''}. El artículo original
+usa senos y cosenos de distintas frecuencias; otros modelos aprenden
+el embedding de posición como cualquier otro.
+
+\subsubsection*{La arquitectura completa}
+
+\begin{center}
+\begin{tikzpicture}[
+    capa/.style={draw, rounded corners=2pt, minimum width=4.4cm,
+                 minimum height=0.6cm, font=\scriptsize,
+                 fill=fondoIdea},
+    norma/.style={capa, minimum height=0.45cm, fill=white},
+    >=stealth]
+    % codificador
+    \node[capa, fill=white] (ee) at (0, 0)
+        {embedding + posición};
+    \node[capa] (ea) at (0, 1.2) {autoatención multi-cabeza};
+    \node[norma] (en1) at (0, 2) {suma y normaliza};
+    \node[capa] (ef) at (0, 2.8) {red \textit{feed-forward}};
+    \node[norma] (en2) at (0, 3.6) {suma y normaliza};
+    \foreach \a/\b in {ee/ea, ea/en1, en1/ef, ef/en2}
+        \draw[->] (\a) -- (\b);
+    \draw[dashed, rounded corners=4pt] (-2.5, 0.7) rectangle
+        (2.5, 4.0);
+    \node[font=\scriptsize, anchor=east] at (-2.6, 2.35)
+        {$N \times$};
+    \node[font=\small] at (0, -0.9) {entrada};
+    \draw[->] (0, -0.65) -- (ee);
+    \node[font=\small] at (0, 4.5) {codificador};
+    % decodificador
+    \node[capa, fill=white] (de) at (6, 0)
+        {embedding + posición};
+    \node[capa] (da) at (6, 1.2) {autoatención enmascarada};
+    \node[norma] (dn1) at (6, 2) {suma y normaliza};
+    \node[capa] (dx) at (6, 2.8)
+        {atención codificador-decodificador};
+    \node[norma] (dn2) at (6, 3.6) {suma y normaliza};
+    \node[capa] (df) at (6, 4.4) {red \textit{feed-forward}};
+    \node[norma] (dn3) at (6, 5.2) {suma y normaliza};
+    \node[capa, fill=white] (ds) at (6, 6.3) {lineal + softmax};
+    \foreach \a/\b in {de/da, da/dn1, dn1/dx, dx/dn2, dn2/df, df/dn3,
+                       dn3/ds}
+        \draw[->] (\a) -- (\b);
+    \draw[dashed, rounded corners=4pt] (3.5, 0.7) rectangle
+        (8.5, 5.6);
+    \node[font=\scriptsize, anchor=west] at (8.6, 3.15)
+        {$\times N$};
+    \node[font=\small, align=center] at (6, -1.0)
+        {salida hasta el paso anterior};
+    \draw[->] (6, -0.7) -- (de);
+    \node[font=\small] at (6, 7.2) {probabilidad de la palabra
+        siguiente};
+    \draw[->] (ds) -- (6, 6.95);
+    % el codificador alimenta la atencion cruzada
+    \draw[->, thick] (en2.east) -- ++(0.8, 0) |- (dx.west);
+\end{tikzpicture}
+\end{center}
+
+Es el diagrama de la diapositiva $75$, simplificado.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Codificador.} $N$ capas iguales ($6$ en el original).
+          Cada una tiene dos subcapas: autoatención multi-cabeza, donde
+          las palabras se miran entre sí, y una red
+          \textit{feed-forward} que se aplica a cada palabra por
+          separado: después de juntar información de las otras, cada
+          palabra se toma un momento para procesarla.
+    \item \textbf{Suma y normaliza.} Cada subcapa va envuelta en una
+          conexión residual y una normalización de capa,
+          $\operatorname{Norm}(x + \operatorname{Subcapa}(x))$. La
+          conexión residual le deja a la información y al gradiente un
+          camino directo que se salta la subcapa, la misma idea que la
+          línea de memoria de la LSTM, y es lo que permite apilar
+          muchas capas.
+    \item \textbf{Decodificador.} También $N$ capas, con tres
+          subcapas. La \textbf{autoatención enmascarada} deja que cada
+          palabra mire solo a las anteriores: al generar la palabra
+          $t$, las siguientes todavía no existen. La \textbf{atención
+          codificador-decodificador} toma las consultas del
+          decodificador y las claves y valores del codificador; es la
+          atención de Bahdanau. Al final, una capa lineal y un softmax
+          dan la probabilidad de la palabra siguiente.
+\end{itemize}
+
+\begin{ojo}
+    La autoatención compara cada palabra con todas las demás: con $n$
+    palabras son $n^2$ puntajes por cabeza y por capa. Una RNN hace $n$
+    pasos. Para oraciones eso no importa y el paralelismo gana de
+    sobra, pero para documentos largos el costo cuadrático es el
+    límite principal del Transformer.
+\end{ojo}
+
+\begin{idea}
+    La salida del codificador ya es un embedding contextualizado: un
+    vector por palabra que depende de la oración entera, a través de
+    varias capas de autoatención. Es la función $g$ del principio de la
+    clase, ahora sin recurrencia. Los dos modelos que siguen se quedan
+    cada uno con una mitad del Transformer: GPT usa solo el
+    decodificador, como modelo de lenguaje de izquierda a derecha, y
+    BERT usa solo el codificador, que ve la oración en las dos
+    direcciones (diapositivas $77$ a $82$).
 \end{idea}
 
 
