@@ -91,3 +91,5 @@ matcomp/proyecto1/out/modelo.npz
 # Copia local de los registros de PhysioNet de matcomp/proyecto1. Unos
 # 2 MB por registro; Datos.py los vuelve a bajar si faltan
 matcomp/proyecto1/datos/
+
+glove/
