@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.4.0
+%   * Version: 3.5.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/10/2026      Clase 8 Oct, voraces y divide y venceras
 %  zxxz6       20/09/2026      Clase 17 Sep, heaps y construccion en O(n)
 %  zxxz6       20/09/2026      Clase 15 Sep, los cuatro metodos con ejemplos
 %  zxxz6       14/09/2026      Clase 10 Sep, recurrencias y sus metodos
@@ -2428,6 +2429,308 @@ Sustituyendo, el costo de \textsc{Build-Max-Heap} es
   \bottomrule
 \end{tabular}
 \end{center}
+
+\newpage
+
+% =====================================================================
+%  Clase 8 Oct - Mochila fraccional, actividades y divide y venceras
+% =====================================================================
+
+\clase{Mochila fraccional, actividades y divide y vencerás}%
+      {8 de octubre de 2026}
+
+\begin{quick_sum}
+  Dos problemas clásicos que se resuelven con algoritmos voraces: la
+  mochila fraccional y la selección de actividades cuyos horarios se
+  traslapan. Para cada uno, el criterio voraz que funciona, un
+  ejemplo completo, por qué da el óptimo y qué criterios parecidos
+  fallan. Al final arrancó la técnica de divide y vencerás.
+\end{quick_sum}
+
+\subsection*{Repaso: algoritmos voraces}
+
+Un algoritmo voraz (\textit{greedy}) resuelve un problema de
+optimización tomando, en cada paso, la opción que se ve mejor en ese
+momento, sin revisar nunca una decisión ya tomada. Suelen ser lineales
+o polinomiales. El riesgo es que lo mejor en el momento no siempre
+lleva al óptimo global, así que cada algoritmo voraz necesita un
+argumento de por qué su criterio funciona en ese problema en
+particular. Los dos de esta clase son el ejemplo de cuándo sí, y una
+variante de la mochila es el ejemplo de cuándo no.
+
+% =====================================================================
+
+\subsection*{Mochila fraccional}
+
+\begin{definicion}
+  Hay $n$ objetos; el objeto $i$ pesa $w_i$ y vale $v_i$. La mochila
+  aguanta un peso máximo $W$. De cada objeto se puede tomar una
+  fracción $x_i \in [0, 1]$, como si fuera polvo de oro y no un
+  lingote. Se busca
+  \[
+    \max \sum_{i=1}^{n} v_i\, x_i
+    \qquad \text{sujeto a} \qquad
+    \sum_{i=1}^{n} w_i\, x_i \leq W .
+  \]
+\end{definicion}
+
+\subsubsection*{El criterio voraz}
+
+Lo que importa no es el valor de un objeto sino cuánto vale cada
+unidad de peso que ocupa: su \textbf{densidad} $v_i / w_i$. El
+algoritmo ordena los objetos de mayor a menor densidad y los va
+metiendo completos mientras quepan. Cuando el siguiente ya no cabe
+completo, mete la fracción que alcance a llenar la mochila y termina.
+
+\begin{algorithm}[H]
+\caption{\textsc{Mochila-Fraccional}$(w, v, W)$}
+\begin{algorithmic}[1]
+\State ordenar los objetos de mayor a menor $v_i / w_i$
+\State $\mathit{libre} \gets W$, \quad $\mathit{valor} \gets 0$
+\For{$i \gets 1$ \Hasta $n$}
+  \If{$w_i \leq \mathit{libre}$}
+    \State $x_i \gets 1$
+  \Else
+    \State $x_i \gets \mathit{libre} / w_i$
+  \EndIf
+  \State $\mathit{libre} \gets \mathit{libre} - x_i\, w_i$
+  \State $\mathit{valor} \gets \mathit{valor} + x_i\, v_i$
+  \If{$\mathit{libre} = 0$}
+    \State \textbf{terminar}
+  \EndIf
+\EndFor
+\State \Return $\mathit{valor}$
+\end{algorithmic}
+\end{algorithm}
+
+Ordenar cuesta $\Ord{n \lg n}$ y la pasada es $\Ord{n}$, así que el
+algoritmo es $\Ord{n \lg n}$.
+
+\begin{ejemplo}
+  Mochila de $W = 50$ con tres objetos:
+  \begin{center}
+  \begin{tabular}{cccc}
+    \toprule
+    \textbf{Objeto} & \textbf{Peso} & \textbf{Valor}
+      & \textbf{Densidad} \\
+    \midrule
+    $1$ & $10$ & $60$  & $6$ \\
+    $2$ & $20$ & $100$ & $5$ \\
+    $3$ & $30$ & $120$ & $4$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Ya están en orden de densidad. Paso a paso:
+  \begin{center}
+  \begin{tabular}{clcc}
+    \toprule
+    \textbf{Objeto} & \textbf{Qué se toma} & \textbf{Libre después}
+      & \textbf{Valor acumulado} \\
+    \midrule
+    $1$ & completo, $10$ de peso & $40$ & $60$ \\
+    $2$ & completo, $20$ de peso & $20$ & $160$ \\
+    $3$ & no cabe completo: $20/30 = 2/3$ & $0$
+        & $160 + \tfrac{2}{3} \cdot 120 = 240$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  El valor máximo es $240$.
+\end{ejemplo}
+
+\subsubsection*{Por qué da el óptimo}
+
+Supóngase una solución que deja espacio sin usar de un objeto denso
+mientras carga un poco de uno menos denso. Si se saca una unidad de
+peso del menos denso y se mete una del más denso, el peso no cambia y
+el valor sube, o se queda igual si las densidades empatan. Repitiendo
+ese intercambio, cualquier solución se puede convertir en la del
+algoritmo sin perder valor. Por eso ninguna solución vale más que la
+voraz.
+
+\begin{ojo}
+  Lo que hace funcionar al criterio es poder partir los objetos. En
+  la \textbf{mochila 0/1}, donde cada objeto se toma completo o no se
+  toma, el mismo criterio falla. Con el ejemplo de arriba, el voraz
+  mete los objetos $1$ y $2$, y el $3$ ya no cabe: vale $160$. Pero
+  los objetos $2$ y $3$ juntos pesan exactamente $50$ y valen $220$.
+  Al no poder partir el objeto $3$, el espacio que deja libre el
+  voraz se desperdicia. La mochila 0/1 se resuelve con programación
+  dinámica, no con un algoritmo voraz.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Selección de actividades}
+
+Es el problema de los horarios que se traslapan.
+
+\begin{definicion}
+  Hay $n$ actividades que quieren usar el mismo recurso, por ejemplo
+  un salón, y solo una puede usarlo a la vez. La actividad $a_i$
+  ocupa el intervalo $[s_i, f_i)$: empieza en $s_i$ y termina en
+  $f_i$. Dos actividades son \textbf{compatibles} si sus intervalos no
+  se traslapan, o sea si una termina antes de que empiece la otra,
+  $f_i \leq s_j$ o $f_j \leq s_i$. Se busca el mayor número posible de
+  actividades compatibles entre sí.
+\end{definicion}
+
+\subsubsection*{El criterio voraz}
+
+Elegir siempre la actividad que \textbf{termina primero} entre las que
+todavía son compatibles con lo ya elegido. La razón: terminar pronto
+deja libre el mayor tiempo posible para todas las demás.
+
+\begin{algorithm}[H]
+\caption{\textsc{Seleccion-Actividades}$(s, f)$}
+\begin{algorithmic}[1]
+\State ordenar las actividades por tiempo de fin $f_i$ creciente
+\State $A \gets \set{a_1}$, \quad $\mathit{ultima} \gets 1$
+\For{$i \gets 2$ \Hasta $n$}
+  \If{$s_i \geq f_{\mathit{ultima}}$}
+    \State $A \gets A \cup \set{a_i}$
+    \State $\mathit{ultima} \gets i$
+  \EndIf
+\EndFor
+\State \Return $A$
+\end{algorithmic}
+\end{algorithm}
+
+Igual que la mochila: $\Ord{n \lg n}$ por el ordenamiento y $\Ord{n}$
+por la pasada.
+
+\begin{ejemplo}
+  Once actividades, ya ordenadas por su tiempo de fin:
+  \begin{center}
+  \begin{tabular}{c*{11}{c}}
+    \toprule
+    $i$   & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\
+    \midrule
+    $s_i$ & 1 & 3 & 0 & 5 & 3 & 5 & 6 & 8 & 8 & 2 & 12 \\
+    $f_i$ & 4 & 5 & 6 & 7 & 9 & 9 & 10 & 11 & 12 & 14 & 16 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Se recorren en orden, comparando el inicio de cada una contra el fin
+  de la última elegida:
+  \begin{center}
+  \begin{tabular}{cccl}
+    \toprule
+    \textbf{Actividad} & \textbf{Intervalo} & \textbf{Fin de la última}
+      & \textbf{Decisión} \\
+    \midrule
+    $a_1$    & $[1, 4)$   & ---  & se toma \\
+    $a_2$    & $[3, 5)$   & $4$  & $3 < 4$, se traslapa \\
+    $a_3$    & $[0, 6)$   & $4$  & se traslapa \\
+    $a_4$    & $[5, 7)$   & $4$  & $5 \geq 4$, se toma \\
+    $a_5$    & $[3, 9)$   & $7$  & se traslapa \\
+    $a_6$    & $[5, 9)$   & $7$  & se traslapa \\
+    $a_7$    & $[6, 10)$  & $7$  & se traslapa \\
+    $a_8$    & $[8, 11)$  & $7$  & $8 \geq 7$, se toma \\
+    $a_9$    & $[8, 12)$  & $11$ & se traslapa \\
+    $a_{10}$ & $[2, 14)$  & $11$ & se traslapa \\
+    $a_{11}$ & $[12, 16)$ & $11$ & $12 \geq 11$, se toma \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Resultado: $\set{a_1, a_4, a_8, a_{11}}$, cuatro actividades.
+  Revisando todos los subconjuntos posibles, ninguno compatible tiene
+  cinco.
+\end{ejemplo}
+
+\subsubsection*{Por qué da el óptimo}
+
+Sea $a_1$ la actividad que termina primero, y tómese cualquier
+solución óptima. Si no empieza con $a_1$, se le quita su primera
+actividad y se pone $a_1$ en su lugar. Como $a_1$ termina antes o al
+mismo tiempo, no choca con nada de lo que seguía, y la solución sigue
+teniendo el mismo número de actividades. Así que siempre existe una
+solución óptima que empieza con $a_1$. Después de elegirla, lo que
+queda es el mismo problema con las actividades que empiezan después de
+$f_1$, y el argumento se repite.
+
+\subsubsection*{Criterios que parecen razonables y fallan}
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{La que empieza primero.} Con $[0, 10)$, $[1, 2)$ y
+        $[3, 4)$ elige $[0, 10)$, que choca con las otras dos: se
+        queda con una sola. El óptimo es dos, $[1, 2)$ y $[3, 4)$.
+  \item \textbf{La más corta.} Con $[0, 5)$, $[4, 6)$ y $[5, 10)$
+        elige $[4, 6)$, que dura $2$ pero se traslapa con las otras
+        dos: otra vez una sola. El óptimo es $[0, 5)$ y $[5, 10)$.
+\end{itemize}
+
+Las dos fallan por lo mismo: miran una propiedad de la actividad que
+no dice cuánto tiempo deja libre. El tiempo de fin es justo eso.
+
+\begin{observacion}
+  Hay un problema hermano que también se resuelve con un voraz: en
+  lugar de elegir cuántas actividades caben en un salón, programarlas
+  \emph{todas} usando el menor número de salones. Ahí se ordenan por
+  tiempo de \emph{inicio} y cada actividad va a un salón que ya esté
+  libre, o se abre uno nuevo si no hay.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Divide y vencerás}
+
+La idea es simple: dado un problema grande, se divide en subproblemas
+parecidos de menor tamaño, se resuelven, y con sus soluciones se arma
+la del problema general. Formalmente son tres pasos:
+
+\begin{enumerate}[itemsep=0.3em]
+  \item \textbf{Dividir} el problema en $a$ subproblemas del mismo
+        tipo, cada uno de tamaño $n/b$.
+  \item \textbf{Vencer}: resolver cada subproblema recursivamente.
+        Cuando uno ya es lo bastante chico, el caso base, se resuelve
+        directo.
+  \item \textbf{Combinar} las soluciones de los subproblemas en la
+        solución del problema original.
+\end{enumerate}
+
+Si dividir y combinar cuestan $f(n)$, el tiempo total cumple
+\[
+  T(n) = a\, T(n/b) + f(n) ,
+\]
+que es justo la forma que resuelve el método maestro de la clase del
+$15$ de septiembre. Por eso las recurrencias se vieron antes: son la
+herramienta para medir estos algoritmos.
+
+\begin{ejemplo}[Ordenamiento por mezcla]
+  Para ordenar $[5, 2, 4, 7, 1, 3, 2, 6]$ se parte a la mitad hasta
+  llegar a arreglos de un elemento, que ya están ordenados, y luego se
+  van mezclando de dos en dos:
+  \begin{center}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Etapa} & \textbf{Arreglos} \\
+    \midrule
+    dividir    & $[5, 2, 4, 7]$ \quad $[1, 3, 2, 6]$ \\
+    dividir    & $[5, 2]$ \quad $[4, 7]$ \quad $[1, 3]$ \quad $[2, 6]$ \\
+    caso base  & $[5]\ [2]\ [4]\ [7]\ [1]\ [3]\ [2]\ [6]$ \\
+    combinar   & $[2, 5]$ \quad $[4, 7]$ \quad $[1, 3]$ \quad $[2, 6]$ \\
+    combinar   & $[2, 4, 5, 7]$ \quad $[1, 2, 3, 6]$ \\
+    combinar   & $[1, 2, 2, 3, 4, 5, 6, 7]$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Mezclar dos arreglos ya ordenados cuesta $\Tht{n}$: basta comparar
+  sus primeros elementos y sacar el menor, una y otra vez. Son dos
+  subproblemas de la mitad del tamaño:
+  \[
+    T(n) = 2\, T(n/2) + \Tht{n} .
+  \]
+  Con $a = 2$ y $b = 2$, $n^{\log_2 2} = n$, que es del mismo orden
+  que $f(n)$: caso 2 del método maestro, $T(n) = \Tht{n \lg n}$.
+\end{ejemplo}
+
+\begin{idea}
+  La diferencia con un algoritmo voraz está en cuántos caminos se
+  siguen. El voraz toma una decisión y se queda con un solo
+  subproblema, el que deja esa decisión. Divide y vencerás resuelve
+  \emph{todos} los subproblemas en que partió el original y después
+  combina sus respuestas.
+\end{idea}
 
 \end{document}
 
