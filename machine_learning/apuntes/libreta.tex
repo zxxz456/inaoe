@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.7.0
+%   * Version: 1.8.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/10/2026      Clase 8 Oct, clasificador Naive Bayes
+%  zxxz6       09/10/2026      Clase 6 Oct, clasificadores por distancia
 %  zxxz6       28/09/2026      Clase 24 Sep, ResNet y autoencoders
 %  zxxz6       28/09/2026      Clase 22 Sep, redes convolucionales
 %  zxxz6       20/09/2026      Clase 17 Sep, gradiente, delta y backprop
@@ -3188,6 +3190,891 @@ parámetros a la vez.
   \bottomrule
 \end{tabular}
 \end{center}
+
+\newpage
+
+% =====================================================================
+%  Clase - Clasificadores basados en distancia
+% =====================================================================
+
+\clase{Clasificadores basados en distancia}{6 de octubre de 2026}
+
+\begin{quick_sum}
+    Una familia de clasificadores que no aprende pesos: guarda
+    ejemplos con su clase y clasifica un dato nuevo según qué tan cerca
+    queda de ellos. Para eso hace falta una distancia, así que primero
+    se vio qué es un espacio métrico y las distancias más usadas.
+    Luego las tres reglas, distancia mínima, vecino más cercano y $k$
+    vecinos más cercanos, cómo son sus fronteras de decisión, y sus
+    problemas: el costo de calcular tantas distancias y la maldición
+    de la dimensionalidad.
+\end{quick_sum}
+
+\subsection*{La idea}
+
+Se supone que los datos se pueden representar en un espacio donde se
+puede medir, y que si dos objetos $x$ y $x'$ son parecidos, sus
+representaciones quedan cerca: $d(x, x')$ es chica. Las clases se
+representan con \textbf{prototipos}, puntos cuya clase ya se conoce.
+
+Con eso, clasificar solo pide dos cosas: la distancia y una regla que
+diga cómo usarla, la \emph{modalidad}. No hay entrenamiento en el
+sentido de la red neuronal; el modelo son los prototipos mismos.
+
+% =====================================================================
+
+\subsection*{Espacio métrico}
+
+\begin{definicion}[Espacio métrico]
+    Un par $(E, d)$ formado por un conjunto de puntos $E$ y una
+    función $d : E \times E \to \R$, llamada \textbf{métrica} o
+    \textbf{distancia}, que para todos $p, q, r \in E$ cumple:
+    \begin{enumerate}[itemsep=0.2em]
+        \item \textbf{Positiva o nula}: $d(p, q) \geq 0$, y
+              $d(p, q) = 0$ si y solo si $p = q$.
+        \item \textbf{Simétrica}: $d(p, q) = d(q, p)$.
+        \item \textbf{Desigualdad del triángulo}:
+              $d(p, q) + d(q, r) \geq d(p, r)$.
+    \end{enumerate}
+\end{definicion}
+
+Cada propiedad tiene su razón. La primera dice que solo un punto está
+a distancia cero de sí mismo: dos objetos distintos siempre se pueden
+distinguir. La segunda, que no importa desde dónde se mida. La
+tercera, que no hay atajos: ir de $p$ a $r$ pasando por $q$ nunca sale
+más corto que ir directo. Esa última es la que permite podar búsquedas
+de vecinos, como se ve más abajo, y por eso importa que la función que
+se use las cumpla.
+
+Si no se cumple alguna, se habla de un \textbf{espacio
+pseudométrico}: la versión ``simple'', donde no se pide simetría ni
+desigualdad del triángulo. En ese caso $d$ se llama \textbf{medida de
+disimilitud}. En textos de matemáticas, ``pseudométrica'' se reserva
+para algo más específico, una métrica que permite $d(p, q) = 0$ con
+$p \neq q$; en el curso se usa en el sentido amplio.
+
+Tampoco toda disimilitud sale de una distancia. Muchas se construyen a
+partir de una similitud, y el resultado no tiene por qué ser métrica.
+
+\begin{ejemplo}[$1 - \cos$ no es una métrica]
+    El coseno mide similitud, y $1 - \cos\theta$ es una disimilitud
+    natural. Con tres vectores a $0^\circ$, $45^\circ$ y $90^\circ$:
+    \[
+        d(0^\circ, 90^\circ) = 1 - \cos 90^\circ = 1 ,
+        \qquad
+        d(0^\circ, 45^\circ) = d(45^\circ, 90^\circ)
+        = 1 - \cos 45^\circ = 0.293 .
+    \]
+    Pasando por el de $45^\circ$ se llega en $0.293 + 0.293 = 0.586$,
+    menos que el $1$ del camino directo: viola la desigualdad del
+    triángulo. Sí es simétrica, así que es una disimilitud pero no una
+    distancia. La divergencia de Kullback-Leibler entre distribuciones
+    es el caso contrario: ni siquiera es simétrica.
+\end{ejemplo}
+
+Todo espacio vectorial con producto punto se vuelve espacio métrico
+con la \textbf{distancia euclidiana}:
+\[
+    d(\vec{p}, \vec{q}) = \norm{\vec{p} - \vec{q}}
+    = \sqrt{(\vec{p} - \vec{q})^{T}(\vec{p} - \vec{q})}
+    = \sqrt{(p_1 - q_1)^2 + \cdots + (p_d - q_d)^2} .
+\]
+
+% =====================================================================
+
+\subsection*{Distancias usuales}
+
+De la euclidiana salen varias. Para vectores de $d$ dimensiones:
+
+\textbf{Familia $L_p$.} Para $p \geq 1$,
+\[
+    d_p(\vec{a}, \vec{b}) = \left( \sum_{i=1}^{d} \abs{a_i - b_i}^p
+    \right)^{1/p} .
+\]
+Los tres casos que se usan:
+\begin{itemize}[itemsep=0.3em]
+    \item $L_1$, \textbf{Manhattan}:
+          $d(\vec{a}, \vec{b}) = \sum_{i=1}^{d} \abs{a_i - b_i}$.
+          Suma las diferencias coordenada por coordenada, como caminar
+          por las cuadras de una ciudad sin cruzar en diagonal.
+    \item $L_2$, \textbf{euclidiana}:
+          $d(\vec{a}, \vec{b}) = \left( \sum_{i=1}^{d}
+          (a_i - b_i)^2 \right)^{1/2}$. La línea recta.
+    \item $L_\infty$, \textbf{Chebyshev}:
+          $d(\vec{a}, \vec{b}) = \max_{1 \leq i \leq d}
+          \abs{a_i - b_i}$. Es el límite de $L_p$ cuando
+          $p \to \infty$: al elevar a una potencia enorme, la
+          diferencia más grande se come a todas las demás. Es la
+          distancia del rey en el ajedrez.
+\end{itemize}
+
+\textbf{Euclidiana pesada.} Con pesos $w_i \geq 0$ que dicen cuánto
+importa cada característica:
+\[
+    d(\vec{a}, \vec{b}) = \left( \sum_{i=1}^{d} w_i\,(a_i - b_i)^2
+    \right)^{1/2} .
+\]
+
+\textbf{Mahalanobis.} Divide cada diferencia entre la desviación
+estándar $\sigma_i$ de esa característica:
+\[
+    d(\vec{a}, \vec{b}) = \left( \sum_{i=1}^{d}
+    \left(\frac{a_i - b_i}{\sigma_i}\right)^2 \right)^{1/2} .
+\]
+Es el caso particular de una euclidiana pesada con
+$w_i = 1 / \sigma_i^2$. La versión general usa la matriz de
+covarianza $\Sigma$ completa,
+$\sqrt{(\vec{a} - \vec{b})^{T}\, \Sigma^{-1}\, (\vec{a} - \vec{b})}$,
+que además descuenta las correlaciones entre características; con
+$\Sigma$ diagonal se reduce a la de arriba.
+
+\begin{ejemplo}[Por qué escalar]
+    Dos personas difieren en $20$ años de edad y en $1000$ pesos de
+    ingreso. La euclidiana da
+    $\sqrt{20^2 + 1000^2} = 1000.2$: la edad casi no cuenta, solo
+    porque el ingreso se mide en números más grandes. Si la edad tiene
+    $\sigma = 10$ y el ingreso $\sigma = 5000$, Mahalanobis da
+    \[
+        \sqrt{\left(\tfrac{20}{10}\right)^2
+        + \left(\tfrac{1000}{5000}\right)^2}
+        = \sqrt{4 + 0.04} = 2.01 ,
+    \]
+    y ahora lo que separa a las dos personas es la edad: $20$ años
+    son dos desviaciones estándar, $1000$ pesos apenas $0.2$.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{La métrica cambia al vecino}
+
+Distancias distintas dan vecindarios distintos (diapositiva 6). El
+conjunto de puntos a distancia menor que $r$ de un centro es un
+círculo con $L_2$, un rombo con $L_1$ y un cuadrado con $L_\infty$.
+Eso cambia quién es el vecino más cercano.
+
+\begin{ejemplo}[Un punto, tres métricas]
+    Se quiere clasificar $P = (0, 0)$ y hay dos prototipos:
+    $A = (1, 1)$, de la clase azul, y $B = (1.4,\ 0)$, de la roja.
+
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Métrica} & $d(P, A)$ & $d(P, B)$
+          & \textbf{Vecino más cercano} \\
+        \midrule
+        $L_2$      & $\sqrt{2} = 1.414$ & $1.4$ & $B$, rojo \\
+        $L_1$      & $1 + 1 = 2$        & $1.4$ & $B$, rojo \\
+        $L_\infty$ & $\max(1, 1) = 1$   & $1.4$ & $A$, azul \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \begin{center}
+    \begin{tikzpicture}[scale=0.78,
+        etiqueta/.style={font=\scriptsize}]
+      \foreach \dx/\titulo in {0/{$L_2$: gana $B$},
+                               4.7/{$L_1$: gana $B$},
+                               9.4/{$L_\infty$: gana $A$}} {
+        \node[font=\small] at (\dx + 0.2, 2.45) {\titulo};
+      }
+      % L2
+      \fill[fondoIdea, draw=acento] (0, 0) circle (1.4);
+      % L1
+      \filldraw[fondoIdea, draw=acento] (4.7 + 1.4, 0) -- (4.7, 1.4)
+          -- (4.7 - 1.4, 0) -- (4.7, -1.4) -- cycle;
+      % Linf
+      \filldraw[fondoIdea, draw=acento] (9.4 - 1, -1) rectangle
+          (9.4 + 1, 1);
+      \foreach \dx in {0, 4.7, 9.4} {
+        \draw[->, gray] (\dx - 1.6, 0) -- (\dx + 2, 0);
+        \draw[->, gray] (\dx, -1.6) -- (\dx, 2);
+        \fill (\dx, 0) circle (1.5pt);
+        \node[etiqueta, below left] at (\dx, 0) {$P$};
+        \fill[blue!70!black] (\dx + 1, 1) circle (2.2pt);
+        \node[etiqueta, above right] at (\dx + 1, 1) {$A$};
+        \fill[red!75!black] (\dx + 1.4, 0) circle (2.2pt);
+        \node[etiqueta, below right] at (\dx + 1.4, 0) {$B$};
+      }
+    \end{tikzpicture}
+    \end{center}
+
+    Cada figura dibuja la bola de radio igual a la distancia al
+    vecino más cercano, que queda en la orilla; el otro prototipo queda
+    fuera. $A$ reparte su diferencia en dos coordenadas de $1$, y $B$
+    la concentra en una de $1.4$. $L_1$ suma las dos de $A$ y la
+    castiga; $L_\infty$ solo mira la mayor y la premia. La
+    clasificación de $P$ cambia sin que se mueva ningún punto.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Reglas de clasificación}
+
+Sea $d$ una distancia y $C$ el número de clases. Las tres modalidades
+de la clase:
+
+\subsubsection*{Distancia mínima (MD)}
+
+Cada clase $i$ se representa con un \textbf{único} prototipo $p_i$,
+normalmente la media de sus ejemplos. Un dato nuevo va a la clase
+del prototipo más cercano:
+\[
+    x \in w \iff d(x, p_w) < d(x, p_i)
+    \quad \text{para todo } 1 \leq i \leq C,\ i \neq w .
+\]
+Es lo más económico: se guardan $C$ puntos y se calculan $C$
+distancias. El problema es que un solo punto resume toda la clase. Si
+la clase está muy extendida, tiene varios grupos separados, o un
+ejemplo raro jala su media, el prototipo deja de representarla.
+
+\subsubsection*{Vecino más cercano (NN)}
+
+Cada clase $i$ se representa con un \textbf{conjunto} de prototipos
+$P_i$, normalmente todos sus ejemplos de entrenamiento. El dato va a
+la clase que tenga el prototipo más cercano:
+\[
+    x \in w \iff \exists\, p \in P_w :\ d(x, p) \leq d(x, p')
+    \quad \forall\, p' \in P_i,\ 1 \leq i \leq C,\ i \neq w .
+\]
+Si hay empate entre clases, se elige la que tenga más prototipos.
+
+\subsubsection*{$k$ vecinos más cercanos ($k$-NN)}
+
+En lugar del vecino más cercano se toman los $k$ más cercanos, sin
+importar su clase. Sea $P = \bigcup_{i=1}^{C} P_i$ el conjunto de todos
+los prototipos y $P^k \subseteq P$ los $k$ más cercanos a $x$. Gana la
+clase con más representantes entre ellos:
+\[
+    x \in w \iff \abs{P^k \cap P_w} \geq \abs{P^k \cap P_i}
+    \quad 1 \leq i \leq C,\ i \neq w .
+\]
+Si hay empate, se usa 1-NN entre las clases empatadas. Con $k > 1$ un
+ejemplo mal etiquetado ya no decide solo: tiene que convencer a la
+mayoría.
+
+\begin{ejemplo}[Tres reglas, tres respuestas]
+    Se clasifica $x = (3, 3)$ con dos clases:
+    \[
+        A = \set{(3, 5),\ (3, 0),\ (4, 2)} , \qquad
+        B = \set{(2, 1),\ (4, 3),\ (6, 3)} .
+    \]
+    \textbf{MD.} Las medias son $\bar{A} = (10/3,\ 7/3)$ y
+    $\bar{B} = (4,\ 7/3)$, así que
+    \[
+        d(x, \bar{A}) = \sqrt{(1/3)^2 + (2/3)^2} = 0.745 , \qquad
+        d(x, \bar{B}) = \sqrt{1^2 + (2/3)^2} = 1.202 .
+    \]
+    Gana $A$.
+
+    \textbf{NN y $k$-NN.} Las distancias euclidianas de $x$ a cada
+    prototipo, de menor a mayor:
+    \begin{center}
+    \begin{tabular}{ccc}
+        \toprule
+        \textbf{Prototipo} & \textbf{Clase} & \textbf{Distancia} \\
+        \midrule
+        $(4, 3)$ & $B$ & $1$ \\
+        $(4, 2)$ & $A$ & $\sqrt{2} = 1.414$ \\
+        $(3, 5)$ & $A$ & $2$ \\
+        $(2, 1)$ & $B$ & $\sqrt{5} = 2.236$ \\
+        $(3, 0)$ & $A$ & $3$ \\
+        $(6, 3)$ & $B$ & $3$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con 1-NN gana $B$, por $(4, 3)$. Con 3-NN los tres más cercanos
+    son uno de $B$ y dos de $A$: gana $A$.
+
+    El mismo punto, con los mismos datos, cambia de clase según la
+    regla. MD mira el centro de cada clase; 1-NN se deja llevar por un
+    solo punto; 3-NN vota.
+\end{ejemplo}
+
+La diapositiva 11 muestra lo mismo con tres clases: MD elige $B$
+porque $b_5$ es el prototipo más cercano; NN elige $A$ por $a_7$; y
+7-NN elige $C$, porque entre los siete más cercanos
+$\set{c_1, c_2, c_3, a_7, a_6, b_3, b_7}$ hay tres de $C$ y dos de
+cada una de las otras.
+
+% =====================================================================
+
+\subsection*{Fronteras de decisión}
+
+\subsubsection*{Distancia mínima: un hiperplano}
+
+Con la métrica euclidiana en $\R^d$, la frontera entre las clases $j$
+y $k$ son los puntos $\vec{y}$ que quedan a la misma distancia de sus
+dos prototipos:
+\begin{align*}
+    \norm{\vec{y} - \vec{p}_j}^2 &= \norm{\vec{y} - \vec{p}_k}^2 \\
+    \vec{y}^{\,T}\vec{y} - 2\vec{p}_j^{\,T}\vec{y}
+      + \vec{p}_j^{\,T}\vec{p}_j
+    &= \vec{y}^{\,T}\vec{y} - 2\vec{p}_k^{\,T}\vec{y}
+      + \vec{p}_k^{\,T}\vec{p}_k \\
+    2(\vec{p}_k - \vec{p}_j)^{T}\vec{y}
+      + \vec{p}_j^{\,T}\vec{p}_j - \vec{p}_k^{\,T}\vec{p}_k &= 0 .
+\end{align*}
+El término $\vec{y}^{\,T}\vec{y}$ se cancela, y lo que queda es
+lineal en $\vec{y}$:
+\[
+    \sum_{i=1}^{d} a_i y_i + a_0 = 0 , \qquad
+    a_i = 2(p_{k,i} - p_{j,i}) , \quad
+    a_0 = \vec{p}_j^{\,T}\vec{p}_j - \vec{p}_k^{\,T}\vec{p}_k .
+\]
+Es un \textbf{hiperplano}, la mediatriz del segmento entre los dos
+prototipos: la misma clase de frontera que dan el perceptrón o una
+SVM lineal.
+
+\subsubsection*{Vecino más cercano: lineal por tramos}
+
+Para NN la función discriminante de la clase $j$ es
+\[
+    g_j(\vec{y}) = \max_{p \in P_j}\left(-d(\vec{y}, \vec{p})\right)
+    \equiv \max_{p \in P_j}\left(-\norm{\vec{y} - \vec{p}}^2\right)
+    \equiv \max_{p \in P_j}\left(2\vec{p}^{\,T}\vec{y}
+    - \vec{p}^{\,T}\vec{p}\right) ,
+\]
+el máximo de varias funciones lineales. La frontera queda
+\textbf{lineal por tramos}: cada tramo es la mediatriz entre un
+prototipo de una clase y uno de otra.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.1,
+    etiqueta/.style={font=\scriptsize}]
+  % (a) distancia minima
+  % la mediatriz es 4 y1 + 2 y2 = 5, recortada al mismo rango que (b)
+  \fill[blue!6] (-0.6, -0.6) -- (1.55, -0.6) -- (-0.05, 2.6)
+      -- (-0.6, 2.6) -- cycle;
+  \fill[red!6] (1.55, -0.6) -- (2.6, -0.6) -- (2.6, 2.6)
+      -- (-0.05, 2.6) -- cycle;
+  \draw[thick, acento] (-0.05, 2.6) -- (1.55, -0.6);
+  \draw[dashed, gray] (0, 0) -- (2, 1);
+  \fill[blue!70!black] (0, 0) circle (2.2pt)
+      node[etiqueta, below left] {$\vec{p}_j$};
+  \fill[red!75!black] (2, 1) circle (2.2pt)
+      node[etiqueta, above right] {$\vec{p}_k$};
+  \node[font=\small] at (1, 2.95) {(a) MD: un hiperplano};
+  % (b) 1-NN
+  \begin{scope}[xshift=4.2cm]
+    \fill[blue!6] (-0.6, -0.6) -- (1.5, -0.6) -- (0.75, 1)
+        -- (1.5, 2.6) -- (-0.6, 2.6) -- cycle;
+    \fill[red!6] (1.5, -0.6) -- (2.6, -0.6) -- (2.6, 2.6)
+        -- (1.5, 2.6) -- (0.75, 1) -- cycle;
+    \draw[thick, acento] (1.5, -0.5) -- (0.75, 1) -- (1.5, 2.5);
+    \draw[dashed, gray] (0, 0) -- (2, 1);
+    \draw[dashed, gray] (0, 2) -- (2, 1);
+    \fill[blue!70!black] (0, 0) circle (2.2pt);
+    \fill[blue!70!black] (0, 2) circle (2.2pt);
+    \fill[red!75!black] (2, 1) circle (2.2pt);
+    \node[font=\small] at (1, 2.95) {(b) 1-NN: lineal por tramos};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+En (b) hay dos prototipos azules, $(0, 0)$ y $(0, 2)$, y uno rojo,
+$(2, 1)$. La frontera es la mediatriz con $(0, 0)$, la recta
+$4y_1 + 2y_2 = 5$, hasta el punto $(0.75,\ 1)$, que está a la misma
+distancia de los tres; de ahí en adelante sigue la mediatriz con
+$(0, 2)$, la recta $4y_1 - 2y_2 = 1$. La mediatriz entre los dos
+azules no se dibuja: separa puntos de la misma clase.
+
+Para trazar a mano la frontera de 1-NN (diapositiva 15):
+\begin{enumerate}[itemsep=0.1em]
+    \item Ubicar la zona donde deberían estar las fronteras.
+    \item Unir con un segmento pares de puntos de clases opuestas que
+          estén cerca.
+    \item Trazar la mediatriz de cada segmento.
+    \item Extender y unir las mediatrices, y borrar lo que sobre.
+    \item Llevar las fronteras hasta la orilla de la gráfica y marcarlo
+          con flechas.
+    \item Revisar: una frontera de 1-NN tiene picos y esquinas; si sale
+          curva, algo está mal.
+\end{enumerate}
+
+\subsubsection*{$k$-NN}
+
+Su función discriminante es simplemente el número de votos,
+$g_j(\vec{y}) = \abs{P^k \cap P_j}$, con $P^k$ los $k$ vecinos de
+$\vec{y}$ según $d$. La frontera también es lineal por tramos.
+
+Las fronteras cambian con la \textbf{distancia}: con $L_1$ los tramos
+se vuelven horizontales, verticales o a $45^\circ$
+(diapositiva 18). Y cambian con el \textbf{número de vecinos}: con
+$k = 1$ la frontera rodea cada punto y se pliega alrededor de los
+aislados; con $k = 3$ sale más suave, porque un punto suelto ya no
+alcanza a ganar la votación de su zona (diapositiva 19). Un $k$
+demasiado grande se va al otro extremo: las clases chicas pierden
+todas las votaciones.
+
+% =====================================================================
+
+\subsection*{Variante: vecinos en una bola de radio $\varepsilon$}
+
+Mismo principio que $k$-NN, pero cambia quién vota. En lugar de los
+$k$ más cercanos votan todos los ejemplos $x'$ con
+$d(x, x') \leq \varepsilon$. En zonas densas vota mucha gente y en
+zonas vacías poca, así que se adapta a la densidad de los datos. A
+cambio, en una zona vacía la bola puede quedar sin nadie y hay que
+decidir qué hacer, y un buen $\varepsilon$ depende de la escala de
+las características.
+
+% =====================================================================
+
+\subsection*{Limitaciones}
+
+\subsubsection*{El costo}
+
+Clasificar un dato pide calcular su distancia a los $n$ prototipos,
+cada una de $d$ coordenadas. No hay costo de entrenamiento, pero todo
+el costo se paga al clasificar, y con un conjunto grande puede ser
+prohibitivo. Se ataca de tres formas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Reducir la dimensión} con técnicas como PCA, para que
+          cada distancia cueste menos.
+    \item \textbf{Estructuras de búsqueda}, como árboles, que descartan
+          prototipos sin calcular su distancia aprovechando la
+          desigualdad del triángulo.
+    \item \textbf{Editar el conjunto de entrenamiento}: quitar puntos
+          redundantes o casi redundantes, y también el ruido. Una
+          forma de saber si un punto es ruido es mirar a sus vecinos:
+          si la mayoría es de otra clase, probablemente está mal
+          etiquetado. Es la edición de Wilson (1972).
+\end{itemize}
+
+\begin{ejemplo}[Podar con la desigualdad del triángulo]
+    Se busca el vecino más cercano de $q$. Ya se calculó
+    $d(q, p) = 10$ contra un prototipo de referencia $p$, y desde antes
+    se tiene guardada $d(p, x) = 3$ para otro prototipo $x$. Por la
+    desigualdad del triángulo,
+    \[
+        d(q, x) \geq \abs{d(q, p) - d(p, x)} = \abs{10 - 3} = 7 .
+    \]
+    Si el mejor candidato hasta ahora está a distancia $5$, $x$ no
+    puede ganarle, y se descarta sin calcular $d(q, x)$. Con una
+    disimilitud que no cumple la desigualdad del triángulo esta poda
+    sería incorrecta: podría tirar al vecino verdadero.
+\end{ejemplo}
+
+\subsubsection*{La maldición de la dimensionalidad}
+
+Cuando la distancia se calcula con muchas coordenadas, la diferencia
+entre las distancias de distintos pares de puntos se vuelve chica.
+Cada coordenada aporta un término a la suma, así que cambiar una sola
+de $d$ variables mueve poco el total; y como todas aportan algo, todos
+los puntos terminan casi a la misma distancia de todos. El problema de
+fondo es que el volumen del espacio crece tan rápido con la dimensión
+que los datos disponibles quedan dispersos.
+
+\begin{ejemplo}[Los vecinos dejan de estar cerca]
+    En una simulación con $1000$ puntos al azar en el cubo $[0, 1]^d$,
+    la distancia de un punto nuevo a su vecino más cercano y a su
+    vecino más lejano fue:
+    \begin{center}
+    \begin{tabular}{rrrr}
+        \toprule
+        $d$ & \textbf{Más cercano} & \textbf{Más lejano}
+          & \textbf{Cociente} \\
+        \midrule
+           $2$ &  $0.010$ &  $1.334$ & $135.6$ \\
+          $10$ &  $0.471$ &  $2.111$ &   $4.5$ \\
+         $100$ &  $3.349$ &  $4.653$ &   $1.4$ \\
+        $1000$ & $12.166$ & $13.553$ &   $1.1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    En $2$ dimensiones el más lejano está $135$ veces más lejos que el
+    más cercano. En $1000$, solo $1.1$ veces: el ``vecino más
+    cercano'' está casi tan lejos como cualquier otro, y la regla
+    pierde sentido.
+
+    Otra forma de verlo: para que un cubito alrededor de un punto
+    atrape el $10\%$ de datos uniformes, su lado tiene que ser
+    $0.1^{1/d}$ del rango. En $d = 1$ eso es $0.1$; en $d = 10$ es
+    $0.79$; en $d = 100$, $0.98$. El vecindario ``local'' ya abarca casi
+    todo el rango de cada variable.
+\end{ejemplo}
+
+\subsubsection*{$k$-NN rápido}
+
+Hay toda una línea de trabajo para acelerar la búsqueda de vecinos
+(diapositivas 23 y 24):
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Distancia parcial}: se va sumando coordenada por
+          coordenada y se abandona en cuanto la suma parcial ya supera
+          a la mejor distancia encontrada.
+    \item \textbf{Preordenar el conjunto de entrenamiento}, para que
+          los candidatos buenos salgan primero y la poda funcione
+          antes.
+    \item \textbf{Proyección de prototipos}: buscar primero en una o
+          pocas coordenadas y solo calcular la distancia completa para
+          los que pasan ese filtro.
+    \item \textbf{Árboles y grafos}, que organizan los prototipos para
+          no recorrerlos todos; varios métodos recientes son
+          aproximados: aceptan no encontrar siempre al vecino exacto a
+          cambio de mucha velocidad.
+    \item \textbf{Aproximación y eliminación}: ramificación y acotamiento
+          en espacios métricos, que descartan grupos enteros de
+          prototipos con cotas como la del ejemplo de la poda.
+\end{itemize}
+
+\subsubsection*{Datos no numéricos}
+
+Las distancias de arriba piden números. Si los datos son categóricos
+hay que transformarlos a números, por ejemplo con codificación one-hot,
+o usar una disimilitud pensada para ellos, como contar en cuántos
+atributos difieren dos objetos.
+
+\begin{idea}
+    Pese a su edad, el $k$-NN sigue vigente: es la forma de encontrar
+    los documentos más parecidos a uno dado. Recuperar los documentos
+    de mayor coseno con una consulta, como en las actividades de
+    Fundamentos para el Análisis Automático de Lenguaje, es una
+    búsqueda de vecinos más cercanos. Los buscadores sobre embeddings
+    usan justo los métodos aproximados basados en grafos de la
+    diapositiva 23 para hacerlo sobre millones de vectores.
+\end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase - Clasificador Naive Bayes
+% =====================================================================
+
+\clase{Clasificador Naive Bayes}{8 de octubre de 2026}
+
+\begin{quick_sum}
+    Un clasificador probabilístico. Para un dato nuevo calcula la
+    probabilidad de cada clase dado ese dato, con el teorema de
+    Bayes, y elige la más probable. Es ``ingenuo'' porque supone que
+    las características son condicionalmente independientes dada la
+    clase; esa suposición casi nunca es cierta, pero vuelve el
+    cálculo lineal y deja estimar el modelo con pocos datos, aun en
+    alta dimensión. Se vio el problema de las probabilidades en cero,
+    el suavizado de Laplace, y la versión gaussiana para variables
+    continuas.
+\end{quick_sum}
+
+\subsection*{La intuición}
+
+Se quiere distinguir saltamontes (\textit{grasshoppers}) de
+\textit{katydids}, insectos parecidos pero de antenas largas, por el
+largo de sus antenas (diapositivas 4 a 11). Con muchos datos
+se arma un histograma de largos para cada especie, y se resume con
+una curva normal para cada una. Para un insecto nuevo con antenas de
+largo $3$, se compara la altura de las dos curvas en $x = 3$: la de
+saltamontes mide $10$ y la de katydid $2$, así que
+\[
+    P(\text{saltamontes} \mid 3) = \frac{10}{10 + 2} = 0.833 ,
+    \qquad
+    P(\text{katydid} \mid 3) = \frac{2}{10 + 2} = 0.167 .
+\]
+Con antenas de $7$ las alturas son $3$ y $9$, y gana katydid con
+$0.75$. En $5$ las curvas se cruzan y queda $0.5$ contra $0.5$.
+
+Esa es toda la idea: calcular la probabilidad de que el dato nuevo
+pertenezca a cada clase y quedarse con la más probable.
+
+% =====================================================================
+
+\subsection*{El teorema de Bayes}
+
+\[
+    p(c_j \mid d) = \frac{p(d \mid c_j)\; p(c_j)}{p(d)}
+\]
+
+\begin{itemize}[itemsep=0.3em]
+    \item $p(c_j \mid d)$, la \textbf{probabilidad a posteriori}: que
+          el dato $d$ sea de la clase $c_j$. Es lo que se quiere
+          calcular.
+    \item $p(d \mid c_j)$, la \textbf{verosimilitud}: la probabilidad
+          de generar el dato $d$ si se es de la clase $c_j$. Se puede
+          pensar como que pertenecer a la clase causa tener esa
+          característica con cierta probabilidad.
+    \item $p(c_j)$, la \textbf{probabilidad a priori}: qué tan
+          frecuente es la clase en los datos, antes de ver $d$.
+    \item $p(d)$, la \textbf{evidencia}: la probabilidad de observar
+          $d$. Es la misma para todas las clases, así que para decidir
+          cuál gana se puede ignorar.
+\end{itemize}
+
+\begin{ejemplo}[La oficial Drew]
+    ``Drew'' es nombre de hombre y de mujer. Con una base de $8$
+    personas, $3$ hombres y $5$ mujeres, donde se llaman Drew un hombre
+    y dos mujeres:
+    \[
+        p(\text{hombre} \mid \text{drew}) \propto
+        p(\text{drew} \mid \text{hombre})\, p(\text{hombre})
+        = \frac{1}{3} \cdot \frac{3}{8} = 0.125 ,
+    \]
+    \[
+        p(\text{mujer} \mid \text{drew}) \propto
+        p(\text{drew} \mid \text{mujer})\, p(\text{mujer})
+        = \frac{2}{5} \cdot \frac{5}{8} = 0.250 .
+    \]
+    Gana mujer. Si se quieren las probabilidades de verdad se divide
+    entre $p(\text{drew}) = 3/8$, y quedan $1/3$ y $2/3$; para decidir
+    no hace falta.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Varias características: la suposición ingenua}
+
+Con un vector de características $x = (x^{(1)}, \dots, x^{(n)})$ hace
+falta $P(x^{(1)}, \dots, x^{(n)} \mid y)$. Por la definición de
+probabilidad condicional aplicada en cadena,
+\[
+    P(x^{(1)}, \dots, x^{(n)} \mid y)
+    = P(x^{(1)} \mid y)\, P(x^{(2)} \mid y, x^{(1)}) \cdots
+      P(x^{(n)} \mid y, x^{(1)}, \dots, x^{(n-1)}) ,
+\]
+y el último factor depende de todas las demás características a la
+vez. Con $n$ características binarias la tabla completa tiene
+$2^n - 1$ probabilidades por clase: con $n = 30$ son más de mil
+millones, y no hay datos para estimarlas.
+
+En un filtro de spam cada correo es un vector con una coordenada por
+palabra del vocabulario, $1$ si la palabra aparece y $0$ si no
+(diapositiva 20). Con $50\,000$ palabras se vive en un espacio de
+$50\,000$ dimensiones, y la tabla completa es impensable.
+
+\begin{definicion}[Suposición de Naive Bayes]
+    Las características son \textbf{condicionalmente independientes
+    dada la clase}:
+    \[
+        P(x^{(1)}, \dots, x^{(n)} \mid y)
+        = \prod_{j=1}^{n} P(x^{(j)} \mid y) .
+    \]
+\end{definicion}
+
+Por eso es ``ingenuo''. Ojo con lo que dice y lo que no: no dice que
+las características sean independientes. En el filtro de spam,
+\textit{buy} y \textit{price} aparecen juntas muy seguido, porque las
+dos son típicas del spam. Lo que se supone es que, \emph{sabiendo ya
+que el correo es spam}, ver \textit{buy} no cambia lo que se cree
+sobre \textit{price}.
+
+Juntando con Bayes y quitando la evidencia, que no depende de la
+clase, el clasificador queda
+\[
+    y_{NB} = \arg\max_{\tilde{y}}\; P(Y = \tilde{y})
+    \prod_{j=1}^{n} P\!\left(X^{(j)} = x_{\text{test}}^{(j)}
+    \mid Y = \tilde{y}\right) .
+\]
+Solo hacen falta $P(y)$ y cada $P(x^{(j)} \mid y)$ por separado, que
+se estiman contando frecuencias en los datos. En lugar de $2^n - 1$
+probabilidades por clase son $n$, y clasificar cuesta una
+multiplicación por característica: el cálculo se vuelve lineal. Con
+tan pocos parámetros el modelo no se ajusta de más a los datos de
+entrenamiento, y por eso generaliza bien aun con pocos ejemplos.
+
+\begin{ejemplo}[Tres características]
+    Con la tabla de la diapositiva 18, sin usar el nombre, se clasifica
+    a alguien que \textbf{no} mide más de $170$ cm, tiene ojos
+    \textbf{azules} y cabello \textbf{largo}. De los $3$ hombres, $1$
+    no pasa de $170$, $2$ tienen ojos azules y $1$ cabello largo; de
+    las $5$ mujeres, $3$, $3$ y $4$:
+    \[
+        \text{hombre}: \quad \frac{3}{8} \cdot \frac{1}{3} \cdot
+        \frac{2}{3} \cdot \frac{1}{3} = \frac{1}{36} = 0.028 ,
+    \]
+    \[
+        \text{mujer}: \quad \frac{5}{8} \cdot \frac{3}{5} \cdot
+        \frac{3}{5} \cdot \frac{4}{5} = \frac{9}{50} = 0.180 .
+    \]
+    Gana mujer, con probabilidad $0.180 / (0.180 + 0.028) = 0.87$.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Probabilidades en cero}
+
+Si una característica nunca tomó cierto valor dentro de una clase en
+los datos de entrenamiento, su frecuencia estimada es $0$, y como todo
+se multiplica, esa clase queda con probabilidad $0$ sin importar lo
+que digan las demás características. Con muchas dimensiones y pocos
+datos pasa todo el tiempo: basta con que un correo traiga una palabra
+que nunca apareció en un spam de entrenamiento.
+
+\begin{ejemplo}[Un cero lo decide todo]
+    Con la misma tabla, ahora usando también el nombre, se clasifica a
+    alguien llamado Sergio, de más de $170$ cm, ojos cafés y cabello
+    largo. Ninguna mujer de la tabla se llama Sergio, así que
+    $P(\text{sergio} \mid \text{mujer}) = 0$ y
+    \[
+        \text{mujer}: \quad \frac{5}{8} \cdot 0 \cdot \frac{2}{5}
+        \cdot \frac{2}{5} \cdot \frac{4}{5} = 0 ,
+        \qquad
+        \text{hombre}: \quad \frac{3}{8} \cdot \frac{1}{3} \cdot
+        \frac{2}{3} \cdot \frac{1}{3} \cdot \frac{1}{3} = 0.009 .
+    \]
+    Hombre con probabilidad $1$, aunque el cabello largo apunte a
+    mujer: el cero borró todo lo demás.
+\end{ejemplo}
+
+\subsubsection*{Suavizado de Laplace}
+
+En lugar de dejar el cero, se le asigna a cada valor una probabilidad
+chica positiva. El \textbf{suavizado de Laplace} hace como si hubiera
+$K$ ejemplos imaginarios repartidos parejo entre los $K$ valores
+posibles de la característica:
+\[
+    \hat{P}\!\left(X^{(j)} = x_{\text{test}}^{(j)} \mid Y = \tilde{y}
+    \right)
+    = \frac{\displaystyle\sum_i \mathbf{1}\!\left[x_i^{(j)}
+      = x_{\text{test}}^{(j)},\ y_i = \tilde{y}\right] + 1}
+      {\displaystyle\sum_i \mathbf{1}\!\left[y_i = \tilde{y}\right]
+      + K} .
+\]
+Al conteo se le suma $1$ y al total $K$. Las estimaciones se jalan
+hacia $1/K$, el valor que tendrían sin datos, y el jalón pesa menos
+entre más ejemplos tenga la clase.
+
+\begin{ejemplo}[Sergio, con suavizado]
+    El nombre toma $K = 6$ valores distintos y las otras tres
+    características, $K = 2$. Para mujer,
+    $\hat{P}(\text{sergio} \mid \text{mujer}) = (0 + 1)/(5 + 6) =
+    1/11$, y con el resto de factores suavizados igual:
+    \[
+        \text{mujer}: \quad \frac{5}{8} \cdot \frac{1}{11} \cdot
+        \frac{3}{7} \cdot \frac{3}{7} \cdot \frac{5}{7} = 0.0075 ,
+        \qquad
+        \text{hombre}: \quad \frac{3}{8} \cdot \frac{2}{9} \cdot
+        \frac{3}{5} \cdot \frac{2}{5} \cdot \frac{2}{5} = 0.0080 .
+    \]
+    Sigue ganando hombre, pero $0.52$ contra $0.48$: el nombre ya no
+    decide solo y las demás características vuelven a contar.
+\end{ejemplo}
+
+Otras técnicas para el mismo problema:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Suavizado aditivo} o de Lidstone: sumar un
+          $\alpha$ entre $0$ y $1$ en lugar de $1$, y $\alpha K$ al
+          total. Laplace es el caso $\alpha = 1$; un $\alpha$ más chico
+          altera menos las frecuencias reales.
+    \item \textbf{Trabajar con logaritmos}. No resuelve los ceros, pero
+          sí el problema hermano: multiplicar miles de probabilidades
+          chicas da un número que la computadora redondea a $0$. Se
+          compara $\log P(y) + \sum_j \log P(x^{(j)} \mid y)$, que da
+          la misma clase ganadora.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Por qué funciona}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Es rápido y ocupa poco}: todas las probabilidades
+          salen de una sola pasada por los datos y caben en una tabla
+          chica.
+    \item \textbf{Funciona en alta dimensión}, justo donde otros
+          métodos sufren la maldición de la dimensionalidad: cada
+          probabilidad se estima con una sola característica, así que
+          los datos alcanzan.
+    \item \textbf{No es sensible a características irrelevantes}
+          (diapositiva 27).
+\end{itemize}
+
+\begin{ejemplo}[Una característica que no dice nada]
+    Para clasificar a Jessica se usan varias características, entre
+    ellas el color de ojos, que no tiene nada que ver con el sexo:
+    \[
+        p(\text{ojos cafés} \mid \text{mujer}) = \frac{9000}{10\,000},
+        \qquad
+        p(\text{ojos cafés} \mid \text{hombre}) = \frac{9001}{10\,000}.
+    \]
+    El factor es casi el mismo en las dos clases, así que multiplica a
+    las dos por casi lo mismo y no cambia cuál gana. Lo que decide es
+    una característica relevante, como usar vestido:
+    $9975/10\,000$ contra $2/10\,000$.
+\end{ejemplo}
+
+\begin{ojo}
+    Una característica irrelevante no estorba si hay datos suficientes
+    para estimarla: su factor sale casi igual en todas las clases.
+    Con pocos datos el ruido de estimación sí puede inclinar un poco
+    la balanza. Lo que de verdad lo daña son las características
+    \textbf{redundantes}: si dos características dicen lo mismo, el
+    modelo las cree independientes y cuenta esa evidencia dos veces.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Variables continuas: Naive Bayes gaussiano}
+
+Lo de arriba es para características discretas, donde
+$P(x^{(j)} \mid y)$ se estima contando. Con características continuas
+hay que suponer una distribución para los valores de cada una. Lo más
+común es suponer que, dentro de cada clase, cada característica sigue
+una \textbf{distribución normal}:
+\[
+    P(x_i \mid y) = \frac{1}{\sqrt{2\pi\sigma_y^2}}
+    \exp\!\left(-\frac{(x_i - \mu_y)^2}{2\sigma_y^2}\right) ,
+\]
+donde $\mu_y$ y $\sigma_y^2$ son la media y la varianza de esa
+característica entre los ejemplos de la clase $y$. Entrenar es solo
+calcular una media y una varianza por clase y por característica.
+Estrictamente esto es una densidad y no una probabilidad, pero como
+todas las clases se evalúan en el mismo punto, la comparación sigue
+siendo válida.
+
+\begin{ejemplo}[Las antenas, con números]
+    Si los saltamontes tienen antenas con $\mu = 3$ y $\sigma = 1$, y
+    los katydid con $\mu = 7$ y $\sigma = 1.5$, con las dos clases
+    igual de frecuentes, para un insecto con antenas de $5$:
+    \[
+        P(5 \mid \text{saltamontes})
+        = \frac{1}{\sqrt{2\pi}}\, e^{-(5-3)^2/2} = 0.054 ,
+        \qquad
+        P(5 \mid \text{katydid})
+        = \frac{1}{1.5\sqrt{2\pi}}\, e^{-(5-7)^2/4.5} = 0.109 .
+    \]
+    Gana katydid, con $0.109 / (0.054 + 0.109) = 0.67$, aunque $5$
+    está justo a la mitad de las dos medias: la curva de katydid es más
+    ancha y llega más lejos. La frontera queda en $x \approx 4.75$, no
+    en $5$. Con varianzas distintas la frontera ya no es lineal sino
+    cuadrática, y tiene un segundo corte en $x \approx -5.15$, en la
+    cola izquierda.
+\end{ejemplo}
+
+\subsubsection*{El teorema central del límite}
+
+En clase se justificó la normal con el teorema central del límite.
+
+\begin{teorema}[Teorema central del límite]
+    Sean $X_1, \dots, X_n$ variables aleatorias independientes e
+    idénticamente distribuidas, con media $\mu$ y varianza
+    $\sigma^2$ finitas, y sea $\bar{X}_n$ su promedio. Conforme $n$
+    crece,
+    \[
+        \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}}
+    \]
+    tiende a una distribución normal estándar, sin importar la
+    distribución original de las $X_i$.
+\end{teorema}
+
+Muchas mediciones naturales son el resultado de sumar muchos efectos
+chicos e independientes: la estatura, por ejemplo, depende de muchos
+genes y factores del ambiente. Por eso tantas características salen
+aproximadamente normales, y la suposición gaussiana suele funcionar.
+
+\begin{ojo}
+    El teorema habla de sumas y promedios, no de cualquier
+    característica. Una variable muy sesgada, como el ingreso o un
+    conteo que casi siempre vale $0$, no se vuelve normal por el
+    teorema, y ahí Naive Bayes gaussiano estima mal. Se puede
+    transformar la variable, por ejemplo con logaritmo, partirla en
+    intervalos y tratarla como discreta, o usar otra distribución.
+\end{ojo}
+
+Según el tipo de características hay tres variantes comunes: la
+\textbf{gaussiana}, para continuas; la de \textbf{Bernoulli}, para
+presencia o ausencia, como el vector del filtro de spam; y la
+\textbf{multinomial}, para conteos, como cuántas veces aparece cada
+palabra en un documento.
 
 
 \end{document}
