@@ -1,0 +1,44 @@
+-- embedings no contextualiazdos
+
+    cada palabra esta representada por un vector fijo (word2vec, fast text, glove)
+
+-- embeddings contextualizados
+
+    permite manejar la polisemia en el lenguaje, por ejemplo se ve muy perro, perro seria que se ve
+    bien, no perro del animal
+
+    para cada palabra se tiene un vector diferente dependiendo de su contexto 
+
+    el primer modelo para ver esto fueron las redes neuronales recurrentes
+    la salida de una de las capas, en la entrada va a estar alimentada por el paso actual y el historial 
+    {explicarlo mejor y profundizar}
+    tienen una memoria interna para capturar la experiencia previa
+    (en cada salida voy a tener un vector que representa la palabra de entrada con las palabras anteriores)
+
+    existen diferentes arquitecturas de la RNN
+
+    desventajas
+        la desproporcion de la info pasada 
+        desvanecimiento de gradiente
+
+    para solucionar esto surgen variantes de la RNN como el LSTM {explicar la LSTM con diagrama}
+
+-- ELMo
+
+elmo es el primer modelo que sale con embeddings contextualizados, contiene embeddings
+que se aprendieron de un modeo de lenguaje bidireccional, como que viera hacia adelante
+las palabras pero tambien hacia atras {explicar mejor elmo, diagrama y ejemplo}
+
+-- enconder decoder
+es un modelo sequence-to-sequence toma una secuencia como entreada y da una secuencia como salida
+difrente a elmo por ejemplo que solo daba una representacion
+va a tomar toda la sequencia, se la pasa al decode y genera las salidas, solo un vector que tiene agrupada
+toda la info que entreo {explicar mejor elmo, diagrama y ejemplo}
+
+- atencion
+tenemos un vector de contexto que permite identificar o prestar atencion a ciertas partes de los datos que en
+otras {explicar mejor elmo, diagrama y ejemplo}
+
+-- Transformer 
+es un modelo basado unicamente en mecanismos de atencion {explicar mejor elmo, diagrama y ejemplo}
+
