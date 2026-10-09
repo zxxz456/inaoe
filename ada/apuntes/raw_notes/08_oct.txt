@@ -1,0 +1,9 @@
+-- problema de la mochila fraccional
+{resolucion con ejemplos}
+
+-- problema de los horarios que se traslapan
+{resolucion con ejemplos}
+
+-- Divide y venceras 
+la idea simple es tdado n problema gramde, lo dividimos en sub problemas parecidos de menor tamano 
+y despues se solucionan y la solucion de todos es la general 
