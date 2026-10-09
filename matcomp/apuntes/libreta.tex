@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.7.0
+%   * Version: 2.8.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       09/10/2026      Clase 7 Oct, introduccion a la estadistica
 %  zxxz6       30/09/2026      Clase de SVD, expuesta por compañeros
 %  zxxz6       30/09/2026      Clase de eigenvalores y eigenvectores
 %  zxxz6       30/09/2026      Clase de inversa de una matriz
@@ -3501,6 +3502,301 @@ $\norm{Ax - b}$ lo más chico posible.
           que sin formar la matriz de covarianza, lo cual es más
           estable numéricamente.
 \end{itemize}
+
+\newpage
+
+% =====================================================================
+%  Clase 7 Oct - Introduccion a la estadistica
+% =====================================================================
+
+\clase{Introducción a la estadística}{7 de octubre de 2026}
+
+\begin{quick_sum}
+    Arranca la segunda parte del curso, dedicada a la estadística. Se
+    presentaron el temario, la forma de evaluar, el libro y los
+    detalles del proyecto. Luego se vieron las dos ramas de la
+    estadística: la descriptiva, que resume y presenta lo que se
+    observó, y la inferencial, que a partir de una muestra dice algo
+    sobre toda la población, con un margen de error y un nivel de
+    confianza. Entre las dos sustentan el método científico.
+\end{quick_sum}
+
+\subsection*{La segunda parte del curso}
+
+El temario arranca con las definiciones básicas y la importancia de
+la estadística, la presentación del libro que se va a usar y los
+detalles del proyecto. La evaluación de esta parte queda así:
+
+\begin{center}
+\begin{tabular}{lr}
+    \toprule
+    \textbf{Actividad} & \textbf{Peso} \\
+    \midrule
+    Presentación por equipos       & 10\,\% \\
+    Ejercicios rápidos             &  5\,\% \\
+    Proyecto por equipos           & 15\,\% \\
+    Defensa personal individual    & 20\,\% \\
+    \midrule
+    \textbf{Total}                 & \textbf{50\,\%} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La defensa individual es lo que más pesa: el proyecto se hace en
+equipo, pero cada quien tiene que poder explicarlo.
+
+\subsubsection*{El libro}
+
+\textit{Calling Bullshit: The Art of Skepticism in a Data-Driven
+World}, de Carl T.\ Bergstrom y Jevin D.\ West (2020). No es un libro
+de fórmulas: trata de cómo detectar cuándo los números, las gráficas y
+los estudios se usan para engañar, a propósito o por descuido. Es el
+otro lado de la estadística: además de saber calcular, saber cuándo
+desconfiar de un resultado.
+
+% =====================================================================
+
+\subsection*{Qué es la estadística}
+
+\begin{definicion}[Estadística]
+    La ciencia que se ocupa de recolectar, organizar, analizar e
+    interpretar datos, para describir lo que se observó y para sacar
+    conclusiones cuando no se puede observar todo.
+\end{definicion}
+
+Antes de separar sus dos ramas hacen falta cuatro términos, porque la
+diferencia entre las ramas está justo ahí:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Población}: el conjunto completo sobre el que se
+          quiere saber algo. Todos los votantes del país, todas las
+          ejecuciones posibles de un programa.
+    \item \textbf{Muestra}: la parte de la población que sí se
+          observa. Las 400 personas encuestadas, las 30 ejecuciones
+          que se corrieron.
+    \item \textbf{Parámetro}: un número que describe a la población,
+          como la proporción real de votantes a favor. Casi nunca se
+          conoce.
+    \item \textbf{Estadístico}: un número calculado con la muestra,
+          como la proporción a favor entre los encuestados. Este sí se
+          conoce, y se usa para estimar el parámetro.
+\end{itemize}
+
+La estadística se divide en dos ramas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Descriptiva}: pone los datos en una forma que se
+          pueda entender.
+    \item \textbf{Inferencial}: usa los datos para sacarles jugo,
+          analizarlos y concluir algo más allá de ellos, siempre con un
+          margen de error y un nivel de confianza.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Estadística descriptiva}
+
+Resume un conjunto de datos con unos cuantos números y gráficas, para
+entender y comunicar lo que se observó. Su límite es ese: describe los
+datos que se tienen y no saca conclusiones sobre nada que no se haya
+medido. Sus herramientas se agrupan en tres tipos:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Tendencia central}, dónde está el centro de los
+          datos: la \textbf{media} (el promedio), la \textbf{mediana}
+          (el valor de en medio al ordenarlos) y la \textbf{moda} (el
+          que más se repite).
+    \item \textbf{Dispersión}, qué tan separados están: el
+          \textbf{rango} (máximo menos mínimo), la \textbf{varianza} y
+          la \textbf{desviación estándar}, que es la raíz de la
+          varianza y queda en las mismas unidades que los datos.
+    \item \textbf{Presentación}: tablas de frecuencias, histogramas,
+          diagramas de caja.
+\end{itemize}
+
+Para una muestra de $n$ datos, la media y la varianza son
+\[
+    \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i ,
+    \qquad
+    s^2 = \frac{1}{n - 1} \sum_{i=1}^{n} \left(x_i - \bar{x}\right)^2 ,
+    \qquad
+    s = \sqrt{s^2} .
+\]
+Se divide entre $n - 1$ y no entre $n$ porque $s^2$ se usa para
+estimar la varianza de la población, y con $n$ la subestimaría: las
+desviaciones se miden contra $\bar{x}$, que está calculada con los
+mismos datos y por eso queda más cerca de ellos que la media real.
+
+\begin{ejemplo}[Tiempos de ejecución]
+    Un programa se corrió $7$ veces y tardó, en milisegundos,
+    \[
+        12,\ 13,\ 14,\ 14,\ 15,\ 16,\ 42 .
+    \]
+    \textbf{Tendencia central.} La suma es $126$, así que
+    $\bar{x} = 126 / 7 = 18$. Ordenados, el de en medio es el cuarto:
+    la mediana es $14$. El que más se repite también es $14$.
+
+    \textbf{Dispersión.} El rango es $42 - 12 = 30$. Las desviaciones
+    respecto de la media son $-6, -5, -4, -4, -3, -2, 24$, y sus
+    cuadrados
+    \[
+        36 + 25 + 16 + 16 + 9 + 4 + 576 = 682 ,
+    \]
+    \[
+        s^2 = \frac{682}{6} = 113.67 , \qquad s = 10.66 \text{ ms}.
+    \]
+
+    La corrida de $42$ ms jala la media a $18$, más arriba que seis de
+    los siete datos, y ella sola aporta $576$ de los $682$ de la suma
+    de cuadrados. Sin esa corrida, la media y la mediana valen $14$ y
+    la desviación estándar baja a $1.41$. La mediana no se movió: es
+    más robusta a valores atípicos que la media.
+
+    Todo esto describe estas $7$ corridas. Si el programa va a tardar
+    $18$ ms en otra máquina, o si la corrida de $42$ fue un accidente,
+    ya no es pregunta de la descriptiva.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Estadística inferencial}
+
+Parte de una muestra representativa para hablar de toda la población.
+Como solo se observó una parte, cualquier conclusión lleva
+incertidumbre, y la inferencial la mide en lugar de ignorarla. Hace
+dos cosas principales:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Estimar parámetros}, casi siempre con un
+          \textbf{intervalo de confianza}: un rango de valores que, con
+          cierto nivel de confianza, contiene al parámetro real.
+    \item \textbf{Poner a prueba hipótesis}: decidir si lo que se ve en
+          la muestra es un efecto real o se explica por el azar de
+          haber tomado esa muestra y no otra.
+\end{itemize}
+
+\begin{ejemplo}[Intervalo de confianza: una encuesta]
+    Se pregunta a $400$ personas si están a favor de una propuesta y
+    $208$ dicen que sí: $\hat{p} = 208/400 = 0.52$. ¿Está a favor la
+    mayoría de la población?
+
+    La proporción de la muestra cambia de una muestra a otra. Cuánto
+    cambia lo mide su error estándar:
+    \[
+        EE = \sqrt{\frac{\hat{p}\,(1 - \hat{p})}{n}}
+           = \sqrt{\frac{0.52 \cdot 0.48}{400}} = 0.025 .
+    \]
+    Con $95\%$ de confianza, el \textbf{margen de error} es
+    $1.96 \cdot EE = 0.049$, y el intervalo
+    \[
+        0.52 \pm 0.049 = [\,0.471,\ 0.569\,] .
+    \]
+    La proporción real puede estar entre $47.1\%$ y $56.9\%$. Como el
+    intervalo incluye valores por debajo del $50\%$, la encuesta
+    \textbf{no} permite decir que la mayoría está a favor, aunque en
+    la muestra haya ganado el sí.
+\end{ejemplo}
+
+El $1.96$ sale de la distribución normal: el $95\%$ de su área queda a
+menos de $1.96$ desviaciones estándar del centro. Más confianza pide
+un intervalo más ancho, y más datos lo angostan: el error estándar
+baja con $\sqrt{n}$, así que para partir el margen a la mitad hay que
+cuadruplicar la muestra.
+
+\begin{ejemplo}[Prueba de hipótesis: ¿la moneda está cargada?]
+    Se lanza una moneda $100$ veces y salen $62$ águilas. ¿Está
+    cargada, o fue suerte?
+
+    \textbf{Hipótesis.} La hipótesis nula, $H_0$, es la que dice que
+    no pasa nada: la moneda es justa, $p = 0.5$. La alternativa,
+    $H_1$, es que sí está cargada, $p \neq 0.5$.
+
+    \textbf{Qué esperaría $H_0$.} Con una moneda justa, en $100$
+    lanzamientos salen en promedio $50$ águilas, con desviación
+    estándar $\sqrt{100 \cdot 0.5 \cdot 0.5} = 5$. Las $62$ están a
+    \[
+        z = \frac{62 - 50}{5} = 2.4
+    \]
+    desviaciones estándar del centro.
+
+    \textbf{Valor $p$.} Es la probabilidad de ver algo así de
+    extremo, o más, si $H_0$ fuera cierta. Con la aproximación normal,
+    quedar a $2.4$ desviaciones o más, para cualquiera de los dos
+    lados, tiene probabilidad $p = 0.016$.
+
+    \textbf{Decisión.} Se fija de antemano un nivel de significancia,
+    típicamente $\alpha = 0.05$. Como $0.016 < 0.05$, se rechaza
+    $H_0$: es muy poco probable que una moneda justa dé $62$ águilas,
+    así que hay evidencia de que está cargada. Con $55$ águilas,
+    $z = 1$ y $p = 0.32$: algo así pasa seguido con una moneda justa y
+    no se rechazaría nada.
+\end{ejemplo}
+
+\begin{ojo}
+    No rechazar $H_0$ no prueba que sea cierta, solo dice que los
+    datos no alcanzan para descartarla. Y el valor $p$ no es la
+    probabilidad de que $H_0$ sea cierta, es la probabilidad de los
+    datos suponiendo que lo es.
+
+    Además, todo depende de que la muestra sea representativa. En
+    1936 la revista \textit{Literary Digest} encuestó a más de dos
+    millones de personas, sacadas sobre todo de directorios telefónicos
+    y registros de autos, y predijo que Landon le ganaba a Roosevelt.
+    Roosevelt ganó con cerca del $61\%$. En plena crisis, quien tenía
+    teléfono y auto no representaba al votante promedio, y ningún
+    tamaño de muestra corrige un sesgo así.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Diferencias entre las dos ramas}
+
+\begin{center}
+\begin{tabular}{p{2.6cm}p{5.4cm}p{5.4cm}}
+    \toprule
+    & \textbf{Descriptiva} & \textbf{Inferencial} \\
+    \midrule
+    Objetivo & Resumir y presentar lo observado
+             & Concluir algo sobre la población \\
+    \addlinespace
+    Alcance  & Solo los datos que se tienen
+             & Más allá de los datos, a partir de una muestra \\
+    \addlinespace
+    Herramientas & Media, mediana, moda, rango, desviación estándar,
+                   tablas y gráficas
+                 & Intervalos de confianza, pruebas de hipótesis \\
+    \addlinespace
+    Incertidumbre & No hay: los números son exactos para esos datos
+                  & Siempre hay: margen de error y nivel de confianza \\
+    \addlinespace
+    Pregunta típica & ¿Cuánto tardaron estas 7 corridas?
+                    & ¿Cuánto tardará el programa en general? \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Las dos van juntas: la inferencial trabaja sobre estadísticos que
+calcula la descriptiva, como la media o la proporción de la muestra.
+
+% =====================================================================
+
+\subsection*{Estadística y método científico}
+
+Las dos ramas sustentan el método científico. Se observa un fenómeno y
+se describe con la estadística descriptiva; se plantea una hipótesis;
+se diseña un experimento que junte una muestra; y con la estadística
+inferencial se decide si los datos apoyan la hipótesis o se explican
+por azar.
+
+\begin{idea}
+    En computación esto aparece cada vez que se compara un sistema
+    contra otro con pocos datos. En Fundamentos para el Análisis
+    Automático de Lenguaje, GloVe sacó un MAP de $0.5221$ contra
+    $0.5376$ de tf-idf, medido sobre solo $10$ consultas. La
+    descriptiva dice que en esas $10$ ganó tf-idf; si con otras
+    consultas también ganaría, o si la diferencia es ruido, es una
+    pregunta de la inferencial.
+\end{idea}
 
 
 \end{document}
