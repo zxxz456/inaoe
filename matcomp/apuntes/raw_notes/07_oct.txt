@@ -1,0 +1,35 @@
+-- segunda parte del curso
+
+-temario
+    definiciones e mportancia estaditica
+    presentacion libro usado
+    detalles de proycto
+
+-evaluacion
+    presentacion por equipos 10%
+    ejercicios rapidos 5%
+    proyecto por equpiois 15%
+    defensa personal individual 20%
+
+
+-- estadistica
+
+    - descriptiva: pone resultado en forma que se puedan entender los datos
+    - infrencial : usar los datos, le queremos sacar jugos, analizarlos, etc (margen de error y confianza)
+
+
+    --- descriptiva
+        mide dispersion stdev, resume el conjunto de datos con medidas de tendencia central 
+        sirve para entender y comunicar lo observado, sin extraer conlcuiosnes {explicar mejor}
+
+    --- inferencial
+        parte de una muestra representativa para hablar de una poblacion
+        estima parametros mediante intervalos de confianza
+        pone a prueba hipoesis {explicar mejor con ejemplos}
+
+
+{tabla de diferencias}
+
+sustentan el metodo cientifico
+
+"Calling Bllshit, Carls T. Bergstorm "
