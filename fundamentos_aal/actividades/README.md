@@ -18,6 +18,7 @@ Metadata:
 History:
 ------------
 Author      Date            Description
+zxxz6       06/10/2026      Tarea 4 instrucciones
 zxxz6       21/09/2026      El README sube a la raiz de actividades/
 zxxz6       14/09/2026      La carpeta actividad_1/ ahora se llama src/
 zxxz6       08/09/2026      Creation
@@ -99,6 +100,31 @@ coseno.
 Calcular y comparar el "Average Precision" (AP) de los documentos recuperados para
 cada consulta, antes y después de la expansión de la consulta.
 Entregables: Código y lista de AP por consulta, antes y después de expansión.
+
+## Actividad 4 
+
+### Instrucciones
+
+Repetir la tarea 2 pero construyendo la representación de los documentos a parir de
+"word embeddings" pre- entrenados. En este caso calcular la representación de cada
+documento como el promedio de los vectores de las palabras que lo conforman.
+Los embeddings de GloVe se pueden descargar en:
+https://nlp.stanford.edu/projects/glove/
+Para cada consulta recuperar los 100 documentos con mayor similitud coseno usando
+su representación basada en embeddings (tanto de documentos como de consultas).
+Calcular el "Average Precision" (AP) de los documentos recuperados para cada
+consulta, y comparar estos resultados contra los obtenidos en la tarea 3.
+Entregables: Código y lista de AP por consulta, usando embeddings, tf-idf y tf-idf con
+expansión de consulta.
+
+Para descargar GloVe
+
+```bash
+
+curl -L -o glove/glove.6B.zip https://nlp.stanford.edu/data/glove.6B.zip
+unzip -j glove/glove.6B.zip glove.6B.300d.txt -d glove
+
+```
 
 <!--
 ############################### END OF README.MD ###############################
