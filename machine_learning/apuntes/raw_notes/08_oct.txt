@@ -1,0 +1,31 @@
+-- Naive Bayes clasificator
+
+Esta basado en el torema de bayes, en el calulo de las probabilidades 
+Se concidera ingenuo
+funciona condatos de alte dimesionalidad 
+
+en este tipo de class, dado un nuevo dato calclamos la prob de un dato nuevo a partir de cual
+seria u proba en cada clase del problema dado que aparecio ese nuevo dato
+
+{formula del teorema de bayes explicada}
+
+asume que las variables son condicionalmente independientes por eso es ingenuo 
+pero eso no significa que las variables sean independientes 
+
+{formula de naive bayes clasificator}
+
+al asumir la no dependencia, el calculo se ace lineal a diferencai de que si hacemos la
+probabilidad exacta, se hace muy costsoo el calculo 
+
+es bueno porque es capaz de generalizar 
+
+si la probabilidad de un termino es cero, hace todo cero, entonces hay tecnicas para evitar eso {explicar y anotar tecnicas}
+
+es sensible a varialbes irrelevantes 
+
+esto fue para variables discretas, pero para variables cnotinuas se aume una distribucion gaussiana por el teorema central del
+limite y se usa la siginte epresion 
+
+{anotar toerema central del limite}
+
+

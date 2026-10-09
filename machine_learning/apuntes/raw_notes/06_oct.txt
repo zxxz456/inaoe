@@ -1,0 +1,78 @@
+-- clasificadores basados en distancia
+
+suponen que todos los datos pueden representarse en un espacio metrico normal
+
+partimos de un espacion donde los datos pueden ser medidos, lo que se asume es que si
+dos objetos estan cercanos, entonces son similraes
+
+-espacio metrico {definicion de espacio metrico y las propiedades (reflexica, simetrica desiguladad triangular, positivo o null)}
+
+es importante que estas propuedades se cumplan en nuestra funcion de metrica o distancia
+
+si no se cumple alguna, hablo de una psuedometrica (disimliraidad) {explicacion de psudometrica}
+no todoas las dismiliridades se obtienen como el inverso de la distancia
+
+de la distancia euclidiana salen diferentes variantes
+
+la familia L_p {completar definicion}
+    - manhatta {poner def}
+    - euclidiana {poner def}
+    - chebysheb {poner def}
+
+Distancia euclidiana pesada {poner def}
+
+Mahalanobis distance {poner def}
+
+{ejemplo con grafica y distancia con los mismos puntos al origen con diferentes metricas de deistancia}
+
+
+como se utiliza la metrica para clasificar?
+solo necesito mi distanca y una modalidad
+
+-distancia minima {explicar mejor y poner def formal}
+solo voy a tener un objeto que represente a una clase, el prototipo
+y la regla de clasificacion va a ser, dado un nuevo dato, evaluo con la merica, evaluo respecto a los prototipos 
+diferentes de las clases, a cual se acerca mas, y al que se acerque mas pues esa es
+pero esto tiene sus inconvenientes ya que solo es el mas cerano, economizamos
+
+-nn {explicar mejor y poner def formal}
+la otra modalidad es la del vecino mas cercano, dado un dato nuevo ese dato nuevo va a estar en la clase w
+si existe un prototipo en esa clase , si la ditsncia es la menor al conjunto de prototipos
+o sea aqui decimos que va a estar cerca de prototipos, y de los que esta mas cerca entonces ese es la clase 
+a la que pertenece, es el vecino mas cercano por clase
+
+-knn {explicar mejor y poner def formal}
+en lugar de conciderar al vecino mas cercano, concidero k prototipos mas cercanos
+cuando llega un nuevo dato a quienes son los objetos mas cercanos a el es la clase a la que va a pertenecer
+aqui los vecinos son independienes de la coase, los que este mas cerca gana
+
+
+
+- fronteras de decision de un clasificador basado en distancia
+en los clasificadores lineales como el SVM, o el Perceptron, es un hiperplano
+cuando estamos ubicados en la d¿frontera enre dos clases, la frontera es un hiperplano, lo mismo que ocurria en 
+unclasificador lineal 
+
+
+esta frontera cambia en funcion de la funcion de distancia (el numero de vecinos tambien, en knn)
+
+
+se han heco modificaciones a knn 
+por ejemplo 
+-epsioln ball nearest neibors {explicar}
+
+
+el calculo de distancia es costoso, razon por la cual se recurre a tecnicas para reducir dimension
+tambien se usan estructuras de tipo arbol para optimizar el calculo de distancias , se hacen podas aprovechando. la desigualdad triangular
+tambien se edita el conjunto de dentrenamiento quitando datos redundantes (tecnicas para quitar el ruido)
+(una manra de analizar si es ruido, es analizar a los vecinos de ese dato)
+
+la maldicion de la dimensionalidad, cuando hay muchas variables, o dimensiones, el cambio de
+un vriable no afecta mucho en la distancia {explicar mejor eso}
+
+- fast knn {explicar brevemente, mejoras, etc}
+
+estos clasificadores basados en distancia, la manera de determianr los documentos mas parecidos
+es los knn y sigue vigente a la fecha 
+
+Si tengo datos no numericos, tengo que transformarlos en numericos 
