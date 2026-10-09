@@ -1,0 +1,290 @@
+% =====================================================================
+%  reporte_4.tex
+%  ========================
+%
+%
+%  Descripción:
+%  ------------
+%  Reporte de la actividad 4 de Fundamentos para el Análisis Automático
+%  de Lenguaje: recuperación con word embeddings GloVe pre-entrenados,
+%  representando cada documento y cada consulta como el promedio de
+%  los vectores de sus palabras, y comparación del average precision
+%  contra tf-idf y tf-idf con expansión de Rocchio.
+%
+%
+%  Metadata:
+%  ----------
+%   * Author : zxxz6 (Bryan Violante Arriaga)
+%   * Version: 1.0.0
+%
+%
+%  History:
+%  ------------
+%  Author      Date            Description
+%  zxxz6       08/10/2026      Creation
+%
+%
+% =====================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% =====================================================================
+%  DATOS DE LA MATERIA
+% =====================================================================
+\newcommand{\materia}{Fundamentos para el Análisis Automático de Lenguaje}
+\newcommand{\profesor}{Dra. Delia Irazú Hernández Farías \\
+                       Dr. Luis Villaseñor Pineda \\
+                       Dr. Manuel Montes y Gómez \\
+                       Dr. Aurelio López López}
+\newcommand{\periodo}{Otoño 2026}
+\newcommand{\alumno}{Bryan Ezequiel Violante Arriaga}
+
+\input{../../../templates/Preambulo.tex}
+
+% El preambulo compartido pone el numero de pagina en el pie. Un
+% reporte de pocas hojas no lo necesita, asi que se limpia solo aqui.
+\fancyfoot[C]{}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\begin{center}
+  {\LARGE\bfseries Actividad 4\par}
+  \vspace{0.3em}
+  {\large Recuperación con \textit{word embeddings}
+   pre-entrenados\par}
+  \vspace{0.5em}
+  {\small \alumno \quad-\quad \periodo\par}
+  \vspace{0.4em}
+  \rule{\linewidth}{0.5pt}
+\end{center}
+
+\section*{Resumen}
+
+Se repitió la recuperación de la actividad 2, pero representando cada
+documento y cada consulta como el promedio de los vectores GloVe de
+sus palabras. Para cada una de las primeras 10 consultas se
+recuperaron los 100 documentos de mayor similitud coseno y se midió el
+average precision, para compararlo contra tf-idf y tf-idf con la
+expansión de Rocchio de la actividad 3.
+
+GloVe obtiene un MAP de $0.5221$, por debajo de tf-idf ($0.5376$) y de
+tf-idf con Rocchio ($0.5618$). El promedio esconde un patrón claro:
+GloVe gana en las consultas que describen un tema con palabras
+comunes, y pierde en las que dependen de un nombre propio o de un
+término raro.
+
+\section{Start point}
+
+De las actividades anteriores se usan los documentos y consultas
+ya preprocesados, en particular texto\_nn, el texto sin
+palabras vacías y sin truncar; los juicios de relevancia de
+TIME.REL; y la tabla de AP por consulta de la actividad 3,
+de donde salen las columnas de tf-idf (AP antes de expandir) y de
+tf-idf con Rocchio (AP después), sobre el sistema NLTK tf-idf. Porter
+y NLTK dan el mismo AP con tf-idf, así que basta uno.
+
+Los embeddings son los de GloVe 6B en 300 dimensiones: entrenados
+sobre Wikipedia 2014 y Gigaword 5, unos 6 mil millones de tokens, con
+un vocabulario de 400 mil palabras en minúsculas.
+
+\section{Método}
+
+\subsection*{Preprocesamiento para GloVe}
+
+GloVe tiene vectores de palabras completas, así que se parte de
+texto\_nn y no de las variantes truncadas con Porter.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    \textbf{Tokenización} & \textbf{Apariciones sin vector}
+      & \textbf{MAP} \\
+    \midrule
+    Sin quitar \texttt{'s} & 5.15\,\% & 0.4997 \\
+    Quitando \texttt{'s}   & 2.54\,\% & 0.5221 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Quitar el posesivo recupera la mitad de las apariciones que
+    se quedaban sin vector y sube el MAP en $0.022$.}
+  \label{tab:posesivo}
+\end{table}
+
+Lo q sigue sin vector son sobre todo nombres propios de la
+época (\texttt{nenni}, \texttt{evtushenko}, \texttt{aflak},
+\texttt{adoula}) y contracciones como \texttt{don't}, que GloVe
+también parte en dos. Esas palabras se saltan.
+
+\subsection*{Representación por promedio}
+
+La representación de un texto es el promedio
+de los vectores de las palabras que lo conforman:
+\[
+    \bar{v}_d = \frac{1}{|T_d|} \sum_{t \in T_d} v_t ,
+\]
+donde $T_d$ son las apariciones de palabras del documento $d$ que sí
+tienen vector. Cada aparición cuenta, así que una palabra que sale
+tres veces pesa tres veces, que es lo más parecido al tf. Las
+consultas se representan igual; como casi nunca repiten palabras, en
+ellas el promedio equivale a un pesado binario.
+
+\subsection*{Recuperación y evaluación}
+
+La similitud es el mismo coseno de la actividad 2, ahora sobre los
+vectores densos de 300 dimensiones. Para cada consulta se toman los
+100 documentos de mayor coseno.
+
+A diferencia de tf-idf, aquí no se puede filtrar por coseno mayor que
+cero, porque prácticamente todos los documentos lo tienen: los
+cosenos van de $-0.112$ a $0.893$, con mediana $0.585$, y solo 110 de
+los 35\,109 pares consulta-documento salen negativos. Con tf-idf, en
+cambio, un documento que no comparte ningún término con la consulta
+tiene coseno exactamente cero.
+
+El AP se mide sobre ese top 100 y sobre las mismas 10 consultas de la
+actividad 3, de modo que las tres columnas se comparan sobre el mismo
+corte:
+\[
+    \mathrm{AP}(q) = \frac{1}{|\mathrm{Rel}|} \sum_{k=1}^{100}
+                     P@k \cdot \mathrm{rel}(k) .
+\]
+
+\section{Resultados}
+
+\subsection*{AP de los tres sistemas}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    \textbf{Sistema} & \textbf{MAP} & \textbf{Contra tf-idf} \\
+    \midrule
+    tf-idf              & 0.5376 &            \\
+    tf-idf + Rocchio    & 0.5618 & $+0.0242$  \\
+    GloVe (promedio)    & 0.5221 & $-0.0155$  \\
+    \bottomrule
+  \end{tabular}
+  \caption{Promedio del AP sobre las primeras 10 consultas, medido
+    sobre el top 100.}
+  \label{tab:map}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{rrrr}
+    \toprule
+    \textbf{Q} & \textbf{tf-idf} & \textbf{tf-idf + Rocchio}
+      & \textbf{GloVe} \\
+    \midrule
+     1 & .7497 & .8010 & .7860 \\
+     2 & .7000 & .7500 & .5909 \\
+     3 & .1401 & .1429 & .3232 \\
+     4 & .0417 & .0452 & .0422 \\
+     5 & .0354 & .0317 & .0942 \\
+     6 & .9114 & .9576 & .9192 \\
+     7 & .0305 & .0135 & .0000 \\
+     8 & 1.000 & 1.000 & 1.000 \\
+     9 & .9185 & .9276 & .8454 \\
+    10 & .8486 & .9484 & .6199 \\
+    \midrule
+    \textbf{media} & \textbf{.5376} & \textbf{.5618}
+      & \textbf{.5221} \\
+    \bottomrule
+  \end{tabular}
+  \caption{AP por consulta con cada representación.}
+  \label{tab:apquery}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{glove_ap.pdf}
+  \caption{AP por consulta de los tres sistemas.}
+  \label{fig:ap}
+\end{figure}
+
+GloVe le gana a tf-idf en cinco consultas (1, 3, 4, 5 y 6), empata en
+la 8 y pierde en cuatro (2, 7, 9 y 10). Las ganancias más grandes son
+la 3, de $0.14$ a $0.32$, y la 5, de $0.04$ a $0.09$; las pérdidas más
+grandes son la 10, de $0.85$ a $0.62$, y la 2, de $0.70$ a $0.59$. En
+la 7 llega a cero
+
+\section{Discusión}
+
+\subsection*{Porque no se obtienen mejores resultados en todas?}
+
+Creo que la diferencia depende de qué tipo de palabras trae cada
+consulta
+
+En la 3 y la 5 GloVe le gana a tf-idf, mi observacion con los resultados obtenidos es que estas
+consultas describen un tema con palabras comunes, por ejemplo
+\textit{persons involved in the viet nam coup}. Un documento relevante
+puede hablar del golpe sin usar \texttt{persons} ni \texttt{involved},
+y para tf-idf si la palabra no está, no cuenta. De hecho, en las dos
+consultas hay un relevante que no comparte ningún término con la
+consulta y que tf-idf nunca recupera. Con GloVe eso no pasa tanto,
+porque \texttt{coup} queda cerca de palabras como \texttt{overthrow} o
+\texttt{junta}, entonces un documento que usa esas palabras también se
+acerca a la consulta. En la 5, por ejemplo, los primeros relevantes
+suben de las posiciones 17 y 28 a la 6 y la 8.
+
+En la 7 y la 10 pasa lo contrario, y en base a las observaciones la intuicion 
+podria decir que es por los nombres propios. La 7 depende casi toda de \texttt{norodom sihanouk}, que
+aparece en solo 4 documentos de la colección, así que en tf-idf tiene
+un idf alto y pesa mucho. Pero al promediar, esas dos palabras valen lo
+mismo que \texttt{further} o \texttt{nation}, y el nombre se pierde
+entre las demás. Los dos relevantes terminan en las posiciones 101 y
+172, fuera del top 100, y por eso el AP sale en cero. Con la 10 me
+parece que pasa algo parecido con \texttt{malaysia}, que queda mezclada
+con palabras como \texttt{growing} o \texttt{proposed}, y los dos
+últimos relevantes bajan de las posiciones 8 y 9 a la 29 y la 46.
+
+\section{Conclusiones}
+
+Con el promedio de vectores GloVe el MAP es de $0.5221$, por debajo
+de tf-idf ($0.5376$) y de tf-idf con Rocchio ($0.5618$). No es una
+mejor representación para esta colección, pero tampoco es peor en
+todo sino que es complementaria. Gana donde la consulta y los documentos usan
+palabras distintas para el mismo tema, y pierde donde la consulta
+depende de un nombre propio o de un término raro, que es justo donde
+tf-idf es fuerte.
+
+Se puede concluir que el problema no está en GloVe sino en el promedio,
+que trata igual a \texttt{sihanouk} que a \texttt{further}.
+
+\section*{Entregables}
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    \texttt{out/actividad\_4/ap\_por\_consulta.csv}
+      & AP por consulta de los tres sistemas \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El archivo trae una fila por consulta, con las columnas
+\texttt{query}, \texttt{tf-idf}, \texttt{tf-idf + rocchio} y
+\texttt{glove}, o sea 10 filas.
+
+El código está en \texttt{src/actividad.ipynb} y el entorno en
+\texttt{../requirements.txt}. Los vectores de GloVe no se versionan
+por su tamaño; las instrucciones para descargarlos están al inicio de
+la actividad 4 en el notebook.
+
+\section*{Referencias}
+
+\begin{enumerate}[label={[\arabic*]}, itemsep=0.3em, leftmargin=*]
+    \item \textbf{GloVe.} Jeffrey Pennington, Richard Socher y
+          Christopher Manning, \emph{GloVe: Global Vectors for Word
+          Representation}, EMNLP, 2014.\\
+          \url{https://nlp.stanford.edu/projects/glove/}
+    \item \textbf{Colección Time.} IR Group, University of Glasgow.
+          Colecciones de prueba para recuperación de información.\\
+          \url{http://ir.dcs.gla.ac.uk/resources/test_collections/}
+\end{enumerate}
+
+\end{document}
+
+%############################ END OF REPORTE_4.TEX #############################
+%###############################################################################
