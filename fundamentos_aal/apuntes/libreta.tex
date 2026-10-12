@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.13.0
+%   * Version: 2.14.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       12/10/2026      Clase 12 Oct, el Transformer a detalle
 %  zxxz6       07/10/2026      Clase 7 Oct, de las RNN al Transformer
 %  zxxz6       05/10/2026      Clase 5 Oct, Word2Vec, FastText y GloVe
 %  zxxz6       30/09/2026      Clase 30 Sep, semantica distribucional
@@ -5660,6 +5661,567 @@ Es el diagrama de la diapositiva $75$, simplificado.
     BERT usa solo el codificador, que ve la oración en las dos
     direcciones (diapositivas $77$ a $82$).
 \end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 17 - El Transformer a detalle
+% =====================================================================
+
+\clase{El Transformer a detalle}{12 de octubre de 2026}
+
+\begin{quick_sum}
+    Segunda vuelta al Transformer, que la clase del $7$ dejó
+    presentado. Usa el esquema codificador-decodificador, pero sus
+    piezas son de autoatención, y la autoatención del codificador no
+    necesita saber nada del decodificador. Los tres conceptos nuevos
+    son query, key y value, y lo que lo hace tan poderoso son las
+    múltiples cabezas de atención: en cada capa hay varias
+    representaciones distintas de cada palabra. Aquí se arma la
+    autoatención completa con matrices, se ve la máscara del
+    decodificador y cómo se genera una traducción paso a paso, se
+    trabajan dos cabezas con números, y se cierra con lo que hay
+    dentro de cada capa: suma y normalización, la red
+    \textit{feed-forward}, la codificación posicional y cuánto pesa el
+    modelo.
+\end{quick_sum}
+
+\subsection*{Autoatención con matrices}
+
+La clase del $7$ calculó la nueva representación de una sola palabra,
+\textit{ladra}, con su consulta y las claves y valores ya dados. En el
+Transformer se calcula para todas las palabras a la vez, y las tres
+proyecciones salen de los mismos embeddings de entrada.
+
+Se apilan los $n$ vectores de entrada como renglones de una matriz $X$
+de $n \times d$. Cada papel es una multiplicación por una matriz
+aprendida:
+\[
+    Q = X W_Q , \qquad K = X W_K , \qquad V = X W_V .
+\]
+El renglón $i$ de $Q$ es la query de la palabra $i$, el de $K$ su key y
+el de $V$ su value. Después,
+\[
+    A = \operatorname{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}}
+        \right) ,
+    \qquad
+    Z = A\, V .
+\]
+$Q K^{\top}$ es de $n \times n$: su celda $(i, j)$ es $q_i \cdot k_j$,
+qué tanto le sirve a la palabra $i$ lo que ofrece la palabra $j$. El
+softmax se aplica renglón por renglón, así que cada renglón de $A$
+suma $1$ y dice cómo reparte su atención una palabra. El renglón $i$
+de $Z$ es la nueva representación de la palabra $i$.
+
+\begin{observacion}
+    Aquí cada palabra es un renglón y las matrices multiplican por la
+    derecha. En la clase del $7$ cada palabra era una columna,
+    $q_i = W_Q\, x_i$. Es la misma operación con las matrices
+    transpuestas; la forma por renglones es la del artículo original y
+    la de casi todo el código.
+\end{observacion}
+
+\begin{ejemplo}[Autoatención completa en \textit{``el gato duerme''}]
+    Con embeddings de dos componentes y $d_k = 2$:
+    \[
+        X = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}
+            \begin{matrix} \textit{el} \\ \textit{gato} \\
+                           \textit{duerme} \end{matrix}
+        \qquad
+        W_Q = \begin{pmatrix} 1 & 0 \\ 1 & 1 \end{pmatrix} , \quad
+        W_K = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} , \quad
+        W_V = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix} .
+    \]
+
+    \textbf{Proyecciones.} Multiplicando cada renglón de $X$:
+    \[
+        Q = \begin{pmatrix} 1 & 0 \\ 1 & 1 \\ 2 & 1 \end{pmatrix} ,
+        \qquad
+        K = \begin{pmatrix} 0 & 1 \\ 1 & 0 \\ 1 & 1 \end{pmatrix} ,
+        \qquad
+        V = \begin{pmatrix} 1 & 0 \\ 0 & 2 \\ 1 & 2 \end{pmatrix} .
+    \]
+
+    \textbf{Puntajes.} Cada query contra cada key, y luego entre
+    $\sqrt{2} = 1.414$:
+    \[
+        Q K^{\top} = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 1 & 2 \\
+                                     1 & 2 & 3 \end{pmatrix}
+        \;\longrightarrow\;
+        \frac{Q K^{\top}}{\sqrt{2}}
+        = \begin{pmatrix} 0 & 0.707 & 0.707 \\
+                          0.707 & 0.707 & 1.414 \\
+                          0.707 & 1.414 & 2.121 \end{pmatrix} .
+    \]
+    Por ejemplo, la celda (\textit{duerme}, \textit{gato}) es
+    $(2,\ 1) \cdot (1,\ 0) = 2$.
+
+    \textbf{Pesos.} Softmax por renglón. Para \textit{el}:
+    $e^{0} = 1$, $e^{0.707} = 2.028$, $e^{0.707} = 2.028$, que suman
+    $5.056$. Igual con los otros dos:
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Mira} $\downarrow$ \quad \textbf{a} $\rightarrow$
+        & \textit{el} & \textit{gato} & \textit{duerme} \\
+        \midrule
+        \textit{el}     & $0.198$ & $0.401$ & $0.401$ \\
+        \textit{gato}   & $0.248$ & $0.248$ & $0.503$ \\
+        \textit{duerme} & $0.140$ & $0.284$ & $0.576$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \textbf{Salida.} Cada renglón de $Z = A V$ es la suma de los
+    values pesada por su renglón de $A$. Para \textit{el}:
+    \[
+        z_{\textit{el}} = 0.198\,(1,\ 0) + 0.401\,(0,\ 2)
+                        + 0.401\,(1,\ 2) = (0.599,\ 1.604) .
+    \]
+    Las tres:
+    \[
+        Z = \begin{pmatrix} 0.599 & 1.604 \\ 0.752 & 1.503 \\
+                            0.716 & 1.720 \end{pmatrix} .
+    \]
+    Cada palabra salió con un vector nuevo hecho de pedazos de las
+    otras. \textit{el} entró como $(1,\ 0)$ y salió cargada de
+    \textit{gato} y \textit{duerme}.
+\end{ejemplo}
+
+\begin{ojo}
+    $A$ no es simétrica. \textit{el} le da $0.401$ a \textit{gato},
+    pero \textit{gato} le da solo $0.248$ a \textit{el}. Si se usara el
+    mismo vector como query y como key, $Q K^{\top}$ sería simétrica y
+    la atención tendría que ser mutua. Con $W_Q$ y $W_K$ separadas, que
+    una palabra busque a otra no obliga a la otra a buscarla de
+    regreso. Es lo que se necesita: un artículo busca a su sustantivo,
+    pero al sustantivo le importa más su verbo que su artículo.
+\end{ojo}
+
+\subsubsection*{Por qué entre $\sqrt{d_k}$, con números}
+
+Si las componentes de $q$ y $k$ son independientes, con media $0$ y
+varianza $1$, el producto punto $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$
+es una suma de $d_k$ términos de varianza $1$, y su varianza es $d_k$.
+Con $d_k = 64$, la desviación estándar es $8$: dos palabras pueden
+tener puntajes que difieren por $8$ solo por azar.
+\[
+    \operatorname{softmax}(8,\ 0) = (0.9997,\ 0.0003) ,
+    \qquad
+    \operatorname{softmax}(1,\ 0) = (0.731,\ 0.269) .
+\]
+El primero es prácticamente one-hot: toda la atención va a una
+palabra y el gradiente hacia las demás es casi cero, así que no
+aprenden. Dividir entre $\sqrt{64} = 8$ regresa los puntajes a
+desviación $1$, que es el segundo caso.
+
+% =====================================================================
+
+\subsection*{Las tres atenciones del Transformer}
+
+El Transformer usa la misma operación en tres lugares, y lo único que
+cambia es de dónde salen las queries, las keys y los values
+(diapositiva $75$):
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.3cm}%
+                 >{\raggedright\arraybackslash}p{2.3cm}%
+                 >{\raggedright\arraybackslash}p{4.4cm}}
+    \toprule
+    & \textbf{Queries de} & \textbf{Keys y values de}
+    & \textbf{Quién mira a quién} \\
+    \midrule
+    Autoatención del codificador & codificador & codificador
+        & cada palabra de la entrada a todas las de la entrada \\
+    Autoatención del decodificador & decodificador & decodificador
+        & cada palabra de la salida a las anteriores de la salida \\
+    Codificador-decodificador & decodificador & codificador
+        & cada palabra de la salida a toda la entrada \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La primera fila es la que dice que en el codificador no hace falta ver
+qué pasa en el decodificador. La autoatención del codificador solo usa
+estados del codificador: las palabras de la entrada se entienden entre
+sí sin saber que existe una salida. El codificador corre una sola vez
+sobre la entrada completa, y el decodificador consulta su resultado en
+la tercera fila tantas veces como quiera.
+
+\begin{idea}
+    Por eso el codificador se puede usar solo. Si lo que se quiere es
+    representar una oración y no generar otra, basta con la pila del
+    codificador: su salida es un embedding contextualizado de cada
+    palabra. Es lo que hace BERT.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{La máscara del decodificador}
+
+En la autoatención del decodificador, cada palabra solo puede mirar a
+las anteriores. La forma de imponerlo es sumarle a los puntajes una
+máscara con $-\infty$ arriba de la diagonal antes del softmax:
+\[
+    M = \begin{pmatrix} 0 & -\infty & -\infty \\
+                        0 & 0       & -\infty \\
+                        0 & 0       & 0 \end{pmatrix} ,
+    \qquad
+    A = \operatorname{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}}
+        + M\right) .
+\]
+Como $e^{-\infty} = 0$, las posiciones tapadas reciben peso cero y el
+softmax reparte todo entre las que quedan.
+
+\begin{ejemplo}[La misma oración, con máscara]
+    Con los puntajes escalados del ejemplo anterior:
+    \begin{center}
+    \begin{tabular}{lcccc}
+        \toprule
+        & \textbf{Puntajes visibles} & \textit{el} & \textit{gato}
+        & \textit{duerme} \\
+        \midrule
+        \textit{el}     & $(0)$                 & $1$     & $0$
+                        & $0$ \\
+        \textit{gato}   & $(0.707,\ 0.707)$     & $0.5$   & $0.5$
+                        & $0$ \\
+        \textit{duerme} & $(0.707,\ 1.414,\ 2.121)$ & $0.140$
+                        & $0.284$ & $0.576$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \textit{el} solo se ve a sí misma, y su salida es su propio value,
+    $(1,\ 0)$. \textit{gato} reparte entre \textit{el} y ella:
+    $0.5\,(1,\ 0) + 0.5\,(0,\ 2) = (0.5,\ 1)$. \textit{duerme} ya veía
+    todo lo anterior y no cambia.
+\end{ejemplo}
+
+\subsubsection*{Generar contra entrenar}
+
+Al traducir \textit{``Je suis étudiant''}, el decodificador genera una
+palabra por paso. Cada palabra que sale se agrega a su entrada para el
+paso siguiente:
+
+\begin{center}
+\begin{tabular}{cll}
+    \toprule
+    \textbf{Paso} & \textbf{Entrada del decodificador}
+    & \textbf{Palabra que sale} \\
+    \midrule
+    $1$ & \texttt{<bos>} & \textit{I} \\
+    $2$ & \texttt{<bos>} \textit{I} & \textit{am} \\
+    $3$ & \texttt{<bos>} \textit{I am} & \textit{a} \\
+    $4$ & \texttt{<bos>} \textit{I am a} & \textit{student} \\
+    $5$ & \texttt{<bos>} \textit{I am a student} & \texttt{<eos>} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{<bos>} marca el inicio y \texttt{<eos>} el final. En todos los
+pasos el codificador ya terminó: su salida es la misma y el
+decodificador la consulta con la atención codificador-decodificador.
+
+Al entrenar no hace falta ir paso por paso, porque la traducción
+correcta ya se conoce. Se le da al decodificador toda la oración
+\texttt{<bos>} \textit{I am a student} de una vez, recorrida una
+posición a la derecha respecto a lo que debe predecir, que es
+\textit{I am a student} \texttt{<eos>}. Es el \textit{``outputs
+(shifted right)''} del diagrama de la diapositiva $75$. Las cinco
+predicciones se calculan en paralelo, y la máscara garantiza que la
+posición $t$ no vea la palabra que tiene que adivinar.
+
+\begin{ojo}
+    Sin la máscara el entrenamiento sería trampa: al predecir
+    \textit{student} el decodificador podría mirar \textit{student} en
+    su propia entrada, y aprendería a copiar en lugar de traducir.
+    Al generar no habría nada que copiar y el modelo fallaría.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Múltiples cabezas de atención}
+
+Lo que hace tan poderoso al Transformer es que no tiene una atención
+por capa sino varias. Una cabeza produce una sola distribución por
+palabra: \textit{duerme} reparte su atención de una sola manera. Con
+$h$ cabezas, cada una con sus propias matrices, la palabra mira a la
+oración de $h$ maneras distintas a la vez:
+\[
+    \operatorname{head}_i
+        = \operatorname{Attention}(X W_Q^{(i)},\ X W_K^{(i)},\
+                                   X W_V^{(i)}) ,
+\]
+\[
+    \operatorname{MultiHead}(X)
+        = \operatorname{Concat}(\operatorname{head}_1, \ldots,
+                                \operatorname{head}_h)\, W_O .
+\]
+Las cabezas trabajan de forma independiente. Al final sus salidas se
+pegan lado a lado y $W_O$ las mezcla y las regresa a la dimensión de
+entrada, para que la capa siguiente reciba vectores del mismo tamaño.
+
+\begin{ejemplo}[Dos cabezas sobre \textit{``el gato duerme''}]
+    La cabeza $1$ es la del ejemplo anterior. La cabeza $2$ tiene
+    \[
+        W_Q^{(2)} = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} ,
+        \qquad
+        W_K^{(2)} = W_V^{(2)}
+                  = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} ,
+    \]
+    así que $K^{(2)} = V^{(2)} = X$ y
+    $Q^{(2)} = \big((1,\ 0),\ (0,\ -1),\ (1,\ -1)\big)$. Sus puntajes
+    escalados y sus pesos:
+    \[
+        \frac{Q^{(2)} K^{(2)\top}}{\sqrt{2}}
+        = \begin{pmatrix} 0.707 & 0 & 0.707 \\
+                          0 & -0.707 & -0.707 \\
+                          0.707 & -0.707 & 0 \end{pmatrix} .
+    \]
+    \begin{center}
+    \begin{tabular}{lccc@{\qquad}ccc}
+        \toprule
+        & \multicolumn{3}{c}{\textbf{Cabeza 1}}
+        & \multicolumn{3}{c}{\textbf{Cabeza 2}} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        & \textit{el} & \textit{gato} & \textit{duerme}
+        & \textit{el} & \textit{gato} & \textit{duerme} \\
+        \midrule
+        \textit{el}     & $0.198$ & $0.401$ & $0.401$
+                        & $0.401$ & $0.198$ & $0.401$ \\
+        \textit{gato}   & $0.248$ & $0.248$ & $0.503$
+                        & $0.503$ & $0.248$ & $0.248$ \\
+        \textit{duerme} & $0.140$ & $0.284$ & $0.576$
+                        & $0.576$ & $0.140$ & $0.284$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Mismas palabras y mismos embeddings, dos patrones distintos. En la
+    cabeza $1$, \textit{duerme} se mira sobre todo a sí misma; en la
+    cabeza $2$ mira sobre todo a \textit{el}. \textit{gato} en una
+    mira al verbo y en la otra al artículo.
+
+    \textbf{Concatenar y mezclar.} Para \textit{duerme}, la cabeza $1$
+    dio $(0.716,\ 1.720)$ y la cabeza $2$
+    \[
+        0.576\,(1,\ 0) + 0.140\,(0,\ 1) + 0.284\,(1,\ 1)
+        = (0.860,\ 0.424) .
+    \]
+    Pegadas, $(0.716,\ 1.720,\ 0.860,\ 0.424)$, de cuatro componentes.
+    Con
+    \[
+        W_O = \begin{pmatrix} 0.5 & 0 \\ 0 & 0.5 \\ 0.5 & 0 \\
+                              0 & 0.5 \end{pmatrix}
+    \]
+    la salida es $(0.788,\ 1.072)$, de vuelta a dos componentes. Esta
+    $W_O$ solo promedia las dos cabezas; la de un modelo real se
+    aprende y mezcla las componentes como le convenga.
+\end{ejemplo}
+
+\subsubsection*{Las dimensiones del Transformer original}
+
+Con $d = 512$ y $h = 8$ cabezas, cada cabeza proyecta a
+$d_k = d / h = 64$ componentes. Para una oración de $n$ palabras:
+
+\begin{center}
+\begin{tabular}{lc}
+    \toprule
+    \textbf{Pieza} & \textbf{Tamaño} \\
+    \midrule
+    Entrada $X$ & $n \times 512$ \\
+    $W_Q^{(i)}$, $W_K^{(i)}$, $W_V^{(i)}$ de cada cabeza
+        & $512 \times 64$ \\
+    $Q^{(i)}$, $K^{(i)}$, $V^{(i)}$ de cada cabeza & $n \times 64$ \\
+    Pesos $A^{(i)}$ de cada cabeza & $n \times n$ \\
+    Salida de cada cabeza & $n \times 64$ \\
+    Las $8$ concatenadas & $n \times 512$ \\
+    $W_O$ & $512 \times 512$ \\
+    Salida de la capa & $n \times 512$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Ocho cabezas de $64$ cuestan lo mismo que una de $512$: el trabajo se
+reparte, no se multiplica. A cambio, en lugar de una forma de mirar
+hay ocho.
+
+\subsubsection*{Distintas representaciones en cada capa}
+
+Con varias cabezas, cada capa produce varias representaciones de cada
+palabra, una por cabeza, cada una armada con un tipo de relación. Y
+las capas se apilan: la salida de la capa $1$ es la entrada de la $2$,
+así que en la segunda capa las palabras se miran ya contextualizadas.
+Pasa lo mismo que con ELMo: las capas bajas capturan relaciones más
+locales y sintácticas, y las altas, más semánticas.
+
+\begin{observacion}
+    Cuando se revisa qué aprendió cada cabeza, salen patrones
+    reconocibles. Voita et al.\ (2019) encontraron, en un Transformer
+    de traducción, cabezas que miran a la palabra anterior o a la
+    siguiente, cabezas que siguen relaciones sintácticas como la de
+    sujeto y verbo, y cabezas que se fijan en las palabras raras.
+    También encontraron que muchas cabezas se pueden quitar sin perder
+    casi nada de calidad: no todas aprenden algo útil.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Dentro de cada capa}
+
+\subsubsection*{Suma y normalización}
+
+Cada subcapa, sea atención o \textit{feed-forward}, va envuelta en
+\[
+    \operatorname{LayerNorm}\big(x + \operatorname{Subcapa}(x)\big) .
+\]
+La suma es la conexión residual de la clase del $7$. La normalización
+de capa toma el vector de \textbf{cada palabra} por separado y lo
+lleva a media $0$ y desviación $1$, y después le aplica una escala
+$\gamma$ y un corrimiento $\beta$ aprendidos:
+\[
+    \operatorname{LayerNorm}(x) = \gamma \odot \frac{x - \mu}{\sigma}
+                                  + \beta ,
+    \qquad
+    \mu = \frac{1}{d} \sum_i x_i ,
+    \quad
+    \sigma = \sqrt{\frac{1}{d} \sum_i (x_i - \mu)^2} .
+\]
+
+\begin{ejemplo}
+    Con $x = (1,\ 2,\ 3,\ 6)$, $\mu = 3$ y las desviaciones son
+    $(-2,\ -1,\ 0,\ 3)$. La varianza es $(4 + 1 + 0 + 9)/4 = 3.5$ y
+    $\sigma = 1.871$:
+    \[
+        \frac{x - \mu}{\sigma} = (-1.069,\ -0.535,\ 0,\ 1.604) .
+    \]
+    Sin importar qué tan grandes vengan los números de la subcapa
+    anterior, la siguiente los recibe en la misma escala. Eso es lo
+    que mantiene estable el entrenamiento cuando se apilan muchas
+    capas.
+\end{ejemplo}
+
+\subsubsection*{La red feed-forward}
+
+Después de juntar información de las otras palabras, cada palabra
+pasa sola por una red de dos capas, la misma para todas las
+posiciones:
+\[
+    \operatorname{FFN}(x) = \max(0,\ x W_1 + b_1)\, W_2 + b_2 ,
+\]
+con $W_1$ de $512 \times 2048$ y $W_2$ de $2048 \times 512$. La
+atención mezcla información \textbf{entre} palabras; la
+\textit{feed-forward} procesa lo que cada palabra ya juntó, sin mirar
+a las demás.
+
+\begin{ejemplo}[Cuánto pesa una capa]
+    Con $d = 512$ y $d_{\text{ff}} = 2048$, contando sesgos:
+    \begin{align*}
+        \text{Atención } (W_Q, W_K, W_V, W_O)
+            &: 4 \cdot 512 \cdot 512 + 4 \cdot 512 = 1\,050\,624 , \\
+        \text{Feed-forward}
+            &: 512 \cdot 2048 + 2048 + 2048 \cdot 512 + 512
+             = 2\,099\,712 , \\
+        \text{Dos normalizaciones}
+            &: 2 \cdot 2 \cdot 512 = 2\,048 .
+    \end{align*}
+    Una capa del codificador suma $3\,152\,384$ parámetros, y dos
+    tercios están en la \textit{feed-forward}, no en la atención. Una
+    del decodificador tiene una atención y una normalización más,
+    $4\,204\,032$. Con $6$ y $6$ capas son $44.1$ millones, más
+    $37\,000 \times 512 = 18.9$ millones de la tabla de embeddings: unos
+    $63$ millones. El artículo reporta $65$ millones para este modelo;
+    la diferencia está en detalles de qué se cuenta.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Codificación posicional}
+
+Como se vio el $7$, la autoatención no ve el orden, y la entrada de
+cada palabra es la suma de su embedding y el de su posición. El
+artículo original no aprende los de posición; los calcula con senos y
+cosenos:
+\[
+    PE(\textit{pos}, 2i) = \sin\!\left(\frac{\textit{pos}}
+                                       {10000^{2i/d}}\right) ,
+    \qquad
+    PE(\textit{pos}, 2i + 1) = \cos\!\left(\frac{\textit{pos}}
+                                           {10000^{2i/d}}\right) .
+\]
+Cada par de componentes es un seno y un coseno de la misma frecuencia,
+y la frecuencia baja conforme avanza la componente.
+
+\begin{ejemplo}[Las tres primeras posiciones con $d = 4$]
+    Para $i = 0$ el divisor es $1$, y para $i = 1$ es
+    $10000^{2/4} = 100$:
+    \begin{center}
+    \begin{tabular}{ccccc}
+        \toprule
+        \textbf{Posición} & $\sin(\textit{pos})$ & $\cos(\textit{pos})$
+        & $\sin(\textit{pos}/100)$ & $\cos(\textit{pos}/100)$ \\
+        \midrule
+        $0$ & $0$     & $1$      & $0$     & $1$ \\
+        $1$ & $0.841$ & $0.540$  & $0.010$ & $1.000$ \\
+        $2$ & $0.909$ & $-0.416$ & $0.020$ & $1.000$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Las dos primeras componentes cambian mucho de una posición a la
+    siguiente; las dos últimas casi nada. Es como un reloj: el
+    segundero distingue posiciones vecinas y el horario distingue
+    posiciones lejanas.
+\end{ejemplo}
+
+\begin{idea}
+    Por qué senos y cosenos y no simplemente el número de posición:
+    \begin{itemize}[itemsep=0.2em]
+        \item Se quedan entre $-1$ y $1$. Sumar $\textit{pos} = 500$
+              directo al embedding lo aplastaría.
+        \item Cada posición tiene un vector distinto, porque las
+              frecuencias distintas no se repiten juntas.
+        \item Pasar de \textit{pos} a $\textit{pos} + k$ es una
+              rotación de cada par seno-coseno, la misma para
+              cualquier \textit{pos}. Una capa lineal puede aprender
+              ``la palabra que está $k$ lugares antes'' sin importar
+              dónde esté.
+        \item Funcionan con oraciones más largas que las del
+              entrenamiento, porque la fórmula da valores para
+              cualquier posición.
+    \end{itemize}
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Transformer contra RNN}
+
+La tabla del artículo original, con $n$ palabras y vectores de
+dimensión $d$:
+
+\begin{center}
+\begin{tabular}{lccc}
+    \toprule
+    & \textbf{Costo por capa} & \textbf{Pasos en secuencia}
+    & \textbf{Camino más largo} \\
+    \midrule
+    Autoatención & $\Ord{n^2 d}$ & $\Ord{1}$ & $\Ord{1}$ \\
+    Recurrente   & $\Ord{n d^2}$ & $\Ord{n}$ & $\Ord{n}$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Pasos en secuencia:} cuántas operaciones tienen que
+          esperar a la anterior. La RNN necesita $n$; la autoatención
+          calcula todas las posiciones a la vez.
+    \item \textbf{Camino más largo:} cuántos pasos separan a dos
+          palabras cualesquiera. En la RNN la primera y la última
+          están a $n$ pasos; en la autoatención, a uno.
+    \item \textbf{Costo por capa:} la autoatención es más barata
+          mientras $n < d$. Con $d = 512$ y oraciones de unas decenas
+          de palabras, casi siempre. Con documentos de miles de
+          palabras el $n^2$ domina, que es el límite que ya marcaba la
+          clase del $7$.
+\end{itemize}
 
 
 \end{document}
