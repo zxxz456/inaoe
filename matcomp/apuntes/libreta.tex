@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.8.0
+%   * Version: 2.9.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       12/10/2026      Clase 12 Oct, datos, variables y escalas
 %  zxxz6       09/10/2026      Clase 7 Oct, introduccion a la estadistica
 %  zxxz6       30/09/2026      Clase de SVD, expuesta por compañeros
 %  zxxz6       30/09/2026      Clase de eigenvalores y eigenvectores
@@ -3797,6 +3798,607 @@ por azar.
     consultas también ganaría, o si la diferencia es ruido, es una
     pregunta de la inferencial.
 \end{idea}
+
+
+\newpage
+
+% =====================================================================
+%  Clase 12 Oct - Datos, variables y escalas de medicion
+% =====================================================================
+
+\clase{Estadística descriptiva: datos, variables y escalas}%
+      {12 de octubre de 2026}
+
+\begin{quick_sum}
+    Antes de resumir datos hay que saber de dónde salen y qué tipo de
+    datos son. Un dato es el último paso de una cadena: fenómeno,
+    constructo, operacionalización y medición. Se definieron población,
+    muestra y observación, y las tres cosas que hacen falta para
+    entender cualquier dato: variabilidad, incertidumbre y sesgo.
+    Después, cómo clasificar una variable con dos preguntas: qué
+    significan las comparaciones entre sus valores, que da la escala de
+    medición (nominal, ordinal, intervalo, razón), y qué valores puede
+    tomar, que la hace discreta o continua. La escala decide qué
+    resúmenes tienen sentido.
+\end{quick_sum}
+
+\subsection*{Qué es la estadística descriptiva}
+
+\begin{definicion}[Estadística descriptiva]
+    La parte de la estadística que organiza, resume y presenta un
+    conjunto de datos, con tablas, gráficas y unos cuantos números,
+    para que se pueda entender y comunicar lo que se observó. Describe
+    solo los datos que se tienen: no generaliza a nada que no se haya
+    medido.
+\end{definicion}
+
+La clase del $7$ la presentó por sus herramientas: media, mediana,
+moda, rango y desviación estándar. Esta clase va un paso antes. Para
+saber qué herramienta usar hay que saber qué tipo de dato se tiene: la
+media de unos tiempos de ejecución tiene sentido, pero la media de unos
+códigos postales no, aunque los dos sean números. Y para entender un
+dato hay que saber cómo se produjo.
+
+% =====================================================================
+
+\subsection*{Del fenómeno a la medición}
+
+Un dato no aparece solo. Es el resultado de una cadena de decisiones:
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.9cm, minimum height=0.8cm,
+                 font=\small\bfseries, align=center},
+    nota/.style={font=\scriptsize, align=center, text width=3.1cm},
+    >=stealth]
+    \node[paso] (f) at (0, 0)    {Fenómeno};
+    \node[paso] (c) at (3.8, 0)  {Constructo};
+    \node[paso] (o) at (7.6, 0)  {Operacionalización};
+    \node[paso] (m) at (11.4, 0) {Medición};
+    \draw[->] (f) -- (c);
+    \draw[->] (c) -- (o);
+    \draw[->] (o) -- (m);
+    \node[nota] at (0, -0.95)    {lo que pasa en el mundo};
+    \node[nota] at (3.8, -0.95)  {la idea o atributo que se quiere
+                                  estudiar};
+    \node[nota] at (7.6, -0.95)  {reglas para observarlo de forma
+                                  reproducible};
+    \node[nota] at (11.4, -0.95) {el valor o etiqueta que se
+                                  registra};
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Fenómeno.} Algo que ocurre y que llama la atención,
+          todavía sin forma de medirlo: ``el sistema se siente lento''.
+    \item \textbf{Constructo.} La idea o atributo concreto que se va a
+          estudiar del fenómeno. ``Lento'' puede ser el tiempo de
+          respuesta, el tiempo de arranque o el uso de memoria; hay que
+          escoger uno.
+    \item \textbf{Operacionalización.} Las reglas para observar el
+          constructo de forma reproducible: qué se mide, con qué
+          instrumento, en qué unidades y en qué condiciones. Cualquiera
+          que siga las mismas reglas debe obtener una medición
+          comparable.
+    \item \textbf{Medición.} El valor o la etiqueta que se registra al
+          aplicar esas reglas a un caso concreto.
+\end{itemize}
+
+\begin{ejemplo}[Dos cadenas completas]
+    La misma cadena para dos fenómenos de áreas muy distintas:
+    \begin{center}
+    \small
+    \begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}%
+                     >{\raggedright\arraybackslash}p{5.2cm}}
+        \toprule
+        & \textbf{Rendimiento de un sistema}
+        & \textbf{Estrés en estudiantes} \\
+        \midrule
+        Fenómeno & El sistema se siente lento
+                 & Los estudiantes de posgrado dicen estar
+                   agotados \\
+        \addlinespace
+        Constructo & Tiempo de respuesta & Estrés percibido \\
+        \addlinespace
+        Operacionalización & Milisegundos entre que llega la petición
+                             y sale la respuesta, medidos en el
+                             servidor, $30$ peticiones con la caché
+                             caliente
+                           & Cuestionario de $10$ preguntas, cada una
+                             de $0$ a $4$, sumadas: puntaje de $0$ a
+                             $40$ \\
+        \addlinespace
+        Medición & $14.2$ ms & $23$ puntos \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+\begin{ojo}
+    La operacionalización decide qué se mide de verdad. Si un equipo
+    mide el tiempo de respuesta en el servidor y otro en el navegador
+    del usuario, el segundo incluye la red y le saldrán números más
+    grandes. Los dos midieron ``tiempo de respuesta'' y los dos tienen
+    razón, pero sus datos no se pueden comparar. Por eso un dato sin su
+    operacionalización dice poco: antes de discutir un número, hay que
+    preguntar cómo se midió. Y hay que preguntar si las reglas capturan
+    de verdad el constructo; un cuestionario de estrés que en realidad
+    mide cansancio físico es reproducible, pero mide otra cosa.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Población, muestra y observación}
+
+\begin{definicion}[Población]
+    El conjunto completo de unidades sobre las que se quiere saber
+    algo. Puede ser enorme o incluso infinito: todas las ejecuciones
+    que va a tener un programa en producción.
+\end{definicion}
+
+\begin{definicion}[Muestra]
+    El subconjunto de la población que sí se observa y se mide. Las
+    $30$ ejecuciones que se registraron.
+\end{definicion}
+
+\begin{definicion}[Observación]
+    Cada unidad de la muestra junto con los valores que se le midieron.
+    En una tabla de datos es un renglón: la ejecución número $17$, con
+    su lenguaje, su número de hilos y su tiempo.
+\end{definicion}
+
+Con la observación vienen otros dos términos. Una \textbf{variable} es
+una característica que se mide en cada observación, y en la tabla es
+una columna. Un \textbf{dato} es el valor de una variable en una
+observación: una celda.
+
+\begin{ejemplo}[La tabla de esta clase]
+    Siete ejecuciones de distintos programas en un servidor. Cada
+    renglón es una observación y cada columna una variable; se va a
+    usar en el resto de la clase.
+    \begin{center}
+    \small
+    \begin{tabular}{cllcccc}
+        \toprule
+        \textbf{Ejec.} & \textbf{Lenguaje} & \textbf{Prioridad}
+        & \textbf{Hilos} & \textbf{Tiempo (ms)}
+        & \textbf{Temp.\ CPU ($^\circ$C)} & \textbf{Inicio} \\
+        \midrule
+        1 & Python & alta  & 4 & 14.2 & 61.5 & 09:15 \\
+        2 & C++    & baja  & 8 &  3.8 & 55.0 & 09:40 \\
+        3 & Python & media & 2 & 21.7 & 58.3 & 10:05 \\
+        4 & Java   & alta  & 8 &  7.1 & 63.2 & 10:30 \\
+        5 & C++    & media & 4 &  4.5 & 57.9 & 11:00 \\
+        6 & Python & baja  & 1 & 39.0 & 52.4 & 11:20 \\
+        7 & Java   & media & 2 &  9.6 & 56.1 & 11:45 \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La población son todas las ejecuciones del servidor; la muestra,
+    estas siete. La observación $6$ es la ejecución en Python de
+    prioridad baja con un hilo que tardó $39.0$ ms.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Variabilidad, incertidumbre y sesgo}
+
+\begin{definicion}[Variabilidad]
+    Que los valores de una variable cambien de una observación a otra.
+    Viene de dos lados: las unidades de verdad son distintas entre sí,
+    y además cada medición trae un poco de ruido.
+\end{definicion}
+
+En la tabla, los tiempos van de $3.8$ a $39.0$ ms porque son programas
+distintos. Pero aun corriendo el mismo programa siete veces, como en
+el ejemplo de la clase del $7$, salieron tiempos entre $12$ y $42$ ms.
+Si no hubiera variabilidad bastaría una sola medición y no haría falta
+la estadística.
+
+\begin{definicion}[Incertidumbre]
+    Lo que no se sabe sobre el valor real que se quiere conocer, porque
+    solo se observó una muestra o porque las mediciones son
+    imperfectas. La estadística no la elimina; la cuantifica, con
+    herramientas como el error estándar y los intervalos de confianza
+    de la clase del $7$.
+\end{definicion}
+
+\begin{definicion}[Sesgo]
+    Un error sistemático: las mediciones, o la muestra, se desvían del
+    valor real siempre en la misma dirección. A diferencia del ruido,
+    no se cancela al promediar.
+\end{definicion}
+
+Los sesgos más comunes:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{De selección}: la muestra no representa a la
+          población. La encuesta de \textit{Literary Digest} de la
+          clase del $7$.
+    \item \textbf{De medición}: el instrumento está mal calibrado. Una
+          báscula que siempre marca un kilo de más.
+    \item \textbf{De respuesta}: las personas contestan distinto de lo
+          que es. Al preguntar cuánto ejercicio hacen, la gente
+          reporta más del que hace.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[tiro/.style={circle, fill=red!70!black,
+                                 inner sep=1.3pt}]
+    \foreach \x/\etq/\puntos in {
+        0/{Sin sesgo,\\poca variabilidad}/{
+            (0.08,0.05),(-0.06,0.1),(0.04,-0.09),(-0.1,-0.03),
+            (0.02,0.0)},
+        3.6/{Sin sesgo,\\mucha variabilidad}/{
+            (0.6,0.2),(-0.5,0.45),(0.1,-0.65),(-0.55,-0.35),
+            (0.35,0.55)},
+        7.2/{Con sesgo,\\poca variabilidad}/{
+            (0.5,0.45),(0.4,0.5),(0.48,0.33),(0.38,0.38),(0.55,0.4)},
+        10.8/{Con sesgo,\\mucha variabilidad}/{
+            (0.75,0.55),(0.1,0.7),(0.6,-0.05),(0.2,0.25),
+            (0.75,0.15)}} {
+        \begin{scope}[shift={(\x, 0)}]
+            \draw[gray] (0, 0) circle (0.95);
+            \draw[gray] (0, 0) circle (0.6);
+            \draw[gray, fill=fondoIdea] (0, 0) circle (0.25);
+            \foreach \p in \puntos
+                \node[tiro] at \p {};
+            \node[font=\scriptsize, align=center] at (0, -1.35)
+                {\etq};
+        \end{scope}
+    }
+\end{tikzpicture}
+\end{center}
+
+El centro de la diana es el valor real. La variabilidad es qué tan
+regados quedan los tiros; el sesgo es qué tan lejos del centro queda
+su promedio.
+
+\begin{ejemplo}[Tres básculas]
+    Una persona que pesa $70.0$ kg se pesa cuatro veces en cada una de
+    tres básculas:
+    \begin{center}
+    \begin{tabular}{lccccc}
+        \toprule
+        \textbf{Báscula} & \multicolumn{4}{c}{\textbf{Mediciones (kg)}}
+        & \textbf{Promedio} \\
+        \midrule
+        A & 69.8 & 70.3 & 70.1 & 69.9 & 70.03 \\
+        B & 68.5 & 71.4 & 69.2 & 70.9 & 70.00 \\
+        C & 71.0 & 71.1 & 70.9 & 71.0 & 71.00 \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \textbf{A} es la primera diana: poca variabilidad y sin sesgo.
+    \textbf{B} es la segunda: cada medición puede fallar por más de un
+    kilo, pero los errores van para los dos lados y el promedio cae
+    justo en $70.0$. \textbf{C} es la tercera: casi no varía, rango de
+    $0.2$ kg, y por eso parece confiable, pero siempre marca un kilo de
+    más.
+
+    Con más mediciones, el promedio de B se acerca cada vez más al
+    valor real: la incertidumbre que causa la variabilidad baja con
+    más datos. El de C se queda en $71$ aunque se pese mil veces. Más
+    datos no corrigen el sesgo.
+\end{ejemplo}
+
+\begin{ojo}
+    Un sesgo con poca variabilidad es el más peligroso, porque los
+    datos se ven consistentes y dan confianza. La báscula C da casi lo
+    mismo cada vez, y nada en sus datos avisa que está mal. El sesgo
+    solo se detecta comparando contra algo externo: una pesa de valor
+    conocido, o revisando cómo se armó la muestra.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Cómo clasificar una variable}
+
+Toda variable se clasifica contestando dos preguntas:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{¿Qué significado tienen las comparaciones entre sus
+          valores?} Si solo se puede decir que dos valores son iguales
+          o distintos, o también cuál es mayor, o cuánto mayor, o
+          cuántas veces mayor. La respuesta es su \textbf{escala de
+          medición}: nominal, ordinal, intervalo o razón.
+    \item \textbf{¿Qué conjunto de valores puede tomar?} Valores
+          separados que se cuentan, o cualquier valor dentro de un
+          intervalo. La respuesta dice si es \textbf{discreta} o
+          \textbf{continua}.
+\end{enumerate}
+
+Antes de las escalas hay una división más gruesa: si los valores son
+etiquetas o cantidades.
+
+\subsubsection*{Variables categóricas}
+
+Sus valores son categorías o etiquetas, y cada observación cae en una.
+También se les llama cualitativas. En la tabla, \textbf{lenguaje} y
+\textbf{prioridad}. Pueden ser nominales u ordinales.
+
+\begin{ojo}
+    Que una variable venga en números no la hace numérica. Un código
+    postal, un número de cuenta o codificar $1 =$ Python, $2 =$ C++ y
+    $3 =$ Java siguen siendo etiquetas. Con esa codificación el
+    promedio de la columna de lenguaje daría $1.86$, y ese número no
+    significa nada: no hay un lenguaje que esté ``un poco antes de
+    C++''.
+\end{ojo}
+
+\subsubsection*{Variables numéricas}
+
+Sus valores son cantidades: miden cuánto hay de algo, y hacer
+aritmética con ellos tiene sentido. También se les llama cuantitativas.
+En la tabla, \textbf{hilos}, \textbf{tiempo}, \textbf{temperatura} e
+\textbf{inicio}. Pueden ser de intervalo o de razón, y discretas o
+continuas.
+
+% =====================================================================
+
+\subsection*{Escalas de medición}
+
+Las cuatro escalas forman una jerarquía. Cada una conserva todo lo de
+la anterior y agrega una propiedad:
+
+\begin{center}
+\begin{tikzpicture}[
+    esc/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                minimum width=2.2cm, minimum height=0.8cm,
+                font=\small\bfseries},
+    etq/.style={above=2pt, font=\scriptsize, align=center},
+    >=stealth]
+    \node[esc] (n) at (0, 0)    {Nominal};
+    \node[esc] (o) at (4.2, 0)  {Ordinal};
+    \node[esc] (i) at (8.4, 0)  {Intervalo};
+    \node[esc] (r) at (12.6, 0) {Razón};
+    \draw[->] (n) -- node[etq] {$+$ orden} (o);
+    \draw[->] (o) -- node[etq] {$+$ distancias\\iguales} (i);
+    \draw[->] (i) -- node[etq] {$+$ cero\\verdadero} (r);
+    \node[font=\scriptsize] at (0, -0.75)    {$=$, $\ne$};
+    \node[font=\scriptsize] at (4.2, -0.75)  {$<$, $>$};
+    \node[font=\scriptsize] at (8.4, -0.75)  {$+$, $-$};
+    \node[font=\scriptsize] at (12.6, -0.75) {$\times$, $\div$};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Escala nominal}
+
+Los valores son nombres de categorías sin ningún orden. Solo conserva
+la \textbf{identidad}: se puede decir si dos observaciones son iguales
+o diferentes, y nada más. No hay orden, ni distancia, ni proporciones
+entre valores. Ejemplos: lenguaje de programación, tipo de sangre,
+carrera, color.
+
+Los resúmenes válidos son los que solo cuentan: \textbf{frecuencias},
+\textbf{proporciones} y \textbf{moda}.
+
+\begin{ejemplo}[El lenguaje de la tabla]
+    Contando cuántas veces aparece cada categoría:
+    \begin{center}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Lenguaje} & \textbf{Frecuencia} & \textbf{Proporción} \\
+        \midrule
+        Python & 3 & $3/7 = 0.43$ \\
+        C++    & 2 & $2/7 = 0.29$ \\
+        Java   & 2 & $2/7 = 0.29$ \\
+        \midrule
+        Total  & 7 & $1.00$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La moda es Python. No hay mediana: para tenerla habría que ordenar
+    los lenguajes, y cualquier orden sería inventado.
+\end{ejemplo}
+
+\subsubsection*{Escala ordinal}
+
+Las categorías tienen un orden natural, pero las distancias entre ellas
+no están definidas. Conserva la \textbf{identidad} y el
+\textbf{orden}: se sabe que alta está por encima de media, pero no
+cuánto. No garantiza que los intervalos entre niveles sean iguales.
+Ejemplos: prioridad baja, media y alta; nivel de inglés; las escalas de
+acuerdo de ``muy en desacuerdo'' a ``muy de acuerdo''; el lugar en una
+carrera.
+
+Además de lo de la nominal, como hay orden se pueden usar la
+\textbf{mediana} y los \textbf{percentiles}.
+
+\begin{ejemplo}[La prioridad de la tabla]
+    Ordenadas las siete:
+    \[
+        \text{baja},\ \text{baja},\ \text{media},\ \text{media},\
+        \text{media},\ \text{alta},\ \text{alta} .
+    \]
+    La de en medio es la cuarta: la mediana es \textbf{media}. La moda
+    también, con $3$ de $7$.
+\end{ejemplo}
+
+\begin{ojo}
+    El lugar en una carrera es ordinal. Entre el primero y el segundo
+    puede haber una décima de segundo y entre el segundo y el tercero
+    un minuto; los lugares no lo dicen. Por eso promediar valores
+    ordinales es dudoso. Con las respuestas $1, 2, 2, 3, 4, 4, 4, 5, 5$
+    en una escala de acuerdo, la media daría $3.33$, y eso supone que
+    pasar de ``en desacuerdo'' a ``neutral'' es la misma distancia que
+    de ``de acuerdo'' a ``muy de acuerdo''. La mediana, $4$, no supone
+    nada. En la práctica se promedian escalas así todo el tiempo, pero
+    hay que saber que se está agregando un supuesto.
+\end{ojo}
+
+\subsubsection*{Escala de intervalo}
+
+Los valores son números con distancias iguales: la diferencia entre
+dos valores significa lo mismo en cualquier parte de la escala. Pero el
+cero es \textbf{arbitrario}: es una convención, no la ausencia de lo
+que se mide. Se pueden sumar y restar valores, así que tienen sentido
+la \textbf{media} y la \textbf{desviación estándar}. Lo que no tiene
+sentido son las razones: decir que un valor es el doble de otro.
+Ejemplos: temperatura en grados Celsius o Fahrenheit, el año del
+calendario, la hora del día.
+
+\begin{ejemplo}[Por qué $20\,^\circ$C no es el doble de
+                $10\,^\circ$C]
+    Las diferencias sí funcionan: de $10$ a $20\,^\circ$C hay el mismo
+    calentamiento que de $20$ a $30\,^\circ$C. Pero si se pasan a
+    Fahrenheit,
+    \[
+        10\,^\circ\text{C} = 50\,^\circ\text{F} ,
+        \qquad
+        20\,^\circ\text{C} = 68\,^\circ\text{F} ,
+        \qquad
+        \frac{68}{50} = 1.36 .
+    \]
+    La misma pareja de temperaturas da razón $2$ en una escala y $1.36$
+    en otra. Una afirmación que cambia con las unidades no habla de la
+    temperatura, habla de dónde se puso el cero.
+
+    En la tabla, la ejecución $4$ dejó el procesador a $63.2\,^\circ$C y
+    la $6$ a $52.4\,^\circ$C. Decir que la $4$ lo calentó
+    $10.8\,^\circ$C más tiene sentido; decir que lo calentó un
+    $20\%$ más, no.
+\end{ejemplo}
+
+\subsubsection*{Escala de razón}
+
+Tiene todo lo de la de intervalo y además un \textbf{cero verdadero}:
+cero quiere decir que no hay nada de lo que se mide. Con eso las
+razones tienen sentido, y se puede decir que un valor es el doble o la
+mitad de otro. Ejemplos: tiempo de ejecución, número de hilos, peso,
+longitud, ingreso, temperatura en kelvin.
+
+\begin{ejemplo}[Razones en la tabla]
+    La ejecución $6$ tardó $39.0$ ms y la $2$ tardó $3.8$ ms:
+    \[
+        \frac{39.0}{3.8} = 10.26 .
+    \]
+    La $6$ tardó diez veces más. En segundos, $0.0390 / 0.0038$ da lo
+    mismo, porque cero milisegundos y cero segundos son el mismo cero:
+    no haber tardado nada.
+\end{ejemplo}
+
+Con razón también tiene sentido el \textbf{coeficiente de variación},
+la desviación estándar dividida entre la media, que mide la dispersión
+en relación con el tamaño de los datos. Para los tiempos de la tabla,
+$\bar{x} = 14.27$ ms y $s = 12.55$ ms, así que $CV = 0.88$: la
+dispersión es casi tan grande como la media. Con temperaturas en
+Celsius el $CV$ no sirve, porque depende de dónde está el cero.
+
+\subsubsection*{Resumen de las escalas}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.4cm}%
+                 >{\raggedright\arraybackslash}p{4.2cm}%
+                 >{\raggedright\arraybackslash}p{4.2cm}}
+    \toprule
+    \textbf{Escala} & \textbf{Conserva} & \textbf{Resúmenes válidos}
+    & \textbf{Ejemplos} \\
+    \midrule
+    Nominal & Identidad & Frecuencias, proporciones, moda
+            & Lenguaje, tipo de sangre \\
+    \addlinespace
+    Ordinal & Identidad y orden & Lo anterior, mediana y percentiles
+            & Prioridad, nivel de inglés, lugar en una carrera \\
+    \addlinespace
+    Intervalo & Lo anterior y distancias iguales
+              & Lo anterior, media y desviación estándar
+              & Temperatura en $^\circ$C, año, hora del día \\
+    \addlinespace
+    Razón & Lo anterior y cero verdadero
+          & Lo anterior, razones y coeficiente de variación
+          & Tiempo, hilos, peso, temperatura en kelvin \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Siempre se puede bajar de escala, pero nunca subir. Los tiempos se
+    pueden agrupar en ``rápido'', ``normal'' y ``lento'' y tratarlos
+    como ordinales, perdiendo información. Lo que no se puede es sacar
+    distancias de una variable ordinal, ni razones de una de
+    intervalo: esa información nunca se midió.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Naturaleza de los valores: discretas y continuas}
+
+La segunda pregunta es qué valores puede tomar la variable.
+
+\begin{definicion}[Variable discreta]
+    Toma valores separados que se pueden contar: entre dos valores
+    consecutivos no hay valores intermedios posibles. Casi siempre
+    sale de contar algo: número de hilos, de errores, de palabras en un
+    documento, de alumnos en un salón.
+\end{definicion}
+
+\begin{definicion}[Variable continua]
+    Puede tomar cualquier valor dentro de un intervalo: entre dos
+    valores cualesquiera siempre cabe otro. Sale de medir algo: tiempo,
+    temperatura, peso, longitud.
+\end{definicion}
+
+En la tabla, los \textbf{hilos} son discretos: una ejecución usa $2$ o
+$3$ hilos, nunca $2.5$. El \textbf{tiempo} es continuo: entre $14.2$ y
+$14.3$ ms hay una infinidad de duraciones posibles.
+
+\begin{ojo}
+    Dos confusiones comunes.
+    \begin{itemize}[itemsep=0.2em]
+        \item Una variable continua siempre se registra redondeada,
+              porque todo instrumento tiene una precisión. Que los
+              tiempos aparezcan con un decimal no los vuelve
+              discretos: la variable es continua, lo discreto es el
+              registro.
+        \item El promedio de una variable discreta no tiene que ser uno
+              de sus valores. Los hilos de la tabla suman $29$, y su
+              media es $29 / 7 = 4.14$ hilos. Ninguna ejecución usó
+              $4.14$ hilos, pero el número sí dice algo: en promedio se
+              usaron un poco más de cuatro.
+    \end{itemize}
+\end{ojo}
+
+Las variables categóricas, nominales u ordinales, son discretas por
+naturaleza: hay un número finito de categorías y nada entre ellas.
+
+% =====================================================================
+
+\subsection*{La tabla, clasificada}
+
+Juntando las dos preguntas para cada columna:
+
+\begin{center}
+\begin{tabular}{llll}
+    \toprule
+    \textbf{Variable} & \textbf{Tipo} & \textbf{Escala}
+    & \textbf{Valores} \\
+    \midrule
+    Lenguaje             & categórica & nominal   & discreta \\
+    Prioridad            & categórica & ordinal   & discreta \\
+    Hora de inicio       & numérica   & intervalo & continua \\
+    Temperatura en $^\circ$C & numérica & intervalo & continua \\
+    Hilos                & numérica   & razón     & discreta \\
+    Tiempo (ms)          & numérica   & razón     & continua \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacion}
+    La hora de inicio es de intervalo porque las $00{:}00$ no es la
+    ausencia de tiempo, es una convención para empezar a contar el
+    día. Entre las $09{:}15$ y las $11{:}45$ pasaron $2.5$ horas, eso
+    sí tiene sentido; decir que las $11{:}45$ es ``más del doble'' que
+    las $05{:}00$ no. La \textbf{duración}, en cambio, sí es de razón:
+    una ejecución de $40$ ms tarda el doble que una de $20$.
+\end{observacion}
+
+Con la clasificación hecha, la elección de resúmenes es automática: a
+lenguaje se le sacan frecuencias y moda, a prioridad además la
+mediana, a temperatura y hora además media y desviación estándar, y a
+hilos y tiempo además razones y coeficiente de variación.
 
 
 \end{document}
