@@ -1,0 +1,51 @@
+-- presentacion capitulo 1
+
+presentacion osvaldo y erik
+
+    - que es teory of mind?
+    - el bullshiting trata de vendernos algo, pero hay un punto en el que podemos ir hasta atras para verificar?
+
+    - los autores dicen que debido a los nuevos medios de comunicacion, es como feertilizante para la exansion rapida de fake news, bullshit y asi...
+    hasta que punto se puede revisar rigurosamente una cita para determinar que no es bullshit? se pueden fiar de los datos? 
+    el bullshit tiene como finalidad convencerte de algo, se podria conciderar que siempre va aser eso, se puede fiar 
+
+
+-- Clase
+---Estadistica descriptiva
+
+    que es la estadistica descriptiva? {explcar}
+
+    tenemos el fenomeno -> pasamos al constructo que es la idea o atributo que queremos estudiar -> operacionalizacion (reglas para observarlo de forma reproducible) -> medicion: valor o etiqueta registrada 
+
+    - poblacion uestra y observacion
+    {definiciones de cada uno}
+
+
+    - incertidumbre variabilidad y sesgo
+    {definir todos estos igual}
+
+    para clasificar variables hacer estas preguntas
+
+        que significados tienen las comparaciones entre las variables? (escalad e medicion, nominal, ordinal, intervalo, razon)
+        que conjuntos de valores puede tener la variable? (discreta, continua)
+
+    variables categoricas {explicar}
+    variables numericas {explicar}
+
+    escala nominal {explicar} (conserva, igual. odiferente. no implica, no hay orden ni distancia ni proporciones. resumenes basicos, frecuencias porporciones moda)
+
+    escala ordinal {explicar} (las categorias ienen un orden pero las distancias no estan definidas. conserva idenidad y orden, no garantiza intervales iguales entre niveles. resumenes tipicos, frecuencia moda mediana y percentiles)
+
+    naturaleza de valores, discreta continua {explicar}
+
+    variables discreas {explicar}
+    variables continuas {explicar}
+
+    - escalas de medicion {explicar cada una}
+    nominal -> ordinal -> intervalo -> razon
+
+    
+
+
+
+
