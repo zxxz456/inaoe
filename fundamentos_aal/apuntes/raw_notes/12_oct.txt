@@ -1,0 +1,10 @@
+-- Transformer 
+
+utilizando mecanismos de atencion se propone una arquitectura que se denomina Transformer
+utiliza el elncoder y decoder, aqui se denomina auto atencion
+no necesito ver que pasa en el decoder 
+
+se utilizan 3 nuevos coneptos, query, key y value 
+
+lo que los hace muy poderosos es que pueden tener multiples cabezas de atencion 
+en cada capa voy a tener diferentes "representaciones"
