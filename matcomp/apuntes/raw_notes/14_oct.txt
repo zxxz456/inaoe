@@ -1,0 +1,63 @@
+-- estadsitica descriptiva
+
+para que interean las distribusiones en compu? para poder contestar preguntas
+o iplementar clasificadores y asi 
+
+del experimetno a la variable
+
+experimento > desnelace > variable > observacion {explicar cada uno}
+
+los desenlaces son los valores uqe puede tener mi variable
+
+-variable aleatoria, una funcion que mie un deselace incierto, la incertidumbre esta ne que desenlace ocurrira, la regla X esta definida antes de observarlo
+
+desenlace es un catalogo de posibles resltadps
+
+El espacio muestras son las posibilidades del desenlace, es limitado
+
+la poblacion, es un conjunto de unodades o valores de interes sobre los que se desea concluir, es todo
+
+muestra, observaciones realmente regisradas, son finitias y puedes estar sesgadas 
+
+muestra es un sibconjunto de la poblacion, y el espacio muestral define a la poblacion 
+
+-- distribuciones de frecuencia
+
+una lista, es todas las posibilidades posibles de respuesta que tenemos en nuestro experimento 
+    - frecuencia absoluta
+    - frecuencia relativa
+    - distribucion empitrica {explicar todas}
+
+lo qe queremos a partir de la distribucion empirica es describir el comportamiento pobalcional, el comportamiento realm
+
+ya que la tenemos, intentamos asociarla a un modelo probablistico ya establecido, una suposicion matematica que se aproxima al 
+proceso, bernouli, 
+
+que es una dstribucio?
+las distibusion esta asociada a la naturaleza de la variable,
+    tenemos las distribuciones para valiables aleatorioa discretas
+    y continuas 
+    {explicar brevemente cada una }
+
+la pregunat cambia de cual fue el valor, a como se distribuye los valores 
+
+- distribuciones duscretas
+indica la probablidad de observar exactamente el valor X
+propiedades {explicar}
+
+las distribuciones discretas tambien cubren categoricas 
+
+- distribuciones discretas
+los varoles posibles no se cuentan uno por uno, sin por intervalos, se refieren a un area bajo la curve 
+
+por lo tanto la probabilidad se da en rangos, no en un valor especifico ya que seria sero
+
+funcion de dencidad de probablidad {explicar esto}
+
+tres formas de describir una distribuxion
+con funcion de 
+masa 
+densisdad
+acumulada 
+{explicar cada una}
+
