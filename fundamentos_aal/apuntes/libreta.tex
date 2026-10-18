@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.14.0
+%   * Version: 2.15.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/10/2026      Clase 14 Oct, el lenguaje para la computadora
 %  zxxz6       12/10/2026      Clase 12 Oct, el Transformer a detalle
 %  zxxz6       07/10/2026      Clase 7 Oct, de las RNN al Transformer
 %  zxxz6       05/10/2026      Clase 5 Oct, Word2Vec, FastText y GloVe
@@ -6222,6 +6223,523 @@ dimensión $d$:
           palabras el $n^2$ domina, que es el límite que ya marcaba la
           clase del $7$.
 \end{itemize}
+
+
+\newpage
+% =====================================================================
+%  Clase 18 - El lenguaje visto por la computadora
+% =====================================================================
+
+\clase{El lenguaje visto por la computadora}{14 de octubre de 2026}
+
+\begin{quick_sum}
+    Una vista de conjunto. Para una computadora el lenguaje es una
+    cosa distinta según el modo en que llega: señal, símbolos,
+    estructuras o interacción. Se repasaron los seis niveles de
+    análisis lingüístico, de la fonética a la pragmática, y cómo la
+    ambigüedad aparece en todos ellos y el contexto la resuelve. Luego
+    qué se quiere hacer con el lenguaje, en seis familias de tareas
+    que casi siempre se combinan, y cómo se encadenan en un sistema
+    para lenguaje oral y para lenguaje escrito. Se cerró con el
+    procesamiento multimodal y dos ideas actuales: RAG y agentes.
+\end{quick_sum}
+
+\subsection*{Qué es el lenguaje para una computadora}
+
+Depende del modo. La misma frase puede llegar como sonido, como texto,
+como estructura o como parte de una conversación, y en cada caso la
+computadora tiene que trabajar con un objeto distinto:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Señal.} El habla es una onda: una secuencia de
+          presiones del aire muestreadas miles de veces por segundo.
+          De ella se saca el \textbf{espectrograma}, que dice cuánta
+          energía hay en cada frecuencia en cada instante, y la
+          \textbf{prosodia}: entonación, ritmo y acento.
+    \item \textbf{Símbolos.} El texto es una secuencia de
+          \textbf{caracteres}, que se agrupan en \textbf{palabras} o en
+          \textbf{tokens}, las piezas con las que trabaja un modelo y
+          que pueden ser pedazos de palabra, como los n-gramas de
+          FastText.
+    \item \textbf{Estructuras.} Sobre los símbolos se arman
+          \textbf{árboles} sintácticos, \textbf{grafos} de dependencias
+          o de conocimiento, y \textbf{marcos semánticos}: esquemas de
+          un tipo de evento con sus participantes.
+    \item \textbf{Interacción.} En una conversación importan los
+          \textbf{turnos}, la \textbf{intención} de quien habla, la
+          \textbf{memoria} de lo que ya se dijo y las
+          \textbf{herramientas} que el sistema puede usar para
+          responder.
+\end{itemize}
+
+\begin{ejemplo}[Una frase en los cuatro modos]
+    \textit{``¿Me reservas una mesa para dos mañana?''}
+    \begin{center}
+    \small
+    \begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+        \toprule
+        \textbf{Modo} & \textbf{Cómo la ve la computadora} \\
+        \midrule
+        Señal & Unos dos segundos de audio a $16\,000$ muestras por
+                segundo: $32\,000$ números. La entonación sube al
+                final, y eso marca que es pregunta. \\
+        \addlinespace
+        Símbolos & $40$ caracteres, $7$ palabras, y un número de
+                   tokens que depende del modelo. \\
+        \addlinespace
+        Estructura & El marco de \textsc{reservación}: quién reserva
+                     (el sistema), para quién (el hablante), qué (una
+                     mesa), cuántas personas (dos), cuándo (mañana). \\
+        \addlinespace
+        Interacción & Es el turno del usuario y su intención es pedir
+                      algo. Para cumplirlo el sistema necesita recordar
+                      de qué restaurante se hablaba y usar la
+                      herramienta de reservaciones. \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Niveles de análisis lingüístico}
+
+El lenguaje se estudia en capas, de lo físico a la intención. Cada
+nivel toma lo que le da el de abajo y le agrega estructura. La clase
+del $17$ de agosto los nombró; aquí va cada uno con lo que estudia y
+qué tarea de PLN le corresponde.
+
+\begin{center}
+\begin{tikzpicture}[
+    nivel/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                  minimum width=2.8cm, minimum height=0.62cm,
+                  font=\small\bfseries},
+    ej/.style={font=\scriptsize, anchor=west, text width=8.6cm},
+    >=stealth]
+    \foreach \y/\n/\e in {
+        0/Fonética/{los sonidos como fenómeno físico: [b] en
+                    \textit{bota}, [$\beta$] en \textit{la bota}},
+        0.8/Fonología/{qué sonidos distinguen significado:
+                       \textit{pero} contra \textit{perro}},
+        1.6/Morfología/{cómo se arman las palabras:
+                        \textit{reserv-a-re-mos}},
+        2.4/Sintaxis/{cómo se combinan las palabras en oraciones},
+        3.2/Semántica/{qué significa: quién hizo qué a quién},
+        4.0/Pragmática/{qué quiso decir en contexto: \textit{¿tienes
+                        hora?} pide la hora}} {
+        \node[nivel] at (0, \y) {\n};
+        \node[ej] at (1.65, \y) {\e};
+    }
+    \draw[->, thick, gray] (-1.9, -0.2) -- (-1.9, 4.2);
+    \node[font=\scriptsize, gray, rotate=90] at (-2.2, 2)
+        {del sonido a la intención};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Fonética}
+
+Estudia los sonidos del habla como fenómeno físico: cómo se producen
+con el aparato fonador, cómo viajan como onda y cómo se perciben. No le
+importa si un sonido cambia el significado; le importa cómo suena. En
+español la \textit{b} de \textit{bota}, al inicio, cierra los labios
+por completo, [b]; la de \textit{la bota}, entre vocales, apenas los
+acerca, [$\beta$]. Son dos sonidos distintos.
+
+\textbf{En PLN:} el reconocimiento automático del habla (ASR), que va
+de la onda al texto, y la síntesis de voz (TTS), que va al revés.
+
+\subsubsection*{Fonología}
+
+Estudia el sistema de sonidos de una lengua: cuáles distinguen
+significado. Su unidad es el \textbf{fonema}. Para la fonología, [b] y
+[$\beta$] son el mismo fonema /b/, porque cambiar uno por otro nunca
+cambia la palabra. En cambio \textit{pero} y \textit{perro} son
+palabras distintas que solo se diferencian en la \textit{r}: la
+\textit{r} simple y la \textit{rr} son fonemas distintos. A ese par de
+palabras se le llama \textbf{par mínimo}. La prosodia también es
+fonológica: \textit{``ya llegó''} y \textit{``¿ya llegó?''} solo se
+distinguen por la entonación.
+
+\textbf{En PLN:} modelos acústicos del ASR, y detectar con la
+prosodia si algo es pregunta, énfasis o ironía.
+
+\subsubsection*{Morfología}
+
+Estudia la estructura interna de las palabras. Su unidad es el
+\textbf{morfema}, la pieza mínima con significado:
+\[
+    \textit{reserv} + \textit{a} + \textit{re} + \textit{mos}
+    \;=\; \textit{reservaremos} :
+\]
+la raíz, la vocal del verbo, el futuro y la primera persona del plural.
+Hay dos tipos de proceso. La \textbf{flexión} cambia la forma sin
+cambiar la palabra: \textit{niño}, \textit{niña}, \textit{niños}. La
+\textbf{derivación} hace una palabra nueva: \textit{posible} y
+\textit{imposible}, \textit{reservar} y \textit{reservación}.
+
+\textbf{En PLN:} lematización y \textit{stemming} (el algoritmo de
+Porter del preprocesado), y las subpalabras de FastText y de los
+tokenizadores de los modelos actuales, que son una forma aproximada de
+morfología aprendida.
+
+\subsubsection*{Sintaxis}
+
+Estudia cómo se combinan las palabras en frases y oraciones: qué orden
+es válido y qué estructura tiene. Una oración no es una lista de
+palabras sino un árbol:
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=0.95cm,
+    level 1/.style={sibling distance=3.4cm},
+    level 2/.style={sibling distance=1.6cm},
+    level 3/.style={sibling distance=1.3cm},
+    every node/.style={font=\small}]
+    \node {O}
+        child {node {SN}
+            child {node {\textit{el}}}
+            child {node {\textit{perro}}}}
+        child {node {SV}
+            child {node {\textit{mordió}}}
+            child {node {SP}
+                child {node {\textit{al}}}
+                child {node {\textit{cartero}}}}};
+\end{tikzpicture}
+\end{center}
+
+O es la oración, SN un sintagma nominal, SV uno verbal y SP uno
+preposicional. \textit{``Perro el cartero al mordió''} tiene las mismas
+palabras y no es una oración del español.
+
+\textbf{En PLN:} etiquetado gramatical (el POS tagging de la clase del
+$9$ de septiembre) y análisis sintáctico (\textit{parsing}), que
+construye el árbol.
+
+\subsubsection*{Semántica}
+
+Estudia el significado de las palabras y de las oraciones, fuera de
+cualquier contexto particular. A nivel de oración, la pregunta central
+es quién hizo qué a quién. \textit{``El perro mordió al cartero''} y
+\textit{``el cartero fue mordido por el perro''} tienen sintaxis
+distinta y el mismo significado: el perro es el \textbf{agente} y el
+cartero el \textbf{paciente}. A nivel de palabra, la semántica léxica
+estudia sinonimia, polisemia y las relaciones de WordNet.
+
+\textbf{En PLN:} desambiguación de sentidos, etiquetado de roles
+semánticos, reconocimiento de entidades, y los embeddings, que son
+semántica distribucional.
+
+\subsubsection*{Pragmática}
+
+Estudia el significado en contexto: lo que quien habla quiso decir, que
+puede ser muy distinto de lo que dijo literalmente.
+\textit{``¿Tienes hora?''} se contesta con la hora, no con ``sí''.
+\textit{``Qué frío hace aquí''} puede ser una petición de cerrar la
+ventana. Y palabras como \textit{yo}, \textit{aquí} o
+\textit{mañana} solo se pueden interpretar sabiendo quién habla,
+dónde y cuándo.
+
+\textbf{En PLN:} detección de intención en asistentes, sarcasmo e
+ironía, y manejo del diálogo. Es el nivel más difícil, porque necesita
+información que no está en el texto.
+
+% =====================================================================
+
+\subsection*{Ambigüedad y contexto}
+
+La clase del $9$ de septiembre separó la ambigüedad léxica, la
+sintáctica y la semántica. En realidad aparece en todos los niveles:
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}%
+                 >{\raggedright\arraybackslash}p{5.6cm}}
+    \toprule
+    \textbf{Nivel} & \textbf{Ejemplo} & \textbf{Interpretaciones} \\
+    \midrule
+    Fonológico & \textit{``ciento''} y \textit{``siento''}
+               & suenan igual en casi todo el español de América \\
+    \addlinespace
+    Morfológico & \textit{canto}
+                & sustantivo (un canto) o verbo (yo canto) \\
+    \addlinespace
+    Léxico & \textit{banco}
+           & institución, asiento o grupo de peces \\
+    \addlinespace
+    Sintáctico & \textit{``Vi al hombre con el telescopio''}
+               & yo tenía el telescopio, o lo tenía el hombre \\
+    \addlinespace
+    Semántico & \textit{``Todos los alumnos leyeron un libro''}
+              & el mismo libro para todos, o uno cada quien \\
+    \addlinespace
+    Pragmático & \textit{``¿Puedes pasarme la sal?''}
+               & pregunta por la capacidad, o petición \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El contexto es lo que resuelve cada caso, y casi siempre viene del
+nivel de arriba. La fonología no sabe si se dijo \textit{ciento} o
+\textit{siento}; la sintaxis de \textit{``lo \_\_\_ mucho''} sí. La
+sintaxis no decide quién tenía el telescopio; el sentido común y lo
+que se dijo antes, sí.
+
+\begin{idea}
+    Es la misma lección de los embeddings contextualizados de la clase
+    del $7$: una palabra aislada es ambigua, y el vector correcto
+    depende de la oración entera. Las personas resuelven la ambigüedad
+    tan rápido que ni la notan; para un sistema hay que darle el
+    contexto de forma explícita.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Qué se quiere hacer con el lenguaje}
+
+Las aplicaciones se agrupan en seis familias de tareas:
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}%
+                 >{\raggedright\arraybackslash}p{5.8cm}}
+    \toprule
+    \textbf{Tarea} & \textbf{Qué hace} & \textbf{Ejemplos} \\
+    \midrule
+    Entender & Saca información o una etiqueta del lenguaje
+             & análisis de sentimiento, clasificación, extracción de
+               entidades \\
+    \addlinespace
+    Transformar & Lo convierte en otra forma con el mismo contenido
+                & traducción, resumen, paráfrasis, corrección \\
+    \addlinespace
+    Encontrar & Localiza lo relevante en una colección
+              & recuperación de información, búsqueda semántica \\
+    \addlinespace
+    Generar & Produce lenguaje nuevo
+            & redacción, completar texto, código \\
+    \addlinespace
+    Interactuar & Sostiene una conversación con un propósito
+                & asistentes, chatbots, agentes \\
+    \addlinespace
+    Medir & Le asigna un número a una propiedad del lenguaje
+          & legibilidad, similitud, autoría, calidad de una
+            traducción \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+En la práctica se combinan varias. Un asistente que contesta preguntas
+sobre los manuales de una empresa tiene que \textbf{entender} la
+pregunta, \textbf{encontrar} el pasaje del manual que la contesta,
+\textbf{generar} la respuesta e \textbf{interactuar} para pedir
+aclaraciones. Es exactamente lo que hace RAG, al final de la clase.
+
+% =====================================================================
+
+\subsection*{Cómo se encadenan: lenguaje oral y escrito}
+
+\subsubsection*{Lenguaje oral}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.4cm, minimum height=0.75cm,
+                 font=\small, align=center},
+    nota/.style={font=\scriptsize, align=center, text width=2.8cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \foreach \x/\n/\t/\d in {
+        0/a/Audio/{la onda que capta el micrófono},
+        3/p/Preprocesado/{quitar ruido, detectar dónde hay voz},
+        6/r/ASR/{audio a texto},
+        9/l/PLN o LLM/{entender y decidir},
+        12/c/Acción/{responder, hablar, ejecutar}} {
+        \node[paso] (\n) at (\x, 0) {\t};
+        \node[nota] at (\x, -0.9) {\d};
+    }
+    \foreach \a/\b in {a/p, p/r, r/l, l/c}
+        \draw[->] (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[\textit{``Oye, pon una alarma a las siete''}]
+    El preprocesado detecta que hay voz y recorta el silencio. El ASR
+    produce el texto. El modelo de lenguaje reconoce la intención,
+    poner una alarma, y el dato, las siete. La acción llama a la
+    aplicación del reloj y contesta con voz sintetizada,
+    \textit{``listo, alarma a las siete''}.
+\end{ejemplo}
+
+\subsubsection*{Lenguaje escrito}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.4cm, minimum height=0.75cm,
+                 font=\small, align=center},
+    nota/.style={font=\scriptsize, align=center, text width=2.8cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \foreach \x/\n/\t/\d in {
+        0/c/Captura/{teclado, web, OCR de un escaneo},
+        3/n/Normalización/{Unicode, minúsculas, tokens, limpieza},
+        6/r/Representación/{bolsa de palabras, tf-idf, embeddings},
+        9/t/Tarea/{clasificar, recuperar, resumir},
+        12/e/Entrega/{mostrar, guardar, servir por una API}} {
+        \node[paso] (\n) at (\x, 0) {\t};
+        \node[nota] at (\x, -0.9) {\d};
+    }
+    \foreach \a/\b in {c/n, n/r, r/t, t/e}
+        \draw[->] (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+Es el camino que siguió todo el curso. La normalización es el
+preprocesado de las primeras clases, la representación son los
+modelos vectoriales, LSI y los embeddings, y la tarea fue sobre todo
+recuperación de información.
+
+\begin{ojo}
+    En una cadena los errores se acumulan: cada etapa recibe lo que dejó
+    la anterior y no puede corregir lo que no ve. Si el ASR oye
+    \textit{``a las diecisiete''} en lugar de \textit{``a las
+    siete''}, el modelo de lenguaje puede ser perfecto y la alarma
+    igual queda mal. Por eso los sistemas actuales tratan de unir
+    etapas, por ejemplo modelos que van del audio a la respuesta sin
+    pasar por texto.
+\end{ojo}
+
+\subsubsection*{Procesamiento multimodal}
+
+Trata de unir todos los modos en un solo sistema: texto, voz, imagen y
+video. Describir una foto, contestar preguntas sobre un diagrama o
+generar subtítulos de un video requieren entender dos modos a la vez.
+La forma común es convertir cada modo a vectores en un espacio
+compartido, de manera que la foto de un perro y la palabra
+\textit{perro} queden cerca. Es la misma idea de los embeddings,
+extendida a cosas que no son palabras.
+
+% =====================================================================
+
+\subsection*{RAG}
+
+\textbf{RAG} (\textit{Retrieval-Augmented Generation}, generación
+aumentada por recuperación) combina un buscador con un modelo de
+lenguaje grande. Antes de contestar, el sistema busca documentos
+relevantes para la pregunta y se los da al modelo junto con la
+pregunta, para que conteste a partir de ellos.
+
+Resuelve tres problemas de un LLM solo: su conocimiento se congela en
+la fecha en que se entrenó, no tiene acceso a documentos privados como
+los de una empresa, y cuando no sabe algo tiende a inventarlo con
+seguridad. Con RAG la respuesta se apoya en texto que se puede citar y
+revisar.
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.3cm, minimum height=0.75cm,
+                 font=\small, align=center},
+    dato/.style={paso, fill=fondoOjo},
+    >=stealth]
+    \node[font=\scriptsize\bfseries, anchor=west] at (-1.2, 1.0)
+        {Antes, una sola vez};
+    \node[dato] (doc) at (0, 0)    {Documentos};
+    \node[paso] (fra) at (3.2, 0)  {Partir en\\fragmentos};
+    \node[paso] (emb) at (6.4, 0)  {Embedding de\\cada fragmento};
+    \node[dato] (ind) at (9.6, 0)  {Índice};
+    \draw[->] (doc) -- (fra);
+    \draw[->] (fra) -- (emb);
+    \draw[->] (emb) -- (ind);
+    \node[font=\scriptsize\bfseries, anchor=west] at (-1.2, -1.3)
+        {Con cada pregunta};
+    \node[dato] (pre) at (0, -2.3)   {Pregunta};
+    \node[paso] (bus) at (3.2, -2.3) {Buscar los\\$k$ más cercanos};
+    \node[paso] (pro) at (6.4, -2.3) {Pregunta +\\fragmentos};
+    \node[paso] (llm) at (9.6, -2.3) {LLM};
+    \node[dato] (res) at (12.6, -2.3) {Respuesta};
+    \draw[->] (pre) -- (bus);
+    \draw[->] (bus) -- (pro);
+    \draw[->] (pro) -- (llm);
+    \draw[->] (llm) -- (res);
+    \draw[->, dashed] (ind) -- (bus);
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textbf{Indexar}, una sola vez: los documentos se parten en
+          fragmentos de unos cuantos párrafos y se calcula un embedding
+          de cada uno.
+    \item \textbf{Recuperar}, con cada pregunta: se calcula el
+          embedding de la pregunta y se buscan los $k$ fragmentos con
+          mayor coseno. Es el modelo vectorial de las primeras clases,
+          con embeddings en lugar de tf-idf.
+    \item \textbf{Generar}: se le pasa al LLM una instrucción como
+          \textit{``contesta usando solo estos fragmentos''}, seguida
+          de los fragmentos y la pregunta.
+\end{enumerate}
+
+\begin{ojo}
+    RAG es tan bueno como su recuperación. Si el buscador no trae el
+    fragmento que tiene la respuesta, el modelo contesta sin él, y
+    puede volver a inventar. Todo lo que se vio de precisión, recall y
+    MAP en recuperación de información sigue mandando aquí.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Agentes}
+
+Un \textbf{agente} es un sistema donde el modelo de lenguaje no solo
+contesta, sino que decide qué acciones tomar para cumplir un objetivo.
+Trabaja en un ciclo: piensa qué hacer, usa una herramienta, mira el
+resultado y vuelve a decidir, hasta que termina.
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.6cm, minimum height=0.8cm,
+                 font=\small, align=center},
+    dato/.style={paso, fill=fondoOjo},
+    >=stealth]
+    \node[dato] (obj) at (-3.6, 0)   {Objetivo};
+    \node[paso] (dec) at (0, 0)      {LLM: decide\\el siguiente paso};
+    \node[paso] (her) at (4.2, 1.1)  {Usar una\\herramienta};
+    \node[paso] (obs) at (4.2, -1.1) {Observar\\el resultado};
+    \node[dato] (res) at (0, -2.4)   {Respuesta final};
+    \draw[->] (obj) -- (dec);
+    \draw[->] (dec) -- (her);
+    \draw[->] (her) -- (obs);
+    \draw[->] (obs) -- (dec);
+    \draw[->] (dec) -- node[right, font=\scriptsize] {terminó} (res);
+    \node[font=\scriptsize, align=center] at (7.2, 0)
+        {buscar en la web,\\calculadora, una API,\\correr código};
+    \draw[gray] (5.6, 1.1) -- (6.3, 0.5);
+\end{tikzpicture}
+\end{center}
+
+Sus piezas son el modelo que razona y decide, las
+\textbf{herramientas} que puede invocar, y una \textbf{memoria} de lo
+que ya hizo y vio. Es el modo de interacción del principio de la clase
+llevado al extremo: turnos, intención, memoria y herramientas.
+
+\begin{ejemplo}[\textit{``¿Cuánto me cuesta en pesos el libro más
+                barato de este autor?''}]
+    El agente decide buscar los libros del autor en una tienda y usa la
+    herramienta de búsqueda. Observa una lista con precios en dólares.
+    Decide que necesita convertir, usa la herramienta de tipo de
+    cambio, observa el valor, multiplica y contesta. Fueron dos
+    herramientas y tres decisiones, y ninguna estaba escrita de
+    antemano: el modelo las escogió según lo que iba viendo.
+\end{ejemplo}
+
+La diferencia con un chatbot es que el agente actúa en el mundo y lo
+hace en varios pasos. Eso lo hace más útil y también más riesgoso: un
+error en el segundo paso se arrastra a todos los siguientes, igual que
+en las cadenas de la sección anterior, y una acción equivocada, como
+mandar un correo o borrar un archivo, puede no tener vuelta atrás.
+Por eso se les limitan las herramientas y se les pide confirmación
+antes de las acciones delicadas.
 
 
 \end{document}
