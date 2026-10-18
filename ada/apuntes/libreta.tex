@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.6.0
+%   * Version: 3.7.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/10/2026      Clase 15 Oct, programacion dinamica
 %  zxxz6       18/10/2026      Clase 13 Oct, multiplicacion de Karatsuba
 %  zxxz6       09/10/2026      Clase 8 Oct, voraces y divide y venceras
 %  zxxz6       20/09/2026      Clase 17 Sep, heaps y construccion en O(n)
@@ -3063,6 +3064,748 @@ El mismo truco aparece en otros problemas:
         der Hoeven llegaron a $\Ord{n \log n}$, que se cree que es lo
         mejor posible.
 \end{itemize}
+
+\newpage
+
+% =====================================================================
+%  Clase 15 Oct - Programacion dinamica
+% =====================================================================
+
+\clase{Programación dinámica}{15 de octubre de 2026}
+
+\begin{quick_sum}
+  Programación dinámica resuelve un problema combinando soluciones de
+  subproblemas, como divide y vencerás, pero para el caso en que los
+  subproblemas se repiten: cada uno se resuelve una sola vez y su
+  resultado se guarda en una tabla. Hace falta que el problema tenga
+  subestructura óptima y subproblemas superpuestos. Se ve con
+  Fibonacci, que pasa de exponencial a lineal; con el cambio de
+  monedas, donde el voraz falla; y a fondo con la mochila 0/1, la que
+  quedó pendiente en la clase del $8$: el voraz daba $160$ y la
+  programación dinámica encuentra el óptimo, $220$.
+\end{quick_sum}
+
+\subsection*{La idea}
+
+Divide y vencerás parte un problema en subproblemas
+\textbf{independientes}: en Karatsuba, $ac$, $bd$ y $(a+b)(c+d)$ son
+tres multiplicaciones distintas que nunca se vuelven a pedir. En muchos
+problemas no es así. Al partir, los mismos subproblemas aparecen una y
+otra vez, y la recursión los resuelve desde cero cada vez.
+
+\begin{definicion}[Programación dinámica]
+  Una técnica para resolver problemas, casi siempre de optimización,
+  combinando soluciones de subproblemas, en la que cada subproblema
+  distinto se resuelve \textbf{una sola vez} y su solución se guarda
+  en una tabla para consultarla cada vez que se vuelva a necesitar.
+\end{definicion}
+
+Se aplica cuando el problema tiene dos propiedades:
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Subestructura óptima.} Una solución óptima del
+        problema contiene soluciones óptimas de sus subproblemas. Eso
+        permite armar la solución grande a partir de las chicas.
+  \item \textbf{Subproblemas superpuestos.} La recursión natural
+        visita los mismos subproblemas muchas veces. Si no se
+        repitieran, guardarlos no ahorraría nada, y bastaría con
+        divide y vencerás.
+\end{itemize}
+
+\begin{observacion}
+  El nombre es de Richard Bellman, en los años cincuenta.
+  ``Programación'' no se refiere a escribir código sino a planear con
+  tablas, como en ``programación lineal''. ``Dinámica'' porque las
+  decisiones se toman en etapas, una tras otra.
+\end{observacion}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{3.6cm}%
+                 >{\raggedright\arraybackslash}p{3.8cm}%
+                 >{\raggedright\arraybackslash}p{3.4cm}}
+  \toprule
+  & \textbf{Divide y vencerás} & \textbf{Voraz}
+    & \textbf{Programación dinámica} \\
+  \midrule
+  Subproblemas & independientes, se resuelven todos
+               & queda uno solo, el que deja la decisión
+               & se repiten; cada uno se resuelve una vez \\
+  \addlinespace
+  Decisión & no hay que elegir
+           & se elige lo mejor del momento y no se revisa
+           & se prueban todas las opciones y se elige la mejor \\
+  \addlinespace
+  Ejemplo & mergesort, Karatsuba & mochila fraccional
+          & mochila 0/1 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Primer ejemplo: Fibonacci}
+
+\[
+  F(0) = 0 , \qquad F(1) = 1 , \qquad F(n) = F(n-1) + F(n-2) .
+\]
+La recursión directa copia la definición:
+
+\begin{algorithm}[H]
+\caption{\textsc{Fib}$(n)$}
+\begin{algorithmic}[1]
+\If{$n \leq 1$}
+  \State \Return $n$
+\EndIf
+\State \Return $\textsc{Fib}(n-1) + \textsc{Fib}(n-2)$
+\end{algorithmic}
+\end{algorithm}
+
+Para calcular $F(5)$ hace este árbol de llamadas:
+
+\begin{center}
+\begin{tikzpicture}[
+  level distance=1.0cm,
+  level 1/.style={sibling distance=6cm},
+  level 2/.style={sibling distance=3cm},
+  level 3/.style={sibling distance=1.5cm},
+  level 4/.style={sibling distance=0.9cm},
+  f/.style={draw, rounded corners=2pt, fill=fondoIdea,
+            font=\scriptsize, inner sep=2pt},
+  r/.style={f, fill=fondoOjo},
+  edge from parent/.style={draw, gray}]
+  \node[f] {$F(5)$}
+    child {node[f] {$F(4)$}
+      child {node[r] {$F(3)$}
+        child {node[f] {$F(2)$}
+          child {node[f] {$F(1)$}}
+          child {node[f] {$F(0)$}}}
+        child {node[f] {$F(1)$}}}
+      child {node[f] {$F(2)$}
+        child {node[f] {$F(1)$}}
+        child {node[f] {$F(0)$}}}}
+    child {node[r] {$F(3)$}
+      child {node[f] {$F(2)$}
+        child {node[f] {$F(1)$}}
+        child {node[f] {$F(0)$}}}
+      child {node[f] {$F(1)$}}};
+\end{tikzpicture}
+\end{center}
+
+Son $15$ llamadas para obtener $F(5) = 5$, y casi todas repiten
+trabajo: $F(3)$ se calcula dos veces (en naranja), $F(2)$ tres veces,
+$F(1)$ cinco. Pero solo hay $6$ subproblemas distintos, de $F(0)$ a
+$F(5)$.
+
+El número de llamadas crece igual que la propia sucesión: para $F(n)$
+son $2F(n+1) - 1$, que es $\Tht{\varphi^{n}}$ con
+$\varphi = (1 + \sqrt{5})/2 \approx 1.618$. Para $F(30) = 832\,040$
+la recursión hace $2\,692\,537$ llamadas, cuando bastaba con $31$
+cálculos.
+
+\subsubsection*{Dos formas de no repetir}
+
+\textbf{Memoización, de arriba hacia abajo.} Se deja la recursión
+igual, pero antes de calcular algo se revisa si ya está en una tabla
+$M$, y al calcularlo se guarda:
+
+\begin{algorithm}[H]
+\caption{\textsc{Fib-Memo}$(n)$, con $M$ inicializada en
+         \textsc{nulo}}
+\begin{algorithmic}[1]
+\If{$M[n] \neq \textsc{nulo}$}
+  \State \Return $M[n]$ \Comment{ya se calculó: no se repite}
+\EndIf
+\If{$n \leq 1$}
+  \State $M[n] \gets n$
+\Else
+  \State $M[n] \gets \textsc{Fib-Memo}(n-1) + \textsc{Fib-Memo}(n-2)$
+\EndIf
+\State \Return $M[n]$
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Tabulación, de abajo hacia arriba.} Se llena la tabla desde
+los casos base, en un orden en el que todo lo que hace falta ya está
+calculado:
+
+\begin{algorithm}[H]
+\caption{\textsc{Fib-Tabla}$(n)$}
+\begin{algorithmic}[1]
+\State $F[0] \gets 0$, \quad $F[1] \gets 1$
+\For{$i \gets 2$ \Hasta $n$}
+  \State $F[i] \gets F[i-1] + F[i-2]$
+\EndFor
+\State \Return $F[n]$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{center}
+\begin{tabular}{c*{11}{c}}
+  \toprule
+  $i$    & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+  \midrule
+  $F[i]$ & 0 & 1 & 1 & 2 & 3 & 5 & 8 & 13 & 21 & 34 & 55 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Las dos son $\Tht{n}$: cada uno de los $n + 1$ subproblemas se
+resuelve una vez, en tiempo constante. La tabulación además deja ver
+que cada valor solo necesita los dos anteriores, así que basta con
+guardar dos números: espacio $\Ord{1}$.
+
+\begin{idea}
+  El costo de un algoritmo de programación dinámica es casi siempre
+  \[
+    (\text{subproblemas distintos}) \times
+    (\text{trabajo por subproblema}) ,
+  \]
+  donde el trabajo de cada uno se cuenta suponiendo que los demás ya
+  están en la tabla. Para Fibonacci: $n + 1$ subproblemas por
+  $\Ord{1}$ cada uno.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{El método en cuatro pasos}
+
+\begin{enumerate}[itemsep=0.3em]
+  \item \textbf{Caracterizar la estructura de una solución óptima.}
+        Qué decisión se toma y qué subproblema queda después de
+        tomarla. De aquí sale qué hay que saber para describir un
+        subproblema: el \textbf{estado}.
+  \item \textbf{Definir el valor óptimo de forma recursiva}, en
+        términos de los subproblemas. Es la recurrencia.
+  \item \textbf{Calcular los valores de abajo hacia arriba}, llenando
+        una tabla con un subproblema por casilla.
+  \item \textbf{Reconstruir la solución} con la información de la
+        tabla: no solo cuánto vale el óptimo, sino cuál es.
+\end{enumerate}
+
+% =====================================================================
+
+\subsection*{Segundo ejemplo: cambio de monedas}
+
+Con monedas de $1$, $3$ y $4$ pesos, ¿cuál es el menor número de
+monedas que suman $6$? El voraz de la clase del $8$ toma siempre la
+moneda más grande que quepa: $4 + 1 + 1$, tres monedas. Pero
+$3 + 3$ son dos.
+
+\textbf{Paso 1.} La última moneda que se usa es de $1$, de $3$ o de
+$4$. Si fue la de $c$ pesos, lo que falta es pagar $a - c$ con el menor
+número de monedas: el mismo problema, más chico. El estado es solo la
+cantidad que falta pagar.
+
+\textbf{Paso 2.} Sea $C[a]$ el menor número de monedas para pagar $a$:
+\[
+  C[0] = 0 , \qquad
+  C[a] = 1 + \min_{\substack{c \in \{1, 3, 4\} \\ c \leq a}} C[a - c] .
+\]
+Se prueba cada moneda como la última y se queda la que deja el resto
+más barato.
+
+\textbf{Paso 3.} De $a = 0$ a $6$:
+
+\begin{center}
+\begin{tabular}{cccccc}
+  \toprule
+  $a$ & \textbf{Última $1$} & \textbf{Última $3$} & \textbf{Última $4$}
+      & $C[a]$ & \textbf{Mejor última} \\
+  \midrule
+  $1$ & $1 + C[0] = 1$ & --- & --- & $1$ & $1$ \\
+  $2$ & $1 + C[1] = 2$ & --- & --- & $2$ & $1$ \\
+  $3$ & $1 + C[2] = 3$ & $1 + C[0] = 1$ & --- & $1$ & $3$ \\
+  $4$ & $1 + C[3] = 2$ & $1 + C[1] = 2$ & $1 + C[0] = 1$ & $1$ & $4$ \\
+  $5$ & $1 + C[4] = 2$ & $1 + C[2] = 3$ & $1 + C[1] = 2$ & $2$ & $1$ \\
+  $6$ & $1 + C[5] = 3$ & $1 + C[3] = 2$ & $1 + C[2] = 3$ & $2$ & $3$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Paso 4.} Para $6$ la mejor última moneda es la de $3$; quedan
+$3$, cuya mejor última es otra de $3$; queda $0$. Solución: $3 + 3$.
+
+En $a = 6$ la tabla muestra justo dónde se equivoca el voraz: tomar
+$4$ deja $2$ pesos, que cuestan dos monedas; tomar $3$ deja $3$, que
+cuestan una. El voraz no compara, la tabla sí.
+
+% =====================================================================
+
+\subsection*{La mochila 0/1}
+
+\begin{definicion}
+  Hay $n$ objetos; el objeto $i$ pesa $w_i$ y vale $v_i$, y la mochila
+  aguanta un peso $W$. Cada objeto se toma \textbf{completo o no se
+  toma}: $x_i \in \{0, 1\}$. Se busca
+  \[
+    \max \sum_{i=1}^{n} v_i\, x_i
+    \qquad \text{sujeto a} \qquad
+    \sum_{i=1}^{n} w_i\, x_i \leq W .
+  \]
+\end{definicion}
+
+\subsubsection*{Por qué no basta con lo que ya se tiene}
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Voraz.} En la clase del $8$, con $W = 50$ y objetos de
+        pesos $10, 20, 30$ y valores $60, 100, 120$, el voraz por
+        densidad toma los dos primeros y vale $160$; el tercero ya no
+        cabe completo y sobran $20$ de espacio. El óptimo es tomar el
+        segundo y el tercero: $220$.
+  \item \textbf{Fuerza bruta.} Probar todos los subconjuntos de
+        objetos funciona, pero son $2^{n}$. Con $50$ objetos son más
+        de $10^{15}$.
+\end{itemize}
+
+Para que la tabla quede chica, el ejemplo de esta sección es el mismo
+de la clase del $8$ con los pesos divididos entre $10$. Las decisiones
+no cambian:
+
+\begin{center}
+\begin{tabular}{cccc}
+  \toprule
+  \textbf{Objeto} $i$ & \textbf{Peso} $w_i$ & \textbf{Valor} $v_i$
+    & \textbf{Densidad} \\
+  \midrule
+  $1$ & $1$ & $60$  & $60$ \\
+  $2$ & $2$ & $100$ & $50$ \\
+  $3$ & $3$ & $120$ & $40$ \\
+  \bottomrule
+\end{tabular}
+\qquad
+capacidad $W = 5$.
+\end{center}
+
+\subsubsection*{Paso 1: la estructura de una solución óptima}
+
+Hay que fijarse en una sola decisión: qué pasa con el
+\textbf{último} objeto, el $n$. En una solución óptima, o está o no
+está.
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Si no está}, el resto de la solución es una forma de
+        llenar la misma mochila de capacidad $W$ con los objetos $1$ a
+        $n - 1$, y tiene que ser la mejor posible.
+  \item \textbf{Si está}, ya ocupa $w_n$ de espacio y aporta $v_n$. El
+        resto es una forma de llenar el espacio que sobra, $W - w_n$,
+        con los objetos $1$ a $n - 1$, y también tiene que ser la
+        mejor posible.
+\end{itemize}
+
+¿Por qué ``tiene que ser la mejor posible''? Porque si el resto no
+fuera óptimo, se podría cambiar por uno mejor que pese lo mismo o
+menos, y la solución completa mejoraría. Eso contradice que era óptima.
+Es la subestructura óptima, y se demuestra siempre así: cortando la
+parte que no es óptima y pegando una mejor.
+
+\begin{idea}
+  Aquí está la clave de todo el problema. Después de decidir sobre un
+  objeto, el subproblema que queda no es solo ``los objetos que
+  faltan'': también importa \textbf{cuánto espacio queda}. Por eso el
+  estado necesita dos números,
+  \[
+    (i,\ w) = (\text{cuántos objetos se pueden usar},\
+               \text{cuánta capacidad hay}) .
+  \]
+  El voraz falla justo por ignorar el segundo: decide sin preguntarse
+  qué tan bien se va a poder aprovechar el espacio que deja.
+\end{idea}
+
+\subsubsection*{Paso 2: la recurrencia}
+
+Sea
+\[
+  K[i][w] = \text{el mayor valor que se puede obtener usando solo los
+  objetos } 1, \ldots, i \text{ con capacidad } w .
+\]
+La respuesta al problema es $K[n][W]$.
+
+\textbf{Casos base.} Sin objetos, o sin capacidad, no se puede meter
+nada:
+\[
+  K[0][w] = 0 , \qquad K[i][0] = 0 .
+\]
+
+\textbf{Caso general.} Para el objeto $i$ hay dos opciones:
+\[
+  K[i][w] =
+  \begin{cases}
+    K[i-1][w]
+      & \text{si } w_i > w \quad \text{(no cabe)} , \\[4pt]
+    \max\Big( \underbrace{K[i-1][w]}_{\text{no tomarlo}} ,\;
+              \underbrace{v_i + K[i-1][w - w_i]}_{\text{tomarlo}}
+        \Big)
+      & \text{si } w_i \leq w .
+  \end{cases}
+\]
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{No tomarlo}: la capacidad sigue siendo $w$ y quedan
+        los objetos anteriores. Vale lo mismo que la mejor solución de
+        $1, \ldots, i-1$ con capacidad $w$: la casilla de
+        \textbf{arriba}.
+  \item \textbf{Tomarlo}: se gana $v_i$, se pierden $w_i$ de
+        capacidad, y lo que sobra se llena lo mejor posible con los
+        anteriores. Es la casilla del renglón de arriba, $w_i$
+        \textbf{columnas a la izquierda}, más $v_i$.
+\end{itemize}
+
+\begin{ojo}
+  Programar esta recurrencia tal cual, con recursión, hace dos
+  llamadas por objeto: $2^{n}$, lo mismo que la fuerza bruta. Pero
+  solo hay $(n + 1)(W + 1)$ pares $(i, w)$ distintos, así que con
+  $n$ grande y $W$ chico casi todas las llamadas repiten un estado que
+  ya se calculó. Son los subproblemas superpuestos, y la tabla los
+  aprovecha.
+\end{ojo}
+
+\subsubsection*{Paso 3: llenar la tabla}
+
+La tabla tiene un renglón por cada $i = 0, \ldots, 3$ y una columna por
+cada capacidad $w = 0, \ldots, 5$. Cada casilla depende solo del
+renglón de arriba, así que se llena renglón por renglón.
+
+\textbf{Renglón $0$.} Sin objetos, todo vale $0$.
+
+\textbf{Renglón $1$}, objeto $1$ con peso $1$ y valor $60$. En $w = 0$
+no cabe y queda $0$. Desde $w = 1$ cabe, y tomarlo da
+$60 + K[0][w-1] = 60 + 0 = 60$ contra $0$ de no tomarlo. Renglón:
+$0, 60, 60, 60, 60, 60$.
+
+\textbf{Renglón $2$}, objeto $2$ con peso $2$ y valor $100$:
+
+\begin{center}
+\small
+\begin{tabular}{cccccl}
+  \toprule
+  $w$ & \textbf{¿Cabe?} & \textbf{No tomar} $K[1][w]$
+      & \textbf{Tomar} $100 + K[1][w-2]$ & $K[2][w]$
+      & \textbf{Qué pasó} \\
+  \midrule
+  $0$ & no & $0$  & ---               & $0$   & se copia \\
+  $1$ & no & $60$ & ---               & $60$  & se copia \\
+  $2$ & sí & $60$ & $100 + 0 = 100$   & $100$ & el $2$ solo gana \\
+  $3$ & sí & $60$ & $100 + 60 = 160$  & $160$ & caben los dos \\
+  $4$ & sí & $60$ & $100 + 60 = 160$  & $160$ & igual \\
+  $5$ & sí & $60$ & $100 + 60 = 160$  & $160$ & igual \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Renglón $3$}, objeto $3$ con peso $3$ y valor $120$:
+
+\begin{center}
+\small
+\begin{tabular}{cccccl}
+  \toprule
+  $w$ & \textbf{¿Cabe?} & \textbf{No tomar} $K[2][w]$
+      & \textbf{Tomar} $120 + K[2][w-3]$ & $K[3][w]$
+      & \textbf{Qué pasó} \\
+  \midrule
+  $0$ & no & $0$   & ---              & $0$   & se copia \\
+  $1$ & no & $60$  & ---              & $60$  & se copia \\
+  $2$ & no & $100$ & ---              & $100$ & se copia \\
+  $3$ & sí & $160$ & $120 + 0 = 120$  & $160$ & mejor $1$ y $2$ \\
+  $4$ & sí & $160$ & $120 + 60 = 180$ & $180$ & mejor $3$ y $1$ \\
+  $5$ & sí & $160$ & $120 + 100 = 220$ & $220$ & mejor $3$ y $2$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Vale la pena leer despacio las tres últimas filas. En $w = 3$ el
+objeto $3$ cabe, pero tomarlo deja $0$ de espacio y vale $120$, menos
+que los objetos $1$ y $2$ juntos. En $w = 4$ tomarlo deja $1$ de
+espacio, que el renglón de arriba sabe aprovechar con el objeto $1$:
+$120 + 60 = 180$. En $w = 5$ deja $2$, y lo mejor para $2$ de espacio
+es el objeto $2$: $120 + 100 = 220$.
+
+La tabla completa, con la casilla de la respuesta y las dos de las que
+depende:
+
+\begin{center}
+\begin{tikzpicture}[
+  celda/.style={draw, minimum width=1.0cm, minimum height=0.62cm,
+                font=\small},
+  etq/.style={font=\small},
+  muestra/.style={draw, minimum width=0.45cm, minimum height=0.3cm}]
+  \node[etq] at (-1.1, 0.7) {$i \;\backslash\; w$};
+  \foreach \w in {0, ..., 5}
+    \node[etq] at (\w, 0.7) {$\w$};
+  \foreach \i/\fila in {0/{0,0,0,0,0,0},
+                        1/{0,60,60,60,60,60},
+                        2/{0,60,100,160,160,160},
+                        3/{0,60,100,160,180,220}} {
+    \node[etq] at (-1.1, -0.62*\i) {$\i$};
+    \foreach \val [count=\w from 0] in \fila
+      \node[celda] (c-\i-\w) at (\w, -0.62*\i) {$\val$};
+  }
+  \node[celda, fill=fondoOjo] at (c-3-5) {$220$};
+  \node[celda, fill=fondoIdea] at (c-2-5) {$160$};
+  \node[celda, fill=fondoResultado] at (c-2-2) {$100$};
+  \foreach \i/\t in {1/{objeto 1: peso 1, valor 60},
+                     2/{objeto 2: peso 2, valor 100},
+                     3/{objeto 3: peso 3, valor 120}}
+    \node[font=\scriptsize, anchor=west] at (5.8, -0.62*\i) {\t};
+  \node[muestra, fill=fondoIdea] at (-0.8, -3.0) {};
+  \node[font=\scriptsize, anchor=west] at (-0.5, -3.0)
+    {$K[2][5] = 160$: no tomar el objeto $3$ (la casilla de arriba)};
+  \node[muestra, fill=fondoResultado] at (-0.8, -3.45) {};
+  \node[font=\scriptsize, anchor=west] at (-0.5, -3.45)
+    {$K[2][2] = 100$: tomarlo ($w_3 = 3$ columnas a la izquierda),
+     $100 + 120 = 220$};
+  \node[muestra, fill=fondoOjo] at (-0.8, -3.9) {};
+  \node[font=\scriptsize, anchor=west] at (-0.5, -3.9)
+    {$K[3][5] = \max(160,\ 220) = 220$: la respuesta};
+\end{tikzpicture}
+\end{center}
+
+$K[3][5]$ compara la casilla de arriba, $160$, con la que está $w_3 =
+3$ columnas a la izquierda en el renglón de arriba, $100$, más el valor
+del objeto, $120$. Gana tomarlo: $220$.
+
+\subsubsection*{Paso 4: reconstruir qué objetos se tomaron}
+
+La tabla dice cuánto vale el óptimo, no cuáles objetos lo forman. Se
+recupera de atrás hacia adelante, empezando en $K[n][W]$. En cada
+renglón se pregunta si la casilla cambió respecto a la de arriba:
+
+\begin{itemize}[itemsep=0.3em]
+  \item Si $K[i][w] = K[i-1][w]$, el objeto $i$ no hizo falta: se sube
+        un renglón con la misma $w$.
+  \item Si $K[i][w] \neq K[i-1][w]$, el valor solo se pudo alcanzar
+        tomando el objeto $i$: se anota, se sube un renglón y se le
+        restan $w_i$ a la capacidad.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{cccccl}
+  \toprule
+  \textbf{Paso} & \textbf{Casilla} & \textbf{Valor}
+    & \textbf{Arriba} & \textbf{¿Cambió?} & \textbf{Decisión} \\
+  \midrule
+  $1$ & $K[3][5]$ & $220$ & $K[2][5] = 160$ & sí
+      & se toma el $3$; $w = 5 - 3 = 2$ \\
+  $2$ & $K[2][2]$ & $100$ & $K[1][2] = 60$  & sí
+      & se toma el $2$; $w = 2 - 2 = 0$ \\
+  $3$ & $K[1][0]$ & $0$   & $K[0][0] = 0$   & no
+      & el $1$ no \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Se toman los objetos $2$ y $3$: pesan $2 + 3 = 5$, justo la capacidad,
+y valen $100 + 120 = 220$. Con los pesos originales es la respuesta de
+la clase del $8$: los objetos de $20$ y $30$, con valor $220$.
+
+\begin{center}
+\begin{tikzpicture}[
+  celda/.style={draw, minimum width=1.0cm, minimum height=0.62cm,
+                font=\small},
+  etq/.style={font=\small}]
+  \node[etq] at (-1.1, 0.7) {$i \;\backslash\; w$};
+  \foreach \w in {0, ..., 5}
+    \node[etq] at (\w, 0.7) {$\w$};
+  \foreach \i/\fila in {0/{0,0,0,0,0,0},
+                        1/{0,60,60,60,60,60},
+                        2/{0,60,100,160,160,160},
+                        3/{0,60,100,160,180,220}} {
+    \node[etq] at (-1.1, -0.62*\i) {$\i$};
+    \foreach \val [count=\w from 0] in \fila
+      \node[celda] (c-\i-\w) at (\w, -0.62*\i) {$\val$};
+  }
+  \node[celda, fill=fondoResultado] at (c-3-5) {$220$};
+  \node[celda, fill=fondoResultado] at (c-2-2) {$100$};
+  \node[celda, fill=fondoResultado] at (c-1-0) {$0$};
+  \node[font=\scriptsize, anchor=west, align=left] at (5.8, -1.24)
+    {camino: $K[3][5] \to K[2][2] \to K[1][0]$};
+\end{tikzpicture}
+\end{center}
+
+En verde, el camino de la reconstrucción. De $K[3][5]$ a $K[2][2]$ se
+sube un renglón y se recorren $w_3 = 3$ columnas a la izquierda: se
+tomó el objeto $3$. De $K[2][2]$ a $K[1][0]$, otro renglón y $w_2 = 2$
+columnas: se tomó el $2$. En $K[1][0]$ la casilla es igual a la de
+arriba, así que el objeto $1$ no se tomó. Cada objeto tomado es un
+salto en diagonal; uno que no se toma sería un paso recto hacia
+arriba.
+
+\subsubsection*{El algoritmo}
+
+\begin{algorithm}[H]
+\caption{\textsc{Mochila-01}$(w, v, n, W)$}
+\begin{algorithmic}[1]
+\For{$c \gets 0$ \Hasta $W$}
+  \State $K[0][c] \gets 0$
+\EndFor
+\For{$i \gets 1$ \Hasta $n$}
+  \For{$c \gets 0$ \Hasta $W$}
+    \State $K[i][c] \gets K[i-1][c]$ \Comment{no tomarlo}
+    \If{$w_i \leq c$ \textbf{y} $v_i + K[i-1][c - w_i] > K[i][c]$}
+      \State $K[i][c] \gets v_i + K[i-1][c - w_i]$ \Comment{tomarlo}
+    \EndIf
+  \EndFor
+\EndFor
+\State \Return $K$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{\textsc{Reconstruir}$(K, w, n, W)$}
+\begin{algorithmic}[1]
+\State $S \gets \emptyset$, \quad $c \gets W$
+\For{$i \gets n$ \Hasta $1$, de bajada}
+  \If{$K[i][c] \neq K[i-1][c]$}
+    \State $S \gets S \cup \set{i}$, \quad $c \gets c - w_i$
+  \EndIf
+\EndFor
+\State \Return $S$
+\end{algorithmic}
+\end{algorithm}
+
+La tabla tiene $(n + 1)(W + 1)$ casillas y cada una se llena en tiempo
+constante: \textsc{Mochila-01} es $\Tht{n W}$ en tiempo y en espacio.
+\textsc{Reconstruir} sube un renglón por paso: $\Tht{n}$.
+
+\subsubsection*{Por qué $\Tht{nW}$ no es polinomial}
+
+Parece polinomial, pero $W$ no es el tamaño de la entrada sino un
+número de la entrada. Escribir $W$ ocupa $\log_2 W$ bits, y agregarle
+un solo bit duplica $W$ y duplica la tabla. Respecto al tamaño de la
+entrada el algoritmo es exponencial; a esto se le llama
+\textbf{pseudopolinomial}.
+
+\begin{ojo}
+  Con $n = 100$ objetos y pesos en gramos hasta $W = 5\,000$, la tabla
+  tiene medio millón de casillas: instantáneo. Con $W = 10^{9}$ tendría
+  $10^{11}$ y ya no cabe en memoria. La mochila 0/1 es NP-difícil: no
+  se conoce un algoritmo polinomial en el tamaño de la entrada, y la
+  programación dinámica sirve cuando la capacidad es un número chico.
+\end{ojo}
+
+\subsubsection*{Segundo ejemplo, para practicar}
+
+Capacidad $W = 7$ y cuatro objetos:
+
+\begin{center}
+\begin{tabular}{ccccc}
+  \toprule
+  \textbf{Objeto} & \textbf{A} & \textbf{B} & \textbf{C} & \textbf{D} \\
+  \midrule
+  Peso      & $1$ & $3$ & $4$ & $5$ \\
+  Valor     & $1$ & $4$ & $5$ & $7$ \\
+  Densidad  & $1.00$ & $1.33$ & $1.25$ & $1.40$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+El voraz por densidad toma D, el más denso; quedan $2$ de espacio,
+donde ni B ni C caben, y toma A. Vale $7 + 1 = 8$.
+
+La tabla de programación dinámica, con los objetos en el orden A, B,
+C, D:
+
+\begin{center}
+\begin{tabular}{l*{8}{c}}
+  \toprule
+  $i \;\backslash\; w$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+  \midrule
+  $0$ (ninguno) & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  $1$ (A: 1, 1) & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+  $2$ (B: 3, 4) & 0 & 1 & 1 & 4 & 5 & 5 & 5 & 5 \\
+  $3$ (C: 4, 5) & 0 & 1 & 1 & 4 & 5 & 6 & 6 & \textbf{9} \\
+  $4$ (D: 5, 7) & 0 & 1 & 1 & 4 & 5 & 7 & 8 & \textbf{9} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+La casilla clave es la última:
+\[
+  K[4][7] = \max\big(\underbrace{K[3][7]}_{\text{no tomar D}} ,\;
+            \underbrace{7 + K[3][2]}_{\text{tomar D}}\big)
+          = \max(9,\ 7 + 1) = 9 .
+\]
+Tomar D, lo que haría el voraz, deja $2$ de espacio que solo valen $1$.
+No tomarlo deja los $7$ de capacidad para los objetos anteriores, que
+valen $9$.
+
+Reconstrucción: $K[4][7] = K[3][7]$, así que D no se toma.
+$K[3][7] = 9 \neq K[2][7] = 5$: se toma C y quedan $7 - 4 = 3$.
+$K[2][3] = 4 \neq K[1][3] = 1$: se toma B y quedan $0$. Solución: B y
+C, que pesan $7$ y valen $9$.
+
+\subsubsection*{Ahorrar memoria: una sola fila}
+
+Cada renglón solo usa el de arriba, así que basta un arreglo de $W + 1$
+casillas que se reescribe para cada objeto:
+
+\begin{algorithm}[H]
+\caption{\textsc{Mochila-01-Una-Fila}$(w, v, n, W)$}
+\begin{algorithmic}[1]
+\State $K[0 \ldots W] \gets 0$
+\For{$i \gets 1$ \Hasta $n$}
+  \For{$c \gets W$ \Hasta $w_i$, de bajada}
+    \State $K[c] \gets \max\big(K[c],\ v_i + K[c - w_i]\big)$
+  \EndFor
+\EndFor
+\State \Return $K[W]$
+\end{algorithmic}
+\end{algorithm}
+
+El espacio baja a $\Tht{W}$. Pero el orden del ciclo interno importa:
+va \textbf{de bajada}.
+
+\begin{ojo}
+  Al calcular $K[c]$ se lee $K[c - w_i]$, que debe ser el valor del
+  renglón anterior, sin el objeto $i$. Recorriendo de bajada,
+  $K[c - w_i]$ todavía no se ha reescrito. De subida ya se reescribió,
+  y el objeto se podría tomar dos veces. Con el objeto $1$ (peso $1$,
+  valor $60$) y $W = 2$, de subida:
+  \[
+    K[1] = \max(0,\ 60 + K[0]) = 60 , \qquad
+    K[2] = \max(0,\ 60 + K[1]) = 120 ,
+  \]
+  como si hubiera dos copias del objeto. De bajada, $K[2]$ se calcula
+  primero con $K[1] = 0$ y queda en $60$. El recorrido de subida
+  resuelve otro problema, la mochila \textbf{sin límite}, donde cada
+  objeto se puede tomar cuantas veces se quiera.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Cómo reconocer un problema de programación dinámica}
+
+\begin{idea}
+  Las señales son tres: el problema pide un óptimo o un conteo; la
+  solución se arma con una secuencia de decisiones; y al escribir la
+  recursión, los mismos estados aparecen por distintos caminos. El
+  trabajo difícil es el paso 1: encontrar el \textbf{estado}, lo
+  mínimo que hay que saber para resolver lo que falta. En Fibonacci es
+  un número; en las monedas, cuánto falta pagar; en la mochila, qué
+  objetos quedan y cuánto espacio hay.
+\end{idea}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.6cm}%
+                 >{\raggedright\arraybackslash}p{6.4cm}l}
+  \toprule
+  \textbf{Problema} & \textbf{Estado} & \textbf{Recurrencia}
+    & \textbf{Costo} \\
+  \midrule
+  Fibonacci & $i$
+            & $F[i] = F[i-1] + F[i-2]$ & $\Tht{n}$ \\
+  \addlinespace
+  Monedas & cantidad $a$
+          & $C[a] = 1 + \min_{c} C[a - c]$
+          & $\Tht{a \cdot k}$, $k$ monedas \\
+  \addlinespace
+  Mochila 0/1 & objetos $i$, capacidad $w$
+              & $\max(K[i-1][w],\ v_i + K[i-1][w - w_i])$
+              & $\Tht{n W}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
 
 \end{document}
 
