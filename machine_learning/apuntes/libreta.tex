@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.8.0
+%   * Version: 1.9.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/10/2026      Clase 15 Oct, medidas de desempeno
 %  zxxz6       09/10/2026      Clase 8 Oct, clasificador Naive Bayes
 %  zxxz6       09/10/2026      Clase 6 Oct, clasificadores por distancia
 %  zxxz6       28/09/2026      Clase 24 Sep, ResNet y autoencoders
@@ -4075,6 +4076,538 @@ Según el tipo de características hay tres variantes comunes: la
 presencia o ausencia, como el vector del filtro de spam; y la
 \textbf{multinomial}, para conteos, como cuántas veces aparece cada
 palabra en un documento.
+
+
+\newpage
+
+% =====================================================================
+%  Clase - Medidas de desempeño
+% =====================================================================
+
+\clase{Medidas de desempeño}{15 de octubre de 2026}
+
+\begin{quick_sum}
+    Cómo saber qué tan bueno es un clasificador. Calidad depende de lo
+    que se quiera medir, porque no todos los errores cuestan lo mismo.
+    Hay dos familias de métricas: las basadas en la matriz de
+    confusión, que evalúan al clasificador con un umbral de decisión
+    fijo, y las basadas en la curva ROC (\textit{receiver operating
+    characteristic}), que lo evalúan en todos los umbrales a la vez.
+    Se vio la matriz de confusión y las métricas que salen de ella:
+    accuracy, precisión, recall y especificidad. Aquí se agregan el
+    F1, el intercambio entre precisión y recall al mover el umbral, el
+    caso multiclase y un adelanto de la curva ROC.
+\end{quick_sum}
+
+\subsection*{Qué significa calidad}
+
+``El clasificador es bueno'' no dice nada hasta decir bueno para qué.
+Un clasificador se equivoca de dos formas, y casi nunca cuestan lo
+mismo:
+
+\begin{itemize}[itemsep=0.3em]
+    \item Un filtro de spam que manda a la basura un correo legítimo
+          puede hacer que se pierda una oferta de trabajo. Uno que deja
+          pasar un spam solo hace perder unos segundos.
+    \item Una prueba médica que no detecta a un enfermo lo manda a su
+          casa sin tratamiento. Una que da positivo a un sano lo manda
+          a hacerse más estudios.
+\end{itemize}
+
+Por eso no hay una sola medida de calidad. Cada métrica contesta una
+pregunta distinta, y se escoge la que corresponde a lo que importa en
+el problema.
+
+Las métricas se agrupan en dos familias:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Basadas en la matriz de confusión.} El clasificador
+          ya tomó una decisión para cada ejemplo, con un umbral fijo, y
+          se cuentan aciertos y errores de cada tipo.
+    \item \textbf{Basadas en la curva ROC.} Muchos clasificadores dan
+          un puntaje, como la probabilidad de Naive Bayes, y la
+          decisión depende de dónde se ponga el umbral. La curva ROC
+          muestra el desempeño en todos los umbrales a la vez.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Matriz de confusión}
+
+En un problema de dos clases se llama \textbf{positiva} a la clase que
+interesa detectar, el spam o el enfermo, y \textbf{negativa} a la
+otra. Cada ejemplo de prueba cae en una de cuatro casillas según su
+clase real y la que predijo el clasificador:
+
+\begin{center}
+\begin{tikzpicture}[
+    celda/.style={draw, minimum width=3.4cm, minimum height=1.4cm,
+                  align=center, font=\small},
+    etq/.style={font=\small\bfseries, align=center}]
+    \node[celda, fill=fondoResultado] at (0, 0)
+        {\textbf{VP}\\verdadero positivo};
+    \node[celda, fill=fondoOjo] at (3.4, 0)
+        {\textbf{FN}\\falso negativo};
+    \node[celda, fill=fondoOjo] at (0, -1.4)
+        {\textbf{FP}\\falso positivo};
+    \node[celda, fill=fondoResultado] at (3.4, -1.4)
+        {\textbf{VN}\\verdadero negativo};
+    \node[etq] at (0, 1.15)   {predice positivo};
+    \node[etq] at (3.4, 1.15) {predice negativo};
+    \node[etq, anchor=east] at (-1.85, 0)    {real positivo};
+    \node[etq, anchor=east] at (-1.85, -1.4) {real negativo};
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Verdadero positivo} (VP): era positivo y lo detectó.
+    \item \textbf{Falso negativo} (FN): era positivo y se le escapó.
+          Es un error de omisión, o error tipo II.
+    \item \textbf{Falso positivo} (FP): era negativo y lo marcó como
+          positivo. Es una falsa alarma, o error tipo I.
+    \item \textbf{Verdadero negativo} (VN): era negativo y lo dejó
+          pasar.
+\end{itemize}
+
+La diagonal son los aciertos y fuera de ella los errores. Todas las
+métricas de esta familia son cocientes entre estas cuatro cuentas.
+
+\begin{ojo}
+    No hay una convención única para la orientación de la tabla.
+    Aquí los renglones son la clase real y las columnas la predicha,
+    como en scikit-learn; en otros libros va al revés. Antes de leer
+    una matriz de confusión hay que revisar cuál es cuál.
+\end{ojo}
+
+\begin{ejemplo}[Un filtro de spam]
+    Se prueba un filtro con $1000$ correos que ya estaban etiquetados:
+    $100$ son spam y $900$ legítimos.
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        & \textbf{Predice spam} & \textbf{Predice legítimo}
+        & \textbf{Total} \\
+        \midrule
+        \textbf{Spam real}      & VP $= 80$ & FN $= 20$  & $100$ \\
+        \textbf{Legítimo real}  & FP $= 30$ & VN $= 870$ & $900$ \\
+        \midrule
+        \textbf{Total} & $110$ & $890$ & $1000$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Detectó $80$ de los $100$ spam y dejó pasar $20$. De los $900$
+    legítimos, mandó $30$ a la basura por error. Las secciones que
+    siguen sacan sus métricas de esta tabla.
+\end{ejemplo}
+
+\begin{ojo}
+    La matriz se arma con ejemplos que el clasificador \textbf{no vio}
+    al entrenar. Evaluado sobre sus propios datos de entrenamiento,
+    un clasificador que memoriza saca métricas perfectas y no dice
+    nada de cómo le irá con datos nuevos.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Accuracy}
+
+\begin{definicion}[Accuracy]
+    La fracción de ejemplos clasificados correctamente:
+    \[
+        \text{accuracy} = \frac{VP + VN}{VP + VN + FP + FN} .
+    \]
+    Su complemento, $1 - \text{accuracy}$, es la tasa de error.
+\end{definicion}
+
+En español se le llama también \textbf{exactitud}. Para el filtro:
+\[
+    \text{accuracy} = \frac{80 + 870}{1000} = 0.95 .
+\]
+Acierta en el $95\%$ de los correos. Suena muy bien, pero hay que
+compararlo contra algo.
+
+\begin{ejemplo}[La paradoja de la accuracy]
+    Un ``filtro'' que nunca marca nada como spam acierta en los $900$
+    legítimos y falla en los $100$ spam:
+    \[
+        \text{accuracy} = \frac{0 + 900}{1000} = 0.90 .
+    \]
+    Un $90\%$ sin hacer nada. El filtro real apenas le gana por cinco
+    puntos. En detección de fraude, donde el $1\%$ de las transacciones
+    son fraude, decir siempre ``no es fraude'' da $99\%$ de accuracy y
+    no detecta ni uno.
+\end{ejemplo}
+
+\begin{ojo}
+    Con clases desbalanceadas la accuracy engaña: la domina la clase
+    mayoritaria, y un clasificador inútil puede sacar un número alto.
+    Sirve cuando las clases son de tamaño parecido y los dos errores
+    cuestan lo mismo. Si no, hay que ver las métricas de cada clase.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Precisión}
+
+\begin{definicion}[Precisión]
+    De todos los ejemplos que el clasificador marcó como positivos,
+    qué fracción de verdad lo era:
+    \[
+        \text{precisión} = \frac{VP}{VP + FP} .
+    \]
+\end{definicion}
+
+Contesta: \textit{cuando el clasificador dice ``positivo'', ¿qué tan
+seguido tiene razón?} Para el filtro,
+\[
+    \text{precisión} = \frac{80}{80 + 30} = \frac{80}{110} = 0.727 .
+\]
+De cada $100$ correos que manda a spam, $73$ son spam y $27$ eran
+legítimos. Solo mira la columna de ``predice positivo''.
+
+Importa cuando los falsos positivos son caros: un filtro que borra
+correos legítimos, un sistema que bloquea tarjetas de crédito, un
+buscador cuyos primeros resultados tienen que ser buenos.
+
+\begin{ojo}
+    En español \textit{precisión} y \textit{exactitud} se usan casi
+    como sinónimos, pero aquí son métricas distintas: exactitud es
+    accuracy, la fracción de aciertos sobre todo; precisión es la de
+    arriba, solo sobre lo que se predijo positivo. Mucha gente dice
+    ``precisión'' cuando quiere decir accuracy.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Recall}
+
+\begin{definicion}[Recall]
+    De todos los ejemplos que de verdad son positivos, qué fracción
+    detectó el clasificador:
+    \[
+        \text{recall} = \frac{VP}{VP + FN} .
+    \]
+\end{definicion}
+
+Contesta: \textit{de todos los positivos que existen, ¿cuántos
+encontró?} Para el filtro,
+\[
+    \text{recall} = \frac{80}{80 + 20} = 0.80 .
+\]
+Atrapó el $80\%$ del spam. Solo mira el renglón de ``real positivo''.
+En español se le llama también \textbf{exhaustividad} o
+\textbf{sensibilidad}, y en la curva ROC aparece como \textbf{tasa de
+verdaderos positivos} (TPR).
+
+Importa cuando los falsos negativos son caros: una prueba de cáncer,
+un detector de fraude, un sistema de búsqueda legal que no puede
+dejar fuera un documento relevante.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.8]
+    \begin{scope}
+        \clip (0, 0) rectangle (4, 4);
+        \fill[fondoIdea] (0, 0) rectangle (4, 4);
+        \fill[fondoResultado] (4, 2) circle (1.5);
+    \end{scope}
+    \begin{scope}
+        \clip (4, 0) rectangle (8, 4);
+        \fill[fondoPend] (4, 0) rectangle (8, 4);
+        \fill[fondoOjo] (4, 2) circle (1.5);
+    \end{scope}
+    \draw (0, 0) rectangle (8, 4);
+    \draw (4, 0) -- (4, 4);
+    \draw[thick] (4, 2) circle (1.5);
+    \node[font=\small\bfseries] at (3.25, 2) {VP};
+    \node[font=\small\bfseries] at (4.75, 2) {FP};
+    \node[font=\small\bfseries] at (1.0, 3.4) {FN};
+    \node[font=\small\bfseries] at (7.0, 3.4) {VN};
+    \node[font=\small] at (2, -0.35) {positivos reales};
+    \node[font=\small] at (6, -0.35) {negativos reales};
+    \node[font=\small, align=center] at (4, 4.45)
+        {el círculo: lo que el clasificador marcó como positivo};
+\end{tikzpicture}
+\end{center}
+
+La figura muestra la diferencia de un vistazo. La \textbf{precisión}
+es qué parte del círculo es VP: qué tan limpio está lo que se marcó. El
+\textbf{recall} es qué parte de la mitad izquierda quedó dentro del
+círculo: cuánto de lo que había se encontró.
+
+% =====================================================================
+
+\subsection*{Especificidad}
+
+\begin{definicion}[Especificidad]
+    De todos los ejemplos que de verdad son negativos, qué fracción
+    clasificó correctamente como negativos:
+    \[
+        \text{especificidad} = \frac{VN}{VN + FP} .
+    \]
+\end{definicion}
+
+Es el recall de la clase negativa: \textit{de todos los negativos, ¿a
+cuántos dejó en paz?} Para el filtro,
+\[
+    \text{especificidad} = \frac{870}{870 + 30} = 0.967 .
+\]
+Su complemento es la \textbf{tasa de falsos positivos},
+\[
+    FPR = \frac{FP}{FP + VN} = 1 - \text{especificidad}
+        = \frac{30}{900} = 0.033 ,
+\]
+el otro eje de la curva ROC.
+
+En medicina sensibilidad y especificidad van siempre en pareja: una
+prueba con sensibilidad alta casi no deja ir a un enfermo; una con
+especificidad alta casi no alarma a un sano.
+
+\begin{ojo}
+    Precisión y especificidad parecen hablar de lo mismo, los falsos
+    positivos, pero no son iguales. La especificidad compara los FP
+    contra todos los negativos reales, $900$; la precisión, contra lo
+    que se marcó positivo, $110$. Por eso el filtro tiene
+    especificidad de $0.967$ y precisión de solo $0.727$: $30$ falsas
+    alarmas son pocas entre $900$ legítimos, pero muchas entre $110$
+    correos marcados. Con clases desbalanceadas, la precisión es la
+    que delata las falsas alarmas.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{F1: precisión y recall en un solo número}
+
+Para comparar clasificadores conviene un solo número que tome en
+cuenta las dos. El \textbf{F1} es su media armónica:
+\[
+    F_1 = \frac{2 \cdot \text{precisión} \cdot \text{recall}}
+               {\text{precisión} + \text{recall}} .
+\]
+Para el filtro,
+\[
+    F_1 = \frac{2 \cdot 0.727 \cdot 0.80}{0.727 + 0.80}
+        = \frac{1.164}{1.527} = 0.762 .
+\]
+
+\begin{ejemplo}[Por qué la media armónica]
+    Un clasificador que solo marca como positivo el ejemplo del que
+    está más seguro puede tener precisión $1$ y recall $0.01$. La media
+    aritmética daría $0.505$, como si fuera regular. La armónica da
+    \[
+        F_1 = \frac{2 \cdot 1 \cdot 0.01}{1 + 0.01} = 0.020 .
+    \]
+    La media armónica se queda cerca del menor de los dos números: solo
+    sale alta si precisión y recall son altas al mismo tiempo.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Mover el umbral}
+
+Un clasificador como Naive Bayes no da directamente ``spam'' o
+``legítimo'': da una probabilidad, y se decide spam si pasa de un
+umbral $u$. Cambiar $u$ cambia la matriz de confusión entera.
+
+\begin{ejemplo}[Diez correos con su puntaje]
+    El filtro le dio a cada correo su probabilidad de ser spam. Cuatro
+    son spam de verdad (S) y seis legítimos (L):
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccccccc}
+        \toprule
+        \textbf{Puntaje} & $0.95$ & $0.85$ & $0.80$ & $0.70$ & $0.55$
+            & $0.45$ & $0.40$ & $0.30$ & $0.20$ & $0.10$ \\
+        \textbf{Real} & S & S & L & S & L & S & L & L & L & L \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Se marca como spam todo lo que tenga puntaje mayor o igual a $u$:
+    \begin{center}
+    \small
+    \begin{tabular}{cccccccc}
+        \toprule
+        $u$ & VP & FP & FN & VN & \textbf{Precisión} & \textbf{Recall}
+            & \textbf{F1} \\
+        \midrule
+        $0.90$ & $1$ & $0$ & $3$ & $6$ & $1.000$ & $0.25$ & $0.400$ \\
+        $0.75$ & $2$ & $1$ & $2$ & $5$ & $0.667$ & $0.50$ & $0.571$ \\
+        $0.60$ & $3$ & $1$ & $1$ & $5$ & $0.750$ & $0.75$ & $0.750$ \\
+        $0.42$ & $4$ & $2$ & $0$ & $4$ & $0.667$ & $1.00$ & $0.800$ \\
+        $0.15$ & $4$ & $5$ & $0$ & $1$ & $0.444$ & $1.00$ & $0.615$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con el umbral alto el filtro es muy cuidadoso: lo que marca es
+    spam seguro, pero se le escapa casi todo. Al bajarlo atrapa más
+    spam y se le cuelan más legítimos. En $u = 0.42$ atrapa los cuatro
+    con el mejor F1; más abajo ya no gana recall y solo pierde
+    precisión.
+\end{ejemplo}
+
+\begin{idea}
+    Precisión y recall se jalan en sentidos contrarios: bajar el
+    umbral sube el recall y casi siempre baja la precisión. No hay un
+    umbral correcto en abstracto; se escoge según cuál error es más
+    caro. Un filtro de spam prefiere umbral alto, porque perder un
+    correo legítimo es peor; una prueba médica de tamizaje prefiere
+    umbral bajo, porque dejar ir a un enfermo es peor.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Más de dos clases}
+
+Con $k$ clases la matriz de confusión es de $k \times k$: el renglón
+es la clase real, la columna la predicha, y la diagonal son los
+aciertos.
+
+\begin{ejemplo}[Noticias en tres temas]
+    $90$ noticias de prueba, $30$ de cada tema:
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Real} $\backslash$ \textbf{Predicho} & Deportes
+            & Política & Tecnología \\
+        \midrule
+        Deportes   & $\mathbf{25}$ & $3$ & $2$ \\
+        Política   & $4$ & $\mathbf{20}$ & $6$ \\
+        Tecnología & $1$ & $5$ & $\mathbf{24}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La accuracy es la diagonal entre el total, $69 / 90 = 0.767$. Para
+    cada clase se calculan precisión y recall tratándola como la
+    positiva y a las otras dos como negativas:
+    \begin{center}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Clase} & \textbf{Precisión} & \textbf{Recall} \\
+        \midrule
+        Deportes   & $25/30 = 0.833$ & $25/30 = 0.833$ \\
+        Política   & $20/28 = 0.714$ & $20/30 = 0.667$ \\
+        Tecnología & $24/32 = 0.750$ & $24/30 = 0.800$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La precisión usa la suma de la columna y el recall la del renglón.
+    Promediando las tres clases, la \textbf{macro-precisión} es
+    $0.766$ y el \textbf{macro-recall} $0.767$.
+
+    Fuera de la diagonal se ve dónde se equivoca: la casilla más
+    grande es $6$, política confundida con tecnología. Ese número no
+    sale en ninguna métrica resumida, y suele ser lo más útil para
+    mejorar el clasificador.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Adelanto: la curva ROC}
+
+La segunda familia de métricas evalúa al clasificador en todos los
+umbrales a la vez. El nombre viene de los operadores de radar de la
+Segunda Guerra Mundial, que tenían que decidir qué tan fuerte debía
+ser una señal para declararla avión enemigo.
+
+La curva ROC pone, para cada umbral, la tasa de falsos positivos en el
+eje horizontal y la de verdaderos positivos, el recall, en el
+vertical. Se recorren los correos del puntaje más alto al más bajo:
+cada spam sube la curva $1/4$ y cada legítimo la mueve $1/6$ a la
+derecha.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=7cm, height=7cm, xmin=0, xmax=1, ymin=0, ymax=1.02,
+    xlabel={tasa de falsos positivos ($1 -$ especificidad)},
+    ylabel={tasa de verdaderos positivos (recall)},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    xtick={0, 0.167, 0.333, 0.5, 0.667, 0.833, 1},
+    xticklabels={$0$, $\frac{1}{6}$, $\frac{2}{6}$, $\frac{3}{6}$,
+                 $\frac{4}{6}$, $\frac{5}{6}$, $1$},
+    ytick={0, 0.25, 0.5, 0.75, 1}]
+    \addplot[draw=none, fill=fondoIdea]
+        coordinates {(0, 0) (0, 0.5) (0.167, 0.5) (0.167, 0.75)
+                     (0.333, 0.75) (0.333, 1) (1, 1)} \closedcycle;
+    \addplot[thick, acento, mark=*, mark size=1.5pt]
+        coordinates {(0, 0) (0, 0.25) (0, 0.5) (0.167, 0.5)
+                     (0.167, 0.75) (0.333, 0.75) (0.333, 1) (0.5, 1)
+                     (0.667, 1) (0.833, 1) (1, 1)};
+    \addplot[dashed, gray, domain=0:1] {x};
+    \node[font=\scriptsize, anchor=north west] at (axis cs:0.17, 0.73)
+        {$u = 0.60$};
+    \node[font=\scriptsize] at (axis cs:0.62, 0.45) {área $= 0.875$};
+    \node[font=\scriptsize, rotate=45, gray] at (axis cs:0.68, 0.76)
+        {al azar};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item La esquina superior izquierda, $(0, 1)$, es el clasificador
+          perfecto: atrapa todos los positivos sin una sola falsa
+          alarma.
+    \item La diagonal punteada es un clasificador que adivina al azar.
+          Una curva por debajo de ella es peor que tirar una moneda.
+    \item Cada punto de la curva es un umbral. El punto $u = 0.60$ de
+          la tabla anterior es $(1/6,\ 0.75)$.
+\end{itemize}
+
+El área bajo la curva, el \textbf{AUC}, resume la curva en un número.
+Aquí vale
+\[
+    \text{AUC} = \tfrac{1}{6} \cdot 0.5 + \tfrac{1}{6} \cdot 0.75
+               + \tfrac{4}{6} \cdot 1 = 0.083 + 0.125 + 0.667 = 0.875 .
+\]
+
+\begin{idea}
+    El AUC tiene una lectura directa: es la probabilidad de que un
+    positivo tomado al azar reciba un puntaje más alto que un negativo
+    tomado al azar. De los $4 \cdot 6 = 24$ pares spam-legítimo, en
+    $21$ el spam tiene el puntaje mayor, y $21 / 24 = 0.875$. A
+    diferencia de la accuracy, no depende del umbral ni de cuántos
+    ejemplos haya de cada clase: mide qué tan bien ordena el
+    clasificador.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.6cm}%
+                 >{\raggedright\arraybackslash}p{4.8cm}%
+                 >{\raggedright\arraybackslash}p{3.8cm}}
+    \toprule
+    \textbf{Métrica} & \textbf{Fórmula} & \textbf{Pregunta}
+    & \textbf{Importa cuando} \\
+    \midrule
+    Accuracy & $\frac{VP + VN}{\text{total}}$
+             & ¿Qué fracción acertó?
+             & las clases están balanceadas \\
+    \addlinespace
+    Precisión & $\frac{VP}{VP + FP}$
+              & Cuando dice positivo, ¿qué tan seguido acierta?
+              & las falsas alarmas son caras \\
+    \addlinespace
+    Recall & $\frac{VP}{VP + FN}$
+           & ¿Cuántos de los positivos encontró?
+           & dejar ir un positivo es caro \\
+    \addlinespace
+    Especificidad & $\frac{VN}{VN + FP}$
+                  & ¿A cuántos negativos dejó en paz?
+                  & se reporta junto con la sensibilidad \\
+    \addlinespace
+    F1 & $\frac{2PR}{P + R}$
+       & ¿Precisión y recall son altas a la vez?
+       & se necesita un solo número \\
+    \addlinespace
+    AUC & área bajo la ROC
+        & ¿Qué tan bien ordena positivos sobre negativos?
+        & todavía no se fija el umbral \\
+    \bottomrule
+\end{tabular}
+\end{center}
 
 
 \end{document}
