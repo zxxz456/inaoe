@@ -1,0 +1,18 @@
+-- medidas de desempeno
+
+que significa calidad?
+    depepnde de lo qeu queramos medir 
+
+hay dos metricas principaes,
+    las basadad en matriz de confusion
+    basadas en recieer operating characteristicas
+
+-matriz de confucion {explicar}
+
+- accuracy {explicar}
+
+- presision {explicar}
+
+- recall
+
+- especificidad
