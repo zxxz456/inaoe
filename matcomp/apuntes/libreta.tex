@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.9.0
+%   * Version: 2.10.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/10/2026      Clase 14 Oct, variables aleatorias
 %  zxxz6       12/10/2026      Clase 12 Oct, datos, variables y escalas
 %  zxxz6       09/10/2026      Clase 7 Oct, introduccion a la estadistica
 %  zxxz6       30/09/2026      Clase de SVD, expuesta por compañeros
@@ -4399,6 +4400,711 @@ Con la clasificación hecha, la elección de resúmenes es automática: a
 lenguaje se le sacan frecuencias y moda, a prioridad además la
 mediana, a temperatura y hora además media y desviación estándar, y a
 hilos y tiempo además razones y coeficiente de variación.
+
+
+\newpage
+
+% =====================================================================
+%  Clase 14 Oct - Variables aleatorias y distribuciones
+% =====================================================================
+
+\clase{Variables aleatorias y distribuciones}{14 de octubre de 2026}
+
+\begin{quick_sum}
+    De los datos se pasa a lo que los produce. Un experimento tiene
+    desenlaces posibles, una variable aleatoria les asigna un número y
+    una observación es el valor que salió. Contando las observaciones
+    se arma una distribución de frecuencias, la distribución empírica,
+    y lo que se busca es asociarla a un modelo probabilístico que
+    describa a toda la población. Las distribuciones son discretas o
+    continuas según la variable: en las discretas hay probabilidad en
+    cada valor; en las continuas solo en intervalos, como área bajo una
+    curva. Se describen con tres funciones: de masa, de densidad y
+    acumulada.
+\end{quick_sum}
+
+\subsection*{Para qué sirven las distribuciones en computación}
+
+Una distribución dice qué valores puede tomar una variable y qué tan
+probable es cada uno. Con eso se pueden:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Contestar preguntas.} ¿Qué fracción de las peticiones
+          a un servidor tarda más de $30$ ms? ¿Cuántas fallas hay que
+          esperar en un lote de mil? Al final de la clase se contesta
+          la primera.
+    \item \textbf{Implementar clasificadores.} Un clasificador de Naive
+          Bayes aprende, para cada clase, la distribución de cada
+          característica, y clasifica un ejemplo nuevo según con qué
+          clase es más probable. Un filtro de spam estima qué tan
+          probable es la palabra \textit{gratis} en el spam y en el
+          correo normal.
+    \item \textbf{Simular y detectar anomalías.} Generar datos
+          sintéticos que se comporten como los reales, o marcar como
+          sospechoso un valor que el modelo considera muy improbable.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Del experimento a la variable}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.6cm, minimum height=0.8cm,
+                 font=\small\bfseries},
+    nota/.style={font=\scriptsize, align=center, text width=3.0cm},
+    >=stealth]
+    \node[paso] (e) at (0, 0)    {Experimento};
+    \node[paso] (d) at (3.7, 0)  {Desenlace};
+    \node[paso] (v) at (7.4, 0)  {Variable};
+    \node[paso] (o) at (11.1, 0) {Observación};
+    \draw[->] (e) -- (d);
+    \draw[->] (d) -- (v);
+    \draw[->] (v) -- (o);
+    \node[nota] at (0, -0.95)    {un proceso cuyo resultado no se
+                                  sabe de antemano};
+    \node[nota] at (3.7, -0.95)  {lo que salió, uno del catálogo de
+                                  resultados posibles};
+    \node[nota] at (7.4, -0.95)  {la regla que le asigna un número al
+                                  desenlace};
+    \node[nota] at (11.1, -0.95) {el número que se registra};
+\end{tikzpicture}
+\end{center}
+
+\begin{definicion}[Experimento aleatorio]
+    Un procedimiento que se puede repetir en las mismas condiciones y
+    cuyo resultado no se conoce antes de hacerlo. Lanzar dos monedas,
+    mandar una petición a un servidor, escoger un documento al azar de
+    una colección.
+\end{definicion}
+
+\begin{definicion}[Desenlace y espacio muestral]
+    Un \textbf{desenlace} es cada resultado posible del experimento. El
+    \textbf{espacio muestral}, $\Omega$, es el catálogo de todos los
+    desenlaces posibles. Queda delimitado antes de hacer el
+    experimento: se sabe qué puede pasar aunque no se sepa qué va a
+    pasar.
+\end{definicion}
+
+\begin{definicion}[Variable aleatoria]
+    Una función $X : \Omega \to \R$ que le asigna un número a cada
+    desenlace. La regla $X$ queda definida antes de observar nada; la
+    incertidumbre está en qué desenlace va a ocurrir, no en la regla.
+\end{definicion}
+
+\begin{definicion}[Observación]
+    El valor que toma la variable cuando el experimento se hace una
+    vez: si ocurrió el desenlace $\omega$, la observación es
+    $x = X(\omega)$.
+\end{definicion}
+
+La convención es usar mayúscula para la variable, $X$, que es la
+regla, y minúscula para un valor observado, $x$. $P(X = 1)$ se lee
+``la probabilidad de que la variable tome el valor $1$''.
+
+\begin{ejemplo}[Dos monedas]
+    \textbf{Experimento:} lanzar dos monedas.
+    \textbf{Espacio muestral:} $\Omega = \{\textit{AA},\ \textit{AS},\
+    \textit{SA},\ \textit{SS}\}$, con \textit{A} para águila y
+    \textit{S} para sol. \textbf{Variable:} $X$ = número de águilas.
+    \begin{center}
+    \begin{tikzpicture}[
+        des/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                    minimum width=1.0cm, font=\small},
+        >=stealth]
+        \draw[rounded corners=6pt, gray] (-0.9, -0.5) rectangle
+            (0.9, 3.5);
+        \node[font=\small] at (0, 3.85) {$\Omega$};
+        \node[des] (aa) at (0, 3.0) {\textit{AA}};
+        \node[des] (as) at (0, 2.0) {\textit{AS}};
+        \node[des] (sa) at (0, 1.0) {\textit{SA}};
+        \node[des] (ss) at (0, 0.0) {\textit{SS}};
+        \draw[->] (5, -0.3) -- (5, 3.5);
+        \foreach \y/\v in {0.0/0, 1.5/1, 3.0/2} {
+            \draw (4.9, \y) -- (5.1, \y);
+            \node[font=\small, anchor=west] at (5.15, \y) {$\v$};
+        }
+        \node[font=\small] at (5, 3.85) {$\R$};
+        \draw[->, gray] (aa.east) -- (4.85, 3.0);
+        \draw[->, gray] (as.east) -- (4.85, 1.5);
+        \draw[->, gray] (sa.east) -- (4.85, 1.5);
+        \draw[->, gray] (ss.east) -- (4.85, 0.0);
+        \node[font=\small] at (2.6, 3.35) {$X$};
+    \end{tikzpicture}
+    \end{center}
+    $X(\textit{AA}) = 2$, $X(\textit{AS}) = X(\textit{SA}) = 1$ y
+    $X(\textit{SS}) = 0$. Dos desenlaces distintos pueden dar el mismo
+    valor. Si al lanzar sale \textit{SA}, la observación es $x = 1$.
+\end{ejemplo}
+
+\begin{ejemplo}[Una petición al servidor]
+    El mismo experimento puede tener varias variables. Al mandar una
+    petición, el desenlace es todo lo que pasó: si llegó, cuánto tardó,
+    qué respondió. De ahí salen
+    \begin{itemize}[itemsep=0.2em]
+        \item $T$ = tiempo de respuesta en milisegundos, que puede
+              valer cualquier número positivo;
+        \item $Y$ = $1$ si la petición falló y $0$ si no.
+    \end{itemize}
+    Una observación podría ser $t = 14.2$ y $y = 0$.
+\end{ejemplo}
+
+\begin{ojo}
+    Lo aleatorio de una variable aleatoria no está en la función.
+    $X$ = número de águilas es una regla fija y sin sorpresas: dado el
+    desenlace, el valor es seguro. Lo que no se sabe es qué desenlace
+    va a salir.
+\end{ojo}
+
+\subsubsection*{Espacio muestral, población y muestra}
+
+Son tres conjuntos distintos que se confunden fácilmente:
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.4cm}%
+                 >{\raggedright\arraybackslash}p{5.2cm}}
+    \toprule
+    & \textbf{Qué es} & \textbf{En el servidor} \\
+    \midrule
+    Espacio muestral & Los desenlaces posibles de \textbf{una}
+                       realización del experimento
+                     & Cualquier tiempo positivo, con o sin falla \\
+    \addlinespace
+    Población & Todas las unidades o valores sobre los que se quiere
+                concluir
+              & Los tiempos de todas las peticiones que recibe el
+                servidor \\
+    \addlinespace
+    Muestra & Las observaciones que de verdad se registraron: un
+              número finito, y pueden estar sesgadas
+            & Los $100$ tiempos medidos el lunes en la mañana \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La muestra es un subconjunto de la población, y el espacio muestral
+define qué valores puede contener la población. Si la muestra se tomó
+solo el lunes en la mañana, cuando hay poca carga, está sesgada
+respecto a la población, como en la clase del $12$.
+
+% =====================================================================
+
+\subsection*{Distribuciones de frecuencia}
+
+\begin{definicion}[Distribución de frecuencias]
+    Una tabla que lista cada valor posible de la variable, o cada
+    intervalo de valores, junto con cuántas veces apareció en la
+    muestra.
+\end{definicion}
+
+Con $n$ observaciones y el valor $x_i$ apareciendo $n_i$ veces:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Frecuencia absoluta}, $n_i$: cuántas veces apareció.
+          Las absolutas suman $n$.
+    \item \textbf{Frecuencia relativa}, $f_i = n_i / n$: qué fracción
+          de la muestra es. Las relativas suman $1$, y sirven para
+          comparar muestras de tamaños distintos.
+    \item \textbf{Frecuencia acumulada}, $N_i$ o $F_i$: cuántas
+          observaciones, o qué fracción, quedaron en $x_i$ o por
+          debajo. Solo tiene sentido si los valores tienen orden.
+    \item \textbf{Distribución empírica}: la asignación de cada valor a
+          su frecuencia relativa. Es la distribución \textbf{de la
+          muestra}: lo que se observó, no lo que es en general.
+\end{itemize}
+
+\begin{ejemplo}[Las dos monedas, lanzadas $20$ veces]
+    Se repitió el experimento $20$ veces y se anotó el número de
+    águilas de cada lanzamiento:
+    \begin{center}
+    \begin{tabular}{ccccc}
+        \toprule
+        $x$ & \textbf{Absoluta} $n_i$ & \textbf{Relativa} $f_i$
+        & \textbf{Acum.\ absoluta} & \textbf{Acum.\ relativa} \\
+        \midrule
+        $0$ & $6$ & $0.30$ & $6$  & $0.30$ \\
+        $1$ & $9$ & $0.45$ & $15$ & $0.75$ \\
+        $2$ & $5$ & $0.25$ & $20$ & $1.00$ \\
+        \midrule
+        Total & $20$ & $1.00$ & & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La distribución empírica es $0 \mapsto 0.30$, $1 \mapsto 0.45$,
+    $2 \mapsto 0.25$.
+\end{ejemplo}
+
+\subsubsection*{De la distribución empírica al modelo}
+
+Lo que se quiere no es describir estas $20$ tiradas, sino el
+comportamiento de la población: qué pasa con las monedas en general.
+La distribución empírica es una aproximación a eso, y cambia con cada
+muestra. Por eso se intenta asociarla a un \textbf{modelo
+probabilístico} ya establecido: una suposición matemática que se
+aproxima al proceso que genera los datos.
+
+Para dos monedas justas, cada uno de los cuatro desenlaces tiene
+probabilidad $1/4$, y el modelo es
+\[
+    P(X = 0) = \tfrac{1}{4} , \qquad
+    P(X = 1) = \tfrac{1}{4} + \tfrac{1}{4} = \tfrac{1}{2} , \qquad
+    P(X = 2) = \tfrac{1}{4} ,
+\]
+porque $X = 1$ ocurre con dos desenlaces, \textit{AS} y \textit{SA}.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ybar, bar width=0.28cm, width=8cm, height=5cm,
+    ymin=0, ymax=0.6, xtick={0, 1, 2}, enlarge x limits=0.3,
+    xlabel={número de águilas}, ylabel={frecuencia relativa},
+    legend style={font=\scriptsize, at={(1.03, 1)},
+                  anchor=north west},
+    legend cell align=left,
+    tick label style={font=\scriptsize},
+    label style={font=\small}]
+    \addplot[fill=fondoIdea, draw=acento]
+        coordinates {(0, 0.30) (1, 0.45) (2, 0.25)};
+    \addplot[fill=fondoOjo, draw=orange!70!black]
+        coordinates {(0, 0.25) (1, 0.50) (2, 0.25)};
+    \legend{empírica ($20$ tiradas), modelo}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+La empírica no coincide exactamente con el modelo: con $20$ tiradas
+salió $0.30$ donde el modelo dice $0.25$. Es la variabilidad de la
+muestra. Con más repeticiones la empírica se va acercando al modelo,
+si el modelo es correcto; si no se acerca, el modelo está mal y la
+moneda está cargada.
+
+El modelo más simple de todos es el de \textbf{Bernoulli}: un solo
+ensayo con dos resultados, éxito o fracaso.
+\[
+    P(Y = 1) = p , \qquad P(Y = 0) = 1 - p .
+\]
+La variable $Y$ de la petición, falló o no, es una Bernoulli. Contar
+cuántos éxitos hay en $n$ ensayos de Bernoulli independientes da la
+\textbf{binomial}; el número de águilas en dos monedas es una binomial
+con $n = 2$ y $p = 1/2$.
+
+% =====================================================================
+
+\subsection*{Qué es una distribución}
+
+\begin{definicion}[Distribución de probabilidad]
+    La descripción de qué valores puede tomar una variable aleatoria y
+    con qué probabilidad toma cada uno, o cada intervalo de valores.
+\end{definicion}
+
+Con una distribución la pregunta cambia. Ya no es ``¿cuál fue el
+valor?'', que es la observación, sino ``¿cómo se distribuyen los
+valores?'', que es el comportamiento de la variable en general.
+
+La forma de la distribución depende de la naturaleza de la variable,
+la de la clase del $12$:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Variables discretas.} Los valores se pueden contar
+          uno por uno, y cada valor tiene su propia probabilidad. La
+          distribución dice cuánta probabilidad le toca a cada valor.
+    \item \textbf{Variables continuas.} Hay una infinidad de valores en
+          cualquier intervalo, y ninguno tiene probabilidad propia. La
+          distribución dice cuánta probabilidad le toca a cada
+          intervalo.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Distribuciones discretas}
+
+Indican la probabilidad de observar \textbf{exactamente} el valor $x$:
+\[
+    p(x) = P(X = x) .
+\]
+A $p$ se le llama función de masa de probabilidad. Tiene tres
+propiedades:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item $0 \le p(x) \le 1$ para todo $x$: son probabilidades.
+    \item $\sum_{x} p(x) = 1$: algún valor tiene que salir, y la
+          probabilidad total se reparte entre todos.
+    \item $P(X \in A) = \sum_{x \in A} p(x)$: la probabilidad de un
+          conjunto de valores es la suma de las de cada uno.
+\end{enumerate}
+
+\begin{ejemplo}[Dos monedas]
+    Con $p(0) = 0.25$, $p(1) = 0.5$ y $p(2) = 0.25$, la suma es $1$. La
+    probabilidad de que salga al menos un águila es
+    \[
+        P(X \ge 1) = p(1) + p(2) = 0.5 + 0.25 = 0.75 .
+    \]
+\end{ejemplo}
+
+\begin{ejemplo}[Fallas en un lote de peticiones]
+    Si cada petición falla con probabilidad $p = 0.02$, de forma
+    independiente, la probabilidad de que ninguna de $10$ falle es
+    \[
+        P(\text{ninguna falla}) = (1 - 0.02)^{10} = 0.98^{10} = 0.817 ,
+    \]
+    y la de que falle al menos una, $1 - 0.817 = 0.183$. Aunque cada
+    petición casi nunca falla, en casi uno de cada cinco lotes falla
+    alguna.
+\end{ejemplo}
+
+Las distribuciones discretas también cubren a las variables
+categóricas. Los valores no tienen que ser números: la distribución
+del lenguaje en la tabla de la clase del $12$ es
+$P(\text{Python}) = 3/7$, $P(\text{C++}) = 2/7$,
+$P(\text{Java}) = 2/7$, y cumple las tres propiedades.
+
+\begin{center}
+\small
+\begin{tabular}{llll}
+    \toprule
+    \textbf{Modelo} & \textbf{Valores} & \textbf{Describe}
+    & \textbf{Ejemplo} \\
+    \midrule
+    Bernoulli  & $0$ o $1$           & un ensayo de sí o no
+               & ¿falló la petición? \\
+    Binomial   & $0, 1, \ldots, n$   & éxitos en $n$ ensayos
+               & fallas en un lote de $10$ \\
+    Poisson    & $0, 1, 2, \ldots$   & eventos en un intervalo
+               & peticiones por segundo \\
+    Categórica & $k$ categorías      & una etiqueta
+               & lenguaje del programa \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Distribuciones continuas}
+
+En una variable continua los valores posibles no se cuentan uno por
+uno, sino por intervalos. La probabilidad se reparte a lo largo de la
+recta como un área bajo una curva, y solo los intervalos tienen
+probabilidad. La de un valor exacto es cero.
+
+\begin{definicion}[Función de densidad de probabilidad]
+    Una función $f$ tal que la probabilidad de que $X$ caiga en un
+    intervalo es el área bajo $f$ en ese intervalo:
+    \[
+        P(a \le X \le b) = \int_{a}^{b} f(x)\, dx .
+    \]
+    Cumple $f(x) \ge 0$ para todo $x$ y
+    $\int_{-\infty}^{\infty} f(x)\, dx = 1$: el área total es $1$.
+\end{definicion}
+
+\begin{ejemplo}[Tiempo de respuesta con un modelo exponencial]
+    Supongamos que el tiempo de respuesta $T$, en milisegundos, sigue
+    una distribución exponencial con media de $10$ ms:
+    \[
+        f(t) = 0.1\, e^{-0.1 t} \quad \text{para } t \ge 0 ,
+    \]
+    y $f(t) = 0$ para $t < 0$. ¿Qué fracción de las peticiones tarda
+    entre $5$ y $15$ ms?
+    \begin{align*}
+        P(5 \le T \le 15)
+            &= \int_{5}^{15} 0.1\, e^{-0.1 t}\, dt
+             = \Big[ -e^{-0.1 t} \Big]_{5}^{15} \\
+            &= e^{-0.5} - e^{-1.5}
+             = 0.6065 - 0.2231 = 0.3834 .
+    \end{align*}
+    Un $38\%$ de las peticiones.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=9cm, height=5cm, domain=0:40, samples=100,
+        xmin=0, xmax=40, ymin=0, ymax=0.11,
+        xlabel={$t$ (ms)}, ylabel={$f(t)$},
+        tick label style={font=\scriptsize},
+        label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[draw=none, fill=fondoIdea, domain=5:15]
+            {0.1*exp(-0.1*x)} \closedcycle;
+        \addplot[thick, acento] {0.1*exp(-0.1*x)};
+        \node[font=\scriptsize] at (axis cs:10, 0.022)
+            {área $= 0.3834$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\subsubsection*{Por qué un valor exacto tiene probabilidad cero}
+
+Con el mismo modelo, intervalos cada vez más angostos alrededor de
+$10$ ms:
+
+\begin{center}
+\begin{tabular}{lc}
+    \toprule
+    \textbf{Intervalo} & \textbf{Probabilidad} \\
+    \midrule
+    $[9.9,\ 10.1]$     & $0.007358$ \\
+    $[9.99,\ 10.01]$   & $0.000736$ \\
+    $[9.999,\ 10.001]$ & $0.000074$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Cada vez que el intervalo se hace diez veces más angosto, la
+probabilidad baja diez veces. En el límite, un intervalo de ancho cero,
+que es un solo valor, tiene probabilidad cero. Por eso $P(T = 10) = 0$,
+aunque $10$ ms sea un valor perfectamente posible, y por eso en una
+continua da igual escribir $\le$ o $<$.
+
+\begin{ojo}
+    $f(x)$ \textbf{no es una probabilidad}. Es probabilidad por unidad
+    de longitud, como la densidad de un material es masa por unidad de
+    volumen. Lo que sí es probabilidad es $f(x)$ por el ancho de un
+    intervalo chico: $f(10) = 0.0368$, y $0.0368 \cdot 0.2 = 0.00736$,
+    justo la primera fila de la tabla. Como no es probabilidad, puede
+    valer más de $1$: si el mismo tiempo se mide en segundos, la
+    densidad en cero es $100$, porque toda la probabilidad se aprieta
+    en un rango de centésimas de segundo.
+\end{ojo}
+
+\subsubsection*{Del histograma a la densidad}
+
+Para una variable continua, la distribución empírica se arma agrupando
+las observaciones en intervalos. Si la altura de cada barra es la
+frecuencia relativa dividida entre el ancho del intervalo, el área de
+cada barra es su frecuencia relativa, y el histograma queda en la misma
+escala que una densidad.
+
+\begin{ejemplo}[$100$ tiempos medidos]
+    En intervalos de $5$ ms:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Intervalo (ms)} & $[0, 5)$ & $[5, 10)$ & $[10, 15)$
+        & $[15, 20)$ & $[20, 25)$ & $[25, 30)$ \\
+        \midrule
+        Frecuencia absoluta & $41$ & $22$ & $15$ & $9$ & $5$ & $3$ \\
+        Frecuencia relativa & $0.41$ & $0.22$ & $0.15$ & $0.09$
+                            & $0.05$ & $0.03$ \\
+        Altura ($f_i / 5$)  & $0.082$ & $0.044$ & $0.030$ & $0.018$
+                            & $0.010$ & $0.006$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Las $5$ observaciones restantes tardaron $30$ ms o más.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=9cm, height=5cm, xmin=0, xmax=40, ymin=0, ymax=0.11,
+        xlabel={$t$ (ms)}, ylabel={densidad},
+        tick label style={font=\scriptsize},
+        label style={font=\small},
+        yticklabel style={/pgf/number format/fixed},
+        legend style={font=\scriptsize, at={(0.98, 0.97)},
+                      anchor=north east}]
+        \addplot[ybar interval, fill=fondoIdea, draw=acento]
+            coordinates {(0, 0.082) (5, 0.044) (10, 0.030)
+                         (15, 0.018) (20, 0.010) (25, 0.006)
+                         (30, 0)};
+        \addplot[thick, orange!70!black, domain=0:40, samples=100]
+            {0.1*exp(-0.1*x)};
+        \legend{histograma, modelo exponencial}
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    El histograma sigue a la curva: el modelo exponencial describe
+    bien estos datos. Con más observaciones e intervalos más angostos,
+    el histograma se parece cada vez más a una densidad.
+\end{ejemplo}
+
+\begin{ojo}
+    El exponencial se escogió aquí porque sus cuentas son sencillas.
+    Los tiempos de respuesta reales suelen tener una cola más larga, con
+    más peticiones muy lentas de las que predice. Un modelo es una
+    suposición, y comparar el histograma con la curva es justo la forma
+    de revisar si la suposición se sostiene.
+\end{ojo}
+
+\begin{center}
+\small
+\begin{tabular}{llll}
+    \toprule
+    \textbf{Modelo} & \textbf{Valores} & \textbf{Describe}
+    & \textbf{Ejemplo} \\
+    \midrule
+    Uniforme    & $[a, b]$      & todo el intervalo igual de probable
+                & lo que devuelve \texttt{random()} \\
+    Exponencial & $t \ge 0$     & tiempos de espera
+                & tiempo hasta la siguiente petición \\
+    Normal      & todos los reales & suma de muchos efectos chicos
+                & errores de medición \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Tres formas de describir una distribución}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Función de masa} (PMF, \textit{probability mass
+          function}): $p(x) = P(X = x)$. Solo para discretas. Dice
+          cuánta probabilidad hay \textbf{en} cada valor.
+    \item \textbf{Función de densidad} (PDF, \textit{probability
+          density function}): $f(x)$. Solo para continuas. Dice qué tan
+          concentrada está la probabilidad \textbf{alrededor} de cada
+          valor; la probabilidad sale de su área.
+    \item \textbf{Función de distribución acumulada} (CDF,
+          \textit{cumulative distribution function}):
+          $F(x) = P(X \le x)$. Para las dos. Dice cuánta probabilidad
+          hay \textbf{hasta} cada valor.
+\end{itemize}
+
+La acumulada se obtiene de las otras dos:
+\[
+    F(x) = \sum_{t \le x} p(t) \quad \text{(discreta)} ,
+    \qquad
+    F(x) = \int_{-\infty}^{x} f(t)\, dt \quad \text{(continua)} ,
+\]
+y en el caso continuo, al revés, $f(x) = F'(x)$. Toda acumulada empieza
+en $0$, termina en $1$ y nunca baja. Con ella cualquier intervalo sale
+con una resta:
+\[
+    P(a < X \le b) = F(b) - F(a) .
+\]
+
+\begin{ejemplo}[Las dos monedas: masa y acumulada]
+    \[
+        F(x) = \begin{cases}
+                   0    & x < 0 , \\
+                   0.25 & 0 \le x < 1 , \\
+                   0.75 & 1 \le x < 2 , \\
+                   1    & x \ge 2 .
+               \end{cases}
+    \]
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        name=masa, width=6.5cm, height=4.5cm,
+        ymin=0, ymax=1.1, xmin=-0.8, xmax=2.8, xtick={0, 1, 2},
+        title={masa $p(x)$}, title style={font=\small},
+        tick label style={font=\scriptsize}]
+        \addplot[ycomb, thick, acento, mark=*,
+                 mark options={fill=acento}]
+            coordinates {(0, 0.25) (1, 0.5) (2, 0.25)};
+    \end{axis}
+    \begin{axis}[
+        at={(masa.east)}, anchor=west, xshift=1.2cm,
+        width=6.5cm, height=4.5cm,
+        ymin=0, ymax=1.1, xmin=-0.8, xmax=2.8, xtick={0, 1, 2},
+        ytick={0, 0.25, 0.75, 1},
+        title={acumulada $F(x)$}, title style={font=\small},
+        tick label style={font=\scriptsize}]
+        \addplot[thick, acento, jump mark left]
+            coordinates {(-0.8, 0) (0, 0.25) (1, 0.75) (2, 1)
+                         (2.8, 1)};
+        \addplot[only marks, mark=*, acento,
+                 mark options={fill=acento}]
+            coordinates {(0, 0.25) (1, 0.75) (2, 1)};
+        \addplot[only marks, mark=*, acento,
+                 mark options={fill=white}]
+            coordinates {(0, 0) (1, 0.25) (2, 0.75)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    La acumulada de una discreta es una escalera: es plana entre los
+    valores posibles y salta en cada uno, y el tamaño del salto es la
+    masa de ese valor. El punto relleno marca dónde está la función en
+    cada salto. Es la columna de frecuencia acumulada relativa del
+    ejemplo de las $20$ tiradas, pero con las probabilidades del
+    modelo.
+\end{ejemplo}
+
+\begin{ejemplo}[El tiempo de respuesta: densidad y acumulada]
+    Integrando la densidad exponencial desde $0$:
+    \[
+        F(t) = \int_{0}^{t} 0.1\, e^{-0.1 s}\, ds = 1 - e^{-0.1 t}
+        \quad \text{para } t \ge 0 .
+    \]
+    El intervalo de antes sale con la resta, sin integrar otra vez:
+    \[
+        P(5 < T \le 15) = F(15) - F(5) = 0.7769 - 0.3935 = 0.3834 .
+    \]
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        name=dens, width=6.5cm, height=4.5cm, domain=0:40,
+        samples=100, xmin=0, xmax=40, ymin=0, ymax=0.11,
+        title={densidad $f(t)$}, title style={font=\small},
+        tick label style={font=\scriptsize},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[draw=none, fill=fondoIdea, domain=5:15]
+            {0.1*exp(-0.1*x)} \closedcycle;
+        \addplot[thick, acento] {0.1*exp(-0.1*x)};
+    \end{axis}
+    \begin{axis}[
+        at={(dens.east)}, anchor=west, xshift=1.2cm,
+        width=6.5cm, height=4.5cm, domain=0:40, samples=100,
+        xmin=0, xmax=40, ymin=0, ymax=1.05,
+        title={acumulada $F(t)$}, title style={font=\small},
+        tick label style={font=\scriptsize}]
+        \addplot[thick, acento] {1 - exp(-0.1*x)};
+        \draw[dashed, gray] (axis cs:5, 0) -- (axis cs:5, 0.3935)
+            -- (axis cs:31, 0.3935);
+        \draw[dashed, gray] (axis cs:15, 0) -- (axis cs:15, 0.7769)
+            -- (axis cs:31, 0.7769);
+        \draw[<->, thick, orange!70!black]
+            (axis cs:31, 0.3935) -- (axis cs:31, 0.7769);
+        \node[font=\scriptsize, anchor=west] at (axis cs:31.5, 0.58)
+            {$0.3834$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    El área sombreada de la izquierda es la misma probabilidad que la
+    distancia vertical de la derecha. La densidad muestra dónde se
+    concentran los tiempos; la acumulada contesta directamente
+    preguntas de ``hasta tanto''.
+
+    Y la pregunta del principio: ¿qué fracción de las peticiones tarda
+    más de $30$ ms?
+    \[
+        P(T > 30) = 1 - F(30) = e^{-3} = 0.0498 .
+    \]
+    Una de cada veinte. Las $100$ observaciones del histograma tenían
+    $5$ arriba de $30$ ms, justo lo que predice el modelo.
+\end{ejemplo}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.2cm}%
+                 >{\raggedright\arraybackslash}p{3.6cm}%
+                 >{\raggedright\arraybackslash}p{4.8cm}}
+    \toprule
+    \textbf{Función} & \textbf{Para} & \textbf{Qué da}
+    & \textbf{Propiedades} \\
+    \midrule
+    Masa $p(x)$ & discretas & $P(X = x)$
+                & $0 \le p \le 1$, suma $1$ \\
+    \addlinespace
+    Densidad $f(x)$ & continuas & probabilidad por unidad, cerca de $x$
+                    & $f \ge 0$, área total $1$, puede pasar de $1$ \\
+    \addlinespace
+    Acumulada $F(x)$ & las dos & $P(X \le x)$
+                     & de $0$ a $1$, nunca baja; escalera en
+                       discretas, curva suave en continuas \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    La acumulada necesita que los valores tengan orden, porque
+    ``hasta $x$'' presupone un antes y un después. Para una variable
+    nominal, como el lenguaje, hay función de masa pero no acumulada:
+    $P(X \le \text{C++})$ no significa nada. Es la misma restricción
+    de la clase del $12$, donde la frecuencia acumulada y la mediana
+    empezaban en la escala ordinal.
+\end{ojo}
 
 
 \end{document}
