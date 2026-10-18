@@ -1,0 +1,41 @@
+-- que es el lenguaje apra una computadora?
+
+cambia segun el modo
+    señal, onda, espectrograma, prodsodia 
+    simbolos, caracteres plabras tokens
+    estructuras, arboles, grafos marcos semanticos
+    interaccion, turnos, nencion, memoria, herramientas
+
+niveles de analisis linguistico
+    fonectica
+    fonologia
+    morfloiga
+    sintaxis
+    semantca
+    pragmatica
+{explicar cada uno}
+
+- ambiguedad y contexto 
+
+- que deseamos hacer con el lenguaje
+se suelen combinar varias de estas tareas
+    entender
+    transforamr
+    encontrar
+    generar
+    interactuar
+    medir
+
+por ejemplo en el proc del lenguaje oral 
+
+se tiene el audio -> se preprocesa -> asr -> nlp/llm -> accion 
+
+proc del lenguaje escrito
+
+captura > normalizacon > representacion > tarea > entreha 
+
+el procesamiento multimodal trata de unir todo 
+
+-RAG {explicacion breve}
+
+- agentes {explicacion breve}
