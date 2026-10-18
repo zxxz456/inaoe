@@ -1,0 +1,4 @@
+--Divide an konker
+
+{explicacion de divide y venceras para el metodo de muletiplicacion de eneros largos }
+
