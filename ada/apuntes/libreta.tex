@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.5.0
+%   * Version: 3.6.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       18/10/2026      Clase 13 Oct, multiplicacion de Karatsuba
 %  zxxz6       09/10/2026      Clase 8 Oct, voraces y divide y venceras
 %  zxxz6       20/09/2026      Clase 17 Sep, heaps y construccion en O(n)
 %  zxxz6       20/09/2026      Clase 15 Sep, los cuatro metodos con ejemplos
@@ -2731,6 +2732,337 @@ herramienta para medir estos algoritmos.
   \emph{todos} los subproblemas en que partió el original y después
   combina sus respuestas.
 \end{idea}
+
+\newpage
+
+% =====================================================================
+%  Clase 13 Oct - Divide y venceras: multiplicacion de enteros grandes
+% =====================================================================
+
+\clase{Multiplicación de enteros grandes}{13 de octubre de 2026}
+
+\begin{quick_sum}
+  Divide y vencerás aplicado a multiplicar dos enteros de $n$ dígitos.
+  El método de la escuela cuesta $\Tht{n^2}$. Partir cada número a la
+  mitad da cuatro multiplicaciones de la mitad del tamaño y el mismo
+  $\Tht{n^2}$: dividir por sí solo no ahorra nada. El truco de
+  Karatsuba obtiene el término de en medio con una sola multiplicación
+  en lugar de dos, y con tres subproblemas en lugar de cuatro el costo
+  baja a $\Tht{n^{\log_2 3}} \approx \Tht{n^{1.585}}$.
+\end{quick_sum}
+
+\subsection*{El problema}
+
+Multiplicar dos enteros $x$ y $y$ de $n$ dígitos cada uno. El
+procesador multiplica números de $64$ bits en una instrucción, pero la
+criptografía trabaja con números mucho más grandes: una llave RSA de
+$2048$ bits tiene unos $617$ dígitos decimales. Las bibliotecas de
+enteros de tamaño arbitrario, como los \texttt{int} de Python, tienen
+que multiplicar números así con operaciones sobre dígitos. El costo se
+mide en operaciones de un dígito.
+
+\subsubsection*{El método de la escuela}
+
+Se multiplica $x$ por cada dígito de $y$, se recorre cada renglón un
+lugar a la izquierda y se suman.
+
+\begin{ejemplo}[$1234 \times 5678$]
+  Los cuatro renglones y su suma:
+  \begin{center}
+  \begin{tabular}{rl}
+    $1234 \times 8 =$ & $\phantom{000}9872$ \\
+    $1234 \times 7 =$ & $\phantom{00}8638\phantom{0}$ \\
+    $1234 \times 6 =$ & $\phantom{0}7404\phantom{00}$ \\
+    $1234 \times 5 =$ & $6170\phantom{000}$ \\
+    \midrule
+    suma: & $7006652$
+  \end{tabular}
+  \end{center}
+  Cada uno de los $4$ dígitos de $y$ se multiplica por cada uno de los
+  $4$ de $x$: $16$ productos de un dígito.
+\end{ejemplo}
+
+Con $n$ dígitos son $n^2$ productos de un dígito, más sumar $n$
+renglones de unos $2n$ dígitos. El método es $\Tht{n^2}$. Duplicar el
+tamaño de los números cuadruplica el tiempo.
+
+% =====================================================================
+
+\subsection*{Primer intento: partir a la mitad}
+
+Con $m = n/2$, cada número se parte en su mitad alta y su mitad baja:
+\[
+  x = a \cdot 10^{m} + b , \qquad y = c \cdot 10^{m} + d .
+\]
+Para $1234$ y $5678$ con $m = 2$: $a = 12$, $b = 34$, $c = 56$,
+$d = 78$. Multiplicando,
+\[
+  x\,y = ac \cdot 10^{2m} + (ad + bc) \cdot 10^{m} + bd .
+\]
+
+\begin{ejemplo}
+  \begin{align*}
+    ac &= 12 \cdot 56 = 672 , &
+    ad &= 12 \cdot 78 = 936 , \\
+    bc &= 34 \cdot 56 = 1904 , &
+    bd &= 34 \cdot 78 = 2652 .
+  \end{align*}
+  \[
+    x\,y = 672 \cdot 10^{4} + (936 + 1904) \cdot 10^{2} + 2652
+        = 6\,720\,000 + 284\,000 + 2\,652 = 7\,006\,652 .
+  \]
+\end{ejemplo}
+
+Multiplicar por $10^{k}$ es agregar $k$ ceros, un corrimiento que cuesta
+$\Tht{n}$, y las sumas también son $\Tht{n}$. Lo caro son las cuatro
+multiplicaciones de números de $n/2$ dígitos, que se resuelven
+recursivamente:
+\[
+  T(n) = 4\, T(n/2) + \Tht{n} .
+\]
+Con $a = 4$ y $b = 2$, $n^{\log_2 4} = n^2$ crece polinomialmente más
+rápido que $f(n) = n$: caso 1 del método maestro,
+$T(n) = \Tht{n^2}$.
+
+\begin{ojo}
+  Dividir no ahorró nada. Cuatro problemas de la mitad del tamaño
+  cuestan $4 \cdot (n/2)^2 = n^2$, lo mismo que el original. Divide y
+  vencerás no es más rápido por partir el problema; es más rápido
+  cuando los subproblemas, juntos, son menos trabajo que el original.
+  Para eso hay que reducir \emph{cuántos} son.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{El truco de Karatsuba}
+
+En 1960 Kolmogorov propuso en un seminario que multiplicar no se podía
+hacer en menos de $\Tht{n^2}$. Anatoli Karatsuba, un estudiante de
+$23$ años, encontró en una semana cómo hacerlo con tres
+multiplicaciones en lugar de cuatro.
+
+La observación es que no hacen falta $ad$ y $bc$ por separado, solo su
+suma. Y
+\[
+  (a + b)(c + d) = ac + ad + bc + bd ,
+\]
+así que
+\[
+  ad + bc = (a + b)(c + d) - ac - bd .
+\]
+$ac$ y $bd$ ya se iban a calcular de todos modos. Basta con tres
+multiplicaciones:
+\[
+  p_1 = ac , \qquad p_2 = bd , \qquad p_3 = (a + b)(c + d) ,
+\]
+\[
+  x\,y = p_1 \cdot 10^{2m} + (p_3 - p_1 - p_2) \cdot 10^{m} + p_2 .
+\]
+
+\begin{ejemplo}[$1234 \times 5678$ otra vez]
+  $p_1 = 672$ y $p_2 = 2652$ como antes. El tercero:
+  \[
+    p_3 = (12 + 34)(56 + 78) = 46 \cdot 134 = 6164 ,
+  \]
+  \[
+    p_3 - p_1 - p_2 = 6164 - 672 - 2652 = 2840 ,
+  \]
+  el mismo $ad + bc = 936 + 1904$ de antes, con una multiplicación
+  menos. El resultado sale igual: $7\,006\,652$.
+\end{ejemplo}
+
+Se cambió una multiplicación por tres sumas y restas extra. Las sumas
+cuestan $\Tht{n}$ y las multiplicaciones mucho más, así que el cambio
+conviene.
+
+\begin{algorithm}[H]
+\caption{\textsc{Karatsuba}$(x, y)$}
+\begin{algorithmic}[1]
+\If{$x < 10$ \textbf{o} $y < 10$}
+  \State \Return $x \cdot y$ \Comment{un factor de un dígito: directo}
+\EndIf
+\State $n \gets$ número de dígitos del mayor de $x$ y $y$
+\State $m \gets \lfloor n / 2 \rfloor$
+\State $a \gets \lfloor x / 10^{m} \rfloor$, \quad $b \gets x \bmod 10^{m}$
+\State $c \gets \lfloor y / 10^{m} \rfloor$, \quad $d \gets y \bmod 10^{m}$
+\State $p_1 \gets \textsc{Karatsuba}(a, c)$
+\State $p_2 \gets \textsc{Karatsuba}(b, d)$
+\State $p_3 \gets \textsc{Karatsuba}(a + b,\ c + d)$
+\State \Return $p_1 \cdot 10^{2m} + (p_3 - p_1 - p_2) \cdot 10^{m} + p_2$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{La recursión completa de $1234 \times 5678$}
+
+Cada producto se parte en tres hasta que uno de los factores tiene un
+solo dígito. En verde, los casos base:
+
+\begin{center}
+\begin{tikzpicture}[
+  level distance=1.25cm,
+  level 1/.style={sibling distance=5cm},
+  level 2/.style={sibling distance=1.6cm},
+  level 3/.style={sibling distance=1.2cm},
+  nodo/.style={draw, rounded corners=2pt, fill=fondoIdea,
+               font=\scriptsize, inner sep=2.5pt},
+  base/.style={nodo, fill=fondoResultado},
+  edge from parent/.style={draw, gray}]
+  \node[nodo] {$1234 \times 5678$}
+    child {node[nodo] {$12 \times 56$}
+      child {node[base] {$1 \times 5$}}
+      child {node[base] {$2 \times 6$}}
+      child {node[base] {$3 \times 11$}}}
+    child {node[nodo] {$34 \times 78$}
+      child {node[base] {$3 \times 7$}}
+      child {node[base] {$4 \times 8$}}
+      child {node[base] {$7 \times 15$}}}
+    child {node[nodo] {$46 \times 134$}
+      child {node[base] {$4 \times 13$}}
+      child {node[base] {$6 \times 4$}}
+      child {node[nodo] {$10 \times 17$}
+        child {node[base] {$1 \times 1$}}
+        child {node[base] {$0 \times 7$}}
+        child {node[base] {$1 \times 8$}}}};
+\end{tikzpicture}
+\end{center}
+
+En cada nodo, los tres hijos son $ac$, $bd$ y $(a+b)(c+d)$, en ese
+orden. Los nodos que no son base se arman así, de abajo hacia arriba:
+
+\begin{center}
+\small
+\begin{tabular}{lccccccl}
+  \toprule
+  \textbf{Producto} & $m$ & $a, b \,\mid\, c, d$ & $p_1$ & $p_2$
+    & $p_3$ & $p_3 - p_1 - p_2$ & \textbf{Resultado} \\
+  \midrule
+  $10 \cdot 17$   & $1$ & $1, 0 \mid 1, 7$   & $1$  & $0$  & $8$
+    & $7$  & $100 + 70 + 0 = 170$ \\
+  $12 \cdot 56$   & $1$ & $1, 2 \mid 5, 6$   & $5$  & $12$ & $33$
+    & $16$ & $500 + 160 + 12 = 672$ \\
+  $34 \cdot 78$   & $1$ & $3, 4 \mid 7, 8$   & $21$ & $32$ & $105$
+    & $52$ & $2100 + 520 + 32 = 2652$ \\
+  $46 \cdot 134$  & $1$ & $4, 6 \mid 13, 4$  & $52$ & $24$ & $170$
+    & $94$ & $5200 + 940 + 24 = 6164$ \\
+  $1234 \cdot 5678$ & $2$ & $12, 34 \mid 56, 78$ & $672$ & $2652$
+    & $6164$ & $2840$ & $7\,006\,652$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+  $a + b$ puede tener un dígito más que $a$ y $b$: $56 + 78 = 134$. Por
+  eso aparece $46 \cdot 134$, con factores de tamaños distintos, y por
+  eso la rama de la derecha baja un nivel más. No cambia el análisis:
+  el tercer subproblema es de tamaño $n/2 + 1$ en lugar de $n/2$, y ese
+  $+1$ no altera el orden de crecimiento.
+\end{ojo}
+
+\begin{observacion}
+  Con números de $4$ dígitos Karatsuba no es más rápido que la
+  escuela: hace casi las mismas multiplicaciones de un dígito y además
+  sumas, restas y llamadas recursivas. La ventaja aparece con números
+  grandes, que es lo que dice el análisis.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Análisis}
+
+Tres subproblemas de la mitad del tamaño, más sumas, restas y
+corrimientos lineales:
+\[
+  T(n) = 3\, T(n/2) + \Tht{n} .
+\]
+Con $a = 3$, $b = 2$ y $f(n) = n$:
+\[
+  n^{\log_b a} = n^{\log_2 3} = n^{1.585} .
+\]
+$f(n) = n = \Ord{n^{1.585 - \varepsilon}}$ con
+$\varepsilon \approx 0.585$, así que es el caso 1 del método maestro:
+\[
+  T(n) = \Tht{n^{\log_2 3}} \approx \Tht{n^{1.585}} .
+\]
+
+\subsubsection*{Con el árbol de recursión}
+
+\begin{center}
+\begin{tabular}{cccc}
+  \toprule
+  \textbf{Nivel} & \textbf{Subproblemas} & \textbf{Tamaño de cada uno}
+    & \textbf{Trabajo del nivel} \\
+  \midrule
+  $0$ & $1$ & $n$ & $c\,n$ \\
+  $1$ & $3$ & $n/2$ & $3 \cdot c\,n/2 = \tfrac{3}{2}\, c\,n$ \\
+  $2$ & $9$ & $n/4$ & $9 \cdot c\,n/4 = \left(\tfrac{3}{2}\right)^2 c\,n$ \\
+  $i$ & $3^{i}$ & $n/2^{i}$ & $\left(\tfrac{3}{2}\right)^{i} c\,n$ \\
+  $\log_2 n$ & $3^{\log_2 n} = n^{\log_2 3}$ & $1$ & $n^{\log_2 3}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+El trabajo crece $3/2$ veces en cada nivel, así que manda el último: las
+hojas. El árbol tiene $\log_2 n$ niveles y en el último hay
+$3^{\log_2 n} = n^{\log_2 3}$ casos base. Con cuatro subproblemas
+serían $4^{\log_2 n} = n^2$ hojas; pasar de $4$ a $3$ es lo que cambia
+el exponente.
+
+\subsubsection*{Cuánto se gana}
+
+\begin{center}
+\begin{tabular}{rrrr}
+  \toprule
+  $n$ \textbf{(dígitos)} & $n^2$ & $n^{1.585}$
+    & \textbf{Karatsuba es} \\
+  \midrule
+  $10$        & $100$         & $38$                   & $2.6$ veces menos \\
+  $100$       & $10\,000$     & $1\,479$               & $6.8$ veces menos \\
+  $1\,000$    & $1\,000\,000$ & $56\,871$              & $17.6$ veces menos \\
+  $1\,000\,000$ & $10^{12}$   & $3.2 \times 10^{9}$    & $309$ veces menos \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+La ventaja crece con $n$ sin límite, porque la razón entre los dos es
+$n^{2 - 1.585} = n^{0.415}$.
+
+\begin{ojo}
+  La tabla ignora las constantes. Karatsuba hace más sumas, restas y
+  llamadas por nivel, y con números chicos eso pesa más que la
+  multiplicación que se ahorra. Por eso las implementaciones reales,
+  como las de Python o de la biblioteca GMP, usan la escuela para
+  números chicos y solo cambian a Karatsuba a partir de cierto tamaño,
+  del orden de cientos de dígitos. Además trabajan en binario: se parte
+  por bits, y multiplicar por $2^{m}$ es un corrimiento de bits.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{La lección general}
+
+\begin{idea}
+  En $T(n) = a\, T(n/b) + f(n)$, cuando dividir y combinar son baratos,
+  manda $n^{\log_b a}$, y lo que más importa es $a$: \emph{cuántos}
+  subproblemas se generan. Gastar un poco más en combinar para generar
+  un subproblema menos es el truco que mejora el exponente.
+\end{idea}
+
+El mismo truco aparece en otros problemas:
+
+\begin{itemize}[itemsep=0.3em]
+  \item \textbf{Strassen} (1969), para multiplicar matrices de
+        $n \times n$: partidas en bloques de la mitad, el método directo
+        hace $8$ productos de bloques, $\Tht{n^{3}}$. Strassen lo hace
+        con $7$ y queda $\Tht{n^{\log_2 7}} \approx \Tht{n^{2.807}}$.
+  \item \textbf{Toom-Cook}: parte cada número en tres partes y se las
+        arregla con $5$ multiplicaciones en lugar de $9$:
+        $\Tht{n^{\log_3 5}} \approx \Tht{n^{1.465}}$.
+  \item Para números enormes se usan algoritmos basados en la
+        transformada rápida de Fourier, como el de Schönhage y
+        Strassen, $\Ord{n \log n \log \log n}$. En 2019 Harvey y van
+        der Hoeven llegaron a $\Ord{n \log n}$, que se cree que es lo
+        mejor posible.
+\end{itemize}
 
 \end{document}
 
