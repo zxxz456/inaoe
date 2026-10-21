@@ -1,0 +1,11 @@
+- reconocimiento del habla
+
+produccion -> señal -> representacion -> unidades -> modelos -> aplicaciones {explicar}
+
+en una grabacion hay 
+    contenido linguistico
+    informacion paralinguistica
+    informcaion del hablante 
+    informcaion del canal
+
+el habla no solo es texto con sonido

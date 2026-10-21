@@ -1,0 +1,40 @@
+-- morfologia y lexicografia
+
+los linguistas lo han hecho al revez
+
+palabra -> morfemas -> lema+tags -> lexico/red -> aplicaciones 
+
+la morfologia es la forma de la palabra {explicar}
+
+para que sirve {explicar}
+
+que es una palabra? 
+
+que es tokenizacio? toekn?
+
+tres formas de formar palabras 
+    inflexion
+    derivacion
+    composicion 
+
+descomponer una palabra capa por capa
+
+
+como parten las palabras los llms? {explicar}
+
+-- lexicografia
+
+-clases abiertas
+- clases cerradas 
+
+el vocabulario de una persona es su idiolecto y el de un grupo es un dialecto
+
+quien decide el significad de una palabra?
+
+-- redes semanticas 
+{explicar}
+
+wordnet
+babelnet
+
+- ley de zipf 
