@@ -1,0 +1,52 @@
+preguntas para determinar la escala de medicion
+
+los valores representan categorias o nombres sin un orden natural?
+    si la respuesta es si, la escala es nominal
+
+los valores pueden ordenarse pero las diferencias entre ellos no tienen una magnitud interpretable?
+    si la respuesta es si, la escala es ordinal
+
+las diferencias entre valores son interpretables y comparables pero el cero no representa ausencia de la cantidad medida?
+    si... es de intervalos
+
+existe un cero absoluto que representa la ausencia de la cantidad medida y permite comparar por porporcioens?
+    si... es escala de razon 
+
+
+las variables nomnales y ordinales son categoricas
+
+si deseas utilizar una clasificacion binara puedes distinguir entre variables categoricas y variables numericas discretas o continuas 
+
+
+
+-- continuacion de distribuciones conjuntas
+
+son dos variables a la vez, por ejemplo la matriz de confucion
+
+
+-pregunta marginal y condicional
+{explicar amabs}
+
+- independencia de variables
+{explicar}
+
+
+-- errores freuentes al ablar de distribuciones
+
+    - confunia distribucion empirica con distribucional
+    - decir que iuna densidad s una problalilidad puntual
+    - comparar histogramas con diferentes bins sin advertirlo
+    - usar una media sin presentar dispersion y revisar forma
+    - interpretar asociaicon en una tabla conjunta como causalidad
+    - olvidar que las categorias nominales no tiene orden natural
+
+
+lista de verificacion ara analizar una variable
+1 que experimento o proceso genero los datos?
+2 cual es la variable aleatoria de la medicion
+3 la variable es categorica, discreta o continua
+4 la distribucion observada paerce representaiva?
+5 conviene usar tabla, barras, histograma?
+6 hay valores extremos asimetria, varios grups?
+7 se comparan variables de forma marginal o condicinal?
+8 la conclusion distingue descripcin e inferencia?

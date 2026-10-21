@@ -1,0 +1,69 @@
+-- estadistica descriptiva
+
+- com describir
+
+dato (observaciones) s -> centro (medidas de tendencia centrsl), dispercion (vaienza, iqr), forma (asimetria, curtosis) -> esitmacion (muetra poblacion)
+
+
+- estadistica- estimadores y esperanza
+
+etaditica : es un numero que vamos a caluclar a partir de una muestra y vamos a obtenrer un numero
+estimedor: estadistica usada para aproximar un parametro poblacional
+
+primedio en estadistica, para la muestra es la x con la barrita y para el estimador, la poblacion es mu 
+
+esperanza: si repites un experiment muchas veces, la esperanza es el valor promedio al que tienden los resultados 
+{propiedades de la esperanza}
+
+-media muestral {explicar}
+- mediana
+- moda
+
+-- dispercion y varianza 
+{explicar que es la dispoercion}
+{explicar que es varianza }
+
+varianza es el pri¿omedio de las desviaciones al cuadrado
+{avrianza muestral}. cantidad de observaciones menos 1 
+
+- la stdev es la raiz de la varianza que se hacer para regrezar a lamagnitud original
+{explicar mejor}
+
+-correccion de bessel {explicar}
+
+propiedades de la varianza {ponerlas}
+
+-- momentos
+{que son los momentos}
+
+- momento general
+
+- primer momento, describen el centro
+- segundo momento, dispersion
+- tercer momento, asimetria
+- cuarto momento, colas y extremos, curtosis
+
+- tres familias de momentos
+-- crudo
+-- central
+-- central estandar
+
+
+para simetria y curtosis si se estandariza
+
+-asimetria {explicar}: que tan simetrica
+-kurtosis {explicar } que tan picuda o chata es
+
+-- sesgo estaditico de un estimador, que tan lejos estoy de la realidad, es del estimador no de muestreo o interpretacion
+    -sesgo del estimador
+    -sesgo de la muestra no representa la poblocian
+    -confusion
+    - sesgo de interpretacion
+
+{simbolos entre estimadores muesrales y poblacionales }
+
+
+nominal-moda-freq
+ordinal-mediana,percentiles-rangos,iqr
+cuantitativa simetrica-meida-stdev
+cuantiva asimetre- mediana
