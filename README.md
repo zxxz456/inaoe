@@ -21,13 +21,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.19.0
+* Version: 1.20.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       21/10/2026      Agregue exposicion/ y proyecto/ de AAL
 zxxz6       21/10/2026      matcomp/proyecto2 cambia a datos de Uber
 zxxz6       21/10/2026      Agregue ada/proyecto, que vive en su repo
 zxxz6       21/10/2026      Agregue matcomp/proyecto2, que vive en su repo
@@ -113,6 +114,10 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     - [modelos_n_gramas.tex](fundamentos_aal/material_apoyo/modelos_n_gramas.tex) -
       modelos de lenguaje de n-gramas: regla de la cadena, supuesto de
       Markov, estimación por máxima verosimilitud, suavizado y perplejidad.
+  - [exposicion/](fundamentos_aal/exposicion/) - Exposición de un paper.
+    Todavía falta elegirlo.
+  - [proyecto/](fundamentos_aal/proyecto/) - Proyecto de la materia.
+    Todavía falta elegir el tema.
 - [machine_learning/](machine_learning/) - Aprendizaje Computacional.
   - [apuntes/](machine_learning/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
