@@ -11,12 +11,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.10.0
+%   * Version: 2.12.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       21/10/2026      Clase 21 Oct, centro, dispersion y forma
+%  zxxz6       21/10/2026      Clase 19 Oct, distribuciones conjuntas
 %  zxxz6       18/10/2026      Clase 14 Oct, variables aleatorias
 %  zxxz6       12/10/2026      Clase 12 Oct, datos, variables y escalas
 %  zxxz6       09/10/2026      Clase 7 Oct, introduccion a la estadistica
@@ -5105,6 +5107,1004 @@ con una resta:
     de la clase del $12$, donde la frecuencia acumulada y la mediana
     empezaban en la escala ordinal.
 \end{ojo}
+
+
+\newpage
+
+% =====================================================================
+%  Clase 19 Oct - Distribuciones conjuntas y como analizar una variable
+% =====================================================================
+
+\clase{Distribuciones conjuntas}{19 de octubre de 2026}
+
+\begin{quick_sum}
+    Se cerró el tema de escalas con cuatro preguntas que deciden la
+    escala de una variable. Después, distribuciones de dos variables a
+    la vez: la tabla conjunta, las preguntas marginales, que miran una
+    variable sola, y las condicionales, que fijan el valor de la otra.
+    Dos variables son independientes cuando conocer una no cambia la
+    distribución de la otra. Se cerró con los errores más frecuentes al
+    hablar de distribuciones y una lista de verificación de ocho
+    preguntas para analizar cualquier variable.
+\end{quick_sum}
+
+\subsection*{Cuatro preguntas para decidir la escala}
+
+La clase del $12$ definió las cuatro escalas. Para clasificar una
+variable concreta basta contestar estas preguntas en orden; la primera
+con respuesta afirmativa da la escala.
+
+\begin{center}
+\begin{tikzpicture}[
+    preg/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 text width=6.6cm, align=left, font=\small,
+                 inner sep=4pt},
+    res/.style={draw, rounded corners=2pt, fill=fondoResultado,
+                font=\small\bfseries, minimum width=2.2cm,
+                minimum height=0.7cm},
+    sino/.style={font=\scriptsize},
+    >=stealth]
+    \node[preg] (q1) at (0, 0)
+        {¿Los valores son categorías o nombres sin un orden natural?};
+    \node[preg] (q2) at (0, -2.0)
+        {¿Se pueden ordenar, pero las diferencias entre ellos no
+         tienen una magnitud interpretable?};
+    \node[preg] (q3) at (0, -4.0)
+        {¿Las diferencias son interpretables y comparables, pero el
+         cero no representa ausencia de lo que se mide?};
+    \node[preg] (q4) at (0, -6.0)
+        {¿Hay un cero absoluto, que es ausencia de lo que se mide y
+         permite comparar proporciones?};
+    \node[res] (r1) at (5.6, 0)    {Nominal};
+    \node[res] (r2) at (5.6, -2.0) {Ordinal};
+    \node[res] (r3) at (5.6, -4.0) {Intervalo};
+    \node[res] (r4) at (5.6, -6.0) {Razón};
+    \foreach \q/\r in {q1/r1, q2/r2, q3/r3, q4/r4}
+        \draw[->] (\q) -- node[above, sino] {sí} (\r);
+    \foreach \a/\b in {q1/q2, q2/q3, q3/q4}
+        \draw[->] (\a) -- node[right, sino] {no} (\b);
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Cuatro variables de una encuesta]
+    Pasando cada una por las preguntas:
+    \begin{itemize}[itemsep=0.2em]
+        \item \textbf{Carrera}: computación, óptica, electrónica. Sí a
+              la primera pregunta: nominal.
+        \item \textbf{Nivel de satisfacción}, de ``nada'' a ``mucho''.
+              No a la primera, sí a la segunda: hay orden, pero no se
+              sabe si de ``poco'' a ``regular'' hay lo mismo que de
+              ``regular'' a ``mucho''. Ordinal.
+        \item \textbf{Año de nacimiento}. Entre $1998$ y $2000$ hay dos
+              años, igual que entre $2000$ y $2002$; pero el año $0$ no
+              es ``ausencia de tiempo''. Intervalo.
+        \item \textbf{Horas de estudio a la semana}. Cero horas es no
+              estudiar, y $10$ horas es el doble que $5$. Razón.
+    \end{itemize}
+\end{ejemplo}
+
+Las nominales y las ordinales son categóricas. Cuando no hace falta
+tanto detalle, basta una clasificación más gruesa:
+\textbf{categórica} contra \textbf{numérica}, y si es numérica,
+\textbf{discreta} o \textbf{continua}. Para escoger gráficas y
+resúmenes básicos esa división suele alcanzar.
+
+% =====================================================================
+
+\subsection*{Distribuciones conjuntas}
+
+Hasta ahora cada distribución era de una sola variable. Muchas
+preguntas involucran dos a la vez: ¿el filtro marca como spam a los
+correos que de verdad son spam?, ¿los programas en Python tardan más
+que los de C++?
+
+\begin{definicion}[Distribución conjunta]
+    Para dos variables $X$ y $Y$, la distribución conjunta da la
+    probabilidad de cada combinación de valores:
+    \[
+        p(x, y) = P(X = x \ \text{y} \ Y = y) .
+    \]
+    Con variables categóricas o discretas se escribe como una tabla:
+    un renglón por cada valor de $X$, una columna por cada valor de
+    $Y$, y en cada celda la probabilidad o el conteo de esa
+    combinación.
+\end{definicion}
+
+Cumple lo mismo que una de una variable: cada celda está entre $0$ y
+$1$, y todas juntas suman $1$.
+
+\begin{ejemplo}[La matriz de confusión es una distribución conjunta]
+    El filtro de spam de Aprendizaje Computacional se probó con $1000$
+    correos. Hay dos variables por correo: la clase real $R$ y la
+    predicha $\hat{R}$. Dividiendo los conteos entre $1000$:
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        & $\hat{R} = $ spam & $\hat{R} = $ legítimo & \textbf{Total} \\
+        \midrule
+        $R = $ spam     & $0.08$ & $0.02$ & $\mathbf{0.10}$ \\
+        $R = $ legítimo & $0.03$ & $0.87$ & $\mathbf{0.90}$ \\
+        \midrule
+        \textbf{Total}  & $\mathbf{0.11}$ & $\mathbf{0.89}$
+                        & $1.00$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La celda $0.08$ es $P(R = \text{spam},\ \hat{R} = \text{spam})$:
+    el $8\%$ de los correos era spam y el filtro lo detectó.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Preguntas marginales y condicionales}
+
+Con una tabla conjunta se pueden hacer dos tipos de pregunta.
+
+\subsubsection*{Marginal: una variable sola}
+
+Una pregunta marginal se fija en una sola variable e ignora la otra:
+¿qué fracción de los correos es spam?, sin importar lo que dijo el
+filtro. Se contesta sumando la tabla a lo largo de la variable que se
+ignora:
+\[
+    P(X = x) = \sum_{y} p(x, y) .
+\]
+Las sumas quedan en los márgenes de la tabla, y de ahí el nombre. En
+el ejemplo, $P(R = \text{spam}) = 0.08 + 0.02 = 0.10$ es la suma del
+primer renglón, y $P(\hat{R} = \text{spam}) = 0.08 + 0.03 = 0.11$ la
+de la primera columna.
+
+\subsubsection*{Condicional: fijando la otra variable}
+
+Una pregunta condicional fija el valor de una variable y pregunta por
+la otra solo dentro de ese grupo: de los correos que \emph{son} spam,
+¿qué fracción detectó el filtro? Se toma solo el renglón o la columna
+que corresponde y se reescala para que sume $1$:
+\[
+    P(Y = y \mid X = x) = \frac{p(x, y)}{P(X = x)} .
+\]
+
+\begin{ejemplo}[Dos condicionales del filtro]
+    \textbf{De los correos que son spam}, se toma el primer renglón y
+    se divide entre su total:
+    \[
+        P(\hat{R} = \text{spam} \mid R = \text{spam})
+        = \frac{0.08}{0.10} = 0.80 .
+    \]
+    Es el \textbf{recall} de Aprendizaje Computacional.
+
+    \textbf{De los correos que el filtro marcó como spam}, se toma la
+    primera columna:
+    \[
+        P(R = \text{spam} \mid \hat{R} = \text{spam})
+        = \frac{0.08}{0.11} = 0.727 .
+    \]
+    Es la \textbf{precisión}. Las dos métricas eran probabilidades
+    condicionales sobre la misma tabla; solo cambia cuál variable se
+    fija.
+\end{ejemplo}
+
+\begin{ojo}
+    El orden importa: $P(A \mid B)$ y $P(B \mid A)$ son números
+    distintos, aquí $0.80$ y $0.727$. Confundirlas es de los errores
+    más caros. Una prueba médica puede detectar al $99\%$ de los
+    enfermos, $P(\text{positivo} \mid \text{enfermo}) = 0.99$, y aun así
+    la mayoría de los positivos ser sanos, si la enfermedad es rara:
+    lo que le importa al paciente es
+    $P(\text{enfermo} \mid \text{positivo})$, que puede ser muy baja.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Independencia}
+
+\begin{definicion}[Variables independientes]
+    $X$ y $Y$ son independientes si conocer el valor de una no cambia
+    la distribución de la otra:
+    \[
+        P(Y = y \mid X = x) = P(Y = y)
+        \quad \text{para todos los } x, y .
+    \]
+    Equivalentemente, la conjunta es el producto de las marginales:
+    $p(x, y) = P(X = x)\, P(Y = y)$.
+\end{definicion}
+
+En una tabla se reconoce porque todos los renglones, una vez
+reescalados, son iguales entre sí e iguales a la marginal.
+
+\begin{ejemplo}[Lenguaje y turno: independientes]
+    $100$ ejecuciones, según el lenguaje y si corrieron en la mañana o
+    en la tarde:
+    \begin{center}
+    \begin{tabular}{lccc}
+        \toprule
+        & \textbf{Mañana} & \textbf{Tarde} & \textbf{Total} \\
+        \midrule
+        Python & $30$ & $20$ & $50$ \\
+        C++    & $18$ & $12$ & $30$ \\
+        Java   & $12$ & $8$  & $20$ \\
+        \midrule
+        Total  & $60$ & $40$ & $100$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La fracción que corrió en la mañana es la misma en cada lenguaje,
+    $30/50 = 18/30 = 12/20 = 0.6$, e igual a la marginal, $60/100$.
+    Saber el lenguaje no dice nada del turno. Y la conjunta es el
+    producto: $P(\text{Python},\ \text{mañana}) = 0.30 = 0.5 \cdot 0.6$.
+\end{ejemplo}
+
+\begin{ejemplo}[El filtro: muy dependientes]
+    Si la clase real y la predicha fueran independientes, la celda
+    spam-spam valdría $P(R = \text{spam})\, P(\hat{R} = \text{spam}) =
+    0.10 \cdot 0.11 = 0.011$. Vale $0.08$, siete veces más. Es lo que
+    se espera de un buen clasificador: su predicción depende mucho de
+    la clase real. Un filtro independiente de la clase real sería uno
+    que adivina.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Errores frecuentes al hablar de distribuciones}
+
+\begin{itemize}[itemsep=0.5em]
+    \item \textbf{Confundir la distribución empírica con la
+          poblacional.} La empírica es la de la muestra y cambia con
+          cada muestra. En la clase del $14$, $20$ tiradas de dos
+          monedas dieron $0.30$ de cero águilas, y el modelo dice
+          $0.25$. Ni una muestra es la población, ni la población se
+          parece siempre a la muestra.
+    \item \textbf{Leer una densidad como probabilidad puntual.}
+          $f(10) = 0.0368$ no es la probabilidad de tardar $10$ ms; esa
+          es cero. La densidad solo da probabilidad al integrarla sobre
+          un intervalo, y puede valer más de $1$.
+    \item \textbf{Comparar histogramas con distintos intervalos sin
+          advertirlo.} Con los $100$ tiempos de la clase del $14$, la
+          barra de $[0, 5)$ tiene $41$ observaciones; con intervalos de
+          $10$ ms la de $[0, 10)$ tiene $63$. Son los mismos datos,
+          pero las alturas no se pueden comparar. Hay que usar los
+          mismos intervalos, o graficar densidad en lugar de conteos.
+    \item \textbf{Reportar una media sin dispersión ni forma.} Los
+          conjuntos $\{14, 15, 15, 16\}$ y $\{5, 10, 20, 25\}$ tienen
+          la misma media, $15$, y no se parecen en nada. Una media sola
+          tampoco avisa si hay un valor extremo jalándola.
+    \item \textbf{Leer asociación como causalidad.} En una tabla
+          conjunta de meses del año, la venta de helados y los
+          ahogamientos suben juntos. Los helados no ahogan a nadie: los
+          dos dependen del calor. Una tercera variable que mueve a las
+          dos se llama \textbf{variable de confusión}.
+    \item \textbf{Olvidar que las categorías nominales no tienen
+          orden.} Codificar los lenguajes como $1$, $2$ y $3$ y sacar
+          su promedio, o su mediana, produce un número sin significado.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Lista de verificación para analizar una variable}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item ¿Qué experimento o proceso generó los datos?
+    \item ¿Cuál es la variable aleatoria que se midió?
+    \item ¿La variable es categórica, discreta o continua?
+    \item ¿La distribución observada parece representativa de la
+          población?
+    \item ¿Conviene una tabla, una gráfica de barras o un histograma?
+    \item ¿Hay valores extremos, asimetría o varios grupos mezclados?
+    \item ¿Las variables se comparan de forma marginal o condicional?
+    \item ¿La conclusión distingue lo que se describió de lo que se
+          está infiriendo?
+\end{enumerate}
+
+\begin{ejemplo}[Los tiempos de respuesta de la clase del $14$]
+    Las ocho preguntas aplicadas a esos datos:
+    \begin{center}
+    \small
+    \begin{tabular}{c>{\raggedright\arraybackslash}p{12.2cm}}
+        \toprule
+        \textbf{\#} & \textbf{Respuesta} \\
+        \midrule
+        $1$ & Se mandaron peticiones al servidor el lunes en la mañana
+              y se midió cuánto tardó cada una. \\
+        $2$ & $T$, el tiempo de respuesta en milisegundos. \\
+        $3$ & Continua, de razón. \\
+        $4$ & Probablemente no: el lunes en la mañana hay poca carga, y
+              en horas pico los tiempos serían otros. \\
+        $5$ & Histograma, porque es continua. Para una categórica
+              serían tabla o barras. \\
+        $6$ & Sí: cola larga a la derecha, con $5$ de $100$ arriba de
+              $30$ ms. \\
+        $7$ & Marginal si se miran todos los tiempos juntos; condicional
+              si se separan por hora o por tipo de petición. \\
+        $8$ & ``En la muestra, el $5\%$ tardó más de $30$ ms'' es
+              descripción. ``El $5\%$ de las peticiones tarda más de
+              $30$ ms'' es inferencia, y por el punto $4$ no está
+              justificada. \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{ejemplo}
+
+
+\newpage
+
+% =====================================================================
+%  Clase 21 Oct - Centro, dispersion, forma y estimadores
+% =====================================================================
+
+\clase{Centro, dispersión y forma}{21 de octubre de 2026}
+
+\begin{quick_sum}
+    Cómo describir un conjunto de datos con números. Primero se separó
+    lo que se calcula con la muestra, una estadística, de lo que se
+    quiere conocer de la población, un parámetro, y se definió la
+    esperanza. Luego los tres aspectos de una distribución: el centro
+    (media, mediana, moda), la dispersión (varianza, desviación
+    estándar, rango intercuartílico, y por qué la varianza muestral
+    divide entre $n - 1$) y la forma (asimetría y curtosis). Las cuatro
+    se unifican como momentos. Se cerró con el sesgo de un estimador,
+    distinto de los otros sesgos, y con qué resumen usar según el tipo
+    de variable.
+\end{quick_sum}
+
+\subsection*{Cómo describir un conjunto de datos}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.5cm, minimum height=0.8cm,
+                 font=\small\bfseries},
+    nota/.style={font=\scriptsize, align=center, text width=3.0cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \node[paso] (d) at (0, 0)    {Datos};
+    \node[paso] (c) at (3.3, 0)  {Centro};
+    \node[paso] (s) at (6.6, 0)  {Dispersión};
+    \node[paso] (f) at (9.9, 0)  {Forma};
+    \node[paso] (e) at (13.2, 0) {Estimación};
+    \foreach \a/\b in {d/c, c/s, s/f, f/e}
+        \draw[->] (\a) -- (\b);
+    \node[nota] at (0, -0.95)    {las observaciones};
+    \node[nota] at (3.3, -0.95)  {media, mediana, moda};
+    \node[nota] at (6.6, -0.95)  {varianza, desviación, IQR};
+    \node[nota] at (9.9, -0.95)  {asimetría, curtosis};
+    \node[nota] at (13.2, -0.95) {de la muestra a la población};
+\end{tikzpicture}
+\end{center}
+
+Cada etapa contesta una pregunta: dónde están los datos, qué tan
+regados, con qué forma, y qué dice todo eso de la población. Un solo
+número nunca basta; el error de reportar una media sin dispersión ni
+forma era uno de los de la clase del $19$.
+
+\begin{ejemplo}[Los datos de esta clase]
+    Diez tiempos de respuesta, en milisegundos, ya ordenados:
+    \[
+        12,\ 13,\ 13,\ 14,\ 15,\ 15,\ 15,\ 17,\ 20,\ 36 .
+    \]
+    Todas las medidas de la clase se calculan sobre ellos.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Estadística, estimador y parámetro}
+
+\begin{definicion}[Parámetro]
+    Un número que describe a la población: su media, su varianza, la
+    proporción de algo. Es fijo, pero casi nunca se conoce.
+\end{definicion}
+
+\begin{definicion}[Estadística]
+    Un número que se calcula a partir de una muestra. Cambia de una
+    muestra a otra.
+\end{definicion}
+
+\begin{definicion}[Estimador]
+    Una estadística que se usa para aproximar un parámetro de la
+    población. La media de la muestra, $\bar{x}$, es un estimador de
+    la media de la población, $\mu$.
+\end{definicion}
+
+Para no confundirlos, cada cosa tiene su símbolo. Las letras griegas
+son para la población y las latinas para la muestra; un gorro sobre un
+parámetro, como $\hat{p}$, quiere decir ``el estimador de ese
+parámetro''.
+
+\begin{center}
+\begin{tabular}{lcc}
+    \toprule
+    \textbf{Medida} & \textbf{Población (parámetro)}
+    & \textbf{Muestra (estadística)} \\
+    \midrule
+    Tamaño & $N$ & $n$ \\
+    Media & $\mu$ & $\bar{x}$ \\
+    Varianza & $\sigma^2$ & $s^2$ \\
+    Desviación estándar & $\sigma$ & $s$ \\
+    Proporción & $p$ & $\hat{p}$ \\
+    Mediana & $M$ & $\tilde{x}$ \\
+    Correlación & $\rho$ & $r$ \\
+    Parámetro en general & $\theta$ & $\hat{\theta}$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Esperanza}
+
+\begin{definicion}[Esperanza]
+    Si un experimento se repite muchas veces, la esperanza $E[X]$ es
+    el valor al que tiende el promedio de los resultados. Se calcula
+    pesando cada valor por su probabilidad:
+    \[
+        E[X] = \sum_{x} x\, p(x) \quad \text{(discreta)} ,
+        \qquad
+        E[X] = \int_{-\infty}^{\infty} x\, f(x)\, dx
+        \quad \text{(continua)} .
+    \]
+\end{definicion}
+
+Es la media de la población, $\mu = E[X]$: la media de la distribución,
+no la de una muestra.
+
+\begin{ejemplo}[Un dado]
+    \[
+        E[X] = 1 \cdot \tfrac{1}{6} + 2 \cdot \tfrac{1}{6} + \cdots
+             + 6 \cdot \tfrac{1}{6} = \frac{21}{6} = 3.5 .
+    \]
+    Ningún lanzamiento da $3.5$, pero el promedio de mil lanzamientos
+    queda muy cerca. En la clase del $14$, el tiempo exponencial con
+    $f(t) = 0.1\, e^{-0.1 t}$ tiene esperanza $1/0.1 = 10$ ms: la
+    ``media de $10$ ms'' con la que se construyó.
+\end{ejemplo}
+
+\subsubsection*{Propiedades de la esperanza}
+
+Con $a$, $b$ y $c$ constantes:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item $E[c] = c$: una constante no varía, su promedio es ella
+          misma.
+    \item $E[aX + b] = a\, E[X] + b$: cambiar de unidades o recorrer
+          los datos hace lo mismo con el promedio.
+    \item $E[X + Y] = E[X] + E[Y]$, \textbf{siempre}, sean o no
+          independientes.
+    \item $E[XY] = E[X]\, E[Y]$, pero \textbf{solo} si $X$ y $Y$ son
+          independientes.
+\end{enumerate}
+
+\begin{ejemplo}[Dos dados]
+    Si $X$ es un dado, $E[2X + 1] = 2 \cdot 3.5 + 1 = 8$. Si $X$ y $Y$
+    son dos dados, la suma tiene esperanza
+    $E[X + Y] = 3.5 + 3.5 = 7$, sin tener que listar las $36$
+    combinaciones. Como los dados son independientes,
+    $E[XY] = 3.5 \cdot 3.5 = 12.25$.
+\end{ejemplo}
+
+\begin{ojo}
+    La esperanza pasa por las funciones lineales, pero no por las
+    demás: en general $E[g(X)] \neq g(E[X])$. Para un dado,
+    \[
+        E[X^2] = \frac{1 + 4 + 9 + 16 + 25 + 36}{6} = \frac{91}{6}
+               = 15.17 ,
+        \qquad
+        (E[X])^2 = 3.5^2 = 12.25 .
+    \]
+    La diferencia, $2.92$, no es casualidad: es la varianza del dado,
+    como se ve más adelante.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Medidas de tendencia central}
+
+\subsubsection*{Media muestral}
+
+\[
+    \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i .
+\]
+Para los datos de la clase, la suma es $170$ y $\bar{x} = 17$ ms.
+
+La media es el \textbf{centro de gravedad} de los datos: si cada dato
+fuera una pesa sobre una regla, la regla se equilibraría en $\bar{x}$.
+Por eso las desviaciones respecto a la media siempre suman cero:
+\[
+    \sum_{i=1}^{n} (x_i - \bar{x}) = 0 .
+\]
+Con los datos: $-5 - 4 - 4 - 3 - 2 - 2 - 2 + 0 + 3 + 19 = 0$. Los
+nueve primeros quedan, en total, $19$ por debajo, y el $36$ solo los
+compensa estando $19$ por encima.
+
+Como estimador de $\mu$ tiene dos propiedades buenas:
+\[
+    E[\bar{x}] = \mu ,
+    \qquad
+    \operatorname{Var}(\bar{x}) = \frac{\sigma^2}{n} .
+\]
+En promedio le atina a la media de la población, y con más datos varía
+menos: es el error estándar de la clase del $7$.
+
+\begin{ojo}
+    La media es sensible a los valores extremos. El $36$ la jala a
+    $17$, por encima de siete de los diez datos. Si en lugar de $36$
+    hubiera sido $360$, la media saltaría a $49.4$ ms, un valor que no
+    se parece a ninguna petición.
+\end{ojo}
+
+\subsubsection*{Mediana}
+
+El valor que queda en medio al ordenar los datos. Con $n$ impar es el
+de en medio; con $n$ par, el promedio de los dos centrales. Aquí,
+$\tilde{x} = (15 + 15)/2 = 15$ ms. La mitad de los datos queda abajo y
+la mitad arriba.
+
+Es \textbf{robusta}: si el $36$ fuera $360$, la mediana seguiría en
+$15$, porque solo depende del orden. Necesita que los valores se
+puedan ordenar, así que existe desde la escala ordinal.
+
+\subsubsection*{Moda}
+
+El valor que más se repite: aquí $15$, que aparece tres veces. Puede
+haber varias, o ninguna si nada se repite. Es la única medida de
+centro para variables nominales, como el lenguaje más común.
+
+\begin{idea}
+    En una distribución con cola a la derecha las tres se ordenan
+    \[
+        \text{moda} \leq \text{mediana} \leq \text{media} ,
+    \]
+    porque la cola jala más a la media que a la mediana, y a la moda
+    no la mueve. En los datos: $15$, $15$ y $17$. Con cola a la
+    izquierda el orden se invierte, y en una simétrica coinciden.
+    Comparar la media con la mediana es la forma más rápida de
+    detectar asimetría.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Dispersión y varianza}
+
+\subsubsection*{Qué es la dispersión}
+
+Qué tan separados están los datos entre sí, o de su centro. Dos
+conjuntos pueden tener el mismo centro y nada más en común:
+\[
+    A = \{14, 15, 15, 16\} , \qquad B = \{5, 10, 20, 25\} .
+\]
+Los dos tienen media $15$. En $A$ todos están a lo más a $1$ de la
+media; en $B$, hasta a $10$. Un sistema con los tiempos de $A$ es
+predecible, uno con los de $B$ no, aunque los dos ``tarden $15$ en
+promedio''.
+
+\subsubsection*{Rango y rango intercuartílico}
+
+El \textbf{rango}, máximo menos mínimo, es la medida más simple, pero
+depende solo de los dos valores más extremos: aquí $36 - 12 = 24$ ms,
+casi todo por el $36$.
+
+El \textbf{rango intercuartílico} (IQR) mide el ancho del $50\%$ de en
+medio. El primer cuartil $Q_1$ deja abajo una cuarta parte de los
+datos y el tercero, $Q_3$, tres cuartas partes:
+\[
+    \text{IQR} = Q_3 - Q_1 .
+\]
+Con la mediana de cada mitad: la mitad baja es $12, 13, 13, 14, 15$,
+así que $Q_1 = 13$; la alta es $15, 15, 17, 20, 36$, así que
+$Q_3 = 17$. $\text{IQR} = 4$ ms, y el $36$ no lo afectó.
+
+\begin{observacion}
+    Hay varias convenciones para calcular cuartiles con pocos datos, y
+    distintos programas dan valores un poco distintos. Con muchos
+    datos la diferencia desaparece.
+\end{observacion}
+
+El \textbf{diagrama de caja} dibuja estas medidas. La caja va de $Q_1$
+a $Q_3$ con una raya en la mediana. Los bigotes llegan hasta el dato
+más lejano que no pase de $1.5\,\text{IQR}$ desde la caja, y lo que
+queda más allá se marca como valor atípico. Aquí el límite superior es
+$17 + 1.5 \cdot 4 = 23$, y el $36$ queda fuera:
+
+\begin{center}
+\begin{tikzpicture}[x=0.38cm, y=1cm, >=stealth]
+    \draw[->] (10, 0) -- (38, 0);
+    \foreach \t in {10, 15, 20, 25, 30, 35} {
+        \draw (\t, 0.08) -- (\t, -0.08);
+        \node[font=\scriptsize, below] at (\t, -0.08) {$\t$};
+    }
+    \node[font=\scriptsize, anchor=west] at (38.2, 0) {ms};
+    \draw[fill=fondoIdea] (13, 0.6) rectangle (17, 1.4);
+    \draw[thick] (15, 0.6) -- (15, 1.4);
+    \draw (12, 1) -- (13, 1);
+    \draw (17, 1) -- (20, 1);
+    \draw (12, 0.8) -- (12, 1.2);
+    \draw (20, 0.8) -- (20, 1.2);
+    \draw[dashed, gray] (23, 0.45) -- (23, 1.55);
+    \node[circle, draw, inner sep=1.5pt, fill=fondoOjo] at (36, 1) {};
+    \node[font=\scriptsize, above] at (13, 1.4) {$Q_1$};
+    \node[font=\scriptsize, above] at (15, 1.4) {$\tilde{x}$};
+    \node[font=\scriptsize, above] at (17, 1.4) {$Q_3$};
+    \node[font=\scriptsize, above, gray] at (23, 1.55) {límite $23$};
+    \node[font=\scriptsize, above] at (36, 1.15) {atípico};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Varianza}
+
+La varianza es el promedio de las desviaciones al cuadrado respecto a
+la media. Para la población,
+\[
+    \sigma^2 = E\big[(X - \mu)^2\big] .
+\]
+Se elevan al cuadrado por dos razones. Las desviaciones con signo
+suman cero, como se vio con la media, así que su promedio no dice
+nada. Y el cuadrado castiga más las desviaciones grandes: una
+desviación de $10$ pesa $100$, cien veces más que una de $1$.
+
+\subsubsection*{Varianza muestral}
+
+Con una muestra, la media de la población no se conoce y se mide
+contra $\bar{x}$. Se divide entre $n - 1$, no entre $n$:
+\[
+    s^2 = \frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})^2 .
+\]
+
+\begin{ejemplo}
+    Las desviaciones son $-5, -4, -4, -3, -2, -2, -2, 0, 3, 19$, y sus
+    cuadrados
+    \[
+        25 + 16 + 16 + 9 + 4 + 4 + 4 + 0 + 9 + 361 = 448 .
+    \]
+    \[
+        s^2 = \frac{448}{10 - 1} = 49.78 \ \text{ms}^2 .
+    \]
+    El $36$ solo aporta $361$ de los $448$.
+\end{ejemplo}
+
+\subsubsection*{Desviación estándar}
+
+La varianza queda en unidades al cuadrado: $49.78$ milisegundos
+cuadrados no significa nada intuitivo. La desviación estándar es su
+raíz, y regresa a las unidades de los datos:
+\[
+    s = \sqrt{s^2} = \sqrt{49.78} = 7.06 \ \text{ms} .
+\]
+Se lee como la distancia típica de un dato a la media. Con datos de
+forma parecida a una normal, cerca del $68\%$ cae a menos de una
+desviación de la media y cerca del $95\%$ a menos de dos. Aquí,
+$17 \pm 7.06 = [9.94,\ 24.06]$ contiene nueve de los diez datos.
+
+\subsubsection*{Corrección de Bessel}
+
+¿Por qué $n - 1$? Las desviaciones se miden contra $\bar{x}$, que se
+calculó con los mismos datos. $\bar{x}$ es justo el punto que hace más
+chica la suma de cuadrados: contra cualquier otro valor, incluida la
+media real $\mu$, la suma sale mayor. Así que $\sum (x_i - \bar{x})^2$
+se queda corta respecto a lo que daría $\mu$, y dividir entre $n$
+subestima la varianza. En promedio,
+\[
+    E\left[ \frac{1}{n} \sum (x_i - \bar{x})^2 \right]
+    = \frac{n - 1}{n}\, \sigma^2 ,
+\]
+y dividir entre $n - 1$ corrige exactamente ese factor. Otra forma de
+verlo: las $n$ desviaciones suman cero, así que conociendo $n - 1$ la
+última queda determinada. Solo $n - 1$ son libres; se dice que hay
+$n - 1$ \textbf{grados de libertad}.
+
+\begin{ejemplo}[Todas las muestras posibles]
+    Una población de tres valores, $\{1, 3, 5\}$, con $\mu = 3$ y
+    \[
+        \sigma^2 = \frac{(1-3)^2 + (3-3)^2 + (5-3)^2}{3}
+                 = \frac{8}{3} = 2.667 .
+    \]
+    Se toman muestras de tamaño $n = 2$, con reemplazo. Hay $9$
+    posibles, todas igual de probables:
+    \begin{center}
+    \small
+    \begin{tabular}{cccccc}
+        \toprule
+        \textbf{Muestra} & $\bar{x}$ & $\sum (x_i - \bar{x})^2$
+        & \textbf{Entre $n = 2$} & \textbf{Entre $n - 1 = 1$} \\
+        \midrule
+        $(1, 1)$ & $1$ & $0$ & $0$ & $0$ \\
+        $(1, 3)$ & $2$ & $2$ & $1$ & $2$ \\
+        $(1, 5)$ & $3$ & $8$ & $4$ & $8$ \\
+        $(3, 1)$ & $2$ & $2$ & $1$ & $2$ \\
+        $(3, 3)$ & $3$ & $0$ & $0$ & $0$ \\
+        $(3, 5)$ & $4$ & $2$ & $1$ & $2$ \\
+        $(5, 1)$ & $3$ & $8$ & $4$ & $8$ \\
+        $(5, 3)$ & $4$ & $2$ & $1$ & $2$ \\
+        $(5, 5)$ & $5$ & $0$ & $0$ & $0$ \\
+        \midrule
+        \textbf{Promedio} & & & $12/9 = 1.333$ & $24/9 = 2.667$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Dividiendo entre $n$, el promedio sobre todas las muestras es
+    $1.333$, la mitad de la varianza real: el factor $(n-1)/n = 1/2$.
+    Dividiendo entre $n - 1$ es $2.667$, exactamente $\sigma^2$.
+\end{ejemplo}
+
+\subsubsection*{Propiedades de la varianza}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item $\operatorname{Var}(X) \geq 0$, y vale $0$ solo si $X$ es
+          constante.
+    \item $\operatorname{Var}(X + b) = \operatorname{Var}(X)$: recorrer
+          todos los datos no cambia qué tan separados están.
+    \item $\operatorname{Var}(aX) = a^2 \operatorname{Var}(X)$, y por
+          eso la desviación estándar se multiplica por $\abs{a}$.
+    \item $\operatorname{Var}(X) = E[X^2] - (E[X])^2$: el promedio de
+          los cuadrados menos el cuadrado del promedio.
+    \item Si $X$ y $Y$ son independientes,
+          $\operatorname{Var}(X + Y) = \operatorname{Var}(X) +
+          \operatorname{Var}(Y)$.
+\end{enumerate}
+
+\begin{ejemplo}[Las propiedades con un dado]
+    Por la propiedad $4$, con las cuentas del ojo de la esperanza:
+    \[
+        \operatorname{Var}(X) = 15.17 - 12.25 = 2.92 .
+    \]
+    $\operatorname{Var}(2X + 1) = 4 \cdot 2.92 = 11.67$: el $+1$ no
+    cuenta y el $2$ entra al cuadrado. La suma de dos dados tiene
+    varianza $2.92 + 2.92 = 5.83$. Y pasar los tiempos de milisegundos
+    a segundos multiplica por $1/1000$: la desviación estándar se
+    divide entre $1000$ y la varianza entre un millón.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Momentos}
+
+La media y la varianza son dos casos de una misma familia. Un
+\textbf{momento} es la esperanza de una potencia de la variable, y
+cada potencia describe un aspecto distinto de la distribución. El
+momento de orden $k$ viene en tres versiones:
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Familia} & \textbf{Definición} & \textbf{Se mide desde} \\
+    \midrule
+    Crudo & $\mu'_k = E[X^k]$ & el cero \\
+    Central & $\mu_k = E\big[(X - \mu)^k\big]$ & la media \\
+    Central estandarizado
+        & $\tilde{\mu}_k = E\left[\left(\dfrac{X - \mu}{\sigma}\right)^k
+          \right] = \dfrac{\mu_k}{\sigma^k}$
+        & la media, en desviaciones estándar \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{clll}
+    \toprule
+    \textbf{Orden} & \textbf{Describe} & \textbf{El que se usa}
+    & \textbf{Es} \\
+    \midrule
+    $1$ & el centro & crudo & la media, $\mu$ \\
+    $2$ & la dispersión & central & la varianza, $\sigma^2$ \\
+    $3$ & la asimetría & central estandarizado & la asimetría \\
+    $4$ & las colas y los extremos & central estandarizado
+        & la curtosis \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Por qué se estandarizan el tercero y el cuarto.} El tercer
+momento central de unos tiempos está en $\text{ms}^3$ y el cuarto en
+$\text{ms}^4$: su valor cambia con las unidades y con la escala de los
+datos, y no se pueden comparar dos distribuciones. Dividiendo entre
+$\sigma^3$ y $\sigma^4$ quedan sin unidades, y solo hablan de la forma:
+la asimetría de unos tiempos es la misma medida en milisegundos o en
+segundos.
+
+Con una muestra se usan los momentos muestrales
+$m_k = \frac{1}{n} \sum (x_i - \bar{x})^k$. Con los datos de la clase,
+\[
+    m_2 = \frac{448}{10} = 44.8 , \qquad
+    m_3 = \frac{6582}{10} = 658.2 , \qquad
+    m_4 = \frac{131\,668}{10} = 13\,166.8 .
+\]
+
+\subsubsection*{Asimetría}
+
+Mide qué tan simétrica es la distribución, y hacia qué lado tiene la
+cola:
+\[
+    g_1 = \frac{m_3}{m_2^{3/2}} .
+\]
+El cubo conserva el signo de cada desviación, así que las de un lado
+compensan las del otro. Si la distribución es simétrica se cancelan y
+$g_1 = 0$. Si tiene una cola larga a la derecha, las desviaciones
+grandes y positivas dominan y $g_1 > 0$; con cola a la izquierda,
+$g_1 < 0$.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    name=neg, width=5.4cm, height=3.8cm, domain=0:8, samples=80,
+    xmin=0, xmax=8, ymin=0, ymax=0.45, axis lines=left,
+    xtick=\empty, ytick=\empty,
+    title={negativa, $g_1 < 0$}, title style={font=\small}]
+    \addplot[thick, acento] {(8-x)*exp(-(8-x))};
+\end{axis}
+\begin{axis}[
+    at={(neg.east)}, anchor=west, xshift=0.6cm, name=sim,
+    width=5.4cm, height=3.8cm, domain=0:8, samples=80,
+    xmin=0, xmax=8, ymin=0, ymax=0.45, axis lines=left,
+    xtick=\empty, ytick=\empty,
+    title={simétrica, $g_1 = 0$}, title style={font=\small}]
+    \addplot[thick, acento] {exp(-(x-4)^2/2)/sqrt(2*pi)};
+\end{axis}
+\begin{axis}[
+    at={(sim.east)}, anchor=west, xshift=0.6cm,
+    width=5.4cm, height=3.8cm, domain=0:8, samples=80,
+    xmin=0, xmax=8, ymin=0, ymax=0.45, axis lines=left,
+    xtick=\empty, ytick=\empty,
+    title={positiva, $g_1 > 0$}, title style={font=\small}]
+    \addplot[thick, acento] {x*exp(-x)};
+    \draw[dashed, gray] (axis cs:1, 0) -- (axis cs:1, 0.368);
+    \draw[dashed, orange!70!black] (axis cs:1.678, 0)
+        -- (axis cs:1.678, 0.31);
+    \draw[dashed, green!45!black] (axis cs:2, 0) -- (axis cs:2, 0.27);
+    \node[font=\tiny, anchor=west] at (axis cs:3.2, 0.36) {moda $1$};
+    \node[font=\tiny, anchor=west, orange!70!black]
+        at (axis cs:3.2, 0.29) {mediana $1.68$};
+    \node[font=\tiny, anchor=west, green!45!black]
+        at (axis cs:3.2, 0.22) {media $2$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[La asimetría de los datos]
+    \[
+        g_1 = \frac{658.2}{44.8^{3/2}} = \frac{658.2}{299.86} = 2.20 .
+    \]
+    Asimetría positiva fuerte. Viene casi toda del $36$: su desviación
+    al cubo es $19^3 = 6859$, y las otras nueve juntas suman $-277$.
+    Coincide con lo que ya decían la media y la mediana: $17 > 15$.
+\end{ejemplo}
+
+\subsubsection*{Curtosis}
+
+\[
+    \text{curtosis} = \frac{m_4}{m_2^2} .
+\]
+Tradicionalmente se describe como qué tan picuda o chata es la
+distribución. Lo que mide de verdad es el peso de las \textbf{colas}:
+la cuarta potencia hace que los valores lejanos dominen la suma, así
+que una curtosis alta indica que hay extremos más frecuentes o más
+lejanos de lo normal. La referencia es la normal, con curtosis $3$; por
+eso se reporta también el \textbf{exceso de curtosis}, curtosis menos
+$3$.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Leptocúrtica}, curtosis mayor que $3$: colas pesadas,
+          extremos frecuentes. La de Laplace tiene $6$.
+    \item \textbf{Mesocúrtica}, igual a $3$: la normal.
+    \item \textbf{Platicúrtica}, menor que $3$: colas ligeras, sin
+          extremos. La uniforme tiene $1.8$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=9cm, height=5cm, domain=-4:4, samples=161,
+    xmin=-4, xmax=4, ymin=0, ymax=0.75,
+    tick label style={font=\scriptsize},
+    legend style={font=\scriptsize, at={(1.03, 1)}, anchor=north west},
+    legend cell align=left]
+    \addplot[thick, orange!70!black]
+        {exp(-sqrt(2)*abs(x))/sqrt(2)};
+    \addplot[thick, acento] {exp(-x^2/2)/sqrt(2*pi)};
+    \addplot[thick, green!45!black, const plot]
+        coordinates {(-4, 0) (-1.732, 0.2887) (1.732, 0) (4, 0)};
+    \legend{Laplace (curtosis $6$), normal ($3$), uniforme ($1.8$)}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Las tres tienen media $0$ y varianza $1$. La de Laplace es más alta en
+el centro, pero sobre todo baja más despacio en las orillas: un valor a
+$4$ desviaciones es mucho más probable que en la normal. La uniforme
+no tiene colas: nada pasa de $\pm 1.73$.
+
+\begin{ejemplo}[La curtosis de los datos]
+    \[
+        \text{curtosis} = \frac{13\,166.8}{44.8^2}
+                        = \frac{13\,166.8}{2007.04} = 6.56 ,
+    \]
+    un exceso de $3.56$: cola pesada. De la suma de cuartas potencias,
+    $131\,668$, el $36$ solo aporta $19^4 = 130\,321$, el $99\%$. Es la
+    muestra más clara de que la curtosis habla de extremos, no de la
+    forma del centro.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Sesgo de un estimador}
+
+\begin{definicion}[Sesgo de un estimador]
+    La diferencia entre lo que el estimador da en promedio y el
+    parámetro que quiere estimar:
+    \[
+        \operatorname{sesgo}(\hat{\theta}) = E[\hat{\theta}] - \theta .
+    \]
+    Si es cero, el estimador es \textbf{insesgado}: en promedio, sobre
+    todas las muestras posibles, le atina.
+\end{definicion}
+
+Es qué tan lejos de la realidad queda la \emph{fórmula}, en promedio.
+\begin{itemize}[itemsep=0.3em]
+    \item $\bar{x}$ es insesgado para $\mu$.
+    \item La varianza dividida entre $n$ tiene sesgo
+          $\frac{n-1}{n}\sigma^2 - \sigma^2 = -\frac{\sigma^2}{n}$:
+          siempre se queda corta. Con $n - 1$ el sesgo es cero; es lo
+          que mostró la tabla de las nueve muestras.
+\end{itemize}
+
+\begin{ojo}
+    $s^2$ es insesgado para $\sigma^2$, pero $s$ no lo es para
+    $\sigma$: la raíz no es lineal, y la esperanza no pasa por ella,
+    igual que con $E[X^2]$. $s$ subestima un poco a $\sigma$. Con
+    muestras grandes el efecto es despreciable.
+\end{ojo}
+
+El sesgo del estimador es una propiedad de la fórmula, no de los datos.
+No hay que confundirlo con los otros sesgos de las clases anteriores:
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.6cm}%
+                 >{\raggedright\arraybackslash}p{6.2cm}}
+    \toprule
+    \textbf{Sesgo} & \textbf{Dónde está el problema} & \textbf{Ejemplo} \\
+    \midrule
+    Del estimador & en la fórmula & dividir la varianza entre $n$ \\
+    \addlinespace
+    De muestreo & la muestra no representa a la población
+                & la encuesta de \textit{Literary Digest}; medir el
+                  servidor solo el lunes en la mañana \\
+    \addlinespace
+    De confusión & una tercera variable mueve a las dos que se comparan
+                 & helados y ahogamientos, movidos por el calor \\
+    \addlinespace
+    De interpretación & en la conclusión, no en los datos
+                      & concluir sobre toda la población con una muestra
+                        sesgada, o leer causalidad en una asociación \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Un estimador insesgado no salva a una muestra sesgada: $\bar{x}$ de
+los tiempos del lunes en la mañana le atina en promedio a la media de
+los lunes en la mañana, no a la de todo el día.
+
+% =====================================================================
+
+\subsection*{Qué resumen usar según el tipo de variable}
+
+\begin{center}
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Variable} & \textbf{Centro} & \textbf{Dispersión} \\
+    \midrule
+    Nominal & moda & frecuencias \\
+    Ordinal & mediana, percentiles & rango, IQR \\
+    Cuantitativa simétrica & media & desviación estándar \\
+    Cuantitativa asimétrica & mediana & IQR \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Los datos de la clase son cuantitativos y muy asimétricos, con
+    $g_1 = 2.20$. Reportarlos como $17 \pm 7.06$ ms da una impresión
+    falsa: la media queda por encima de siete de los diez datos, y el
+    $7.06$ lo infla un solo valor; sin el $36$, la desviación estándar
+    sería $2.42$. Lo honesto es la mediana y el IQR, $15$ ms con un IQR
+    de $4$, y mencionar aparte el valor atípico de $36$.
+\end{idea}
 
 
 \end{document}
