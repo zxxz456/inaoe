@@ -21,13 +21,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.18.0
+* Version: 1.19.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       21/10/2026      matcomp/proyecto2 cambia a datos de Uber
 zxxz6       21/10/2026      Agregue ada/proyecto, que vive en su repo
 zxxz6       21/10/2026      Agregue matcomp/proyecto2, que vive en su repo
 zxxz6       26/09/2026      presentaciones/ con una carpeta por exposicion
@@ -132,10 +133,14 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     datos, con reporte en formato Springer. Es un repo aparte,
     [zxxz456/proyecto_mate](https://github.com/zxxz456/proyecto_mate);
     aquí solo vive su clon local, que está en el `.gitignore`.
-    - `data/` - El conjunto de datos de TikTok Shop, comprimido con xz.
-    - `src/` - Notebooks de análisis.
+    - `data/` - 150,000 reservas de viajes de Uber en la región de
+      Delhi (NCR) durante 2024, en CSV.
+    - `src/` - Notebooks de análisis. `notes.ipynb` carga el conjunto y
+      muestra su forma, las reservas por estado y sus atributos.
     - `doc/` - Reporte en LaTeX.
     - `presentacion/` - Presentación en Quarto.
+    - `requirements.txt` - El entorno de Python con las versiones
+      fijadas; el `.venv` no se versiona.
 - [seminario1/](seminario1/) - Seminario de Metodología.
   - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
     solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
