@@ -12,12 +12,14 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.15.0
+%   * Version: 2.17.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       21/10/2026      Clase 21 Oct, morfologia y lexicografia
+%  zxxz6       21/10/2026      Clase 19 Oct, reconocimiento del habla
 %  zxxz6       18/10/2026      Clase 14 Oct, el lenguaje para la computadora
 %  zxxz6       12/10/2026      Clase 12 Oct, el Transformer a detalle
 %  zxxz6       07/10/2026      Clase 7 Oct, de las RNN al Transformer
@@ -6740,6 +6742,795 @@ en las cadenas de la sección anterior, y una acción equivocada, como
 mandar un correo o borrar un archivo, puede no tener vuelta atrás.
 Por eso se les limitan las herramientas y se les pide confirmación
 antes de las acciones delicadas.
+
+
+\newpage
+% =====================================================================
+%  Clase 19 - Reconocimiento del habla
+% =====================================================================
+
+\clase{Reconocimiento del habla}{19 de octubre de 2026}
+
+\begin{quick_sum}
+    El primer modo de la clase del $14$, la señal, a detalle. El habla
+    recorre una cadena: se produce en el aparato fonador, viaja como
+    señal, se convierte en una representación que una máquina puede
+    procesar, se organiza en unidades, se interpreta con modelos y
+    termina en aplicaciones. Una grabación no solo trae palabras:
+    también trae cómo se dijeron, quién las dijo y por dónde pasó el
+    sonido. Por eso el habla no es texto con sonido.
+\end{quick_sum}
+
+\subsection*{La cadena del habla}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.15cm, minimum height=0.75cm,
+                 font=\footnotesize\bfseries},
+    nota/.style={font=\scriptsize, align=center, text width=2.4cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \foreach \x/\n/\t/\d in {
+        0/p/Producción/{pulmones, cuerdas vocales, boca},
+        2.6/s/Señal/{onda de presión, muestreada},
+        5.2/r/Representación/{espectrograma, coeficientes},
+        7.8/u/Unidades/{fonemas, sílabas, palabras},
+        10.4/m/Modelos/{acústico y de lenguaje},
+        13.0/a/Aplicaciones/{dictado, subtítulos, asistentes}} {
+        \node[paso] (\n) at (\x, 0) {\t};
+        \node[nota] at (\x, -0.95) {\d};
+    }
+    \foreach \a/\b in {p/s, s/r, r/u, u/m, m/a}
+        \draw[->] (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Producción}
+
+El aire sale de los pulmones y pasa por las cuerdas vocales. En los
+sonidos \textbf{sonoros}, como las vocales o la \textit{m}, las cuerdas
+vibran, y la frecuencia de esa vibración es el tono de la voz, la
+\textbf{frecuencia fundamental} $F_0$: unos $120$ Hz en una voz grave
+típica y unos $220$ Hz en una aguda. En los \textbf{sordos}, como la
+\textit{s} o la \textit{f}, no vibran y el sonido es un ruido de aire.
+
+Después, el tracto vocal (garganta, lengua, dientes, labios) funciona
+como un filtro: según su forma, refuerza unas frecuencias y apaga
+otras. Las frecuencias reforzadas se llaman \textbf{formantes}, y son
+las que distinguen una \textit{a} de una \textit{i}, aunque se digan
+con el mismo tono. A esta forma de verlo, una fuente que vibra y un
+filtro que la moldea, se le llama \textbf{modelo fuente-filtro}.
+
+\subsubsection*{Señal}
+
+El micrófono convierte las variaciones de presión del aire en un
+voltaje, y ese voltaje se \textbf{muestrea}: se mide miles de veces por
+segundo y cada medición se guarda como un número.
+
+\begin{ejemplo}[Cuántos números es un segundo de voz]
+    Para reconocimiento de habla se usa típicamente $16\,000$ muestras
+    por segundo, cada una de $16$ bits:
+    \[
+        16\,000 \ \tfrac{\text{muestras}}{\text{s}}
+        \times 2 \ \tfrac{\text{bytes}}{\text{muestra}}
+        = 32\,000 \ \tfrac{\text{bytes}}{\text{s}} .
+    \]
+    Por el teorema de muestreo, con $16\,000$ muestras por segundo se
+    pueden representar frecuencias hasta la mitad, $8\,000$ Hz, que
+    cubren lo que importa del habla. El teléfono tradicional muestrea a
+    $8\,000$ y corta en $4\,000$ Hz; por eso la \textit{s} y la
+    \textit{f} se confunden por teléfono.
+\end{ejemplo}
+
+\subsubsection*{Representación}
+
+La onda cruda es difícil de usar directamente: la misma vocal dicha
+dos veces produce ondas muy distintas. Lo estable es cuánta energía
+hay en cada frecuencia. Por eso la señal se parte en
+\textbf{ventanas} cortas, de unos $25$ ms, que avanzan cada $10$ ms y
+se traslapan, y a cada ventana se le calcula su espectro.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=12cm, height=3.6cm, xmin=0, xmax=60, ymin=-1.1, ymax=1.1,
+    axis lines=left, xlabel={tiempo (ms)}, ytick=\empty,
+    tick label style={font=\scriptsize}, label style={font=\small},
+    samples=600, domain=0:60, clip=false]
+    \addplot[acento] {sin(360*x/5)*(0.6 + 0.4*sin(360*x/50))};
+    \foreach \k/\c in {0/orange!70!black, 1/green!45!black,
+                       2/violet!70!black, 3/orange!70!black} {
+        \edef\temp{\noexpand\draw[thick, \c]
+            (axis cs:{10*\k}, {1.3 + 0.22*\k})
+            -- (axis cs:{10*\k + 25}, {1.3 + 0.22*\k});}
+        \temp
+    }
+    \node[font=\scriptsize, anchor=west] at (axis cs:56, 1.63)
+        {ventanas de $25$ ms, cada $10$ ms};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Cada ventana de $25$ ms son $400$ muestras, y como avanzan cada $10$
+ms hay $100$ ventanas por segundo. Juntando los espectros de todas se
+arma el \textbf{espectrograma} de la clase del $14$: tiempo en un eje,
+frecuencia en el otro y la energía como intensidad de color. Luego se
+resume cada ventana con unos pocos números, como $13$
+\textbf{coeficientes MFCC} o $80$ energías en bandas de la escala
+\textbf{mel}, que reparte las frecuencias como las percibe el oído,
+con más detalle en las graves que en las agudas.
+
+\begin{ejemplo}
+    Un segundo de voz pasa de $16\,000$ muestras a $100$ ventanas de
+    $13$ coeficientes: $1\,300$ números. Doce veces menos datos, y
+    mucho más estables entre una repetición y otra de la misma
+    palabra.
+\end{ejemplo}
+
+\subsubsection*{Unidades}
+
+La secuencia de ventanas se organiza en unidades lingüísticas:
+\textbf{fonemas}, que en español son unos $22$ a $24$ según la
+variante, \textbf{sílabas} y \textbf{palabras}. Los sistemas actuales
+a veces usan directamente caracteres o pedazos de palabra, como los
+tokens de la clase del $21$.
+
+\begin{ojo}
+    En el audio no hay espacios. \textit{``los osos''} y \textit{``lo
+    sosos''} suenan casi igual, y las palabras se pegan unas con otras.
+    Además, cada sonido se deforma por los vecinos: la \textit{n} de
+    \textit{un vaso} se pronuncia como \textit{m}, porque los labios ya
+    se preparan para la \textit{v}. A esto se le llama
+    \textbf{coarticulación}, y hace que un mismo fonema nunca suene
+    igual dos veces.
+\end{ojo}
+
+\subsubsection*{Modelos}
+
+El enfoque clásico separa el problema en dos modelos y los junta con
+el teorema de Bayes, igual que Naive Bayes: de todas las secuencias de
+palabras $W$ posibles, se busca la más probable dada la señal $A$:
+\[
+    W^{*} = \arg\max_{W} P(W \mid A)
+          = \arg\max_{W}\
+            \underbrace{P(A \mid W)}_{\text{modelo acústico}}\
+            \underbrace{P(W)}_{\text{modelo de lenguaje}} .
+\]
+
+\begin{itemize}[itemsep=0.3em]
+    \item El \textbf{modelo acústico} dice qué tan probable es esa
+          señal si se dijeron esas palabras. Pasa por un diccionario
+          de pronunciaciones que dice de qué fonemas está hecha cada
+          palabra.
+    \item El \textbf{modelo de lenguaje} es el de la clase del $31$ de
+          agosto: qué tan probable es esa secuencia de palabras en el
+          idioma. Desempata lo que suena igual:
+          \textit{``me siento cansado''} es mucho más probable que
+          \textit{``me ciento cansado''}.
+\end{itemize}
+
+Los sistemas actuales son de \textbf{extremo a extremo}: una sola red,
+casi siempre un Transformer con codificador y decodificador como el
+de las clases del $7$ y $12$, que recibe el espectrograma y genera el
+texto directamente, sin fonemas ni diccionario de por medio. Whisper,
+de OpenAI, es un ejemplo, entrenado con cientos de miles de horas de
+audio.
+
+\subsubsection*{Aplicaciones}
+
+Dictado, subtítulos automáticos, transcripción de reuniones,
+asistentes de voz, búsqueda por voz y accesibilidad para personas
+sordas. Y aplicaciones que no buscan las palabras sino el resto de la
+señal: identificar a quien habla, detectar emociones o idioma.
+
+\subsubsection*{Cómo se evalúa: la tasa de error por palabra}
+
+Se compara la transcripción del sistema con una de referencia hecha
+por personas, alineándolas palabra por palabra. Los errores son de
+tres tipos: \textbf{sustituciones} ($S$), \textbf{borrados} ($D$) e
+\textbf{inserciones} ($I$). Con $N$ palabras en la referencia,
+\[
+    \text{WER} = \frac{S + D + I}{N} .
+\]
+
+\begin{ejemplo}[La alarma de la clase del $14$]
+    Alineando la referencia con lo que entendió el sistema:
+    \begin{center}
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Referencia} & pon & una & alarma & a & las & siete \\
+        \textbf{Sistema}    & pon & una & alarma & --- & las
+                            & diecisiete \\
+        \textbf{Error}      & & & & $D$ & & $S$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Un borrado y una sustitución sobre $6$ palabras:
+    $\text{WER} = 2/6 = 0.33$. Basta un error de los dos para que la
+    alarma suene a la hora equivocada.
+\end{ejemplo}
+
+\begin{ojo}
+    El WER puede pasar de $1$, porque las inserciones no tienen límite:
+    un sistema que inventa muchas palabras puede tener más errores que
+    palabras hay en la referencia. Y trata igual todos los errores:
+    confundir \textit{siete} con \textit{diecisiete} cuenta lo mismo
+    que confundir \textit{una} con \textit{un}, aunque el primero sea
+    mucho más grave.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Qué hay en una grabación}
+
+Una grabación de voz trae cuatro tipos de información mezclados en la
+misma onda:
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{3.0cm}%
+                 >{\raggedright\arraybackslash}p{4.0cm}%
+                 >{\raggedright\arraybackslash}p{4.0cm}}
+    \toprule
+    \textbf{Información} & \textbf{Pregunta} & \textbf{Ejemplos}
+    & \textbf{Tarea que la usa} \\
+    \midrule
+    Lingüística & ¿qué se dijo?
+                & las palabras y su orden
+                & reconocimiento del habla \\
+    \addlinespace
+    Paralingüística & ¿cómo se dijo?
+                    & entonación, ritmo, volumen, emoción, risa,
+                      titubeos
+                    & detección de emociones o de sarcasmo \\
+    \addlinespace
+    Del hablante & ¿quién lo dijo?
+                 & identidad, edad, acento, estado de salud
+                 & verificación de identidad por voz \\
+    \addlinespace
+    Del canal & ¿por dónde pasó?
+              & micrófono, ruido de fondo, eco, compresión del
+                teléfono
+              & reducción de ruido \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Para el reconocimiento del habla, solo la primera fila es la señal;
+las otras tres son variación que el sistema tiene que ignorar. Para
+otras tareas es al revés: un sistema que verifica identidad por voz
+quiere justo la tercera fila y le da igual qué palabras se dijeron.
+
+\subsection*{El habla no es texto con sonido}
+
+\begin{ejemplo}[\textit{``Ya llegó''}]
+    La misma transcripción puede venir de grabaciones que significan
+    cosas distintas:
+    \begin{itemize}[itemsep=0.2em]
+        \item con entonación que baja, es una afirmación;
+        \item con entonación que sube, es una pregunta;
+        \item alargada y con suspiro, es fastidio: alguien que no
+              quería que llegara;
+        \item rápida y con risa, es alegría.
+    \end{itemize}
+    Al transcribir, las cuatro quedan como \textit{ya llegó}. Todo lo
+    que las distinguía estaba en la información paralingüística, y se
+    perdió.
+\end{ejemplo}
+
+Además, el habla espontánea no se parece al texto escrito. Tiene
+titubeos (\textit{eh}, \textit{este}), repeticiones, frases que se
+corrigen a la mitad y oraciones que nunca terminan. Un sistema
+entrenado solo con texto bien escrito no está preparado para eso, y
+uno que transcribe todo al pie de la letra produce un texto difícil de
+leer.
+
+\begin{idea}
+    El habla es una señal mucho más rica que el texto que sale de ella,
+    y el reconocimiento de habla es una compresión con pérdida: se
+    queda con las palabras y tira lo demás. Es la cadena de la clase
+    del $14$ otra vez: lo que el ASR tira no lo puede recuperar el
+    modelo de lenguaje que viene después. Por eso los modelos
+    multimodales actuales tratan de trabajar con el audio directamente.
+\end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 20 - Morfologia y lexicografia
+% =====================================================================
+
+\clase{Morfología y lexicografía}{21 de octubre de 2026}
+
+\begin{quick_sum}
+    Del sonido a las palabras. La morfología estudia la forma interna
+    de las palabras y cómo se forman, por flexión, derivación y
+    composición; el análisis morfológico va de la palabra a sus
+    morfemas, y de ahí a un lema con etiquetas. Se vio qué es una
+    palabra y qué es un token, y cómo parten las palabras los modelos
+    de lenguaje grandes. La lexicografía estudia el vocabulario: clases
+    abiertas y cerradas, idiolecto y dialecto, y quién decide qué
+    significa una palabra. Se cerró con las redes semánticas, WordNet y
+    BabelNet, y con la ley de Zipf.
+\end{quick_sum}
+
+\subsection*{De la palabra a las aplicaciones}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.5cm, minimum height=0.75cm,
+                 font=\footnotesize\bfseries, align=center},
+    nota/.style={font=\scriptsize, align=center, text width=2.7cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \foreach \x/\n/\t/\d in {
+        0/p/Palabra/{\textit{corrieron}},
+        3.2/m/Morfemas/{\textit{corr} + \textit{ie} + \textit{ron}},
+        6.4/l/Lema + etiquetas/{\textit{correr} +V +pretérito +3
+                               +plural},
+        9.6/x/Léxico o red/{\textit{correr}: moverse rápido; es un
+                            tipo de \textit{moverse}},
+        12.8/a/Aplicaciones/{búsqueda, traducción, análisis
+                             sintáctico}} {
+        \node[paso] (\n) at (\x, 0) {\t};
+        \node[nota] at (\x, -1.05) {\d};
+    }
+    \foreach \a/\b in {p/m, m/l, l/x, x/a}
+        \draw[->] (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+En clase se comentó que los lingüistas lo han hecho al revés. La
+lingüística describe las piezas mínimas y las reglas para combinarlas,
+y desde ahí explica cómo se construyen las palabras. El procesamiento
+automático parte de lo que sí tiene, la palabra escrita, y la
+desarma.
+
+% =====================================================================
+
+\subsection*{Morfología}
+
+\begin{definicion}[Morfología]
+    El estudio de la estructura interna de las palabras: de qué piezas
+    están hechas y cómo esas piezas se combinan para formar palabras
+    nuevas o variantes de una palabra.
+\end{definicion}
+
+La pieza mínima con significado es el \textbf{morfema}. Los hay de dos
+tipos: la \textbf{raíz}, que lleva el significado principal, y los
+\textbf{afijos}, que se le pegan: \textbf{prefijos} antes, como
+\textit{des-} o \textit{re-}, y \textbf{sufijos} después, como
+\textit{-ción} o \textit{-s}. Un morfema \textbf{libre} puede ser
+palabra solo, como \textit{sol}; uno \textbf{ligado} no, como
+\textit{-s}.
+
+\subsubsection*{Para qué sirve}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Reducir la dispersión.} \textit{corro},
+          \textit{corres}, \textit{corrió} y \textit{correríamos} son la
+          misma palabra en el fondo. Llevarlas a un lema hace que una
+          búsqueda de \textit{correr} las encuentre todas: es la
+          lematización del preprocesado de las primeras clases.
+    \item \textbf{Extraer información gramatical.} La terminación dice
+          tiempo, persona, número y género. \textit{Corrieron} dice
+          que fueron varios y que ya pasó, y eso alimenta al etiquetado
+          gramatical y al análisis sintáctico.
+    \item \textbf{Concordar al generar.} Un traductor que produce
+          \textit{``las casas blanco''} falló en morfología: el
+          adjetivo tenía que concordar en género y número.
+    \item \textbf{Manejar palabras nuevas.} Una palabra que nunca se
+          vio, como \textit{tuiteábamos}, se puede entender por sus
+          piezas: \textit{tuite-} y \textit{-ábamos}.
+\end{itemize}
+
+En español importa mucho: un verbo regular tiene más de cincuenta
+formas conjugadas. En lenguas como el turco o el finés es todavía más
+extremo, porque una sola palabra puede cargar lo que en español sería
+una frase entera.
+
+% =====================================================================
+
+\subsection*{Qué es una palabra}
+
+La respuesta obvia, ``lo que está entre dos espacios'', falla
+enseguida:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textit{del} son dos palabras pegadas, \textit{de} y
+          \textit{el}. \textit{Dámelo} son tres: \textit{da},
+          \textit{me} y \textit{lo}.
+    \item \textit{Nueva York}, \textit{sin embargo} y \textit{a pesar
+          de} son varias palabras escritas que funcionan como una sola.
+    \item En chino o japonés no hay espacios entre palabras.
+    \item En turco, \textit{evlerinizden} es una sola palabra que
+          significa ``de sus casas'' (de ustedes).
+\end{itemize}
+
+Por eso se distinguen varias nociones. La \textbf{palabra
+ortográfica} es la que está entre espacios. El \textbf{lema} o
+\textbf{lexema} es la palabra abstracta, la entrada del diccionario,
+de la que \textit{corro} y \textit{corrieron} son formas. Y en
+conteos se separan los \textbf{tokens}, cada aparición, de los
+\textbf{tipos}, cada palabra distinta.
+
+\begin{ejemplo}[Tokens y tipos]
+    \textit{``la casa y la casa''} tiene $5$ tokens y $3$ tipos:
+    \textit{la}, \textit{casa} e \textit{y}. El tamaño de un corpus se
+    mide en tokens; el de su vocabulario, en tipos.
+\end{ejemplo}
+
+\subsubsection*{Tokenización}
+
+Tokenizar es partir un texto en tokens, las unidades con las que va a
+trabajar el sistema. Parece trivial y está lleno de decisiones.
+
+\begin{ejemplo}[\textit{``¡Dámelo ya! Cuesta \$1,250.50 en Nueva
+                York, ¿no?''}]
+    Partiendo solo por espacios salen $8$ piezas, varias con la
+    puntuación pegada:
+    \begin{center}
+    \small
+    \texttt{¡Dámelo} \quad \texttt{ya!} \quad \texttt{Cuesta} \quad
+    \texttt{\$1,250.50} \quad \texttt{en} \quad \texttt{Nueva} \quad
+    \texttt{York,} \quad \texttt{¿no?}
+    \end{center}
+    Un tokenizador razonable separa los signos y decide qué hacer con
+    el resto:
+    \begin{center}
+    \small
+    \texttt{¡} \quad \texttt{Dámelo} \quad \texttt{ya} \quad
+    \texttt{!} \quad \texttt{Cuesta} \quad \texttt{\$} \quad
+    \texttt{1,250.50} \quad \texttt{en} \quad \texttt{Nueva York}
+    \quad \texttt{,} \quad \texttt{¿} \quad \texttt{no} \quad
+    \texttt{?}
+    \end{center}
+    Las decisiones: el número no se parte en la coma ni en el punto;
+    \textit{Nueva York} queda como un solo token; \textit{Dámelo}
+    podría partirse en \textit{da}, \textit{me} y \textit{lo}, y aquí
+    se dejó entero. Otro sistema puede decidir distinto, y sus conteos
+    no serán comparables con los de este.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Tres formas de formar palabras}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.6cm}%
+                 >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    \textbf{Proceso} & \textbf{Qué hace} & \textbf{Ejemplos} \\
+    \midrule
+    Flexión & Cambia la forma para marcar rasgos gramaticales; sigue
+              siendo la misma palabra
+            & \textit{gato}, \textit{gatos}; \textit{como},
+              \textit{comí}, \textit{comeremos} \\
+    \addlinespace
+    Derivación & Agrega un afijo y crea una palabra nueva, a menudo de
+                 otra categoría
+               & \textit{feliz} $\to$ \textit{felicidad},
+                 \textit{infeliz}; \textit{reservar} $\to$
+                 \textit{reservación} \\
+    \addlinespace
+    Composición & Junta dos o más raíces en una palabra
+                & \textit{sacacorchos}, \textit{abrelatas},
+                  \textit{bocacalle}, \textit{lavaplatos} \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La diferencia entre flexión y derivación es si se obtiene otra entrada
+del diccionario. \textit{Gatos} no tiene entrada propia, se busca
+\textit{gato}; \textit{felicidad} sí tiene la suya.
+
+\subsubsection*{Descomponer una palabra capa por capa}
+
+Las palabras se arman en capas, y se pueden desarmar en el orden
+inverso. El análisis de \textit{desafortunadamente}:
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.05cm,
+    level 1/.style={sibling distance=4.6cm},
+    level 2/.style={sibling distance=3.0cm},
+    level 3/.style={sibling distance=2.4cm},
+    level 4/.style={sibling distance=1.5cm},
+    every node/.style={font=\small},
+    proc/.style={font=\scriptsize, gray, fill=white, inner sep=1pt},
+    edge from parent/.style={draw, gray}]
+    \node {\textit{desafortunadamente}}
+        child {node {\textit{desafortunada}}
+            child {node {\textit{des-}}}
+            child {node {\textit{afortunada}}
+                child {node {\textit{afortunad-}}
+                    child {node {\textit{a-}}}
+                    child {node {\textit{fortun(a)}}}
+                    child {node {\textit{-ad(o)}}}}
+                child {node {\textit{-a}}}}}
+        child {node {\textit{-mente}}};
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item \textit{-mente} convierte un adjetivo femenino en adverbio:
+          derivación.
+    \item \textit{des-} niega: derivación.
+    \item \textit{-a} marca femenino: flexión.
+    \item \textit{a-} y \textit{-ado} se agregan juntos a
+          \textit{fortuna} para formar el adjetivo
+          \textit{afortunado}: derivación.
+\end{enumerate}
+
+Una palabra de $18$ letras resulta ser la raíz \textit{fortuna} con
+cinco afijos alrededor. Un analizador morfológico devuelve esa
+información en forma de lema más etiquetas, por ejemplo
+\textit{corrieron} $\to$ \textit{correr} +V +pretérito +3 +plural.
+
+\begin{ojo}
+    El análisis puede ser ambiguo, como en la clase del $14$:
+    \textit{canto} es \textit{canto} +sustantivo +singular o
+    \textit{cantar} +V +presente +1 +singular. El analizador devuelve
+    todas las opciones, y la sintaxis o el contexto escogen.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Cómo parten las palabras los modelos de lenguaje}
+
+Los modelos de lenguaje grandes no usan palabras ni morfemas: usan
+\textbf{subpalabras}, pedazos aprendidos de los datos. Así resuelven
+los dos problemas de FastText de la clase del $5$: no hay palabras
+fuera del vocabulario, porque cualquier palabra se puede armar con
+pedazos, y el vocabulario se queda de un tamaño fijo, entre $30\,000$ y
+unos cientos de miles de tokens.
+
+El algoritmo más usado es \textbf{BPE} (\textit{byte pair
+encoding}). Empieza con los caracteres sueltos y repite un solo paso:
+juntar el par de símbolos vecinos más frecuente del corpus en un
+símbolo nuevo. Cada fusión agrega un token al vocabulario.
+
+\begin{ejemplo}[BPE en un corpus de cuatro palabras]
+    El corpus tiene \textit{hablando} $6$ veces, \textit{cantando} $5$,
+    \textit{hablo} $4$ y \textit{comiendo} $3$. Cada palabra empieza
+    partida en letras, con \texttt{\_} marcando el final. En cada paso
+    se cuentan los pares vecinos, pesados por cuántas veces aparece la
+    palabra, y se fusiona el más frecuente. Si hay empate se toma el
+    que aparece primero en el corpus.
+    \begin{center}
+    \small
+    \begin{tabular}{clcl}
+        \toprule
+        \textbf{Paso} & \textbf{Fusión} & \textbf{Veces}
+        & \textbf{Qué sale} \\
+        \midrule
+        $1$ & \texttt{o} + \texttt{\_}     & $18$
+            & todas terminan en \texttt{o\_} \\
+        $2$ & \texttt{a} + \texttt{n}      & $16$
+            & \texttt{an}, en \textit{hablando} y \textit{cantando} \\
+        $3$ & \texttt{d} + \texttt{o\_}    & $14$ & \texttt{do\_} \\
+        $4$ & \texttt{an} + \texttt{do\_}  & $11$
+            & \texttt{ando\_}: el gerundio \\
+        $5$ & \texttt{h} + \texttt{a}      & $10$ & \texttt{ha} \\
+        $6$ & \texttt{ha} + \texttt{b}     & $10$ & \texttt{hab} \\
+        $7$ & \texttt{hab} + \texttt{l}    & $10$
+            & \texttt{habl}: la raíz \\
+        $8$ & \texttt{habl} + \texttt{ando\_} & $6$
+            & \textit{hablando} queda en un solo token \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Al paso $1$, por ejemplo, \texttt{o\_} aparece al final de las
+    cuatro palabras: $6 + 5 + 4 + 3 = 18$. Después de las ocho fusiones
+    el corpus queda partido así:
+    \begin{center}
+    \texttt{hablando\_} \qquad \texttt{c an t ando\_} \qquad
+    \texttt{habl o\_} \qquad \texttt{c o m i e n do\_}
+    \end{center}
+    Y una palabra que nunca vio, \textit{bailando}, se parte en
+    \texttt{b a i l ando\_}.
+\end{ejemplo}
+
+\begin{idea}
+    Nadie le dijo a BPE qué es una raíz o un sufijo, y aun así
+    aprendió \texttt{habl} y \texttt{ando}, que son casi los morfemas.
+    Lo que se repite mucho en el corpus tiende a ser lo que la
+    morfología reconoce como pieza. Pero no siempre coincide: las
+    fusiones siguen la frecuencia, no la gramática, y
+    \texttt{an} o \texttt{do} no son morfemas de nada.
+\end{idea}
+
+\begin{ojo}
+    El vocabulario de BPE se aprende sobre el corpus de entrenamiento,
+    que en los modelos grandes es mayoritariamente inglés. Las palabras
+    en inglés quedan casi siempre como un token, y las del español se
+    parten en más pedazos. El mismo texto en español gasta más tokens,
+    y eso cuesta más dinero y llena antes la ventana de contexto. Otras
+    variantes del mismo principio son WordPiece, la de BERT, y el
+    modelo unigrama de SentencePiece.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Lexicografía}
+
+La lexicografía estudia el \textbf{léxico}, el vocabulario de una
+lengua, y es también el oficio de hacer diccionarios.
+
+\subsubsection*{Clases abiertas y cerradas}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Clases abiertas}: sustantivos, verbos, adjetivos y
+          adverbios. Aceptan palabras nuevas todo el tiempo:
+          \textit{tuitear}, \textit{googlear}, \textit{criptomoneda}.
+          Son miles y cargan el contenido.
+    \item \textbf{Clases cerradas}: artículos, preposiciones,
+          pronombres, conjunciones. Casi nunca ganan miembros, son unas
+          cuantas decenas y aparecen en todas las oraciones. Son las
+          \textit{stop words} de recuperación de información.
+\end{itemize}
+
+\subsubsection*{Idiolecto y dialecto}
+
+El vocabulario y la forma de hablar de una sola persona es su
+\textbf{idiolecto}; el de un grupo, sea una región o una comunidad, es
+un \textbf{dialecto}. En México se dice \textit{camión} donde en
+España se dice \textit{autobús}; dentro de un grupo de programadores,
+\textit{deployar} es una palabra normal que fuera de él nadie usa.
+
+\subsubsection*{Quién decide qué significa una palabra}
+
+Los hablantes, con el uso. Los diccionarios llegan después. Uno
+\textbf{descriptivo}, como el \textit{Diccionario del español de
+México} de El Colegio de México, registra cómo se usan las palabras;
+uno \textbf{normativo}, como el de la Real Academia Española, además
+recomienda cómo deberían usarse, pero incorpora una palabra cuando su
+uso ya se estableció. El significado cambia: \textit{ratón} significó
+solo un animal hasta que hubo computadoras.
+
+\begin{idea}
+    Es la hipótesis distribucional de la clase del $30$ de septiembre
+    vista desde la lexicografía: el significado de una palabra está en
+    su uso. Un diccionario y un embedding hacen lo mismo con métodos
+    distintos: los dos resumen cómo se usa una palabra.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Redes semánticas}
+
+Una \textbf{red semántica} representa el léxico como un grafo: los
+nodos son conceptos y las aristas son relaciones entre ellos, como
+\textit{es-un}, \textit{parte-de} o \textit{puede}.
+
+\begin{center}
+\begin{tikzpicture}[
+    con/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                font=\small, minimum height=0.6cm},
+    rel/.style={font=\scriptsize, fill=white, inner sep=1pt},
+    >=stealth]
+    \node[con] (ani) at (3, 3)     {animal};
+    \node[con] (mam) at (1.5, 2)   {mamífero};
+    \node[con] (ave) at (5, 2)     {ave};
+    \node[con] (can) at (0, 1)     {cánido};
+    \node[con] (fel) at (3, 1)     {felino};
+    \node[con] (per) at (0, 0)     {perro};
+    \node[con] (gat) at (3, 0)     {gato};
+    \node[con] (col) at (-3.0, 0)  {cola};
+    \node[con] (lad) at (0, -1.2)  {ladrar};
+    \node[con] (vol) at (5, 1)     {volar};
+    \draw[->] (mam) -- node[rel] {es-un} (ani);
+    \draw[->] (ave) -- node[rel] {es-un} (ani);
+    \draw[->] (can) -- node[rel] {es-un} (mam);
+    \draw[->] (fel) -- node[rel] {es-un} (mam);
+    \draw[->] (per) -- node[rel] {es-un} (can);
+    \draw[->] (gat) -- node[rel] {es-un} (fel);
+    \draw[->] (col) -- node[rel] {parte-de} (per);
+    \draw[->] (per) -- node[rel] {puede} (lad);
+    \draw[->] (ave) -- node[rel] {puede} (vol);
+\end{tikzpicture}
+\end{center}
+
+La estructura permite razonar: como un perro es un cánido, un cánido es
+un mamífero y un mamífero es un animal, un perro es un animal, aunque
+esa arista no esté escrita. Y la distancia en el grafo mide qué tan
+parecidos son dos conceptos: \textit{perro} y \textit{gato} se juntan
+en \textit{mamífero}, a dos pasos cada uno; \textit{perro} y
+\textit{ave}, hasta \textit{animal}.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{WordNet}, de la clase del $21$ de septiembre, es la red
+          semántica más conocida: synsets del inglés unidos por
+          hiperonimia, meronimia y las demás relaciones. Hay versiones
+          para otros idiomas, incluido el español, alineadas con la
+          inglesa.
+    \item \textbf{BabelNet} es una red semántica multilingüe, de
+          Navigli y Ponzetto. Junta WordNet con Wikipedia y otros
+          recursos, y cada concepto tiene sus nombres en cientos de
+          idiomas. El concepto de ratón de computadora une
+          \textit{ratón}, \textit{mouse}, \textit{souris} y
+          \textit{Maus}, y lo separa del ratón animal.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{La ley de Zipf}
+
+Si se cuentan las palabras de un corpus grande y se ordenan de la más
+frecuente a la menos, la frecuencia de la palabra en el lugar $r$ es,
+aproximadamente, inversamente proporcional a $r$:
+\[
+    f(r) \approx \frac{C}{r} .
+\]
+La segunda palabra aparece la mitad de veces que la primera, la tercera
+un tercio, la décima un décimo.
+
+\begin{ejemplo}[El corpus Brown, del inglés]
+    En este corpus de alrededor de un millón de palabras,
+    \textit{the} aparece $69\,971$ veces, \textit{of} $36\,411$ y
+    \textit{and} $28\,852$:
+    \[
+        \frac{69\,971}{36\,411} = 1.92 \approx 2 ,
+        \qquad
+        \frac{69\,971}{28\,852} = 2.43 \approx 3 .
+    \]
+    No es exacto, pero la tendencia se cumple en todos los idiomas y
+    en casi cualquier corpus.
+\end{ejemplo}
+
+En escala logarítmica en los dos ejes, $\log f = \log C - \log r$ es
+una recta de pendiente $-1$:
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=8cm, height=5.5cm, xmode=log, ymode=log,
+    xmin=1, xmax=10000, ymin=4, ymax=100000, domain=1:10000,
+    samples=50, xlabel={lugar $r$}, ylabel={frecuencia $f(r)$},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \addplot[thick, acento] {60000/x};
+    \addplot[only marks, mark=*, mark size=1.5pt, orange!70!black]
+        coordinates {(1, 60000) (2, 30000) (3, 20000) (10, 6000)
+                     (100, 600) (1000, 60) (10000, 6)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Una distribución de Zipf ideal]
+    Si la palabra más frecuente aparece $60\,000$ veces:
+    \begin{center}
+    \begin{tabular}{rrrrrrr}
+        \toprule
+        $r$ & $1$ & $2$ & $3$ & $10$ & $100$ & $10\,000$ \\
+        $f(r)$ & $60\,000$ & $30\,000$ & $20\,000$ & $6\,000$ & $600$
+               & $6$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con un vocabulario de $10\,000$ tipos, la fracción de tokens que
+    cubren las $100$ más frecuentes es
+    \[
+        \frac{\sum_{r=1}^{100} 1/r}{\sum_{r=1}^{10\,000} 1/r}
+        = \frac{5.19}{9.79} = 0.53 .
+    \]
+    El $1\%$ de las palabras distintas produce más de la mitad del
+    texto.
+\end{ejemplo}
+
+\begin{idea}
+    Zipf explica varias cosas del curso. Las palabras más frecuentes
+    son casi todas de clase cerrada, y por eso las \textit{stop words}
+    son tan pocas y quitarlas reduce tanto el texto. En el otro
+    extremo, la cola es enorme: en corpus reales cerca de la mitad de
+    las palabras distintas aparece una sola vez. Ahí nacen los ceros
+    que obligaron a suavizar en Naive Bayes, las palabras fuera del
+    vocabulario de Word2Vec y la necesidad de partir en subpalabras:
+    por más grande que sea el corpus, siempre habrá palabras que casi
+    nunca se vieron.
+\end{idea}
 
 
 \end{document}
