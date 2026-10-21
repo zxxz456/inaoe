@@ -1,0 +1,55 @@
+- arboles de desision
+
+cada cmino de la raiz a una hoja consiste en un camino de atributos
+
+con un arbol queremos crear una estructura de este tipo que nos ayude a clasificar
+nuevas instancias. Queremos constuir el arbol a partir del conjunto de entrenamiento 
+que clasifica correctamente a eso daos de entrenamiento
+
+en el nodo raiz va un atributo, en general todos los nodos son atributos y las ramas van
+a ser los valores que toma este atributo, los nodos internos el arbol son nodos de decsion
+, las hojas son las clases y, se van tomando decisiones, saltando de nodos de decision para llegar a un odo 
+hoja
+
+hay dos opeaciones basicas
+    - splitting
+    - puring 
+
+algoritmo ID3
+    es un algoritmo de construccion que segue un top to down
+    hace un particionamiento recursivo
+
+
+    Tambien cmocido como algoritmo TDIDT algoritm
+    
+    para construir un arbol de desision T de un conjunto de entrenamiento s
+        - si todos los objetos de S pertenecen a una clase C, entinces hacer una hoja C
+
+        en otro caso,
+            seleccionar el artibuto mas informativo A
+
+            particionar S de acuerrdo a los valores de A
+
+            Construir sub arboles poral los subconjuntos de S 
+
+    - criterio de seleccion de atributos
+    el pricipal es seleccionar el atributo que particiona el conjunto de datos de manra que sea mas puro (o sea que las instancias sean de la misma clase)
+
+    si inicialmente yo parto. de un conjunto que tiene una medida de info y lo divido en otrros subconjuntos, la diferencia de la info del conjunto oriinal
+    y los subconjuntos es la ganancia de info, me conviene tener una ganancia grende
+
+    el ID3 utiliza la entropia como la info que hay en ese conjunto {explicar que es y oner formula} (la cantidad de objetos que pertenecen a cada una de las clases)
+
+    {poner ejemplo de arbol sobre un conjunto de juguete clasificacion y hacer el procediemeinto con entropia }
+
+    pero esto tine un defecto, le da preferencia a los atributos con mas valores
+
+    - overfitting and puring
+    {explicar}
+        -pre puring
+        - post puring 
+
+    
+    - random forest
+    {explicar que es, como los construye, bagging}
+
