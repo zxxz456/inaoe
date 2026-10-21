@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.9.0
+%   * Version: 1.10.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       21/10/2026      Clase 20 Oct, arboles de decision
 %  zxxz6       18/10/2026      Clase 15 Oct, medidas de desempeno
 %  zxxz6       09/10/2026      Clase 8 Oct, clasificador Naive Bayes
 %  zxxz6       09/10/2026      Clase 6 Oct, clasificadores por distancia
@@ -4605,6 +4606,980 @@ Aquí vale
     AUC & área bajo la ROC
         & ¿Qué tan bien ordena positivos sobre negativos?
         & todavía no se fija el umbral \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\newpage
+
+% =====================================================================
+%  Clase - Arboles de decision
+% =====================================================================
+
+\clase{Árboles de decisión}{20 de octubre de 2026}
+
+% Estilos de los árboles dibujados en esta clase
+\tikzset{
+    nodoDec/.style={draw=acento, rounded corners=2pt, fill=fondoIdea,
+                    font=\small\bfseries, minimum height=0.65cm,
+                    inner xsep=6pt},
+    hojaSi/.style={draw=green!45!black, fill=fondoResultado,
+                   font=\small, minimum width=0.9cm,
+                   minimum height=0.6cm},
+    hojaNo/.style={draw=orange!70!black, fill=fondoOjo, font=\small,
+                   minimum width=0.9cm, minimum height=0.6cm},
+    ramaEtq/.style={font=\scriptsize, fill=white, inner sep=1.5pt},
+    ruta/.style={draw=acento, line width=1.4pt},
+    numEtq/.style={circle, draw=acento, fill=white, text=acento,
+                   font=\tiny\bfseries, inner sep=1pt}
+}
+
+\begin{quick_sum}
+    Un árbol de decisión clasifica haciendo una pregunta por nodo: cada
+    nodo interno prueba un atributo, cada rama es uno de sus valores y
+    cada hoja es una clase. Se construye de arriba hacia abajo por
+    particionamiento recursivo (ID3, de la familia TDIDT), y en cada
+    nodo se escoge el atributo que deja los subconjuntos más puros,
+    medido con la ganancia de información sobre la entropía. Se vio el
+    defecto de esa medida, que prefiere a los atributos con muchos
+    valores; el sobreajuste y sus dos remedios, la pre-poda y la
+    post-poda; y los bosques aleatorios, que ponen a votar muchos
+    árboles entrenados con bagging. Aquí se agregan el ejemplo completo
+    de ID3 sobre el conjunto de jugar tenis, la razón de ganancia de
+    C4.5, el índice de Gini, los atributos numéricos y el error fuera
+    de la bolsa.
+\end{quick_sum}
+
+\subsection*{La estructura}
+
+Un árbol de decisión es una cadena de preguntas. Para clasificar un
+ejemplo se empieza en la raíz, se contesta la pregunta del nodo y se
+baja por la rama de la respuesta, hasta llegar a una hoja, que dice la
+clase.
+
+\begin{itemize}[itemsep=0.3em]
+    \item La \textbf{raíz} y los \textbf{nodos internos} son
+          \textbf{nodos de decisión}: cada uno prueba un atributo.
+    \item Las \textbf{ramas} que salen de un nodo son los valores que
+          puede tomar su atributo.
+    \item Las \textbf{hojas} son las clases.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    level distance=1.7cm,
+    level 1/.style={sibling distance=4.4cm},
+    level 2/.style={sibling distance=2.3cm}]
+    \node[nodoDec] (raiz) {Cielo}
+        child {node[nodoDec] {Humedad}
+            child {node[hojaNo] {no}
+                   edge from parent[ruta] node[ramaEtq] {alta}}
+            child {node[hojaSi] {sí}
+                   edge from parent node[ramaEtq] {normal}}
+            edge from parent[ruta] node[ramaEtq] {soleado}}
+        child {node[hojaSi] {sí}
+               edge from parent node[ramaEtq] {nublado}}
+        child {node[nodoDec] {Viento}
+            child {node[hojaSi] {sí}
+                   edge from parent node[ramaEtq] {débil}}
+            child {node[hojaNo] {no}
+                   edge from parent node[ramaEtq] {fuerte}}
+            edge from parent node[ramaEtq] {lluvioso}};
+    \node[font=\scriptsize\itshape, text=gray, anchor=west]
+        at ([xshift=6pt]raiz.east) {raíz};
+\end{tikzpicture}
+\end{center}
+
+El árbol de la figura decide si se juega tenis según el clima, y se
+construye paso a paso más abajo. Un día nuevo soleado, fresco, de
+humedad alta y viento fuerte baja por la ruta resaltada: Cielo es
+soleado, luego Humedad es alta, y la hoja dice que no se juega. La
+temperatura y el viento ni se consultaron.
+
+Cada camino de la raíz a una hoja es una conjunción de pruebas sobre
+atributos, así que el árbol entero se lee como un conjunto de reglas,
+una por hoja:
+
+\begin{center}
+\small
+\begin{tabular}{l}
+    si Cielo $=$ soleado y Humedad $=$ alta, entonces no se juega \\
+    si Cielo $=$ soleado y Humedad $=$ normal, entonces sí \\
+    si Cielo $=$ nublado, entonces sí \\
+    si Cielo $=$ lluvioso y Viento $=$ débil, entonces sí \\
+    si Cielo $=$ lluvioso y Viento $=$ fuerte, entonces no
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Esa legibilidad es la ventaja principal de un árbol frente a una
+    red neuronal o una SVM: el modelo se puede leer, revisar con un
+    experto del dominio y explicarle a quien se ve afectado por la
+    decisión.
+\end{idea}
+
+Construir el árbol a partir de un conjunto de entrenamiento se reduce
+a dos operaciones básicas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Dividir} (\textit{splitting}): escoger el atributo de
+          un nodo y repartir sus ejemplos entre las ramas.
+    \item \textbf{Podar} (\textit{pruning}): quitar las ramas que solo
+          le sirven a los ejemplos de entrenamiento y no ayudan con los
+          nuevos.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{ID3: particionamiento recursivo}
+
+ID3 (\textit{Iterative Dichotomiser 3}, de Ross Quinlan, 1986) construye
+el árbol de arriba hacia abajo: escoge el atributo de la raíz, parte el
+conjunto según sus valores y repite lo mismo dentro de cada parte. Por
+eso a esta familia de algoritmos se le llama TDIDT, \textit{Top-Down
+Induction of Decision Trees}.
+
+\begin{algorithm}[H]
+\caption{ID3$(S, \mathcal{A})$}
+\begin{algorithmic}[1]
+\Require conjunto de entrenamiento $S$, atributos disponibles
+         $\mathcal{A}$
+\Ensure un árbol de decisión
+\If{todos los ejemplos de $S$ son de la misma clase $C$}
+  \State \Return una hoja con la clase $C$
+\EndIf
+\If{$\mathcal{A}$ está vacío}
+  \State \Return una hoja con la clase mayoritaria de $S$
+\EndIf
+\State $A \gets$ el atributo de $\mathcal{A}$ más informativo sobre $S$
+\State crear un nodo de decisión que prueba $A$
+\ForAll{valor $v$ de $A$}
+  \State $S_v \gets$ los ejemplos de $S$ con $A = v$
+  \If{$S_v$ está vacío}
+    \State colgar de la rama $v$ una hoja con la clase mayoritaria de
+           $S$
+  \Else
+    \State colgar de la rama $v$ el subárbol
+           ID3$(S_v,\ \mathcal{A} \setminus \{A\})$
+  \EndIf
+\EndFor
+\State \Return el nodo
+\end{algorithmic}
+\end{algorithm}
+
+En clase se vio el primer caso base y el paso recursivo. Los otros dos
+casos hacen falta para que el algoritmo siempre termine. Si ya no
+quedan atributos y los ejemplos siguen mezclados, como pasa cuando dos
+días idénticos tienen clases distintas, no queda nada que preguntar y
+se vota. Si ningún ejemplo toma un valor, esa rama no tiene datos y
+hereda la clase mayoritaria del padre.
+
+Un atributo se usa a lo más una vez en cada camino: una vez que se
+sabe que el cielo está soleado, volver a preguntarlo no reparte nada.
+
+Todo el algoritmo depende de una sola decisión, la de qué atributo es
+el ``más informativo''.
+
+% =====================================================================
+
+\subsection*{Entropía}
+
+El criterio es la \textbf{pureza}: el mejor atributo es el que reparte
+los ejemplos en subconjuntos donde casi todos son de la misma clase. Un
+subconjunto puro ya es una hoja; uno revuelto todavía necesita más
+preguntas. ID3 mide qué tan revuelto está un conjunto con la entropía
+de Shannon, que solo depende de cuántos ejemplos hay de cada clase.
+
+\begin{definicion}[Entropía]
+    Sea $S$ un conjunto de ejemplos con $k$ clases, y $p_i$ la fracción
+    de ejemplos de $S$ que son de la clase $i$. La entropía de $S$ es
+    \[
+        H(S) = -\sum_{i=1}^{k} p_i \log_2 p_i ,
+    \]
+    con la convención $0 \log_2 0 = 0$, porque una clase ausente no
+    aporta incertidumbre.
+\end{definicion}
+
+Se lee como el número promedio de bits que hacen falta para comunicar
+la clase de un ejemplo tomado al azar de $S$. Si todos son de la misma
+clase no hay nada que comunicar, y $H = 0$. Si las clases están
+repartidas a partes iguales cada ejemplo es una sorpresa, y la
+entropía llega a su máximo, $\log_2 k$; con dos clases, $1$ bit. El
+signo menos está porque $\log_2 p_i \le 0$: sin él la entropía saldría
+negativa.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=8cm, height=5.2cm, xmin=0, xmax=1, ymin=0, ymax=1.15,
+    xlabel={$p$, fracción de ejemplos positivos},
+    ylabel={$H(S)$ en bits},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    xtick={0, 0.25, 0.5, 0.75, 1}, ytick={0, 0.5, 1}, clip=false]
+    \addplot[thick, acento, domain=0.0005:0.9995, samples=200]
+        {-x*ln(x)/ln(2) - (1-x)*ln(1-x)/ln(2)};
+    \addplot[only marks, mark=*, mark size=1.8pt, acento]
+        coordinates {(0.5, 1) (0.643, 0.940) (1, 0)};
+    \node[font=\scriptsize, anchor=south] at (axis cs:0.5, 1.0)
+        {$(7+,\,7-)$: $1$};
+    \node[font=\scriptsize, anchor=north east] at (axis cs:0.63, 0.92)
+        {$(9+,\,5-)$: $0.940$};
+    \node[font=\scriptsize, anchor=south east] at (axis cs:0.98, 0.04)
+        {$(14+,\,0-)$: $0$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Tres conjuntos de 14 ejemplos]
+    Se escribe $(a+,\, b-)$ para un conjunto con $a$ ejemplos positivos
+    y $b$ negativos.
+    \begin{align*}
+        H(9+,\,5-) &= -\tfrac{9}{14}\log_2\tfrac{9}{14}
+                      - \tfrac{5}{14}\log_2\tfrac{5}{14}
+                    = 0.410 + 0.530 = 0.940 , \\
+        H(7+,\,7-) &= -\tfrac{1}{2}\log_2\tfrac{1}{2}
+                      - \tfrac{1}{2}\log_2\tfrac{1}{2}
+                    = 0.5 + 0.5 = 1 , \\
+        H(14+,\,0-) &= -1 \cdot \log_2 1 - 0 = 0 .
+    \end{align*}
+    El primero está cargado hacia los positivos, así que es menos
+    incierto que el de mitad y mitad, pero está lejos de ser puro.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Ganancia de información}
+
+Si un conjunto $S$ se parte con un atributo $A$, cada subconjunto
+tiene su propia entropía. Lo que bajó la entropía al partir es la
+\textbf{ganancia de información}: cuánta incertidumbre sobre la clase
+quitó conocer el valor de $A$. Conviene que sea grande.
+
+\begin{definicion}[Ganancia de información]
+    Sea $S_v$ el subconjunto de $S$ donde el atributo $A$ vale $v$.
+    \[
+        \text{Ganancia}(S, A) = H(S)
+            - \sum_{v \in \text{valores}(A)}
+              \frac{\abs{S_v}}{\abs{S}}\, H(S_v) .
+    \]
+\end{definicion}
+
+La suma es la entropía que queda después de partir, promediada según
+el tamaño de cada parte: un subconjunto revuelto de dos ejemplos pesa
+menos que uno de doce. ID3 escoge en cada nodo el atributo de
+\textbf{ganancia máxima}. Como $H(S)$ es la misma para todos los
+atributos, escoger la ganancia máxima es escoger la menor entropía
+restante.
+
+% =====================================================================
+
+\subsection*{Ejemplo completo: jugar tenis}
+
+El conjunto clásico de Quinlan, en la versión del libro de Mitchell:
+$14$ días con cuatro atributos del clima y si ese día se jugó tenis.
+
+\begin{center}
+\small
+\begin{tabular}{cccccc}
+    \toprule
+    \textbf{Día} & \textbf{Cielo} & \textbf{Temperatura}
+        & \textbf{Humedad} & \textbf{Viento} & \textbf{Juega} \\
+    \midrule
+    D1  & soleado  & calurosa & alta   & débil  & no \\
+    D2  & soleado  & calurosa & alta   & fuerte & no \\
+    D3  & nublado  & calurosa & alta   & débil  & sí \\
+    D4  & lluvioso & templada & alta   & débil  & sí \\
+    D5  & lluvioso & fresca   & normal & débil  & sí \\
+    D6  & lluvioso & fresca   & normal & fuerte & no \\
+    D7  & nublado  & fresca   & normal & fuerte & sí \\
+    D8  & soleado  & templada & alta   & débil  & no \\
+    D9  & soleado  & fresca   & normal & débil  & sí \\
+    D10 & lluvioso & templada & normal & débil  & sí \\
+    D11 & soleado  & templada & normal & fuerte & sí \\
+    D12 & nublado  & templada & alta   & fuerte & sí \\
+    D13 & nublado  & calurosa & normal & débil  & sí \\
+    D14 & lluvioso & templada & alta   & fuerte & no \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\paso{Paso 1: entropía del conjunto completo.} Hay $9$ días en que se
+jugó y $5$ en que no, así que $H(S) = H(9+,\,5-) = 0.940$, el valor del
+ejemplo anterior.
+
+\paso{Paso 2: ganancia de cada atributo en la raíz.} Para Cielo, los
+tres subconjuntos son
+\begin{align*}
+    S_{\text{soleado}}  &= \{D1, D2, D8, D9, D11\}
+        && (2+,\,3-) && H = 0.971 , \\
+    S_{\text{nublado}}  &= \{D3, D7, D12, D13\}
+        && (4+,\,0-) && H = 0 , \\
+    S_{\text{lluvioso}} &= \{D4, D5, D6, D10, D14\}
+        && (3+,\,2-) && H = 0.971 ,
+\end{align*}
+y la ganancia es
+\begin{align*}
+    \text{Ganancia}(S, \text{Cielo})
+        &= H(S) - \tfrac{5}{14} H(S_{\text{soleado}})
+                - \tfrac{4}{14} H(S_{\text{nublado}})
+                - \tfrac{5}{14} H(S_{\text{lluvioso}}) \\
+        &= 0.9403 - \tfrac{5}{14}(0.9710) - \tfrac{4}{14}(0)
+                  - \tfrac{5}{14}(0.9710) \\
+        &= 0.9403 - 0.3468 - 0 - 0.3468 \\
+        &= 0.247 .
+\end{align*}
+Con los otros tres atributos se hace la misma cuenta:
+\begin{center}
+\small
+\begin{tabular}{llcc}
+    \toprule
+    \textbf{Atributo} & \textbf{Subconjuntos}
+        & \textbf{Entropía restante} & \textbf{Ganancia} \\
+    \midrule
+    Cielo & soleado $(2+,3-)$, nublado $(4+,0-)$, lluvioso $(3+,2-)$
+          & $0.694$ & $\mathbf{0.247}$ \\
+    Humedad & alta $(3+,4-)$, normal $(6+,1-)$
+            & $0.788$ & $0.152$ \\
+    Viento & débil $(6+,2-)$, fuerte $(3+,3-)$
+           & $0.892$ & $0.048$ \\
+    Temperatura & calurosa $(2+,2-)$, templada $(4+,2-)$,
+                  fresca $(3+,1-)$ & $0.911$ & $0.029$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+Gana Cielo y va en la raíz. La rama nublado ya es pura: todos los días
+nublados se jugó, y queda una hoja ``sí''. Las otras dos ramas siguen
+revueltas y se repite el procedimiento con los atributos que quedan.
+
+\paso{Paso 3: la rama soleado.} Ahora el conjunto es
+$S_{\text{soleado}}$, con $H = 0.971$:
+\begin{align*}
+    \text{Ganancia}(S_{\text{soleado}}, \text{Humedad})
+        &= 0.971 - \tfrac{3}{5}\,H(0+,\,3-) - \tfrac{2}{5}\,H(2+,\,0-) \\
+        &= 0.971 - 0 - 0 = 0.971 , \\[0.4em]
+    \text{Ganancia}(S_{\text{soleado}}, \text{Temperatura})
+        &= 0.971 - \tfrac{2}{5}\,H(0+,\,2-) - \tfrac{2}{5}\,H(1+,\,1-)
+                 - \tfrac{1}{5}\,H(1+,\,0-) \\
+        &= 0.971 - 0 - 0.400 - 0 = 0.571 , \\[0.4em]
+    \text{Ganancia}(S_{\text{soleado}}, \text{Viento})
+        &= 0.971 - \tfrac{3}{5}\,H(1+,\,2-) - \tfrac{2}{5}\,H(1+,\,1-) \\
+        &= 0.971 - 0.551 - 0.400 = 0.020 .
+\end{align*}
+Gana Humedad, y sus dos subconjuntos ya son puros: con humedad alta
+(D1, D2, D8) no se jugó, con humedad normal (D9, D11) sí.
+
+\paso{Paso 4: la rama lluvioso.} El conjunto es
+$S_{\text{lluvioso}}$, también con $H = 0.971$:
+\begin{align*}
+    \text{Ganancia}(S_{\text{lluvioso}}, \text{Viento})
+        &= 0.971 - \tfrac{3}{5}\,H(3+,\,0-) - \tfrac{2}{5}\,H(0+,\,2-) \\
+        &= 0.971 - 0 - 0 = 0.971 , \\[0.4em]
+    \text{Ganancia}(S_{\text{lluvioso}}, \text{Humedad})
+        &= 0.971 - \tfrac{2}{5}\,H(1+,\,1-) - \tfrac{3}{5}\,H(2+,\,1-) \\
+        &= 0.971 - 0.400 - 0.551 = 0.020 , \\[0.4em]
+    \text{Ganancia}(S_{\text{lluvioso}}, \text{Temperatura})
+        &= 0.971 - \tfrac{3}{5}\,H(2+,\,1-) - \tfrac{2}{5}\,H(1+,\,1-) \\
+        &= 0.971 - 0.551 - 0.400 = 0.020 .
+\end{align*}
+Gana Viento, con dos subconjuntos puros: con viento débil (D4, D5, D10)
+se jugó, con viento fuerte (D6, D14) no. Ningún día lluvioso fue
+caluroso, así que en Temperatura la rama calurosa quedaría vacía; si
+Temperatura hubiera ganado, esa rama heredaría la clase mayoritaria,
+el caso base de $S_v$ vacío.
+
+Todas las hojas son puras y el algoritmo termina. El resultado es el
+árbol del principio de la clase. La Temperatura no aparece en ningún
+nodo: ID3 descubrió por su cuenta que, sabiendo el cielo, la humedad y
+el viento, no aporta nada.
+
+\begin{ojo}
+    ID3 es \textbf{voraz}: en cada nodo toma el mejor atributo de ese
+    momento y nunca se regresa a reconsiderarlo. No garantiza el árbol
+    más chico que clasifica bien al entrenamiento; encontrar ese árbol
+    es NP-completo (Hyafil y Rivest, 1976). La búsqueda voraz es lo
+    que lo vuelve rápido.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{El defecto: atributos con muchos valores}
+
+La ganancia de información favorece a los atributos con muchos
+valores. Con más ramas los subconjuntos son más chicos, y un
+subconjunto chico sale puro con facilidad, aunque sea por casualidad.
+
+\begin{ejemplo}[El número de día como atributo]
+    Si al conjunto se le agrega la columna Día, con valores D1 a D14,
+    cada valor tiene un solo ejemplo y cada subconjunto es puro:
+    \[
+        \text{Ganancia}(S, \text{Día})
+            = 0.940 - \sum_{v=1}^{14} \tfrac{1}{14} \cdot 0
+            = 0.940 ,
+    \]
+    la ganancia más grande posible, muy arriba de los $0.247$ de
+    Cielo. ID3 pondría Día en la raíz con $14$ hojas. Ese árbol
+    clasifica perfecto el entrenamiento y no sirve para ningún día
+    nuevo: un D15 no tiene rama por la cual bajar.
+\end{ejemplo}
+
+C4.5, el sucesor de ID3 del mismo Quinlan (1993), lo corrige con la
+\textbf{razón de ganancia}. Divide la ganancia entre la entropía de la
+partición misma, calculada sobre los tamaños de las ramas y sin mirar
+las clases:
+\[
+    \text{InfoDiv}(S, A) = -\sum_{v} \frac{\abs{S_v}}{\abs{S}}
+                              \log_2 \frac{\abs{S_v}}{\abs{S}} ,
+    \qquad
+    \text{RazónGanancia}(S, A)
+        = \frac{\text{Ganancia}(S, A)}{\text{InfoDiv}(S, A)} .
+\]
+La información de división crece con el número de ramas: vale $1$ para
+un atributo que parte en dos mitades y $\log_2 14 = 3.807$ para Día,
+que parte en $14$ pedazos de uno.
+
+\begin{center}
+\small
+\begin{tabular}{lccc}
+    \toprule
+    \textbf{Atributo} & \textbf{Ganancia} & \textbf{InfoDiv}
+        & \textbf{Razón de ganancia} \\
+    \midrule
+    Día         & $0.940$ & $3.807$ & $0.247$ \\
+    Cielo       & $0.247$ & $1.577$ & $0.156$ \\
+    Humedad     & $0.152$ & $1.000$ & $0.152$ \\
+    Viento      & $0.048$ & $0.985$ & $0.049$ \\
+    Temperatura & $0.029$ & $1.557$ & $0.019$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    La razón de ganancia reduce la ventaja de Día de $0.940$ contra
+    $0.247$ a $0.247$ contra $0.156$, pero no se la quita. Un
+    identificador (folio, matrícula, nombre) siempre gana porque parte
+    en conjuntos de un solo ejemplo, y se elimina del conjunto antes de
+    entrenar: no describe al ejemplo, solo lo nombra. El otro extremo
+    también falla: con una información de división cercana a cero la
+    razón se dispara sin que el atributo sirva, y por eso C4.5 solo
+    compara razones entre los atributos cuya ganancia es por lo menos
+    el promedio.
+\end{ojo}
+
+La entropía tampoco es la única medida de impureza. CART (Breiman y
+otros, 1984), y scikit-learn por omisión, usan el \textbf{índice de
+Gini},
+\[
+    \text{Gini}(S) = 1 - \sum_{i=1}^{k} p_i^2 ,
+\]
+que es la probabilidad de equivocarse si se etiqueta un ejemplo de $S$
+con una clase sorteada según las proporciones de $S$. Vale $0$ en un
+conjunto puro y $0.5$ con dos clases mitad y mitad. Para el conjunto
+de tenis, $1 - (9/14)^2 - (5/14)^2 = 0.459$. Gini y entropía casi
+siempre escogen el mismo atributo, y Gini se calcula sin logaritmos.
+
+% =====================================================================
+
+\subsection*{Atributos numéricos}
+
+ID3 solo maneja atributos con unos cuantos valores discretos. Con una
+temperatura en grados, cada valor distinto sería una rama, y se cae en
+el defecto de arriba. C4.5 convierte el atributo numérico en una
+pregunta binaria, $x < t$, y escoge el umbral $t$ por ganancia:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item Ordenar los ejemplos por el valor del atributo.
+    \item Tomar como candidatos los puntos medios entre valores
+          consecutivos donde cambia la clase. Un umbral entre dos
+          ejemplos de la misma clase nunca gana más que recorrerlo a la
+          frontera de clase más cercana.
+    \item Calcular la ganancia de cada candidato y quedarse con el
+          mejor.
+\end{enumerate}
+
+\begin{ejemplo}[Un umbral para la temperatura]
+    Seis días con su temperatura en grados Fahrenheit, ya ordenados:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Temperatura} & $40$ & $48$ & $60$ & $72$ & $80$ & $90$ \\
+        \textbf{Juega}       & no & no & sí & sí & sí & no \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La clase cambia entre $48$ y $60$, y entre $80$ y $90$, así que
+    los candidatos son $t = 54$ y $t = 85$. El conjunto es
+    $(3+,\,3-)$, con $H = 1$.
+    \begin{align*}
+        \text{Ganancia}(t = 54)
+            &= 1 - \tfrac{2}{6}\,H(0+,\,2-) - \tfrac{4}{6}\,H(3+,\,1-)
+             = 1 - 0 - \tfrac{4}{6}(0.811) = 0.459 , \\
+        \text{Ganancia}(t = 85)
+            &= 1 - \tfrac{5}{6}\,H(3+,\,2-) - \tfrac{1}{6}\,H(0+,\,1-)
+             = 1 - \tfrac{5}{6}(0.971) - 0 = 0.191 .
+    \end{align*}
+    Gana $t = 54$: el nodo pregunta ``¿temperatura $< 54$?''. A
+    diferencia de un atributo discreto, uno numérico se puede volver a
+    usar más abajo en el mismo camino con otro umbral.
+\end{ejemplo}
+
+Con atributos numéricos cada nodo corta el espacio con una recta
+paralela a un eje, así que el árbol parte el espacio en rectángulos y
+asigna una clase a cada uno. En la figura, cada número marca el corte
+que hace el nodo correspondiente:
+
+\begin{center}
+\begin{tikzpicture}[
+    baseline=(current bounding box.center),
+    level distance=1.45cm,
+    level 1/.style={sibling distance=2.8cm},
+    level 2/.style={sibling distance=2.4cm},
+    level 3/.style={sibling distance=2.0cm}]
+    \node[nodoDec] (n1) {estudio $< 3$}
+        child {node[hojaNo] {reprueba}
+               edge from parent node[ramaEtq] {sí}}
+        child {node[nodoDec] (n2) {sueño $< 5$}
+            child {node[nodoDec] (n3) {estudio $< 7$}
+                child {node[hojaNo] {reprueba}
+                       edge from parent node[ramaEtq] {sí}}
+                child {node[hojaSi] {aprueba}
+                       edge from parent node[ramaEtq] {no}}
+                edge from parent node[ramaEtq] {sí}}
+            child {node[hojaSi] {aprueba}
+                   edge from parent node[ramaEtq] {no}}
+            edge from parent node[ramaEtq] {no}};
+    \node[numEtq, anchor=east] at ([xshift=-3pt]n1.west) {1};
+    \node[numEtq, anchor=west] at ([xshift=3pt]n2.east) {2};
+    \node[numEtq, anchor=east] at ([xshift=-3pt]n3.west) {3};
+\end{tikzpicture}
+\hspace{0.8cm}
+\begin{tikzpicture}[baseline=(current bounding box.center)]
+\begin{axis}[
+    width=6.4cm, height=6.4cm, xmin=0, xmax=10, ymin=0, ymax=10,
+    xlabel={horas de estudio}, ylabel={horas de sueño},
+    xtick={0, 3, 7, 10}, ytick={0, 5, 10},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    axis on top]
+    \fill[fondoOjo] (axis cs:0, 0) rectangle (axis cs:3, 10);
+    \fill[fondoOjo] (axis cs:3, 0) rectangle (axis cs:7, 5);
+    \fill[fondoResultado] (axis cs:3, 5) rectangle (axis cs:10, 10);
+    \fill[fondoResultado] (axis cs:7, 0) rectangle (axis cs:10, 5);
+    \draw[thick, acento] (axis cs:3, 0) -- (axis cs:3, 10);
+    \draw[thick, acento] (axis cs:3, 5) -- (axis cs:10, 5);
+    \draw[thick, acento] (axis cs:7, 0) -- (axis cs:7, 5);
+    \addplot[only marks, mark=x, mark size=2.5pt, thick,
+             orange!70!black]
+        coordinates {(1, 2) (2, 7) (1.5, 4.5) (0.8, 8.5) (2.5, 1)
+                     (4, 2) (5.5, 3.5) (6, 1.5) (4.8, 4.2)};
+    \addplot[only marks, mark=*, mark size=1.8pt, green!45!black]
+        coordinates {(4.5, 7) (6, 8.5) (8, 6) (9, 8) (5, 6) (8, 2)
+                     (9, 3.5) (7.5, 4.2) (3.8, 9)};
+    \node[numEtq] at (axis cs:3, 7.5) {1};
+    \node[numEtq] at (axis cs:8.5, 5) {2};
+    \node[numEtq] at (axis cs:7, 2.5) {3};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{ojo}
+    Una frontera diagonal, como ``aprueba si estudio $+$ sueño
+    $> 10$'', un árbol solo la puede aproximar con una escalera de
+    muchos cortes. Un clasificador lineal la representa con un solo
+    hiperplano. Cuando las clases se separan en diagonal, el árbol
+    necesita muchos nodos y muchos datos para lo que un perceptrón
+    hace con tres pesos.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Sobreajuste}
+
+ID3 sigue partiendo hasta que cada hoja es pura. Si los datos tienen
+ruido, una etiqueta mal capturada o un atributo mal medido, el árbol
+crece ramas solo para acomodar esos ejemplos. El árbol se aprende el
+entrenamiento de memoria, ruido incluido, y generaliza peor.
+
+\begin{definicion}[Sobreajuste]
+    Un árbol $h$ \textbf{sobreajusta} el conjunto de entrenamiento si
+    existe otro árbol $h'$ que se equivoca más que $h$ en el
+    entrenamiento, pero menos que $h$ sobre la distribución completa
+    de los ejemplos.
+\end{definicion}
+
+\begin{ejemplo}[Un solo día mal etiquetado]
+    Al conjunto de tenis se le agrega
+    \[
+        \text{D15} = (\text{soleado},\ \text{calurosa},\
+                      \text{normal},\ \text{fuerte}), \quad
+        \text{Juega} = \text{no},
+    \]
+    un día que por la regla aprendida debió ser ``sí'' y que alguien
+    anotó mal. Cielo sigue en la raíz, pero la rama soleado ahora es
+    $(2+,\,4-)$ con $H = 0.918$, y las ganancias cambian de orden:
+    \begin{align*}
+        \text{Ganancia}(S_{\text{soleado}}, \text{Temperatura})
+            &= 0.918 - \tfrac{3}{6}\,H(0+,\,3-)
+                     - \tfrac{2}{6}\,H(1+,\,1-)
+                     - \tfrac{1}{6}\,H(1+,\,0-) \\
+            &= 0.918 - 0 - 0.333 - 0 = 0.585 , \\[0.4em]
+        \text{Ganancia}(S_{\text{soleado}}, \text{Humedad})
+            &= 0.918 - \tfrac{3}{6}\,H(0+,\,3-)
+                     - \tfrac{3}{6}\,H(2+,\,1-) \\
+            &= 0.918 - 0 - 0.459 = 0.459 .
+    \end{align*}
+    Ahora gana Temperatura, y la rama templada (D8 ``no'', D11 ``sí'')
+    necesita todavía otro nodo. Humedad y Viento empatan ahí y se
+    escoge Humedad:
+    \begin{center}
+    \begin{tikzpicture}[baseline=(current bounding box.north),
+        level distance=1.7cm,
+        level 1/.style={sibling distance=2.2cm}]
+        \node[nodoDec] {Humedad}
+            child {node[hojaNo] {no}
+                   edge from parent node[ramaEtq] {alta}}
+            child {node[hojaSi] {sí}
+                   edge from parent node[ramaEtq] {normal}};
+        \node[font=\small\itshape, anchor=south] at (0, 0.45)
+            {sin D15};
+    \end{tikzpicture}
+    \hspace{1.6cm}
+    \begin{tikzpicture}[baseline=(current bounding box.north),
+        level distance=1.7cm,
+        level 1/.style={sibling distance=3.0cm},
+        level 2/.style={sibling distance=2.0cm}]
+        \node[nodoDec] {Temperatura}
+            child {node[hojaNo] {no}
+                   edge from parent node[ramaEtq] {calurosa}}
+            child {node[nodoDec] {Humedad}
+                child {node[hojaNo] {no}
+                       edge from parent node[ramaEtq] {alta}}
+                child {node[hojaSi] {sí}
+                       edge from parent node[ramaEtq] {normal}}
+                edge from parent node[ramaEtq] {templada}}
+            child {node[hojaSi] {sí}
+                   edge from parent node[ramaEtq] {fresca}};
+        \node[font=\small\itshape, anchor=south] at (0, 0.45)
+            {con D15 mal etiquetado};
+    \end{tikzpicture}
+    \end{center}
+    Una sola etiqueta equivocada reorganizó la rama completa. El árbol
+    nuevo sigue clasificando bien los $15$ días, pero ahora dice que un
+    día soleado, caluroso, de humedad normal y viento débil no se
+    juega, cuando el árbol original decía que sí. La regla
+    ``soleado y caluroso, no se juega'' salió de D1 y D2, que además
+    tenían humedad alta, y del día mal anotado.
+\end{ejemplo}
+
+La forma típica del problema, con el tamaño del árbol creciendo
+conforme ID3 agrega nodos:
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=8.5cm, height=5.5cm, xmin=0, xmax=60, ymin=0.4, ymax=1.03,
+    xlabel={tamaño del árbol (número de nodos)},
+    ylabel={accuracy},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend pos=south east, legend style={font=\scriptsize},
+    ytick={0.4, 0.6, 0.8, 1}, clip=false]
+    \addplot[thick, acento, domain=1:60, samples=100]
+        {1 - 0.45*exp(-x/12)};
+    \addlegendentry{entrenamiento}
+    \addplot[thick, dashed, orange!80!black, domain=1:60, samples=100]
+        {0.55 + 0.27*(1 - exp(-x/8)) - 0.0035*x};
+    \addlegendentry{prueba}
+    \draw[gray, densely dotted] (axis cs:18, 0.4) -- (axis cs:18, 1.0);
+    \node[font=\scriptsize, anchor=south, text=gray]
+        at (axis cs:18, 1.03) {aquí conviene parar};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Curvas esquemáticas, en la forma de la figura 3.6 de Mitchell. En
+entrenamiento la accuracy sube siempre, porque cada nodo nuevo acomoda
+algún ejemplo más. En prueba sube mientras el árbol aprende la
+estructura real, y luego baja cuando los nodos nuevos solo acomodan
+ruido. Hay dos formas de quedarse cerca de la línea punteada: dejar de
+crecer el árbol a tiempo o crecerlo completo y luego recortarlo.
+
+% =====================================================================
+
+\subsection*{Pre-poda}
+
+La \textbf{pre-poda} (\textit{pre-pruning}) detiene el crecimiento
+antes de que las hojas sean puras. Un nodo se vuelve hoja, con la
+clase mayoritaria de sus ejemplos, cuando se cumple alguna condición
+de paro:
+
+\begin{itemize}[itemsep=0.2em]
+    \item el árbol llegó a una profundidad máxima;
+    \item al nodo llegan menos de cierto número de ejemplos;
+    \item la mejor ganancia disponible es menor que un umbral;
+    \item una prueba estadística, como la $\chi^2$, no encuentra
+          diferencia significativa entre la distribución de clases del
+          nodo y la de sus hijos.
+\end{itemize}
+
+Es barata: el árbol grande nunca se construye. El costo es que decide
+mirando un solo nivel hacia adelante.
+
+\begin{ejemplo}[El efecto horizonte]
+    La clase es el o exclusivo de dos atributos binarios:
+    \begin{center}
+    \small
+    \begin{tabular}{ccc}
+        \toprule
+        $A$ & $B$ & clase \\
+        \midrule
+        $0$ & $0$ & no \\
+        $0$ & $1$ & sí \\
+        $1$ & $0$ & sí \\
+        $1$ & $1$ & no \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Partir por $A$ deja dos subconjuntos $(1+,\,1-)$, igual de
+    revueltos que el original:
+    \[
+        \text{Ganancia}(S, A)
+            = 1 - \tfrac{2}{4}(1) - \tfrac{2}{4}(1) = 0 ,
+    \]
+    y lo mismo pasa con $B$. Una pre-poda que exige ganancia mínima de
+    $0.01$ se detiene en la raíz con una hoja que acierta la mitad. Si
+    se partiera por $A$ y luego por $B$, el árbol acertaría todo. La
+    pre-poda no puede ver que un corte inútil hoy hace posible uno
+    perfecto en el siguiente nivel.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Post-poda}
+
+La \textbf{post-poda} (\textit{post-pruning}) hace lo contrario: deja
+que ID3 crezca el árbol completo, con todo y sobreajuste, y después lo
+recorta de abajo hacia arriba. La versión más directa es la
+\textbf{poda por error reducido} (Quinlan, 1987), que aparta un
+conjunto de validación que el árbol no vio:
+
+\begin{enumerate}[itemsep=0.2em]
+    \item Para cada nodo interno, probar a reemplazar el subárbol que
+          cuelga de él por una hoja con la clase mayoritaria de los
+          ejemplos de entrenamiento que llegan a ese nodo.
+    \item Si con el reemplazo la accuracy en validación no baja, el
+          reemplazo se queda.
+    \item Repetir con el nodo cuya poda más mejore la validación, hasta
+          que cualquier poda adicional la empeore.
+\end{enumerate}
+
+\begin{ejemplo}[Podar un nodo]
+    A un nodo llegan $20$ ejemplos de validación. El subárbol que
+    cuelga de él, con sus $7$ hojas, acierta $13$. Una hoja sola con la
+    clase mayoritaria acertaría $15$. El subárbol se reemplaza por la
+    hoja: es más chico y se equivoca menos con datos que no vio. Si la
+    hoja acertara $12$, el subárbol se queda, porque está capturando
+    algo real.
+\end{ejemplo}
+
+Hay variantes que no gastan datos en un conjunto de validación. C4.5
+estima el error de cada hoja con una cota pesimista calculada sobre el
+mismo entrenamiento, y CART poda por \textbf{costo-complejidad}, que
+penaliza el número de hojas con un parámetro $\alpha$ escogido por
+validación cruzada.
+
+\begin{idea}
+    En la práctica la post-poda suele dar mejores árboles que la
+    pre-poda, porque decide con el árbol completo a la vista y no cae
+    en el efecto horizonte. El precio es construir primero el árbol
+    grande. La pre-poda es la opción cuando el árbol completo sería
+    demasiado caro de construir.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Bosques aleatorios}
+
+Un árbol tiene \textbf{alta varianza}: cambiar unos cuantos ejemplos
+de entrenamiento cambia un atributo cerca de la raíz y con él todo lo
+que cuelga, como pasó con D15. Un \textbf{bosque aleatorio}
+(\textit{random forest}, Breiman, 2001) aprovecha esa inestabilidad:
+entrena muchos árboles distintos y los pone a votar. Cada árbol se
+equivoca a su manera, y en la votación esos errores tienden a
+cancelarse.
+
+Para que los árboles salgan distintos hacen falta conjuntos de
+entrenamiento distintos, y solo hay uno. La solución es el
+\textbf{bagging}.
+
+\begin{definicion}[Bagging]
+    \textit{Bootstrap aggregating} (Breiman, 1996). Dado un conjunto
+    $S$ de $n$ ejemplos:
+    \begin{enumerate}[itemsep=0.2em]
+        \item Sortear $n$ ejemplos de $S$ \textbf{con reemplazo}. El
+              resultado $S_b$ es una \textbf{muestra bootstrap}: algunos
+              ejemplos salen repetidos y otros no salen.
+        \item Entrenar un árbol $h_b$ sobre $S_b$.
+        \item Repetir para $b = 1, \dots, B$.
+    \end{enumerate}
+    Un ejemplo nuevo $x$ se clasifica por mayoría de votos entre
+    $h_1(x), \dots, h_B(x)$. En regresión se promedian.
+\end{definicion}
+
+\begin{ejemplo}[Una muestra bootstrap de los días de tenis]
+    Se sortean $14$ números del $1$ al $14$ con reemplazo y salen
+    \[
+        2,\ 2,\ 3,\ 5,\ 7,\ 8,\ 8,\ 8,\ 10,\ 11,\ 13,\ 13,\ 13,\ 14 .
+    \]
+    La muestra tiene $14$ días, pero solo $9$ distintos: D8 y D13
+    aparecen tres veces cada uno, D2 dos, y D1, D4, D6, D9 y D12 no
+    aparecen. El árbol entrenado con esta muestra le da a D8 triple
+    peso y nunca ve D1.
+\end{ejemplo}
+
+La probabilidad de que un ejemplo dado no salga en ninguno de los $n$
+sorteos es
+\[
+    \left(1 - \frac{1}{n}\right)^n \xrightarrow[n \to \infty]{}
+    \frac{1}{e} \approx 0.368 ,
+\]
+así que cada muestra bootstrap contiene alrededor del $63.2\%$ de los
+ejemplos distintos. Con $n = 14$ la cuenta exacta da $64.6\%$, o sea
+unos $9$ días, como en el ejemplo.
+
+Un bosque aleatorio es bagging de árboles más una segunda fuente de
+azar: en \textbf{cada nodo} se sortean $m$ de los $p$ atributos, y el
+mejor se escoge solo entre esos $m$. Para clasificación lo usual es
+$m \approx \sqrt{p}$; con los cuatro atributos de tenis, $m = 2$. Los
+árboles se crecen completos, sin podar, porque la varianza de cada uno
+ya la controla la votación.
+
+\begin{center}
+\begin{tikzpicture}[
+    caja/.style={draw=acento, rounded corners=2pt, fill=fondoIdea,
+                 font=\small, minimum width=1.5cm,
+                 minimum height=0.65cm, align=center},
+    arbol/.style={draw=green!45!black, rounded corners=2pt,
+                  fill=fondoResultado, font=\small,
+                  minimum width=1.5cm, minimum height=0.65cm},
+    flecha/.style={->, thick, gray}]
+    \node[caja] (S) at (0, 0) {$S$, con $n$ ejemplos};
+    \node[caja] (S1) at (-4.2, -1.5) {$S_1$};
+    \node[caja] (S2) at (-1.4, -1.5) {$S_2$};
+    \node        (Sd) at ( 1.4, -1.5) {$\cdots$};
+    \node[caja] (SB) at ( 4.2, -1.5) {$S_B$};
+    \node[arbol] (h1) at (-4.2, -3.0) {árbol $h_1$};
+    \node[arbol] (h2) at (-1.4, -3.0) {árbol $h_2$};
+    \node        (hd) at ( 1.4, -3.0) {$\cdots$};
+    \node[arbol] (hB) at ( 4.2, -3.0) {árbol $h_B$};
+    \node[caja, fill=fondoOjo, draw=orange!70!black] (voto)
+        at (0, -4.5) {voto mayoritario};
+    \foreach \s in {S1, S2, Sd, SB} \draw[flecha] (S) -- (\s);
+    \draw[flecha] (S1) -- (h1);
+    \draw[flecha] (S2) -- (h2);
+    \draw[flecha] (Sd) -- (hd);
+    \draw[flecha] (SB) -- (hB);
+    \foreach \h in {h1, h2, hd, hB} \draw[flecha] (\h) -- (voto);
+    \node[font=\scriptsize, text=gray, anchor=west, align=left]
+        at (5.2, -0.75) {muestras bootstrap,\\con reemplazo};
+    \node[font=\scriptsize, text=gray, anchor=west, align=left]
+        at (5.2, -2.25) {en cada nodo, el mejor\\de $m$ atributos
+                         al azar};
+\end{tikzpicture}
+\end{center}
+
+\begin{algorithm}[H]
+\caption{Bosque aleatorio}
+\begin{algorithmic}[1]
+\Require $S$ con $n$ ejemplos y $p$ atributos, número de árboles $B$,
+         atributos por nodo $m$
+\For{$b \gets 1$ \Hasta $B$}
+  \State $S_b \gets$ $n$ ejemplos sorteados de $S$ con reemplazo
+  \State $h_b \gets$ árbol entrenado sobre $S_b$, sin podar; en cada
+         nodo se sortean $m$ atributos y se escoge el mejor de ellos
+\EndFor
+\State \Return $h(x) =$ la clase más votada entre
+       $h_1(x), \dots, h_B(x)$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[La votación]
+    Un bosque de cinco árboles recibe un día soleado, fresco, de
+    humedad alta y viento fuerte. Los votos salen no, no, sí, no, sí:
+    gana ``no'' tres a dos. Ningún árbol tiene que ser perfecto; basta
+    con que la mayoría acierte en cada ejemplo.
+\end{ejemplo}
+
+\begin{idea}
+    Por qué votar ayuda: si $25$ árboles acertaran cada uno el $70\%$
+    de las veces y se equivocaran \textbf{de forma independiente}, la
+    mayoría acertaría cuando al menos $13$ aciertan, y eso pasa con
+    probabilidad
+    \[
+        \sum_{k=13}^{25} \binom{25}{k}\, 0.7^k\, 0.3^{25-k} = 0.983 .
+    \]
+    La independencia es la condición que importa. Con bagging solo, si
+    un atributo es mucho mejor que los demás, como Cielo, todos los
+    árboles lo ponen en la raíz, se parecen entre sí y se equivocan en
+    los mismos días; votar no corrige un error que todos comparten. El
+    sorteo de atributos por nodo obliga a que en muchos nodos Cielo ni
+    siquiera esté disponible, y los árboles salen menos correlacionados.
+\end{idea}
+
+Cada ejemplo se queda fuera de alrededor del $37\%$ de las muestras
+bootstrap. Clasificar cada ejemplo solo con los árboles que no lo
+vieron da el \textbf{error fuera de la bolsa} (\textit{out-of-bag}),
+una estimación del error en datos nuevos que sale gratis, sin apartar
+un conjunto de validación. En la muestra del ejemplo, D1, D4, D6, D9 y
+D12 sirven para evaluar al árbol entrenado con ella.
+
+\begin{ojo}
+    Lo que se gana en accuracy se pierde en legibilidad. Un bosque de
+    $500$ árboles no se lee como reglas. Lo más cercano es la
+    \textbf{importancia de cada atributo}: cuánto bajó la impureza en
+    promedio en los nodos que lo usan, sumado sobre todos los árboles.
+    Dice qué atributos pesan, pero no cómo se combinan.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.6cm}%
+                 >{\raggedright\arraybackslash}p{6.4cm}}
+    \toprule
+    \textbf{Concepto} & \textbf{Fórmula o regla} & \textbf{Para qué} \\
+    \midrule
+    Entropía & $-\sum_i p_i \log_2 p_i$
+             & mide qué tan revuelto está un conjunto; $0$ si es puro \\
+    \addlinespace
+    Ganancia & $H(S) - \sum_v \frac{\abs{S_v}}{\abs{S}} H(S_v)$
+             & criterio de ID3 para escoger el atributo; favorece a
+               los de muchos valores \\
+    \addlinespace
+    Razón de ganancia & $\text{Ganancia} / \text{InfoDiv}$
+                      & criterio de C4.5; castiga partir en muchas
+                        ramas \\
+    \addlinespace
+    Gini & $1 - \sum_i p_i^2$
+         & impureza de CART y scikit-learn, sin logaritmos \\
+    \addlinespace
+    Pre-poda & parar al llegar a profundidad, tamaño o ganancia mínimos
+             & barata; sufre el efecto horizonte \\
+    \addlinespace
+    Post-poda & crecer completo y reemplazar subárboles por hojas si
+                la validación no empeora
+              & la que mejor funciona en la práctica \\
+    \addlinespace
+    Bagging & $B$ árboles sobre muestras bootstrap, voto mayoritario
+            & baja la varianza de un árbol solo \\
+    \addlinespace
+    Bosque aleatorio & bagging más $m \approx \sqrt{p}$ atributos al
+                       azar en cada nodo
+                     & árboles menos correlacionados; error fuera de la
+                       bolsa gratis \\
     \bottomrule
 \end{tabular}
 \end{center}
