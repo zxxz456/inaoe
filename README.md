@@ -21,13 +21,15 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.16.0
+* Version: 1.18.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       21/10/2026      Agregue ada/proyecto, que vive en su repo
+zxxz6       21/10/2026      Agregue matcomp/proyecto2, que vive en su repo
 zxxz6       26/09/2026      presentaciones/ con una carpeta por exposicion
 zxxz6       26/09/2026      Agregue machine_learning/presentaciones/
 zxxz6       23/09/2026      Agregue ada/examen/ y PlantillaSoluciones
@@ -73,6 +75,12 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     sobre los mismos arreglos aleatorios, de 2^1 hasta 2^25 elementos, y
     deja los tiempos en `.txt` separados por comas para graficarlos en
     la libreta.
+  - `proyecto/` - Proyecto 1: el problema CDVII (UVa 10138), cobro de
+    casetas de una autopista, resuelto con divide y vencerás. Es un repo
+    aparte, [zxxz456/proyecto_ada](https://github.com/zxxz456/proyecto_ada);
+    aquí solo vive su clon local, que está en el `.gitignore`.
+    - `README.md` - Enunciado del problema e integrantes.
+    - `presentacion.qmd` - Presentación en Quarto.
 - [fundamentos_aal/](fundamentos_aal/) - Fundamentos para el Análisis
   Automático de Lenguaje.
   - [apuntes/](fundamentos_aal/apuntes/) - Libreta de clase en LaTeX
@@ -120,6 +128,14 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [apuntes/](matcomp/apuntes/) - Libreta de clase en LaTeX
     (`libreta.tex`), una sección por sesión. La toma cruda de cada clase
     queda en [raw_notes/](matcomp/apuntes/raw_notes/).
+  - `proyecto2/` - Análisis descriptivo e inferencial de un conjunto de
+    datos, con reporte en formato Springer. Es un repo aparte,
+    [zxxz456/proyecto_mate](https://github.com/zxxz456/proyecto_mate);
+    aquí solo vive su clon local, que está en el `.gitignore`.
+    - `data/` - El conjunto de datos de TikTok Shop, comprimido con xz.
+    - `src/` - Notebooks de análisis.
+    - `doc/` - Reporte en LaTeX.
+    - `presentacion/` - Presentación en Quarto.
 - [seminario1/](seminario1/) - Seminario de Metodología.
   - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
     solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
