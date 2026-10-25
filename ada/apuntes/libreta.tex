@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 3.7.0
+%   * Version: 3.8.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       22/10/2026      Clase 22 Oct, grafos
 %  zxxz6       18/10/2026      Clase 15 Oct, programacion dinamica
 %  zxxz6       18/10/2026      Clase 13 Oct, multiplicacion de Karatsuba
 %  zxxz6       09/10/2026      Clase 8 Oct, voraces y divide y venceras
@@ -3803,6 +3804,990 @@ va \textbf{de bajada}.
   Mochila 0/1 & objetos $i$, capacidad $w$
               & $\max(K[i-1][w],\ v_i + K[i-1][w - w_i])$
               & $\Tht{n W}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% =====================================================================
+%  Clase 22 Oct - Grafos
+% =====================================================================
+
+\clase{Grafos}{22 de octubre de 2026}
+
+% Estilos de los grafos dibujados en esta clase
+\tikzset{
+  vert/.style={circle, draw=acento, fill=fondoIdea, font=\small,
+               minimum size=0.62cm, inner sep=0pt},
+  vertOk/.style={vert, draw=green!45!black, fill=fondoResultado},
+  arista/.style={draw=gray!70, thick},
+  aristaArbol/.style={draw=acento, line width=1.6pt},
+  aristaFuera/.style={draw=orange!80!black, thick, dashed},
+  peso/.style={font=\scriptsize, fill=white, inner sep=1.2pt},
+  dirigida/.style={->, >=stealth, thick, draw=gray!70},
+  nota/.style={font=\scriptsize, text=gray},
+}
+
+\begin{quick_sum}
+  Un grafo es un par de conjuntos, vértices y aristas, y modela
+  cualquier cosa hecha de objetos y relaciones entre pares de ellos:
+  ciudades y carreteras, páginas y ligas, estados de un juego y
+  jugadas. Se representa con matriz o con listas de adyacencia, y se
+  clasifica por sus aristas: dirigido o no, pesado o no, cíclico o
+  acíclico, simple o no, encajado o topológico, implícito o
+  explícito. Se vieron los dos recorridos, búsqueda en anchura (con
+  cola) y en profundidad (con recursión o pila), y tres problemas:
+  camino más corto con Dijkstra y Floyd, detección de ciclos con BFS y
+  árbol de expansión mínima con Kruskal. Todos los ejemplos usan los
+  mismos tres grafos.
+\end{quick_sum}
+
+\subsection*{Definición formal}
+
+\begin{definicion}[Grafo]
+  Un \textbf{grafo} es un par $G = (V, E)$ donde $V$ es un conjunto
+  finito de \textbf{vértices} y $E$ un conjunto de \textbf{aristas}.
+  En un grafo no dirigido cada arista es un par no ordenado de
+  vértices distintos,
+  \[
+    E \subseteq \set{\set{u, v} : u, v \in V,\ u \neq v} .
+  \]
+  Se escribe $n = \abs{V}$ y $m = \abs{E}$.
+\end{definicion}
+
+Si $\set{u, v} \in E$, los vértices $u$ y $v$ son
+\textbf{adyacentes} y la arista es \textbf{incidente} en los dos. El
+\textbf{grado} de un vértice, $\text{gr}(v)$, es el número de aristas
+incidentes en él.
+
+\begin{ejemplo}[El grafo $G$ de esta clase]
+  \[
+    V = \set{A, B, C, D, E, F, G} , \qquad
+    E = \set{\set{A,B}, \set{A,C}, \set{B,D}, \set{B,E},
+             \set{C,F}, \set{E,F}, \set{D,G}} .
+  \]
+  \begin{center}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \node[vert] (A) at (0, 0) {A};
+    \node[vert] (B) at (-1.6, -1.2) {B};
+    \node[vert] (C) at (1.6, -1.2) {C};
+    \node[vert] (D) at (-2.6, -2.4) {D};
+    \node[vert] (E) at (-0.6, -2.4) {E};
+    \node[vert] (F) at (1.6, -2.4) {F};
+    \node[vert] (G) at (-2.6, -3.6) {G};
+    \foreach \a/\b in {A/B, A/C, B/D, B/E, C/F, E/F, D/G}
+      \draw[arista] (\a) -- (\b);
+  \end{tikzpicture}
+  \end{center}
+  $n = 7$ y $m = 7$. Los grados son $\text{gr}(B) = 3$,
+  $\text{gr}(G) = 1$ y $2$ para los demás. Este grafo se usa en toda
+  la clase.
+\end{ejemplo}
+
+\begin{observacion}
+  Cada arista suma $1$ al grado de sus dos extremos, así que
+  $\sum_{v \in V} \text{gr}(v) = 2m$. En $G$:
+  $2 + 3 + 2 + 2 + 2 + 2 + 1 = 14 = 2 \cdot 7$. Y como hay a lo más
+  un par por cada dos vértices, $0 \leq m \leq n(n-1)/2$.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Matriz y listas de adyacencia}
+
+\begin{definicion}[Matriz de adyacencia]
+  Con los vértices numerados de $1$ a $n$, la matriz de adyacencia es
+  la matriz $A$ de $n \times n$ con
+  \[
+    A[i][j] =
+    \begin{cases}
+      1 & \text{si } \set{i, j} \in E , \\
+      0 & \text{si no.}
+    \end{cases}
+  \]
+\end{definicion}
+
+Para $G$, en el orden $A, \dots, G$:
+\[
+  \begin{array}{c|ccccccc}
+      & A & B & C & D & E & F & G \\ \hline
+    A & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+    B & 1 & 0 & 0 & 1 & 1 & 0 & 0 \\
+    C & 1 & 0 & 0 & 0 & 0 & 1 & 0 \\
+    D & 0 & 1 & 0 & 0 & 0 & 0 & 1 \\
+    E & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+    F & 0 & 0 & 1 & 0 & 1 & 0 & 0 \\
+    G & 0 & 0 & 0 & 1 & 0 & 0 & 0
+  \end{array}
+\]
+En un grafo no dirigido la matriz es simétrica, la diagonal es cero y
+la suma de cada renglón es el grado del vértice.
+
+La alternativa son las \textbf{listas de adyacencia}: para cada vértice,
+la lista de sus vecinos.
+\[
+  \begin{array}{ll}
+    A: B, C & \quad E: B, F \\
+    B: A, D, E & \quad F: C, E \\
+    C: A, F & \quad G: D \\
+    D: B, G &
+  \end{array}
+\]
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+  \toprule
+  \textbf{Operación} & \textbf{Matriz} & \textbf{Listas} \\
+  \midrule
+  Memoria & $\Tht{n^2}$ & $\Tht{n + m}$ \\
+  ¿Es $\set{u, v}$ arista? & $\Ord{1}$ & $\Ord{\text{gr}(u)}$ \\
+  Recorrer los vecinos de $u$ & $\Tht{n}$ & $\Tht{\text{gr}(u)}$ \\
+  Recorrer todo el grafo & $\Tht{n^2}$ & $\Tht{n + m}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+  Casi todos los grafos reales son \textbf{dispersos}: $m$ es mucho
+  menor que $n^2$. Un mapa de carreteras con un millón de cruces tiene
+  unos cuantos millones de tramos, no $10^{12}$. Ahí la matriz gasta
+  memoria en ceros y las listas ganan. La matriz conviene en grafos
+  \textbf{densos} o cuando se pregunta mucho si una arista existe.
+  Las complejidades de esta clase suponen listas.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Tipos de grafos}
+
+La clasificación es la de Skiena. Cada par describe una propiedad de
+las aristas o de cómo se guarda el grafo, y cambia qué algoritmo se
+puede usar.
+
+\subsubsection*{Dirigido o no dirigido}
+
+En un \textbf{grafo dirigido} las aristas son pares ordenados,
+$E \subseteq V \times V$: la arista $(u, v)$ va de $u$ a $v$ y no al
+revés. Cada vértice tiene \textbf{grado de entrada} y \textbf{grado de
+salida}, y la matriz de adyacencia deja de ser simétrica. Una calle de
+un solo sentido o \textit{A sigue a B} en una red social son
+dirigidas; una amistad no.
+
+\begin{center}
+\begin{tikzpicture}[baseline=(current bounding box.center)]
+  \node[vert] (n1) at (0, 0) {1};
+  \node[vert] (n2) at (2.6, 0) {2};
+  \node[vert] (n3) at (2.6, -2.2) {3};
+  \node[vert] (n4) at (0, -2.2) {4};
+  \draw[dirigida] (n1) to[bend left=15] (n2);
+  \draw[dirigida] (n2) to[bend left=15] (n1);
+  \draw[dirigida] (n1) to[bend right=15] (n4);
+  \draw[dirigida] (n4) to[bend right=15] (n1);
+  \draw[dirigida] (n2) -- (n3);
+  \draw[dirigida] (n3) -- (n1);
+  \draw[dirigida] (n3) -- (n4);
+\end{tikzpicture}
+\hspace{1.2cm}
+$\begin{array}{c|cccc}
+    & 1 & 2 & 3 & 4 \\ \hline
+  1 & 0 & 1 & 0 & 1 \\
+  2 & 1 & 0 & 1 & 0 \\
+  3 & 1 & 0 & 0 & 1 \\
+  4 & 1 & 0 & 0 & 0
+\end{array}$
+\end{center}
+
+$A[2][3] = 1$ pero $A[3][2] = 0$: de $2$ se llega a $3$ en un paso,
+de $3$ a $2$ no. El vértice $1$ tiene grado de entrada $3$ y de salida
+$2$. Este grafo se usa en Floyd.
+
+\subsubsection*{Pesado o no pesado}
+
+En un \textbf{grafo pesado} cada arista tiene un número,
+$w : E \to \R$: distancia, tiempo, costo. En la matriz se guarda el
+peso en lugar del $1$, y $\infty$ donde no hay arista.
+
+\begin{center}
+\begin{tikzpicture}[baseline=(current bounding box.center)]
+  \node[vert] (A) at (0, 0) {A};
+  \node[vert] (B) at (2, 1.4) {B};
+  \node[vert] (C) at (2, -1.4) {C};
+  \node[vert] (D) at (4.5, 1.4) {D};
+  \node[vert] (E) at (4.5, -1.4) {E};
+  \node[vert] (F) at (6.5, 0) {F};
+  \foreach \a/\b/\w in {A/B/4, A/C/2, B/C/1, B/D/5, C/D/8, C/E/10,
+                        D/E/2, D/F/6, E/F/3}
+    \draw[arista] (\a) -- node[peso] {\w} (\b);
+  \draw[arista] (A) to[out=75, in=150] node[peso] {7} (D);
+\end{tikzpicture}
+\hspace{0.8cm}
+$\begin{array}{c|cccccc}
+    & A & B & C & D & E & F \\ \hline
+  A & 0 & 4 & 2 & 7 & \infty & \infty \\
+  B & 4 & 0 & 1 & 5 & \infty & \infty \\
+  C & 2 & 1 & 0 & 8 & 10 & \infty \\
+  D & 7 & 5 & 8 & 0 & 2 & 6 \\
+  E & \infty & \infty & 10 & 2 & 0 & 3 \\
+  F & \infty & \infty & \infty & 6 & 3 & 0
+\end{array}$
+\end{center}
+
+En un grafo no pesado el camino más corto es el de menos aristas, y
+lo encuentra BFS. En uno pesado el de menos aristas puede no ser el
+más barato: de A a D la arista directa pesa $7$, y A, C, B, D pesa
+$2 + 1 + 5 = 8$. Hacen falta Dijkstra o Floyd. Este grafo se usa en
+Dijkstra y en Kruskal.
+
+\subsubsection*{Cíclico o acíclico}
+
+Un \textbf{ciclo} es un camino que regresa a su vértice de inicio sin
+repetir aristas. $G$ tiene uno: A, B, E, F, C, A. Un grafo sin ciclos
+es \textbf{acíclico}. Un no dirigido, conexo y acíclico es un
+\textbf{árbol}; un dirigido acíclico es un \textbf{DAG}
+(\textit{directed acyclic graph}), como las seriaciones de un plan de
+estudios.
+
+\begin{center}
+\begin{tikzpicture}[
+  materia/.style={draw=acento, rounded corners=2pt, fill=fondoIdea,
+                  font=\scriptsize, inner sep=3pt}]
+  \node[materia] (cal) at (0, 0) {Cálculo};
+  \node[materia] (pro) at (2.6, 0) {Probabilidad};
+  \node[materia] (alg) at (0, -1.1) {Álgebra lineal};
+  \node[materia] (prg) at (0, -2.2) {Programación};
+  \node[materia] (ada) at (2.6, -2.2) {ADA};
+  \node[materia] (ml) at (5.2, -1.1) {Aprendizaje};
+  \draw[dirigida] (cal) -- (pro);
+  \draw[dirigida] (pro) -- (ml);
+  \draw[dirigida] (alg) -- (ml);
+  \draw[dirigida] (prg) -- (ada);
+  \draw[dirigida] (ada) -- (ml);
+  \node[nota] at (2.6, 0.7) {DAG: ninguna flecha regresa};
+  \begin{scope}[xshift=8.6cm, yshift=0.2cm]
+    \node[vert] (r) at (0, 0) {};
+    \node[vert] (h1) at (-1, -1.1) {};
+    \node[vert] (h2) at (1, -1.1) {};
+    \node[vert] (h3) at (-1.6, -2.2) {};
+    \node[vert] (h4) at (-0.4, -2.2) {};
+    \node[vert] (h5) at (1, -2.2) {};
+    \foreach \a/\b in {r/h1, r/h2, h1/h3, h1/h4, h2/h5}
+      \draw[arista] (\a) -- (\b);
+    \node[nota] at (0, 0.5) {árbol: $m = n - 1$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+Un DAG siempre tiene un \textbf{orden topológico}: una forma de poner
+los vértices en fila con todas las flechas hacia adelante, el orden en
+que se pueden cursar las materias. Un grafo con un ciclo dirigido no
+lo tiene.
+
+\subsubsection*{Simple o no simple}
+
+Un grafo es \textbf{simple} si no tiene \textbf{lazos} (aristas de un
+vértice a sí mismo) ni \textbf{aristas múltiples} (dos aristas entre
+el mismo par). La definición formal de arriba, con conjuntos, solo
+admite grafos simples: $\set{u, u}$ no es un par y un conjunto no
+repite elementos. Para los no simples $E$ se vuelve un multiconjunto.
+
+\begin{center}
+\begin{tikzpicture}
+  \node[vert] (a) at (0, 0) {};
+  \node[vert] (b) at (1.6, 0) {};
+  \node[vert] (c) at (0.8, -1.3) {};
+  \draw[arista] (a) -- (b) -- (c) -- (a);
+  \node[nota] at (0.8, 0.6) {simple};
+  \begin{scope}[xshift=4.2cm]
+    \node[vert] (u) at (0, 0) {$u$};
+    \node[vert] (v) at (1.8, 0) {$v$};
+    \node[vert] (x) at (0.9, -1.3) {$w$};
+    \draw[arista] (u) to[bend left=25] (v);
+    \draw[arista] (u) to[bend right=25] (v);
+    \draw[arista] (v) -- (x);
+    \draw[arista] (x) to[loop below, looseness=6] (x);
+    \node[nota] at (0.9, 0.7) {no simple: arista múltiple y lazo};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+Una arista múltiple aparece, por ejemplo, con dos vuelos distintos
+entre las mismas ciudades. Casi todos los algoritmos suponen grafos
+simples: con aristas múltiples pesadas basta quedarse con la más
+barata.
+
+\subsubsection*{Encajado o topológico}
+
+Un grafo es \textbf{encajado} (\textit{embedded}) si a sus vértices y
+aristas se les asignan posiciones geométricas: un punto en el plano
+para cada vértice y una curva para cada arista. Un grafo es
+\textbf{topológico} si solo importa quién está unido con quién. Los
+dos dibujos de abajo son el mismo grafo topológico, $K_4$, con cuatro
+vértices todos unidos entre sí, en dos encajes distintos:
+
+\begin{center}
+\begin{tikzpicture}
+  \node[vert] (p1) at (0, 0) {1};
+  \node[vert] (p2) at (1.8, 0) {2};
+  \node[vert] (p3) at (1.8, -1.8) {3};
+  \node[vert] (p4) at (0, -1.8) {4};
+  \foreach \a/\b in {p1/p2, p2/p3, p3/p4, p4/p1, p1/p3, p2/p4}
+    \draw[arista] (\a) -- (\b);
+  \begin{scope}[xshift=5cm]
+    \node[vert] (q1) at (0, 0.2) {1};
+    \node[vert] (q2) at (-1.2, -1.9) {2};
+    \node[vert] (q3) at (1.2, -1.9) {3};
+    \node[vert] (q4) at (0, -1.15) {4};
+    \foreach \a/\b in {q1/q2, q2/q3, q3/q1, q4/q1, q4/q2, q4/q3}
+      \draw[arista] (\a) -- (\b);
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+A la izquierda dos aristas se cruzan; a la derecha ninguna. Como grafo
+topológico es lo mismo; como grafo encajado no. En un mapa la
+geometría es parte del problema: la distancia entre dos cruces sale de
+sus coordenadas, y se puede saber si dos calles se cruzan.
+
+\subsubsection*{Implícito o explícito}
+
+Un grafo \textbf{explícito} se construye completo y se guarda en una
+matriz o en listas antes de recorrerlo. Uno \textbf{implícito} no se
+guarda nunca: los vecinos de un vértice se generan cuando se
+necesitan, con una regla.
+
+\begin{ejemplo}[Permutaciones como grafo implícito]
+  Los vértices son las permutaciones de $1, 2, 3$, y dos son vecinas
+  si una sale de la otra intercambiando dos elementos contiguos:
+  \begin{center}
+  \begin{tikzpicture}
+    \foreach \p/\ang in {123/90, 213/30, 231/-30, 321/-90, 312/-150,
+                         132/150}
+      \node[vert, minimum size=0.85cm, font=\scriptsize] (p\p)
+        at (\ang:1.6) {\p};
+    \foreach \a/\b in {123/213, 213/231, 231/321, 321/312, 312/132,
+                       132/123}
+      \draw[arista] (p\a) -- (p\b);
+  \end{tikzpicture}
+  \end{center}
+  Los vecinos de $123$ son $213$ y $132$, y se obtienen con la regla
+  sin haber guardado nada. Con $n$ elementos el grafo tiene $n!$
+  vértices: con $n = 10$ son $3\,628\,800$, y solo se generan los que
+  el recorrido alcanza a visitar.
+\end{ejemplo}
+
+Los grafos implícitos aparecen en búsqueda: los estados de un
+rompecabezas, las posiciones de un juego, las soluciones parciales de
+un problema de backtracking.
+
+% =====================================================================
+
+\subsection*{Búsqueda en anchura (BFS)}
+
+Recorrer un grafo es visitar todos los vértices alcanzables desde uno
+inicial $s$, cada uno una sola vez. La \textbf{búsqueda en anchura}
+(\textit{breadth-first search}) visita por capas: primero $s$, luego
+todos sus vecinos, luego los vecinos de esos que no se han visto, y
+así. Para respetar ese orden usa una \textbf{cola}: el primer vértice
+descubierto es el primero que se procesa.
+
+\begin{algorithm}[H]
+\caption{\textsc{BFS}$(G, s)$}
+\begin{algorithmic}[1]
+\ForAll{$v \in V$}
+  \State $\text{visto}[v] \gets$ falso, \quad $d[v] \gets \infty$,
+         \quad $\pi[v] \gets$ nulo
+\EndFor
+\State $\text{visto}[s] \gets$ verdadero, \quad $d[s] \gets 0$
+\State $Q \gets$ cola vacía; \ \textsc{Encolar}$(Q, s)$
+\While{$Q$ no está vacía}
+  \State $u \gets \textsc{Desencolar}(Q)$
+  \ForAll{$v$ en la lista de adyacencia de $u$}
+    \If{\textbf{no} $\text{visto}[v]$}
+      \State $\text{visto}[v] \gets$ verdadero, \quad
+             $d[v] \gets d[u] + 1$, \quad $\pi[v] \gets u$
+      \State \textsc{Encolar}$(Q, v)$
+    \EndIf
+  \EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+$d[v]$ es la distancia en aristas desde $s$ y $\pi[v]$ el vértice desde
+el que se descubrió $v$, su \textbf{padre}.
+
+\begin{ejemplo}[BFS sobre $G$ desde A]
+  Los vecinos se recorren en orden alfabético.
+  \begin{center}
+  \small
+  \begin{tabular}{cclc}
+    \toprule
+    \textbf{Paso} & \textbf{Sale} & \textbf{Descubre}
+      & \textbf{Cola después} \\
+    \midrule
+    1 & A & B, C & [B, C] \\
+    2 & B & D, E (A ya visto) & [C, D, E] \\
+    3 & C & F (A ya visto) & [D, E, F] \\
+    4 & D & G (B ya visto) & [E, F, G] \\
+    5 & E & nada: B y F ya vistos & [F, G] \\
+    6 & F & nada: C y E ya vistos & [G] \\
+    7 & G & nada & [\,] \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Orden de visita: A, B, C, D, E, F, G. Las aristas por las que se
+  descubrió cada vértice forman el \textbf{árbol BFS}:
+  \begin{center}
+  \begin{tikzpicture}
+    \node[vert] (A) at (0, 0) {A};
+    \node[vert] (B) at (-1.6, -1.2) {B};
+    \node[vert] (C) at (1.6, -1.2) {C};
+    \node[vert] (D) at (-2.6, -2.4) {D};
+    \node[vert] (E) at (-0.6, -2.4) {E};
+    \node[vert] (F) at (1.6, -2.4) {F};
+    \node[vert] (G) at (-2.6, -3.6) {G};
+    \foreach \a/\b in {A/B, A/C, B/D, B/E, C/F, D/G}
+      \draw[aristaArbol] (\a) -- (\b);
+    \draw[aristaFuera] (E) -- (F);
+    \foreach \y/\d in {0/0, -1.2/1, -2.4/2, -3.6/3}
+      \node[nota, anchor=west] at (3.0, \y) {$d = \d$};
+  \end{tikzpicture}
+  \end{center}
+  Cada renglón es una capa: todos los vértices a la misma distancia de
+  A. La arista E--F, punteada, no está en el árbol: cuando se procesó
+  E, F ya estaba visto.
+\end{ejemplo}
+
+Cada vértice entra y sale de la cola una vez, $\Tht{n}$, y la lista de
+cada vértice se recorre una vez; las listas suman $2m$ entradas. En
+total BFS es $\Tht{n + m}$ con listas, y $\Tht{n^2}$ con matriz, porque
+encontrar los vecinos de cada vértice cuesta $\Tht{n}$.
+
+\begin{idea}
+  En un grafo no pesado, $d[v]$ es la longitud del camino más corto de
+  $s$ a $v$, y siguiendo $\pi$ de $v$ hacia atrás se reconstruye ese
+  camino. BFS ya resuelve el camino más corto cuando todas las aristas
+  valen lo mismo.
+\end{idea}
+
+\begin{ojo}
+  En clase se dijo que la complejidad depende del problema, y que en un
+  grafo completamente conectado es factorial. Hay que separar dos
+  cosas. BFS visita cada vértice y cada arista una vez: en el grafo
+  completo $K_n$, con $m = n(n-1)/2$, cuesta $\Tht{n^2}$, no
+  factorial. Lo factorial aparece cuando el problema exige recorrer
+  \textbf{caminos} y no vértices, como probar todas las rutas posibles:
+  desde un vértice de $K_5$ salen $65$ caminos simples y desde uno de
+  $K_{10}$, $986\,410$, alrededor de $e \cdot (n-1)!$. O cuando el
+  grafo es implícito y sus vértices son permutaciones, como el ejemplo
+  de arriba: BFS sigue siendo lineal en el tamaño del grafo, pero el
+  grafo mide $n!$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Búsqueda en profundidad (DFS)}
+
+La \textbf{búsqueda en profundidad} (\textit{depth-first search}) se
+mete lo más hondo que puede por un camino y solo regresa cuando se
+atora: cuando el vértice actual ya no tiene vecinos sin visitar. Se
+escribe de forma natural con recursión; la pila de llamadas hace el
+papel que la cola hace en BFS. La versión iterativa usa una pila
+explícita.
+
+\begin{algorithm}[H]
+\caption{\textsc{DFS-Visitar}$(G, u)$}
+\begin{algorithmic}[1]
+\State $t \gets t + 1$, \quad $\text{entra}[u] \gets t$, \quad
+       $\text{visto}[u] \gets$ verdadero
+\ForAll{$v$ en la lista de adyacencia de $u$}
+  \If{\textbf{no} $\text{visto}[v]$}
+    \State $\pi[v] \gets u$
+    \State \textsc{DFS-Visitar}$(G, v)$
+  \EndIf
+\EndFor
+\State $t \gets t + 1$, \quad $\text{sale}[u] \gets t$
+\end{algorithmic}
+\end{algorithm}
+
+$t$ es un reloj global que empieza en $0$. $\text{entra}[u]$ marca
+cuándo se descubrió $u$ y $\text{sale}[u]$ cuándo se terminó con todo
+lo que cuelga de él.
+
+\begin{ejemplo}[DFS sobre $G$ desde A]
+  Con los vecinos en orden alfabético, como en BFS:
+  \begin{itemize}[itemsep=0.1em]
+    \item A $\to$ B $\to$ D $\to$ G. G no tiene vecinos nuevos: se
+          termina, y se regresa a D, que tampoco tiene; se regresa a B.
+    \item B $\to$ E $\to$ F $\to$ C. Los vecinos de C son A y F, los dos
+          vistos: se termina C, luego F, E, B y A.
+  \end{itemize}
+  Orden de visita: A, B, D, G, E, F, C. El de BFS era A, B, C, D, E, F,
+  G.
+  \begin{center}
+  \begin{tikzpicture}
+    \node[vert] (A) at (0, 0) {A};
+    \node[vert] (B) at (0, -1.1) {B};
+    \node[vert] (D) at (-1.3, -2.2) {D};
+    \node[vert] (G) at (-1.3, -3.3) {G};
+    \node[vert] (E) at (1.3, -2.2) {E};
+    \node[vert] (F) at (1.3, -3.3) {F};
+    \node[vert] (C) at (1.3, -4.4) {C};
+    \foreach \a/\b in {A/B, B/D, D/G, B/E, E/F, F/C}
+      \draw[aristaArbol] (\a) -- (\b);
+    \draw[aristaFuera] (C) to[out=0, in=0, looseness=1.4] (A);
+    \foreach \v/\t/\lado in {A/1--14/left, B/2--13/left, D/3--6/left,
+                             G/4--5/left, E/7--12/left, F/8--11/left,
+                             C/9--10/left}
+      \node[nota, \lado=4pt] at (\v) {\t};
+  \end{tikzpicture}
+  \end{center}
+  Junto a cada vértice, $\text{entra}$--$\text{sale}$. El árbol DFS es
+  largo y angosto; el BFS, ancho y bajo. La arista C--A, punteada, es
+  una \textbf{arista de retroceso}: va de C a un antecesor suyo en el
+  árbol.
+\end{ejemplo}
+
+DFS también cuesta $\Tht{n + m}$ con listas, por la misma cuenta que
+BFS.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+  \toprule
+  & \textbf{BFS} & \textbf{DFS} \\
+  \midrule
+  Estructura & cola & pila o recursión \\
+  Orden & por capas, de cerca a lejos & un camino hasta el fondo \\
+  Árbol & ancho y bajo & largo y angosto \\
+  Útil para & camino más corto sin pesos & ciclos dirigidos, orden
+    topológico, componentes \\
+  Costo con listas & $\Tht{n + m}$ & $\Tht{n + m}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Camino más corto: Dijkstra}
+
+Dado un grafo pesado con pesos \textbf{no negativos} y un vértice $s$,
+el algoritmo de Dijkstra (1959) encuentra la distancia de $s$ a todos
+los demás. Mantiene una estimación $d[v]$ que empieza en $\infty$, y
+en cada paso fija el vértice no fijado con la $d$ más chica: esa ya es
+su distancia definitiva. Luego \textbf{relaja} las aristas que salen
+de él: si llegar a un vecino pasando por $u$ es más barato que lo que
+se tenía, se actualiza.
+
+\begin{algorithm}[H]
+\caption{\textsc{Dijkstra}$(G, w, s)$}
+\begin{algorithmic}[1]
+\ForAll{$v \in V$}
+  \State $d[v] \gets \infty$, \quad $\pi[v] \gets$ nulo
+\EndFor
+\State $d[s] \gets 0$
+\State $Q \gets$ montículo de mínimos con todos los vértices, con
+       llave $d$
+\While{$Q$ no está vacío}
+  \State $u \gets \textsc{Extraer-Min}(Q)$ \Comment{$d[u]$ queda fija}
+  \ForAll{$v$ adyacente a $u$}
+    \If{$d[u] + w(u, v) < d[v]$} \Comment{relajar}
+      \State $d[v] \gets d[u] + w(u, v)$, \quad $\pi[v] \gets u$
+      \State \textsc{Decrementar-Llave}$(Q, v, d[v])$
+    \EndIf
+  \EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[Dijkstra sobre el grafo pesado desde A]
+  Cada renglón muestra las $d$ después de procesar el vértice que
+  sale; en negritas, las ya fijas.
+  \begin{center}
+  \small
+  \begin{tabular}{ccccccccl}
+    \toprule
+    \textbf{Paso} & \textbf{Sale} & A & B & C & D & E & F
+      & \textbf{Relajaciones} \\
+    \midrule
+    0 & & $0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$
+      & \\
+    1 & A & $\mathbf{0}$ & $4$ & $2$ & $7$ & $\infty$ & $\infty$
+      & B, C, D desde A \\
+    2 & C & $\mathbf{0}$ & $3$ & $\mathbf{2}$ & $7$ & $12$ & $\infty$
+      & B: $2 + 1 = 3 < 4$; D: $10$, no \\
+    3 & B & $\mathbf{0}$ & $\mathbf{3}$ & $\mathbf{2}$ & $7$ & $12$
+      & $\infty$ & D: $3 + 5 = 8$, no mejora \\
+    4 & D & $\mathbf{0}$ & $\mathbf{3}$ & $\mathbf{2}$ & $\mathbf{7}$
+      & $9$ & $13$ & E: $7 + 2 = 9 < 12$ \\
+    5 & E & $\mathbf{0}$ & $\mathbf{3}$ & $\mathbf{2}$ & $\mathbf{7}$
+      & $\mathbf{9}$ & $12$ & F: $9 + 3 = 12 < 13$ \\
+    6 & F & $\mathbf{0}$ & $\mathbf{3}$ & $\mathbf{2}$ & $\mathbf{7}$
+      & $\mathbf{9}$ & $\mathbf{12}$ & \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  B empezó en $4$ por la arista directa y bajó a $3$ pasando por C. Los
+  padres quedan $\pi[B] = C$, $\pi[C] = A$, $\pi[D] = A$,
+  $\pi[E] = D$, $\pi[F] = E$, y el camino a F se lee de atrás hacia
+  adelante: F $\leftarrow$ E $\leftarrow$ D $\leftarrow$ A, o sea
+  A, D, E, F, con $7 + 2 + 3 = 12$.
+  \begin{center}
+  \begin{tikzpicture}
+    \node[vert] (A) at (0, 0) {A};
+    \node[vert] (B) at (2, 1.4) {B};
+    \node[vert] (C) at (2, -1.4) {C};
+    \node[vert] (D) at (4.5, 1.4) {D};
+    \node[vert] (E) at (4.5, -1.4) {E};
+    \node[vert] (F) at (6.5, 0) {F};
+    \foreach \a/\b/\w in {A/B/4, B/D/5, C/D/8, C/E/10, D/F/6}
+      \draw[arista] (\a) -- node[peso] {\w} (\b);
+    \foreach \a/\b/\w in {A/C/2, C/B/1, D/E/2, E/F/3}
+      \draw[aristaArbol] (\a) -- node[peso] {\w} (\b);
+    \draw[aristaArbol] (A) to[out=75, in=150] node[peso] {7} (D);
+    \foreach \v/\d/\lado in {A/0/left, B/3/below right, C/2/below,
+                             D/7/above right, E/9/below, F/12/right}
+      \node[nota, \lado=3pt] at (\v) {$d = \d$};
+  \end{tikzpicture}
+  \end{center}
+  En azul, el \textbf{árbol de caminos más cortos}: las aristas
+  $\pi[v]$--$v$.
+\end{ejemplo}
+
+\textbf{Por qué funciona.} Cuando $u$ sale con la $d$ mínima, cualquier
+otro camino a $u$ tendría que pasar por algún vértice no fijado, que
+ya tiene $d \geq d[u]$, y luego sumar aristas que no pueden restar. Es
+un algoritmo voraz: la elección del momento nunca se revisa, y con
+pesos no negativos no hace falta.
+
+\textbf{Costo.} Con montículo binario, $n$ extracciones de
+$\Ord{\log n}$ y hasta $m$ decrementos de $\Ord{\log n}$:
+$\Ord{(n + m) \log n}$. Es el montículo de la clase del 17 de
+septiembre. Con un arreglo, buscar el mínimo cuesta $\Tht{n}$ y el
+total es $\Tht{n^2}$, mejor cuando el grafo es denso.
+
+\begin{ojo}
+  Con un peso negativo Dijkstra falla. Con las aristas dirigidas
+  $A \to B$ de peso $2$, $A \to C$ de peso $3$ y $C \to B$ de peso
+  $-2$, desde A se fija B con $d = 2$ antes de procesar C. Pero
+  $A \to C \to B$ cuesta $3 - 2 = 1$. El argumento de arriba suponía
+  que sumar aristas nunca resta.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Camino más corto entre todos los pares: Floyd}
+
+Dijkstra da las distancias desde un vértice. Para tener las de todos
+contra todos se podría correr $n$ veces, pero Floyd (Floyd--Warshall,
+1962) lo resuelve con programación dinámica en tres ciclos, y admite
+pesos negativos siempre que no haya ciclos de peso negativo.
+
+Con los vértices numerados de $1$ a $n$, sea $d^{(k)}_{ij}$ el camino
+más corto de $i$ a $j$ que solo usa como intermedios vértices de
+$\set{1, \dots, k}$. Para pasar de $k - 1$ a $k$ hay dos opciones: el
+camino no usa $k$, y queda igual; o lo usa, y se parte en dos tramos
+que ya están calculados:
+\[
+  d^{(k)}_{ij} = \min\left( d^{(k-1)}_{ij},\
+                 d^{(k-1)}_{ik} + d^{(k-1)}_{kj} \right) ,
+\]
+con $d^{(0)}_{ij} = w(i, j)$, $0$ en la diagonal e $\infty$ si no hay
+arista. La respuesta es $D^{(n)}$.
+
+\begin{algorithm}[H]
+\caption{\textsc{Floyd}$(W, n)$}
+\begin{algorithmic}[1]
+\State $D \gets W$
+\For{$k \gets 1$ \Hasta $n$}
+  \For{$i \gets 1$ \Hasta $n$}
+    \For{$j \gets 1$ \Hasta $n$}
+      \State $D[i][j] \gets \min(D[i][j],\ D[i][k] + D[k][j])$
+    \EndFor
+  \EndFor
+\EndFor
+\State \Return $D$
+\end{algorithmic}
+\end{algorithm}
+
+Son $\Tht{n^3}$ operaciones y $\Tht{n^2}$ de memoria, porque la misma
+matriz se puede actualizar en su lugar.
+
+\begin{ejemplo}[Floyd sobre el grafo dirigido]
+  Los pesos de las aristas del grafo dirigido de arriba:
+  \begin{center}
+  \begin{tikzpicture}
+    \node[vert] (n1) at (0, 0) {1};
+    \node[vert] (n2) at (2.8, 0) {2};
+    \node[vert] (n3) at (2.8, -2.4) {3};
+    \node[vert] (n4) at (0, -2.4) {4};
+    \draw[dirigida] (n1) to[bend left=15] node[peso] {3} (n2);
+    \draw[dirigida] (n2) to[bend left=15] node[peso] {8} (n1);
+    \draw[dirigida] (n1) to[bend right=15] node[peso] {7} (n4);
+    \draw[dirigida] (n4) to[bend right=15] node[peso] {2} (n1);
+    \draw[dirigida] (n2) -- node[peso] {2} (n3);
+    \draw[dirigida] (n3) -- node[peso] {5} (n1);
+    \draw[dirigida] (n3) -- node[peso] {1} (n4);
+  \end{tikzpicture}
+  \end{center}
+  En negritas, las casillas que cambian en cada paso:
+  \[
+    D^{(0)} = \begin{pmatrix}
+      0 & 3 & \infty & 7 \\
+      8 & 0 & 2 & \infty \\
+      5 & \infty & 0 & 1 \\
+      2 & \infty & \infty & 0
+    \end{pmatrix}
+    \qquad
+    D^{(1)} = \begin{pmatrix}
+      0 & 3 & \infty & 7 \\
+      8 & 0 & 2 & \mathbf{15} \\
+      5 & \mathbf{8} & 0 & 1 \\
+      2 & \mathbf{5} & \infty & 0
+    \end{pmatrix}
+    \qquad
+    D^{(2)} = \begin{pmatrix}
+      0 & 3 & \mathbf{5} & 7 \\
+      8 & 0 & 2 & 15 \\
+      5 & 8 & 0 & 1 \\
+      2 & 5 & \mathbf{7} & 0
+    \end{pmatrix}
+  \]
+  \[
+    D^{(3)} = \begin{pmatrix}
+      0 & 3 & 5 & \mathbf{6} \\
+      \mathbf{7} & 0 & 2 & \mathbf{3} \\
+      5 & 8 & 0 & 1 \\
+      2 & 5 & 7 & 0
+    \end{pmatrix}
+    \qquad
+    D^{(4)} = \begin{pmatrix}
+      0 & 3 & 5 & 6 \\
+      \mathbf{5} & 0 & 2 & 3 \\
+      \mathbf{3} & \mathbf{6} & 0 & 1 \\
+      2 & 5 & 7 & 0
+    \end{pmatrix}
+  \]
+  Algunos cambios, uno por paso:
+  \begin{itemize}[itemsep=0.1em]
+    \item $k = 1$: de $3$ a $2$ no había arista; pasando por $1$,
+          $d_{31} + d_{12} = 5 + 3 = 8$.
+    \item $k = 2$: de $1$ a $3$, $d_{12} + d_{23} = 3 + 2 = 5$.
+    \item $k = 3$: de $2$ a $4$ bajó de $15$ a $d_{23} + d_{34} =
+          2 + 1 = 3$.
+    \item $k = 4$: de $3$ a $1$ bajó de $5$ a $d_{34} + d_{41} =
+          1 + 2 = 3$.
+  \end{itemize}
+  $D^{(4)}$ tiene todas las distancias. Por ejemplo
+  $d_{32} = 6$ es el camino $3 \to 4 \to 1 \to 2$, con
+  $1 + 2 + 3 = 6$.
+\end{ejemplo}
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+  \toprule
+  & \textbf{Dijkstra} & \textbf{Floyd} \\
+  \midrule
+  Responde & desde un vértice & todos los pares \\
+  Pesos negativos & no & sí, sin ciclos negativos \\
+  Técnica & voraz & programación dinámica \\
+  Costo & $\Ord{(n + m)\log n}$ & $\Tht{n^3}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Encontrar ciclos con BFS}
+
+En un grafo no dirigido, BFS encuentra un ciclo en cuanto ve una
+arista que no es del árbol: al procesar $u$, un vecino $v$ que ya fue
+visto y que no es el padre de $u$. El padre no cuenta porque la arista
+$\set{u, \pi[u]}$ es justo por la que se llegó a $u$. Basta cambiar el
+\textbf{si} de BFS:
+
+\begin{algorithm}[H]
+\caption{Cambio a \textsc{BFS} para detectar un ciclo}
+\begin{algorithmic}[1]
+\ForAll{$v$ en la lista de adyacencia de $u$}
+  \If{\textbf{no} $\text{visto}[v]$}
+    \State \ldots igual que en BFS \ldots
+  \ElsIf{$v \neq \pi[u]$}
+    \State \Return hay un ciclo que pasa por la arista $\set{u, v}$
+  \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[El ciclo de $G$]
+  En el paso 5 de BFS sale E y su vecino F ya está visto, pero
+  $\pi[E] = B \neq F$. Hay ciclo. Para recuperarlo se sube por los
+  padres desde los dos extremos hasta que se encuentran:
+  \[
+    E \to B \to A , \qquad F \to C \to A .
+  \]
+  Se juntan en A, y el ciclo es A, B, E, F, C, A: la arista punteada
+  del árbol BFS cierra la vuelta.
+\end{ejemplo}
+
+\begin{ojo}
+  En un grafo dirigido esta regla da falsos positivos. Con
+  $A \to B$, $A \to C$ y $B \to C$, BFS desde A llega a C dos veces y
+  la regla dice ciclo, pero no hay ningún ciclo dirigido. Para grafos
+  dirigidos se usa DFS, donde un ciclo es una arista de retroceso, o el
+  algoritmo de Kahn: con una cola se van quitando los vértices de grado
+  de entrada $0$; si alguno nunca llega a $0$, hay ciclo. En el grafo de
+  Floyd ningún vértice empieza con grado de entrada $0$, así que la
+  cola nace vacía: tiene ciclos, como $1 \to 2 \to 1$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Árbol de expansión mínima: Kruskal}
+
+\begin{definicion}[Árbol de expansión mínima]
+  En un grafo no dirigido, conexo y pesado, un \textbf{árbol de
+  expansión} es un subconjunto de aristas que conecta todos los
+  vértices sin formar ciclos; tiene exactamente $n - 1$ aristas. El
+  de \textbf{expansión mínima} (MST, \textit{minimum spanning tree})
+  es el de menor peso total.
+\end{definicion}
+
+Es el problema de conectar $n$ ciudades con cable gastando lo menos
+posible. El algoritmo de Kruskal (1956) es voraz: ordena las aristas de
+la más ligera a la más pesada y las agrega en ese orden, saltándose las
+que cerrarían un ciclo.
+
+\begin{algorithm}[H]
+\caption{\textsc{Kruskal}$(G, w)$}
+\begin{algorithmic}[1]
+\State $T \gets \emptyset$
+\ForAll{$v \in V$}
+  \State \textsc{Crear-Conjunto}$(v)$
+\EndFor
+\State ordenar $E$ por peso, de menor a mayor
+\ForAll{$\set{u, v} \in E$, en ese orden}
+  \If{$\textsc{Encontrar}(u) \neq \textsc{Encontrar}(v)$}
+    \State $T \gets T \cup \set{\set{u, v}}$
+    \State \textsc{Unir}$(u, v)$
+  \EndIf
+\EndFor
+\State \Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+Para saber si una arista cierra un ciclo se usa una estructura de
+\textbf{conjuntos disjuntos} (\textit{union-find}): cada vértice
+empieza en su propio conjunto, \textsc{Encontrar} dice en qué conjunto
+está un vértice y \textsc{Unir} junta dos. Si $u$ y $v$ ya están en el
+mismo conjunto, ya hay un camino entre ellos y la arista cerraría un
+ciclo.
+
+\begin{ejemplo}[Kruskal sobre el grafo pesado]
+  Las aristas en orden de peso:
+  \begin{center}
+  \small
+  \begin{tabular}{cclll}
+    \toprule
+    \textbf{Arista} & \textbf{Peso} & \textbf{¿Entra?}
+      & \textbf{Componentes después} \\
+    \midrule
+    B--C & $1$ & sí & \{A\} \{B, C\} \{D\} \{E\} \{F\} \\
+    A--C & $2$ & sí & \{A, B, C\} \{D\} \{E\} \{F\} \\
+    D--E & $2$ & sí & \{A, B, C\} \{D, E\} \{F\} \\
+    E--F & $3$ & sí & \{A, B, C\} \{D, E, F\} \\
+    A--B & $4$ & no: A y B ya están juntos & \\
+    B--D & $5$ & sí & \{A, B, C, D, E, F\} \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Con $n - 1 = 5$ aristas el árbol está completo, y las que faltan
+  (D--F, A--D, C--D, C--E) cerrarían ciclos. Peso total:
+  $1 + 2 + 2 + 3 + 5 = 13$.
+  \begin{center}
+  \begin{tikzpicture}[scale=0.82, transform shape]
+    \foreach \pre/\x in {s/0, k/8.2} {
+      \begin{scope}[xshift=\x cm, name prefix=\pre-]
+        \node[vert] (A) at (0, 0) {A};
+        \node[vert] (B) at (2, 1.4) {B};
+        \node[vert] (C) at (2, -1.4) {C};
+        \node[vert] (D) at (4.5, 1.4) {D};
+        \node[vert] (E) at (4.5, -1.4) {E};
+        \node[vert] (F) at (6.5, 0) {F};
+        \foreach \a/\b in {A/B, B/C, B/D, C/D, C/E, D/E, D/F, E/F, A/C}
+          \draw[arista] (\a) -- (\b);
+        \draw[arista] (A) to[out=75, in=150] (D);
+      \end{scope}
+    }
+    \foreach \a/\b in {A/C, C/B, D/E, E/F}
+      \draw[aristaArbol] (s-\a) -- (s-\b);
+    \draw[aristaArbol] (s-A) to[out=75, in=150] (s-D);
+    \foreach \a/\b in {B/C, A/C, D/E, E/F, B/D}
+      \draw[aristaArbol] (k-\a) -- (k-\b);
+    \node[font=\small] at (3.25, -2.3)
+      {Caminos más cortos desde A: peso 15};
+    \node[font=\small] at (11.45, -2.3) {Expansión mínima: peso 13};
+  \end{tikzpicture}
+  \end{center}
+\end{ejemplo}
+
+\begin{ojo}
+  El árbol de caminos más cortos de Dijkstra y el árbol de expansión
+  mínima no son lo mismo, aunque los dos tengan $n - 1$ aristas. El de
+  Dijkstra minimiza la distancia de A a cada vértice; el MST, el peso
+  total. En el MST el camino de A a D es A, C, B, D, con $8$; en el de
+  Dijkstra es la arista directa, con $7$. Pero el MST pesa $13$ y el de
+  Dijkstra $15$.
+\end{ojo}
+
+\textbf{Por qué funciona.} Si se parte el conjunto de vértices en dos
+lados, la arista más ligera que cruza de un lado al otro está en algún
+MST: cualquier árbol que use otra arista de cruce se puede mejorar
+cambiándola por esa. Cada arista que Kruskal acepta es la más ligera
+entre dos componentes, así que siempre es segura. Es la misma idea
+voraz de la clase del 8 de octubre.
+
+\textbf{Costo.} Ordenar las aristas cuesta $\Ord{m \log m}$. Con
+unión por rango y compresión de caminos, las $\Ord{m}$ operaciones de
+\textsc{Encontrar} y \textsc{Unir} cuestan prácticamente
+$\Ord{m}$. Domina el ordenamiento: $\Ord{m \log m} = \Ord{m \log n}$,
+porque $m \leq n^2$.
+
+\begin{observacion}
+  El otro algoritmo clásico es el de Prim: hace crecer un solo árbol
+  desde un vértice, agregando siempre la arista más ligera que sale de
+  él. Es casi idéntico a Dijkstra, cambiando la llave $d[u] + w(u, v)$
+  por solo $w(u, v)$.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.4cm}%
+                 >{\raggedright\arraybackslash}p{3.2cm}l}
+  \toprule
+  \textbf{Algoritmo} & \textbf{Resuelve} & \textbf{Estructura}
+    & \textbf{Costo} \\
+  \midrule
+  BFS & recorrido por capas; camino más corto sin pesos; ciclos en no
+        dirigidos & cola & $\Tht{n + m}$ \\
+  \addlinespace
+  DFS & recorrido en profundidad; ciclos dirigidos; orden topológico
+      & pila o recursión & $\Tht{n + m}$ \\
+  \addlinespace
+  Dijkstra & caminos más cortos desde un vértice, pesos $\geq 0$
+           & montículo & $\Ord{(n + m) \log n}$ \\
+  \addlinespace
+  Floyd & caminos más cortos entre todos los pares
+        & matriz & $\Tht{n^3}$ \\
+  \addlinespace
+  Kruskal & árbol de expansión mínima & conjuntos disjuntos
+          & $\Ord{m \log n}$ \\
   \bottomrule
 \end{tabular}
 \end{center}
