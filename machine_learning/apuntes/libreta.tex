@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.10.0
+%   * Version: 1.11.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       22/10/2026      Clase 22 Oct, seleccion de atributos
 %  zxxz6       21/10/2026      Clase 20 Oct, arboles de decision
 %  zxxz6       18/10/2026      Clase 15 Oct, medidas de desempeno
 %  zxxz6       09/10/2026      Clase 8 Oct, clasificador Naive Bayes
@@ -5580,6 +5581,1183 @@ D12 sirven para evaluar al árbol entrenado con ella.
                        azar en cada nodo
                      & árboles menos correlacionados; error fuera de la
                        bolsa gratis \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\newpage
+
+% =====================================================================
+%  Clase - Seleccion de atributos
+% =====================================================================
+
+\clase{Selección de atributos}{22 de octubre de 2026}
+
+% Estilos de los diagramas de esta clase
+\tikzset{
+    cajaFlujo/.style={draw=acento, rounded corners=2pt, fill=fondoIdea,
+                      font=\small, align=center, minimum height=0.9cm,
+                      inner xsep=5pt},
+    flechaFlujo/.style={->, thick, gray},
+    subconj/.style={draw=gray!70, rounded corners=2pt, fill=white,
+                    font=\scriptsize, align=center,
+                    minimum width=1.15cm, inner sep=2pt},
+    bitCaja/.style={draw=gray!70, minimum size=0.55cm,
+                    font=\small\ttfamily},
+}
+
+\begin{quick_sum}
+    Seleccionar atributos es quedarse con un subconjunto de las
+    variables originales que discrimine igual o mejor que todas. No es
+    lo mismo que extraer variables, que construye atributos nuevos
+    combinando los originales. Se selecciona porque hay atributos
+    irrelevantes o redundantes que estorban al clasificador, encarecen
+    las mediciones e impiden visualizar los datos. Hay dos familias: los
+    \textbf{filtros}, que califican los atributos con una medida sobre
+    los datos sin usar el clasificador (correlación de Pearson,
+    información mutua, RELIEF, clasificador de un solo atributo,
+    árboles de decisión), y los \textbf{wrappers}, que usan al
+    clasificador para evaluar subconjuntos y por eso son un problema
+    combinatorio que se ataca con heurísticas: selección hacia adelante
+    y hacia atrás, búsquedas secuenciales generalizadas, búsqueda
+    flotante y algoritmos genéticos.
+\end{quick_sum}
+
+\subsection*{Qué es la selección de atributos}
+
+\begin{definicion}[Selección de atributos]
+    Dado un conjunto de $n$ atributos $X = \{x_1, \dots, x_n\}$ y un
+    criterio $J$ que mide qué tan bueno es un subconjunto, encontrar
+    \[
+        S^* = \arg\max_{S \subseteq X,\ \abs{S} = d} J(S) ,
+        \qquad d < n .
+    \]
+    Los atributos elegidos se usan tal cual; los demás se descartan.
+\end{definicion}
+
+El criterio $J$ puede ser una medida calculada directo sobre los datos
+o la exactitud de un clasificador entrenado con el subconjunto. Esa
+elección separa a las dos familias de métodos.
+
+La \textbf{extracción} de variables resuelve el mismo problema, bajar
+la dimensión, por otro camino: construye $d$ atributos nuevos como
+funciones de los $n$ originales, $y = f(x_1, \dots, x_n)$. PCA y los
+autoencoders de la clase del 24 de septiembre son extracción.
+
+\begin{center}
+\begin{tikzpicture}[
+    col/.style={draw=gray!70, fill=white, font=\small,
+                minimum width=1.55cm, minimum height=0.7cm,
+                text height=1.6ex, text depth=0.4ex},
+    elegida/.style={col, draw=green!45!black, fill=fondoResultado},
+    nueva/.style={col, draw=acento, fill=fondoIdea,
+                  minimum width=3.1cm}]
+    \node[font=\small\bfseries] at (2.4, 1.0) {Selección};
+    \node[elegida] at (0, 0) {altura};
+    \node[elegida] at (1.6, 0) {peso};
+    \node[col, text=gray] at (3.2, 0) {edad};
+    \node[col, text=gray] at (4.8, 0) {folio};
+    \draw[flechaFlujo] (0.8, -0.5) -- (0.8, -1.1);
+    \node[elegida] at (0, -1.6) {altura};
+    \node[elegida] at (1.6, -1.6) {peso};
+    \node[font=\scriptsize, text=gray, align=left, anchor=west]
+        at (2.5, -1.6) {las mismas columnas,\\con su significado};
+    \begin{scope}[xshift=7.6cm]
+        \node[font=\small\bfseries] at (2.4, 1.0) {Extracción};
+        \node[col] at (0, 0) {altura};
+        \node[col] at (1.6, 0) {peso};
+        \node[col] at (3.2, 0) {edad};
+        \node[col] at (4.8, 0) {folio};
+        \draw[flechaFlujo] (0.8, -0.5) -- (1.55, -1.1);
+        \node[nueva] at (1.55, -1.6) {IMC $= \text{peso} / \text{altura}^2$};
+        \node[font=\scriptsize, text=gray, align=left, anchor=west]
+            at (3.2, -1.6) {una columna\\nueva};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Riesgo de diabetes]
+    Para predecir riesgo de diabetes se tienen altura, peso, edad y el
+    folio del expediente. Seleccionar es quedarse con altura y peso: el
+    médico sigue viendo dos medidas que entiende. Extraer es construir
+    el índice de masa corporal, $\text{peso}/\text{altura}^2$, o una
+    componente principal como $0.71\,\text{altura} + 0.70\,\text{peso}$:
+    pueden discriminar mejor, pero ya no son algo que se mida
+    directamente.
+\end{ejemplo}
+
+\begin{idea}
+    La selección conserva el significado de los atributos y ahorra
+    medirlos: si el folio y la edad se descartan, ya no hay que
+    capturarlos. La extracción suele comprimir mejor, pero necesita
+    todos los atributos originales para calcular los nuevos, y lo que
+    produce es más difícil de interpretar.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Por qué seleccionar}
+
+Lo natural sería pensar que más atributos nunca estorban: en el peor
+caso el clasificador ignora los que no sirven. En la práctica no los
+ignora.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Atributos irrelevantes.} No ayudan a discriminar entre
+          clases y meten ruido. En un clasificador por distancia pesan
+          lo mismo que los buenos.
+    \item \textbf{Atributos redundantes.} Repiten información de otro,
+          como la temperatura en Celsius y en Fahrenheit. No agregan
+          nada y cuestan medirlos y procesarlos.
+    \item \textbf{Pocos datos para muchas dimensiones.} Con $N$
+          ejemplos fijos, cada atributo nuevo agrega parámetros que
+          estimar con los mismos datos. Pasado cierto punto, el
+          clasificador empeora.
+    \item \textbf{Costo e interpretación.} Menos atributos es entrenar
+          más rápido, medir menos y un modelo que se puede explicar.
+    \item \textbf{Visualización.} Para ver los datos se escogen dos o
+          tres atributos del total y se estudian en una gráfica. Escoger
+          bien cuáles es un problema de selección.
+\end{itemize}
+
+\begin{ejemplo}[Un atributo de ruido confunde al vecino más cercano]
+    La clase depende solo de $x_1$: los azules están cerca de $x_1 = 1$
+    y los rojos cerca de $x_1 = 3$. El atributo $x_2$ es ruido entre
+    $0$ y $100$. Se clasifica $q = (1.0,\ 50)$, que es azul, con dos
+    ejemplos de entrenamiento:
+    \[
+        a = (1.2,\ 90)\ \text{azul}, \qquad b = (3.0,\ 52)\ \text{rojo}.
+    \]
+    Con los dos atributos,
+    \[
+        d(q, a) = \sqrt{0.2^2 + 40^2} = 40.0 , \qquad
+        d(q, b) = \sqrt{2^2 + 2^2} = 2.83 ,
+    \]
+    y 1-NN dice rojo. Con solo $x_1$, $d(q, a) = 0.2$ y $d(q, b) = 2$,
+    y dice azul. Normalizar los rangos arregla la escala, pero no el
+    problema: el ruido sigue sumando a la distancia una cantidad al
+    azar.
+\end{ejemplo}
+
+El tercer punto se conoce como el \textbf{fenómeno de Hughes} o la
+\textbf{maldición de la dimensionalidad}. Con el número de ejemplos
+fijo, la exactitud primero sube al agregar atributos útiles y luego
+baja:
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=8cm, height=5cm, xmin=0, xmax=40, ymin=0.5, ymax=1.05,
+    xlabel={número de atributos}, ylabel={exactitud en prueba},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend pos=north east, legend style={font=\scriptsize},
+    ytick={0.5, 0.7, 0.9}, xtick={0, 10, 20, 30, 40}]
+    \addplot[thick, acento, domain=1:40, samples=100]
+        {0.5 + 0.38*(1 - exp(-x/5)) - 0.007*x};
+    \addlegendentry{$N$ ejemplos}
+    \addplot[thick, dashed, orange!80!black, domain=1:40, samples=100]
+        {0.5 + 0.40*(1 - exp(-x/5)) - 0.0025*x};
+    \addlegendentry{$4N$ ejemplos}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Curvas esquemáticas. Con más ejemplos el máximo se recorre a la
+derecha: se pueden usar más atributos antes de que empiecen a estorbar.
+
+% =====================================================================
+
+\subsection*{Dos familias: filtros y wrappers}
+
+\begin{center}
+\begin{tikzpicture}
+    \node[font=\small\bfseries, anchor=west] at (-1.2, 1.0) {Filtro};
+    \node[cajaFlujo] (f1) at (0, 0) {todos los\\atributos};
+    \node[cajaFlujo] (f2) at (3.5, 0)
+        {medida sobre los datos\\(correlación, información,\\distancia)};
+    \node[cajaFlujo] (f3) at (7.0, 0) {subconjunto};
+    \node[cajaFlujo, fill=fondoResultado, draw=green!45!black] (f4)
+        at (9.8, 0) {clasificador};
+    \draw[flechaFlujo] (f1) -- (f2);
+    \draw[flechaFlujo] (f2) -- (f3);
+    \draw[flechaFlujo] (f3) -- (f4);
+
+    \node[font=\small\bfseries, anchor=west] at (-1.2, -1.8) {Wrapper};
+    \node[cajaFlujo] (w1) at (0, -2.8) {todos los\\atributos};
+    \node[cajaFlujo] (w2) at (3.5, -2.8) {búsqueda:\\propone $S$};
+    \node[cajaFlujo, fill=fondoResultado, draw=green!45!black] (w3)
+        at (7.0, -2.8) {clasificador:\\estima $J(S)$};
+    \node[cajaFlujo] (w4) at (9.8, -2.8) {mejor $S$};
+    \draw[flechaFlujo] (w1) -- (w2);
+    \draw[flechaFlujo] ([yshift=5pt]w2.east) -- ([yshift=5pt]w3.west);
+    \draw[flechaFlujo] ([yshift=-5pt]w3.west) -- ([yshift=-5pt]w2.east);
+    \draw[flechaFlujo] (w3) -- (w4);
+    \node[font=\scriptsize, text=gray] at (5.25, -3.55)
+        {se repite muchas veces};
+\end{tikzpicture}
+\end{center}
+
+\textbf{Métodos de filtro.} Califican cada atributo, o cada
+subconjunto, con una medida que sale de los datos: qué tanto se
+relaciona con la clase, cuánta información aporta, qué tan bien separa
+vecinos. El clasificador final no participa; se entrena después, con
+los atributos que pasaron el filtro.
+
+\begin{itemize}[itemsep=0.2em]
+    \item[$+$] Rápidos: casi siempre lineales en el número de atributos.
+    \item[$+$] Independientes del clasificador: el mismo subconjunto
+          sirve para k-NN, para Naive Bayes o para una red.
+    \item[$+$] Menos propensos a sobreajustar, porque no optimizan la
+          exactitud sobre los mismos datos.
+    \item[$-$] La medida puede no coincidir con lo que le sirve al
+          clasificador.
+    \item[$-$] Los que califican atributo por atributo no ven las
+          interacciones: dos atributos inútiles por separado pueden ser
+          perfectos juntos.
+    \item[$-$] Tampoco ven la redundancia: dos copias del mismo atributo
+          bueno reciben la misma calificación alta.
+\end{itemize}
+
+\textbf{Métodos wrapper} (envolventes). El clasificador se trata como
+caja negra: se le propone un subconjunto, se entrena con él y su
+exactitud, estimada con validación cruzada, es la calificación. Una
+estrategia de búsqueda decide qué subconjunto probar después.
+
+\begin{itemize}[itemsep=0.2em]
+    \item[$+$] Optimizan directo lo que importa: la exactitud del
+          clasificador que se va a usar.
+    \item[$+$] Evalúan subconjuntos completos, así que ven
+          interacciones y redundancia.
+    \item[$-$] Caros: cada evaluación es entrenar y validar un
+          clasificador.
+    \item[$-$] El subconjunto queda amarrado a ese clasificador.
+    \item[$-$] Riesgo de sobreajustar la selección: con muchas
+          evaluaciones, alguna sale alta por suerte.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Filtro: coeficiente de correlación de Pearson}
+
+\begin{definicion}[Coeficiente de correlación de Pearson]
+    Para un atributo $x$ y la clase $c$, codificada como $0$ y $1$,
+    medidos en $N$ ejemplos,
+    \[
+        r = \frac{\sum_{i=1}^{N} (x_i - \bar{x})(c_i - \bar{c})}
+                 {\sqrt{\sum_{i=1}^{N} (x_i - \bar{x})^2
+                        \ \sum_{i=1}^{N} (c_i - \bar{c})^2}} ,
+        \qquad -1 \le r \le 1 .
+    \]
+\end{definicion}
+
+Mide qué tan bien se acomodan los puntos $(x_i, c_i)$ a una recta.
+$\abs{r}$ cerca de $1$ es una relación lineal fuerte; cerca de $0$, que
+no hay relación lineal. El signo solo dice la dirección, así que se
+ordenan los atributos por $\abs{r}$ y se toman los primeros $d$.
+
+\begin{ejemplo}[Dos atributos contra la clase]
+    Seis ejemplos, tres de cada clase:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        $x_1$ & $1$ & $2$ & $3$ & $6$ & $7$ & $8$ \\
+        $x_2$ & $5$ & $1$ & $4$ & $2$ & $6$ & $3$ \\
+        $c$   & $0$ & $0$ & $0$ & $1$ & $1$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Para $x_1$: $\bar{x}_1 = 27/6 = 4.5$ y $\bar{c} = 0.5$. Las
+    desviaciones de $x_1$ son $-3.5, -2.5, -1.5, 1.5, 2.5, 3.5$ y las de
+    $c$ son $-0.5$ tres veces y $0.5$ tres veces.
+    \begin{align*}
+        \textstyle\sum (x_i - \bar{x})(c_i - \bar{c})
+            &= 0.5\,(3.5 + 2.5 + 1.5) + 0.5\,(1.5 + 2.5 + 3.5) = 7.5 , \\
+        \textstyle\sum (x_i - \bar{x})^2
+            &= 2\,(3.5^2 + 2.5^2 + 1.5^2) = 41.5 , \\
+        \textstyle\sum (c_i - \bar{c})^2
+            &= 6 \cdot 0.5^2 = 1.5 , \\
+        r_1 &= \frac{7.5}{\sqrt{41.5 \cdot 1.5}}
+             = \frac{7.5}{7.890} = 0.951 .
+    \end{align*}
+    Con la misma cuenta, $r_2 = 0.5 / \sqrt{17.5 \cdot 1.5} = 0.098$.
+    El filtro se queda con $x_1$.
+\end{ejemplo}
+
+Pearson sirve también para medir \textbf{redundancia}: dos atributos
+con $\abs{r}$ cercano a $1$ entre sí dicen lo mismo, y basta con uno.
+Los buenos subconjuntos tienen atributos muy correlacionados con la
+clase y poco correlacionados entre sí.
+
+\begin{ojo}
+    Pearson solo ve relaciones \textbf{lineales} y de \textbf{un
+    atributo a la vez}. Un atributo que separa las clases de forma no
+    lineal puede tener $r = 0$; el ejemplo de la información mutua lo
+    muestra. Y dos atributos que solo sirven juntos tienen $r = 0$ cada
+    uno; el ejemplo de RELIEF lo muestra.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Filtro: información mutua}
+
+\begin{definicion}[Información mutua]
+    Para un atributo discreto $X$ y la clase $C$,
+    \[
+        I(X; C) = \sum_{x} \sum_{c} p(x, c)
+                  \log_2 \frac{p(x, c)}{p(x)\, p(c)}
+                = H(C) - H(C \mid X) .
+    \]
+\end{definicion}
+
+La segunda forma dice qué mide: cuánto baja la incertidumbre sobre la
+clase cuando se conoce el valor del atributo. Vale $0$ si $X$ y $C$ son
+independientes, y $H(C)$ si $X$ determina la clase por completo. Es
+exactamente la \textbf{ganancia de información} de la clase de árboles
+de decisión, ahora usada para ordenar atributos en lugar de escoger la
+pregunta de un nodo. Con el conjunto de jugar tenis el ranking ya está
+calculado:
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+    \toprule
+    & Cielo & Humedad & Viento & Temperatura \\
+    \midrule
+    $I(X; \text{Juega})$ & $0.247$ & $0.152$ & $0.048$ & $0.029$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+A diferencia de Pearson, la información mutua detecta cualquier tipo de
+dependencia, no solo la lineal.
+
+\begin{ejemplo}[Una relación que Pearson no ve]
+    Cinco ejemplos con $x \in \{-2, -1, 0, 1, 2\}$. La clase es $1$
+    cuando $\abs{x} = 2$, o sea en los extremos:
+    \begin{center}
+    \begin{tikzpicture}[x=1.4cm]
+        \draw[->, gray] (-2.6, 0) -- (2.6, 0) node[right] {$x$};
+        \foreach \x in {-2, -1, 0, 1, 2}
+            \draw[gray] (\x, 0.08) -- (\x, -0.08)
+                node[below, font=\scriptsize, text=black] {$\x$};
+        \foreach \x in {-1, 0, 1}
+            \fill[acento] (\x, 0.35) circle (3.5pt);
+        \foreach \x in {-2, 2}
+            \fill[orange!80!black] (\x, 0.35) circle (3.5pt);
+        \node[font=\scriptsize, anchor=west] at (2.7, 0.35)
+            {\textcolor{orange!80!black}{$\bullet$} clase 1\quad
+             \textcolor{acento}{$\bullet$} clase 0};
+    \end{tikzpicture}
+    \end{center}
+    Con $\bar{x} = 0$ y $\bar{c} = 2/5$, las desviaciones de la clase
+    son $0.6$ en los extremos y $-0.4$ en el centro, y el numerador de
+    Pearson es
+    \[
+        (-2)(0.6) + (-1)(-0.4) + (0)(-0.4) + (1)(-0.4) + (2)(0.6) = 0 .
+    \]
+    Los términos se cancelan por simetría y $r = 0$. Pero cada valor de
+    $x$ tiene una sola clase, así que $H(C \mid X) = 0$ y
+    \[
+        I(X; C) = H(C) = H\!\left(\tfrac{2}{5}, \tfrac{3}{5}\right)
+                = 0.971 \text{ bits},
+    \]
+    el máximo posible: conocer $x$ dice la clase sin error.
+\end{ejemplo}
+
+\begin{ojo}
+    Con atributos continuos, $p(x, c)$ no se cuenta directo: hay que
+    discretizar en intervalos o usar un estimador de densidad, y el
+    resultado depende de esa decisión. Y sigue siendo de un atributo a
+    la vez: no ve interacciones ni redundancia. Variantes como mRMR
+    (\textit{máxima relevancia, mínima redundancia}) restan la
+    información mutua entre los atributos ya elegidos.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Filtro: RELIEF}
+
+RELIEF (Kira y Rendell, 1992) califica los atributos mirando vecinos.
+Toma al azar un objeto de la muestra y busca sus dos vecinos más
+cercanos: el \textbf{amigo} (\textit{nearest hit}), el más cercano de
+su misma clase, y el \textbf{enemigo} (\textit{nearest miss}), el más
+cercano de otra clase. Un atributo bueno tiene valores parecidos entre
+el objeto y su amigo, y distintos entre el objeto y su enemigo.
+
+\begin{algorithm}[H]
+\caption{RELIEF}
+\begin{algorithmic}[1]
+\Require muestra con $N$ objetos y $n$ atributos, número de
+         iteraciones $m$
+\State $W[A] \gets 0$ para todo atributo $A$
+\For{$i \gets 1$ \Hasta $m$}
+  \State $R \gets$ un objeto tomado al azar
+  \State $H \gets$ su vecino más cercano de la misma clase
+  \State $M \gets$ su vecino más cercano de otra clase
+  \ForAll{atributo $A$}
+    \State $W[A] \gets W[A] - \text{dif}(A, R, H)/m
+                         + \text{dif}(A, R, M)/m$
+  \EndFor
+\EndFor
+\State \Return $W$
+\end{algorithmic}
+\end{algorithm}
+
+Para atributos numéricos,
+$\text{dif}(A, R, P) = \abs{R[A] - P[A]} / (\max A - \min A)$, que
+queda entre $0$ y $1$; para nominales vale $0$ si los valores son
+iguales y $1$ si no. La distancia para encontrar los vecinos es la suma
+de las $\text{dif}$ sobre todos los atributos. Al final se conservan
+los atributos con $W$ mayor que un umbral $\tau$.
+
+Restar la diferencia con el amigo castiga a los atributos que cambian
+dentro de una misma clase; sumar la diferencia con el enemigo premia a
+los que cambian entre clases.
+
+\begin{ejemplo}[Dos atributos que solo sirven juntos]
+    Ocho objetos con tres atributos. La clase es el o exclusivo de ``$x_1$
+    es grande'' y ``$x_2$ es grande'', y $x_3$ es ruido:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccccc}
+        \toprule
+        & P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 \\
+        \midrule
+        $x_1$ & $1$ & $2$ & $8$ & $9$ & $1$ & $2$ & $8$ & $9$ \\
+        $x_2$ & $2$ & $1$ & $9$ & $8$ & $9$ & $8$ & $2$ & $1$ \\
+        $x_3$ & $7$ & $2$ & $6$ & $1$ & $3$ & $8$ & $5$ & $4$ \\
+        clase & $0$ & $0$ & $0$ & $0$ & $1$ & $1$ & $1$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=6.2cm, height=6.2cm, xmin=0, xmax=10, ymin=0, ymax=10,
+        xlabel={$x_1$}, ylabel={$x_2$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        xtick={0, 5, 10}, ytick={0, 5, 10}, clip=false]
+        \draw[gray, densely dotted] (axis cs:5, 0) -- (axis cs:5, 10);
+        \draw[gray, densely dotted] (axis cs:0, 5) -- (axis cs:10, 5);
+        \addplot[only marks, mark=*, mark size=2.2pt, acento]
+            coordinates {(1, 2) (2, 1) (8, 9) (9, 8)};
+        \addplot[only marks, mark=x, mark size=3pt, thick,
+                 orange!80!black]
+            coordinates {(1, 9) (2, 8) (8, 2) (9, 1)};
+        \draw[->, thick, green!45!black, shorten >=3pt]
+            (axis cs:1, 2) -- (axis cs:2, 1);
+        \draw[->, thick, orange!80!black, shorten >=3pt]
+            (axis cs:1, 2) -- (axis cs:2, 8);
+        \node[font=\scriptsize, left]  at (axis cs:1, 2) {P1};
+        \node[font=\scriptsize, right] at (axis cs:2, 1) {P2};
+        \node[font=\scriptsize, left]  at (axis cs:8, 9) {P3};
+        \node[font=\scriptsize, right] at (axis cs:9, 8) {P4};
+        \node[font=\scriptsize, left]  at (axis cs:1, 9) {P5};
+        \node[font=\scriptsize, right] at (axis cs:2, 8) {P6};
+        \node[font=\scriptsize, left]  at (axis cs:8, 2) {P7};
+        \node[font=\scriptsize, right] at (axis cs:9, 1) {P8};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    Los círculos son la clase $0$ y las cruces la clase $1$; $x_3$ no
+    se ve en la figura. Proyectados sobre un solo eje, los dos tipos de
+    punto quedan revueltos: $x_1 = 1$ tiene un objeto de cada clase, y
+    lo mismo cada valor. Pearson lo confirma: $r_1 = r_2 = 0$, mientras
+    que el ruido $x_3$ sale con $r_3 = 0.218$. Un filtro por Pearson
+    escogería el único atributo que no sirve.
+
+    \textbf{Una iteración de RELIEF con $R = $ P1.} Los rangos son $8$,
+    $8$ y $7$. Las distancias de P1 a los demás:
+    \begin{center}
+    \small
+    \begin{tabular}{lll}
+        \toprule
+        \multicolumn{3}{l}{\textbf{Misma clase}} \\
+        P2 & $1/8 + 1/8 + 5/7$ & $= 0.964$ \\
+        P3 & $7/8 + 7/8 + 1/7$ & $= 1.893$ \\
+        P4 & $8/8 + 6/8 + 6/7$ & $= 2.607$ \\
+        \midrule
+        \multicolumn{3}{l}{\textbf{Otra clase}} \\
+        P5 & $0/8 + 7/8 + 4/7$ & $= 1.446$ \\
+        P6 & $1/8 + 6/8 + 1/7$ & $= 1.018$ \\
+        P7 & $7/8 + 0/8 + 2/7$ & $= 1.161$ \\
+        P8 & $8/8 + 1/8 + 3/7$ & $= 1.554$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    El amigo es P2 y el enemigo P6, las dos flechas de la figura. La
+    actualización de cada atributo, antes de dividir entre $m$, es
+    $-\text{dif}(R, H) + \text{dif}(R, M)$:
+    \begin{align*}
+        x_1 &: -\tfrac{1}{8} + \tfrac{1}{8} = 0 , \\
+        x_2 &: -\tfrac{1}{8} + \tfrac{6}{8} = +0.625 , \\
+        x_3 &: -\tfrac{5}{7} + \tfrac{1}{7} = -0.571 .
+    \end{align*}
+    $x_2$ separa a P1 de su enemigo y no de su amigo: gana. $x_3$ hace
+    lo contrario: pierde.
+
+    \textbf{Todas las iteraciones.} Tomando cada uno de los ocho objetos
+    una vez, $m = 8$, las sumas son $1.125$, $4.125$ y $-2.857$, y
+    \[
+        W = \left(\tfrac{1.125}{8},\ \tfrac{4.125}{8},\
+                  \tfrac{-2.857}{8}\right)
+          = (0.141,\ 0.516,\ -0.357) .
+    \]
+    \begin{center}
+    \small
+    \begin{tabular}{lccc}
+        \toprule
+        & $x_1$ & $x_2$ & $x_3$ \\
+        \midrule
+        Pearson $\abs{r}$ & $0$ & $0$ & $0.218$ \\
+        RELIEF $W$        & $0.141$ & $0.516$ & $-0.357$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    RELIEF descarta el ruido y conserva los dos atributos del XOR.
+\end{ejemplo}
+
+\begin{idea}
+    RELIEF ve interacciones porque busca a los vecinos con todos los
+    atributos a la vez: el amigo de P1 es P2 porque se parecen en $x_1$
+    y en $x_2$ juntos. Pearson y la información mutua miran un atributo
+    por separado y no pueden.
+\end{idea}
+
+\begin{ojo}
+    RELIEF no detecta redundancia: dos copias de $x_2$ recibirían las
+    dos $W = 0.516$. Con pocos objetos el resultado depende de cuáles
+    se sortean; aquí $x_1$ y $x_2$ juegan el mismo papel y aun así
+    salieron con pesos distintos. ReliefF (Kononenko, 1994) promedia
+    sobre $k$ amigos y $k$ enemigos, maneja más de dos clases y valores
+    faltantes, y es la versión que se usa en la práctica.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Filtro: clasificador de un solo atributo}
+
+Se entrena un clasificador usando un atributo a la vez, se estima su
+exactitud con validación cruzada y se ordenan los atributos por esa
+exactitud. Mide la capacidad de discriminar en las mismas unidades que
+importan al final, pero sigue siendo de un atributo a la vez.
+
+\begin{ejemplo}[Una regla por atributo en jugar tenis]
+    El clasificador más simple con un solo atributo asigna a cada valor
+    la clase mayoritaria de sus ejemplos; se le conoce como OneR. Con
+    Cielo: soleado tiene $(2+, 3-)$ y predice no, nublado $(4+, 0-)$
+    predice sí, lluvioso $(3+, 2-)$ predice sí. Acierta $3 + 4 + 3 = 10$
+    de $14$.
+    \begin{center}
+    \small
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Atributo} & \textbf{Aciertos} & \textbf{Exactitud} \\
+        \midrule
+        Cielo       & $10/14$ & $0.714$ \\
+        Humedad     & $10/14$ & $0.714$ \\
+        Viento      & $9/14$  & $0.643$ \\
+        Temperatura & $9/14$  & $0.643$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con $14$ ejemplos se midió sobre el mismo entrenamiento; con datos
+    reales se usa validación cruzada. Coincide con la información mutua
+    en los dos primeros lugares, pero empata lo que ella separa: los
+    rankings dependen de la medida.
+\end{ejemplo}
+
+En el ejemplo del XOR, un clasificador que solo ve $x_1$ acierta la
+mitad, igual que uno que solo ve $x_2$: este filtro también los
+descarta.
+
+Cuenta como filtro aunque use un clasificador porque evalúa atributos
+sueltos y no subconjuntos, y el clasificador de un atributo no tiene
+que ser el que se va a usar al final.
+
+% =====================================================================
+
+\subsection*{Filtro: selección con árboles de decisión}
+
+Se entrena un árbol de decisión con todos los atributos y se conservan
+los que aparecen en algún nodo. Los que el árbol nunca usó no le
+sirvieron para separar las clases. Para ordenarlos se suma la
+reducción de impureza que logró cada atributo en todos sus nodos,
+pesada por la fracción de ejemplos que llega a cada nodo:
+\[
+    \text{importancia}(A) = \sum_{\text{nodos que prueban } A}
+        \frac{\abs{S_{\text{nodo}}}}{\abs{S}}\,
+        \text{Ganancia}(S_{\text{nodo}}, A) .
+\]
+
+\begin{ejemplo}[El árbol de jugar tenis]
+    El árbol de la clase pasada usa Cielo en la raíz, Humedad bajo
+    soleado y Viento bajo lluvioso. Temperatura no aparece y se
+    descarta. Las importancias:
+    \begin{align*}
+        \text{Cielo}   &: \tfrac{14}{14} \cdot 0.247 = 0.247 , \\
+        \text{Humedad} &: \tfrac{5}{14} \cdot 0.971 = 0.347 , \\
+        \text{Viento}  &: \tfrac{5}{14} \cdot 0.971 = 0.347 .
+    \end{align*}
+    Suman $0.940 = H(S)$, toda la entropía inicial, porque las hojas
+    quedaron puras. Normalizadas son $26\%$, $37\%$ y $37\%$: el
+    atributo de la raíz no es el más importante. Cielo hace un corte
+    parcial sobre los $14$ días; Humedad y Viento terminan de separar
+    sus ramas por completo.
+\end{ejemplo}
+
+A diferencia de los filtros anteriores, el árbol evalúa cada atributo
+en el contexto de las preguntas que ya se hicieron arriba, así que
+puede capturar algunas interacciones. Pero es voraz: en el XOR la raíz
+tiene ganancia $0$ con cualquier atributo, el efecto horizonte de la
+clase pasada.
+
+\begin{ojo}
+    En otros textos esto no se llama filtro sino \textbf{método
+    embebido} (\textit{embedded}): la selección ocurre dentro del
+    entrenamiento de un modelo. La importancia de un bosque aleatorio,
+    promediada sobre cientos de árboles, es más estable que la de un
+    árbol solo.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Wrappers: el espacio de búsqueda}
+
+Un wrapper evalúa subconjuntos, y con $n$ atributos hay $2^n - 1$
+subconjuntos no vacíos. Evaluar todos es la única forma de garantizar
+el mejor, y deja de ser posible muy pronto:
+
+\begin{center}
+\small
+\begin{tabular}{rrl}
+    \toprule
+    $n$ & \textbf{Subconjuntos} & \textbf{A un segundo por evaluación} \\
+    \midrule
+    $10$  & $1\,023$ & $17$ minutos \\
+    $20$  & $1\,048\,575$ & $12$ días \\
+    $30$  & $1.07 \times 10^{9}$ & $34$ años \\
+    $100$ & $1.27 \times 10^{30}$ & mucho más que la edad del universo \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Por eso los wrappers son problemas de combinatoria que se resuelven con
+heurísticas: recorren una parte pequeña del espacio buscando un
+subconjunto bueno, sin garantía de que sea el mejor.
+
+Para comparar las heurísticas se usa un ejemplo con cuatro atributos,
+A, B, C y D. Cada subconjunto tiene una exactitud $J$, inventada para
+el ejemplo como si viniera de validación cruzada. C y D se comportan
+como el XOR de RELIEF: solos son débiles ($0.60$ y $0.55$), juntos son
+el mejor subconjunto ($0.92$).
+
+\begin{center}
+\begin{tikzpicture}[x=1.15cm, y=1.45cm]
+    \node[subconj] (n0) at (0, 0) {$\varnothing$\\0.50};
+    \node[subconj] (nA) at (-3, 1) {\textbf{A}\\0.70};
+    \node[subconj] (nB) at (-1, 1) {\textbf{B}\\0.65};
+    \node[subconj] (nC) at ( 1, 1) {\textbf{C}\\0.60};
+    \node[subconj] (nD) at ( 3, 1) {\textbf{D}\\0.55};
+    \node[subconj] (nAB) at (-5, 2) {\textbf{AB}\\0.78};
+    \node[subconj] (nAC) at (-3, 2) {\textbf{AC}\\0.75};
+    \node[subconj] (nAD) at (-1, 2) {\textbf{AD}\\0.72};
+    \node[subconj] (nBC) at ( 1, 2) {\textbf{BC}\\0.74};
+    \node[subconj] (nBD) at ( 3, 2) {\textbf{BD}\\0.70};
+    \node[subconj, fill=fondoResultado, draw=green!45!black, thick]
+        (nCD) at ( 5, 2) {\textbf{CD}\\0.92};
+    \node[subconj] (nABC) at (-3, 3) {\textbf{ABC}\\0.80};
+    \node[subconj] (nABD) at (-1, 3) {\textbf{ABD}\\0.79};
+    \node[subconj] (nACD) at ( 1, 3) {\textbf{ACD}\\0.89};
+    \node[subconj] (nBCD) at ( 3, 3) {\textbf{BCD}\\0.90};
+    \node[subconj] (nABCD) at (0, 4) {\textbf{ABCD}\\0.86};
+    \foreach \a/\b in {n0/nA, n0/nB, n0/nC, n0/nD,
+            nA/nAB, nA/nAC, nA/nAD, nB/nAB, nB/nBC, nB/nBD,
+            nC/nAC, nC/nBC, nC/nCD, nD/nAD, nD/nBD, nD/nCD,
+            nAB/nABC, nAB/nABD, nAC/nABC, nAC/nACD, nAD/nABD,
+            nAD/nACD, nBC/nABC, nBC/nBCD, nBD/nABD, nBD/nBCD,
+            nCD/nACD, nCD/nBCD, nABC/nABCD, nABD/nABCD,
+            nACD/nABCD, nBCD/nABCD}
+        \draw[gray!35] (\a) -- (\b);
+    \foreach \a/\b in {n0/nA, nA/nAB, nAB/nABC, nABC/nABCD}
+        \draw[->, very thick, orange!80!black] (\a) -- (\b);
+    \foreach \a/\b in {nABCD/nBCD, nBCD/nCD}
+        \draw[->, very thick, acento] (\a) -- (\b);
+    \node[font=\scriptsize, text=orange!80!black, anchor=west]
+        at (-6.2, 3.6) {$\rightarrow$ hacia adelante};
+    \node[font=\scriptsize, text=acento, anchor=west]
+        at (-6.2, 3.3) {$\rightarrow$ hacia atrás};
+\end{tikzpicture}
+\end{center}
+
+Cada nivel tiene los subconjuntos de un tamaño, y las líneas unen
+subconjuntos que difieren en un atributo. Las heurísticas se mueven por
+estas líneas.
+
+% =====================================================================
+
+\subsection*{Wrapper: selección hacia adelante}
+
+La \textbf{selección secuencial hacia adelante} (SFS,
+\textit{sequential forward selection}) empieza con el conjunto vacío y
+en cada paso agrega el atributo que más sube $J$.
+
+\begin{algorithm}[H]
+\caption{Selección hacia adelante}
+\begin{algorithmic}[1]
+\Require atributos $X$, tamaño deseado $d$
+\State $S \gets \varnothing$
+\While{$\abs{S} < d$}
+  \State $x^* \gets \arg\max_{x \in X \setminus S} J(S \cup \{x\})$
+  \State $S \gets S \cup \{x^*\}$
+\EndWhile
+\State \Return $S$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[Hacia adelante en la tabla]
+    Los candidatos de cada paso y el que se queda:
+    \begin{center}
+    \small
+    \begin{tabular}{clc}
+        \toprule
+        \textbf{Paso} & \textbf{Candidatos} & \textbf{Queda} \\
+        \midrule
+        1 & A $0.70$, B $0.65$, C $0.60$, D $0.55$ & A ($0.70$) \\
+        2 & AB $0.78$, AC $0.75$, AD $0.72$ & AB ($0.78$) \\
+        3 & ABC $0.80$, ABD $0.79$ & ABC ($0.80$) \\
+        4 & ABCD $0.86$ & ABCD ($0.86$) \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    El mejor que encuentra es ABCD con $0.86$, usando los cuatro
+    atributos. CD nunca se evaluó: en el paso 1 ganó A, y desde ahí
+    todos los subconjuntos que se prueban contienen a A.
+\end{ejemplo}
+
+Hace $n + (n - 1) + \dots + 1 = n(n+1)/2$ evaluaciones: con
+$n = 100$ son $5\,050$ en lugar de $10^{30}$. Es barato porque sus
+primeros pasos entrenan clasificadores con muy pocos atributos.
+
+\begin{ojo}
+    El defecto es el \textbf{efecto de anidamiento}
+    (\textit{nesting}): un atributo que se agregó ya no se puede quitar,
+    aunque después deje de servir. Y como empieza con atributos sueltos,
+    no ve interacciones: C y D solos son los peores, así que nunca
+    entran primero.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Wrapper: selección hacia atrás}
+
+La \textbf{selección secuencial hacia atrás} (SBS,
+\textit{sequential backward selection}) hace lo contrario: empieza con
+todos los atributos y en cada paso quita el que menos falta hace, el
+que al quitarlo deja la $J$ más alta.
+
+\begin{algorithm}[H]
+\caption{Selección hacia atrás}
+\begin{algorithmic}[1]
+\Require atributos $X$, tamaño deseado $d$
+\State $S \gets X$
+\While{$\abs{S} > d$}
+  \State $x^* \gets \arg\max_{x \in S} J(S \setminus \{x\})$
+  \State $S \gets S \setminus \{x^*\}$
+\EndWhile
+\State \Return $S$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[Hacia atrás en la tabla]
+    Los candidatos de cada paso y el que se queda:
+    \begin{center}
+    \small
+    \begin{tabular}{clc}
+        \toprule
+        \textbf{Paso} & \textbf{Candidatos} & \textbf{Queda} \\
+        \midrule
+        1 & sin A: BCD $0.90$, sin B: ACD $0.89$, & BCD ($0.90$) \\
+          & sin C: ABD $0.79$, sin D: ABC $0.80$ & \\
+        2 & sin B: CD $0.92$, sin C: BD $0.70$, sin D: BC $0.74$
+          & CD ($0.92$) \\
+        3 & sin C: D $0.55$, sin D: C $0.60$ & C ($0.60$) \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Encuentra CD con $0.92$, el mejor subconjunto de la tabla. Como
+    empezó con todos los atributos, C y D estuvieron juntos desde el
+    principio y nunca se separaron.
+\end{ejemplo}
+
+\begin{idea}
+    Hacia atrás ve interacciones que hacia adelante no ve, porque
+    siempre evalúa subconjuntos grandes. El costo es ese mismo: sus
+    primeros pasos entrenan clasificadores con casi todos los
+    atributos, que es lo más caro. Y tiene el anidamiento al revés: un
+    atributo que se quitó ya no regresa.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Wrapper: búsquedas secuenciales generalizadas}
+
+Las dos anteriores son casos extremos de una familia. Las más usadas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Más $l$, menos $r$} (PTA$(l, r)$, \textit{plus-$l$
+          take-away-$r$}, Stearns, 1976). Se alternan $l$ pasos hacia
+          adelante y $r$ pasos hacia atrás. Si $l > r$ el subconjunto
+          crece desde el vacío; si $l < r$, se encoge desde el
+          completo. Quitar después de agregar deshace parte del
+          anidamiento.
+    \item \textbf{Generalizadas} (GSFS$(g)$ y GSBS$(g)$). En cada paso
+          se agrega o se quita el mejor grupo de $g$ atributos, probando
+          todas las combinaciones de $g$. Con $g = 2$ ya puede agregar C
+          y D juntos. El costo crece como $\binom{n}{g}$ por paso.
+\end{itemize}
+
+\begin{ejemplo}[PTA(2, 1) en la tabla]
+    Agrega dos, quita uno, y repite:
+    \[
+        \varnothing \xrightarrow{+A} \text{A} \xrightarrow{+B} \text{AB}
+        \xrightarrow{-B} \text{A} \xrightarrow{+B} \text{AB}
+        \xrightarrow{+C} \text{ABC} \xrightarrow{-C} \text{AB}
+        \xrightarrow{+C} \text{ABC} \xrightarrow{+D} \text{ABCD}
+        \xrightarrow{-A} \text{BCD} .
+    \]
+    Llega a BCD con $0.90$: mejor que hacia adelante, pero no encuentra
+    CD.
+\end{ejemplo}
+
+El problema de esta familia es que $l$, $r$ y $g$ se fijan antes de
+empezar, y ningún valor sirve bien en todos los problemas.
+
+% =====================================================================
+
+\subsection*{Wrapper: búsqueda flotante}
+
+La \textbf{búsqueda secuencial flotante hacia adelante} (SFFS,
+\textit{sequential floating forward selection}; Pudil, Novovičová y
+Kittler, 1994) deja que los datos decidan cuántos pasos hacia atrás dar.
+Después de cada paso hacia adelante intenta quitar atributos, y quita
+mientras eso produzca un subconjunto mejor que el mejor que ya conocía
+de ese tamaño. El tamaño del subconjunto sube y baja: flota.
+
+\begin{algorithm}[H]
+\caption{Búsqueda flotante hacia adelante}
+\begin{algorithmic}[1]
+\Require atributos $X$, tamaño máximo $d$
+\State $S \gets \varnothing$;\ $\text{mejor}[k] \gets -\infty$ para
+       todo $k$
+\While{$\abs{S} < d$}
+  \State agregar a $S$ el atributo que más sube $J$
+         \Comment{paso hacia adelante}
+  \State actualizar $\text{mejor}[\abs{S}]$
+  \While{$\abs{S} > 2$} \Comment{pasos hacia atrás condicionales}
+    \State $x^- \gets$ el atributo de $S$ cuya salida deja la $J$ más
+           alta
+    \If{$x^-$ es el recién agregado, o
+        $J(S \setminus \{x^-\}) \le \text{mejor}[\abs{S} - 1]$}
+      \State salir del ciclo
+    \EndIf
+    \State $S \gets S \setminus \{x^-\}$;\ actualizar
+           $\text{mejor}[\abs{S}]$
+  \EndWhile
+\EndWhile
+\State \Return el subconjunto de $\text{mejor}$ con la $J$ más alta
+\end{algorithmic}
+\end{algorithm}
+
+\begin{ejemplo}[Búsqueda flotante en la tabla]
+    \begin{center}
+    \small
+    \begin{tabular}{clcl}
+        \toprule
+        \textbf{Paso} & \textbf{Movimiento} & \textbf{Queda}
+            & \textbf{Por qué} \\
+        \midrule
+        1 & $+$A & A $0.70$ & \\
+        2 & $+$B & AB $0.78$ & \\
+        3 & $+$C & ABC $0.80$ & quitar C es quitar el recién agregado \\
+        4 & $+$D & ABCD $0.86$ & \\
+        5 & $-$A & BCD $0.90$ & $0.90 >$ mejor de tamaño 3 ($0.80$) \\
+        6 & $-$B & CD $0.92$ & $0.92 >$ mejor de tamaño 2 ($0.78$) \\
+        7 & $+$B & BCD $0.90$ & quitar B es quitar el recién agregado \\
+        8 & $+$A & ABCD $0.86$ & llegó a $d = 4$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=10cm, height=4.6cm, xmin=-0.4, xmax=8.6, ymin=-0.3,
+        ymax=4.7, xlabel={paso}, ylabel={tamaño de $S$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        xtick={0, 1, ..., 8}, ytick={0, 1, 2, 3, 4}, clip=false]
+        \addplot[thick, gray!60, mark=*, mark size=1.8pt,
+                 mark options={fill=acento, draw=acento}]
+            coordinates {(0, 0) (1, 1) (2, 2) (3, 3) (4, 4) (5, 3)
+                         (6, 2) (7, 3) (8, 4)};
+        \addplot[very thick, orange!80!black, mark=*, mark size=2pt]
+            coordinates {(4, 4) (5, 3) (6, 2)};
+        \node[font=\scriptsize, above left]  at (axis cs:0, 0)
+            {$\varnothing$};
+        \node[font=\scriptsize, above left]  at (axis cs:1, 1) {A};
+        \node[font=\scriptsize, above left]  at (axis cs:2, 2) {AB};
+        \node[font=\scriptsize, above left]  at (axis cs:3, 3) {ABC};
+        \node[font=\scriptsize, above]       at (axis cs:4, 4) {ABCD};
+        \node[font=\scriptsize, below left]  at (axis cs:5, 3) {BCD};
+        \node[font=\scriptsize, below]       at (axis cs:6, 2) {CD};
+        \node[font=\scriptsize, below right] at (axis cs:7, 3) {BCD};
+        \node[font=\scriptsize, above]       at (axis cs:8, 4) {ABCD};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    En naranja, los dos pasos hacia atrás. Los mejores por tamaño quedan
+    A ($0.70$), CD ($0.92$), BCD ($0.90$) y ABCD ($0.86$), y devuelve
+    CD: el óptimo de la tabla, con la mitad de los atributos.
+\end{ejemplo}
+
+La versión simétrica, SFBS, empieza con todos los atributos y alterna
+quitar con agregar condicionalmente. Las búsquedas flotantes dan
+resultados cercanos a la búsqueda exhaustiva en muchos problemas, con
+un costo parecido al de las secuenciales simples.
+
+% =====================================================================
+
+\subsection*{Selección con algoritmos genéticos}
+
+Encontrar buenos subconjuntos de atributos es muy costoso, y las
+búsquedas secuenciales avanzan un atributo a la vez desde un solo punto
+de partida. Un \textbf{algoritmo genético} (Holland, 1975; aplicado a
+selección de atributos por Siedlecki y Sklansky, 1989) mantiene una
+\textbf{población} de muchos subconjuntos a la vez y los hace
+evolucionar: los mejores se reproducen, mezclan sus atributos y de vez
+en cuando mutan. Con el paso de las generaciones la población se
+concentra en subconjuntos buenos.
+
+\textbf{Representación.} Cada subconjunto es un
+\textbf{cromosoma}: una cadena de $n$ bits, donde el bit $i$ vale $1$
+si el atributo $i$ está en el subconjunto.
+
+\begin{center}
+\begin{tikzpicture}
+    \foreach \i/\at in {0/A, 1/B, 2/C, 3/D}
+        \node[font=\small\bfseries] at (\i*0.6, 0.55) {\at};
+    \foreach \i in {0, 2, 3}
+        \node[bitCaja, fill=fondoResultado] at (\i*0.6, 0) {1};
+    \node[bitCaja] at (0.6, 0) {0};
+    \node[font=\small, anchor=west] at (2.3, 0)
+        {$=\ \{\text{A}, \text{C}, \text{D}\}$};
+\end{tikzpicture}
+\end{center}
+
+\textbf{Aptitud.} Cada cromosoma se califica con la exactitud del
+clasificador entrenado con sus atributos, $J(S)$. Si además se quieren
+subconjuntos chicos, se resta un castigo por tamaño,
+$f(S) = J(S) - \lambda\,\abs{S}/n$.
+
+\begin{algorithm}[H]
+\caption{Algoritmo genético para selección de atributos}
+\begin{algorithmic}[1]
+\Require tamaño de población $P$, generaciones $G$, probabilidades de
+         cruza $p_c$ y de mutación $p_m$
+\State generar $P$ cromosomas al azar y calcular su aptitud
+\For{$g \gets 1$ \Hasta $G$}
+  \State conservar los mejores cromosomas sin cambio
+         \Comment{elitismo}
+  \While{la nueva población tenga menos de $P$ cromosomas}
+    \State escoger dos padres según su aptitud
+           \Comment{selección}
+    \State con probabilidad $p_c$, cruzarlos para obtener dos hijos
+           \Comment{cruza}
+    \State invertir cada bit de los hijos con probabilidad $p_m$
+           \Comment{mutación}
+    \State agregar los hijos a la nueva población
+  \EndWhile
+  \State calcular la aptitud de los nuevos cromosomas
+\EndFor
+\State \Return el cromosoma de mayor aptitud que se haya visto
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Selección.} Decide quién se reproduce. En la \textbf{ruleta}
+cada cromosoma se escoge con probabilidad proporcional a su aptitud,
+$p_i = f_i / \sum_j f_j$. En el \textbf{torneo} se toman $k$ cromosomas
+al azar y gana el de mayor aptitud; con $k = 2$ es el más común.
+
+\begin{ejemplo}[Una generación sobre la tabla]
+    Población inicial de cuatro cromosomas, con su aptitud tomada de la
+    tabla:
+    \begin{center}
+    \small
+    \begin{tabular}{cccc}
+        \toprule
+        \textbf{Cromosoma} & \textbf{Subconjunto} & \textbf{Aptitud}
+            & \textbf{Ruleta} \\
+        \midrule
+        \texttt{1100} & AB & $0.78$ & $0.78 / 2.94 = 0.265$ \\
+        \texttt{0110} & BC & $0.74$ & $0.252$ \\
+        \texttt{1001} & AD & $0.72$ & $0.245$ \\
+        \texttt{0101} & BD & $0.70$ & $0.238$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Con ruleta las cuatro probabilidades son casi iguales, porque las
+    aptitudes son parecidas: la selección casi no favorece a los
+    mejores. El torneo no depende de qué tan grandes son las
+    diferencias, solo de quién gana. Se hacen dos torneos: BC contra BD
+    gana BC, y AD contra BD gana AD. Esos son los padres.
+
+    \textbf{Cruza de un punto.} Se escoge un punto de corte al azar,
+    aquí después del tercer bit, y los hijos intercambian las colas:
+    \begin{center}
+    \begin{tikzpicture}
+        \foreach \i/\b in {0/0, 1/1, 2/1, 3/0}
+            \node[bitCaja, fill=fondoIdea] at (\i*0.6, 0) {\b};
+        \foreach \i/\b in {0/1, 1/0, 2/0, 3/1}
+            \node[bitCaja, fill=fondoOjo] at (\i*0.6, -0.9) {\b};
+        \node[font=\scriptsize, anchor=east] at (-0.45, 0)
+            {padre BC};
+        \node[font=\scriptsize, anchor=east] at (-0.45, -0.9)
+            {padre AD};
+        \draw[very thick, red!70!black] (1.5, 0.45) -- (1.5, -1.35);
+        \draw[flechaFlujo] (2.4, -0.45) -- (3.4, -0.45);
+        \begin{scope}[xshift=4.2cm]
+            \foreach \i/\b in {0/0, 1/1, 2/1}
+                \node[bitCaja, fill=fondoIdea] at (\i*0.6, 0) {\b};
+            \node[bitCaja, fill=fondoOjo] at (1.8, 0) {1};
+            \foreach \i/\b in {0/1, 1/0, 2/0}
+                \node[bitCaja, fill=fondoOjo] at (\i*0.6, -0.9) {\b};
+            \node[bitCaja, fill=fondoIdea] at (1.8, -0.9) {0};
+            \node[font=\scriptsize, anchor=west] at (2.25, 0)
+                {BCD, $0.90$};
+            \node[font=\scriptsize, anchor=west] at (2.25, -0.9)
+                {A, $0.70$};
+        \end{scope}
+    \end{tikzpicture}
+    \end{center}
+    El primer hijo junta B y C de un padre con D del otro, y vale más
+    que los dos padres.
+
+    \textbf{Mutación.} Cada bit se invierte con probabilidad $p_m$. Si
+    le toca al bit de B del primer hijo:
+    \begin{center}
+    \begin{tikzpicture}
+        \foreach \i/\b in {0/0, 1/1, 2/1, 3/1}
+            \node[bitCaja] at (\i*0.6, 0) {\b};
+        \node[font=\scriptsize, anchor=east] at (-0.45, 0) {BCD, $0.90$};
+        \draw[flechaFlujo] (2.4, 0) -- (3.4, 0);
+        \begin{scope}[xshift=4.2cm]
+            \foreach \i/\b in {0/0, 2/1, 3/1}
+                \node[bitCaja] at (\i*0.6, 0) {\b};
+            \node[bitCaja, fill=marcador, very thick] at (0.6, 0) {0};
+            \node[font=\scriptsize, anchor=west] at (2.25, 0)
+                {CD, $0.92$};
+        \end{scope}
+    \end{tikzpicture}
+    \end{center}
+    En una generación apareció CD, el subconjunto que la búsqueda hacia
+    adelante nunca evaluó. Ninguno de los padres lo tenía; salió de
+    combinar partes de dos padres y de un cambio al azar.
+\end{ejemplo}
+
+La cruza aprovecha lo que ya funciona, combinando trozos de
+cromosomas buenos. La mutación explora: mete atributos que ningún
+cromosoma de la población tiene, o quita alguno que todos comparten.
+Sin mutación la población puede perder un atributo para siempre.
+
+\textbf{Parámetros.} Los valores son puntos de partida usuales, no
+reglas; se ajustan para cada problema.
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}%
+                >{\raggedright\arraybackslash}p{2.4cm}%
+                >{\raggedright\arraybackslash}p{8.4cm}}
+    \toprule
+    \textbf{Parámetro} & \textbf{Valor usual} & \textbf{Efecto} \\
+    \midrule
+    Tamaño de población $P$ & $20$ a $100$
+        & chica converge rápido a un subconjunto mediocre; grande
+          explora más y cuesta más evaluaciones \\
+    \addlinespace
+    Generaciones $G$ & $50$ a $500$, o hasta que la mejor aptitud deje
+        de subir
+        & cada generación cuesta $P$ entrenamientos \\
+    \addlinespace
+    Probabilidad de cruza $p_c$ & $0.6$ a $0.9$
+        & baja deja pasar a los padres casi sin cambio \\
+    \addlinespace
+    Probabilidad de mutación $p_m$ & $1/n$ por bit
+        & alta vuelve la búsqueda aleatoria; cero la estanca \\
+    \addlinespace
+    Selección & torneo con $k = 2$ o $3$
+        & $k$ mayor presiona más hacia los mejores y pierde
+          diversidad \\
+    \addlinespace
+    Elitismo & los $1$ o $2$ mejores
+        & garantiza que el mejor encontrado no se pierda \\
+    \addlinespace
+    Castigo $\lambda$ & según el problema
+        & mayor prefiere subconjuntos más chicos \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    Un algoritmo genético no garantiza el óptimo: encuentra soluciones
+    buenas, a menudo cercanas al óptimo, en espacios donde la búsqueda
+    exhaustiva es imposible. El costo se mide en entrenamientos: con
+    $P = 50$ y $G = 100$ son $5\,000$, parecido a la búsqueda hacia
+    adelante con $n = 100$. Y como hace muchas evaluaciones sobre los
+    mismos datos, el riesgo de sobreajustar la selección es mayor; el
+    subconjunto final se valida con datos que la búsqueda no usó.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.3cm}%
+                l%
+                >{\raggedright\arraybackslash}p{2.6cm}%
+                >{\raggedright\arraybackslash}p{5.2cm}}
+    \toprule
+    \textbf{Método} & \textbf{Tipo} & \textbf{Ve interacciones}
+        & \textbf{Comentario} \\
+    \midrule
+    Pearson & filtro & no & solo relaciones lineales \\
+    \addlinespace
+    Información mutua & filtro & no
+        & cualquier dependencia; es la ganancia de información \\
+    \addlinespace
+    RELIEF & filtro & sí & vecinos con todos los atributos; no ve
+        redundancia \\
+    \addlinespace
+    Clasificador de un atributo & filtro & no
+        & ordena por exactitud de cada atributo solo \\
+    \addlinespace
+    Árbol de decisión & filtro (o embebido) & en parte
+        & se queda con los atributos que usa el árbol \\
+    \addlinespace
+    Hacia adelante & wrapper & no & barato; anidamiento \\
+    \addlinespace
+    Hacia atrás & wrapper & sí & caro al principio; anidamiento \\
+    \addlinespace
+    PTA y generalizadas & wrapper & en parte
+        & $l$, $r$ o $g$ fijos de antemano \\
+    \addlinespace
+    Flotante & wrapper & sí & los pasos hacia atrás los decide $J$ \\
+    \addlinespace
+    Algoritmo genético & wrapper & sí
+        & población de subconjuntos; sin garantía de óptimo \\
     \bottomrule
 \end{tabular}
 \end{center}
