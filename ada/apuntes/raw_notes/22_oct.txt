@@ -1,0 +1,31 @@
+- Grafos
+
+{Definicion formal de grafo con conjuntos}
+{Matriz de adyasensia}
+{Grafo dirigido}
+{Grafos pesados}
+{ciclico aciclico}
+{simple vs no simple}
+{embedded vs topological}
+{implicitos vs explisitos}
+
+-- algoritmos para recorrido 
+--- busqueda en anchura {explicar con ejemplo} (se implementa con una cola)
+{la complejidad depende del problema que se debe abordar, por ejemplo
+en un grafo full connected es factorial}
+
+--- bustqueda en prfundidada {explicar con mismo ejemplo de anchura}
+
+
+---problemas
+----camino mas corto
+{explicar dijstra con p sudocodigo y ejemplo }
+{explicar floyd}
+
+----encontrar ciclos
+BFS {explicar}
+
+----
+
+---ARbol de expansionminima
+Kruskal{explicar}
