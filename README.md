@@ -21,13 +21,15 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.20.0
+* Version: 1.22.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       22/10/2026      matcomp/proyecto2 con los cuatro cortes
+zxxz6       22/10/2026      matcomp/proyecto2 cambia a Airbnb CDMX
 zxxz6       21/10/2026      Agregue exposicion/ y proyecto/ de AAL
 zxxz6       21/10/2026      matcomp/proyecto2 cambia a datos de Uber
 zxxz6       21/10/2026      Agregue ada/proyecto, que vive en su repo
@@ -138,10 +140,11 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     datos, con reporte en formato Springer. Es un repo aparte,
     [zxxz456/proyecto_mate](https://github.com/zxxz456/proyecto_mate);
     aquí solo vive su clon local, que está en el `.gitignore`.
-    - `data/` - 150,000 reservas de viajes de Uber en la región de
-      Delhi (NCR) durante 2024, en CSV.
+    - `data/` - Anuncios de Airbnb en la Ciudad de México, de Inside
+      Airbnb: cuatro cortes trimestrales, de diciembre de 2025 a
+      septiembre de 2026, uno por carpeta.
     - `src/` - Notebooks de análisis. `notes.ipynb` carga el conjunto y
-      muestra su forma, las reservas por estado y sus atributos.
+      muestra su forma, los anuncios por tipo de cuarto y sus atributos.
     - `doc/` - Reporte en LaTeX.
     - `presentacion/` - Presentación en Quarto.
     - `requirements.txt` - El entorno de Python con las versiones
