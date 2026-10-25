@@ -1,0 +1,56 @@
+-- seleccion de atributos
+
+{que es la seleccion de atributos}
+{diferencia entre extraccion de variables y seleccion de variebles}
+
+{por quee s importante seleccionar variebles}(a veces hay variables que no son utiles para la discriminacion)
+
+a veces este problema de seleccion de atributos es bueno para visualizacion de datos, se seleccina un subconjunto de variables
+del total de variables y es el que se estudia 
+
+{explicar filter methods, ventajas y desventajas} no incluims al clasificador
+
+{explicar wrapper methods, ventajas y desventajas}
+
+- metodos filter
+
+--- coeficiente de correlacion de pearson (filter)
+{explicar}
+
+--- informiacion mutua (filter)
+{explicar}
+
+--- RELIEF (filter)
+seleciona aleatoriamente un obj de la muestra y para ese bjeto calcula su amigo o enemigo mas cercano
+{explicar y ejemplo}
+
+--- single feature classifier (filter)
+{explicar}
+
+--- feature selection using desicion trees (filter)
+{explicar}
+
+- metodos wrapper
+son problemas de cominatoria, para solucionar se usan varias heuristicas
+
+--- seleccion hacia atras
+{explicar}
+
+--- seleccion hacia adelante 
+{explicar}
+
+--- secuential search algorithms
+{explicar}
+
+--- secuential floating search algorithm
+{explicar}
+
+- FS using genetic algorithms
+encontrar conjunts de features que sean buenos es muy costoso, la heristica de algorimos geneticos permite encontrar soluciones
+optimas
+
+{explicar mejor}
+{explicar el algoritmo de los algoritmo geneticos}
+{operador de cruza}
+{operador de mutacion}
+{parametros de los AG}
