@@ -1,0 +1,24 @@
+\input{preambulo}
+\begin{document}
+\setcounter{algorithm}{0}
+\begin{algorithm}[H]
+\caption{Destilación por alineación tabular mediante incrustaciones de momentos (TAME)}
+\begin{algorithmic}[1]
+\Require Conjunto de entrenamiento $\mathcal{T}$, clases $C$, presupuesto IPC, tasa de aprendizaje $\eta$, iteraciones $K$, tamaño del lote real $B$, distribución de embedders $P(\vartheta)$
+\State Inicializar $\mathcal{S}$ con IPC muestras por clase, tomadas de $\mathcal{T}$
+\For{$k = 1$ hasta $K$}
+  \State Muestrear parámetros congelados $\vartheta \sim P(\vartheta)$. Generar $f_\vartheta^k$
+  \State $L \gets 0$
+  \For{$c = 0$ hasta $C - 1$}
+    \State Muestrear un lote real $B_c^{\mathcal{T}} \subset \mathcal{T}$ de tamaño $B$ de la clase $c$
+    \State Sea $B_c^{\mathcal{S}} = \{\tilde{s} \in \mathcal{S} : \tilde{y} = c\}$
+    \State Calcular $Z_c^{\mathcal{T}} = f_\vartheta^k(B_c^{\mathcal{T}})$, \quad $Z_c^{\mathcal{S}} = f_\vartheta^k(B_c^{\mathcal{S}})$
+    \State Calcular $\mu_c^{\mathcal{T}}, \Sigma_c^{\mathcal{T}}$ y $\mu_c^{\mathcal{S}}, \Sigma_c^{\mathcal{S}}$
+    \State $L \gets L + \|\mu_c^{\mathcal{T}} - \mu_c^{\mathcal{S}}\|_2^2 + \lambda\,\|\Sigma_c^{\mathcal{T}} - \Sigma_c^{\mathcal{S}}\|_F^2$
+  \EndFor
+  \State $\mathcal{S} \gets \mathcal{S} - \eta\,\nabla_{\mathcal{S}} L$
+\EndFor
+\State \Return $\mathcal{S}$
+\end{algorithmic}
+\end{algorithm}
+\end{document}

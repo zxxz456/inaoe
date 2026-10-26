@@ -1,0 +1,29 @@
+\input{preambulo}
+\begin{document}
+\setcounter{algorithm}{4}
+\begin{algorithm}[H]
+\caption{TAME con el término marginal W1D}
+\begin{algorithmic}[1]
+\Require Lo mismo que el Algoritmo 2, los grupos one-hot $\mathcal{G}$ y el peso $\gamma$
+\Statex \textbf{Definiciones.} $\mathcal{J}$ son las columnas fuera de los grupos de $\mathcal{G}$, $\mathcal{T}_c$ las filas de $\mathcal{T}$ de la clase $c$, $q_{c,j,i} = Q_{\mathcal{T}_c, j}\bigl(\tfrac{i - 1/2}{\mathrm{IPC}}\bigr)$ y $L_{\mathrm{W1}}(\mathcal{S}) = \sum_{c} \sum_{j \in \mathcal{J}} \tfrac{1}{\mathrm{IPC}} \sum_{i} \bigl| \operatorname{sort}(\mathcal{S}_{c,\cdot,j})_i - q_{c,j,i} \bigr|$.
+\Def
+\State Inicializar el conjunto sintético $\mathcal{S}\in\mathbb{R}^{C\times \text{IPC}\times d}$ con IPC muestras por clase, tomadas de $\mathcal{T}$
+\State \hl{Calcular $q_{c,j,i}$ para todo $c$, $j \in \mathcal{J}$ e $i \le \mathrm{IPC}$} \Comment{una sola vez: $\mathcal{T}$ no cambia}
+\State Instanciar un único embedder $f_\vartheta$ y conservarlo durante toda la corrida
+\State $L^\star \gets \infty$
+\For{$k = 1$ hasta $K$}
+  \State Resortear $\vartheta \sim P(\vartheta)$ sobre $f_\vartheta$, en el mismo lugar
+  \State Tomar los lotes reales $\mathcal{B}^{\mathcal{T}}\in\mathbb{R}^{C\times B\times d}$, con $B$ filas de cada clase
+  \State $Z^{\mathcal{T}} \gets f_\vartheta(\mathcal{B}^{\mathcal{T}})\in\mathbb{R}^{C\times B\times p}$, \quad $Z^{\mathcal{S}} \gets f_\vartheta(\mathcal{S})\in\mathbb{R}^{C\times \text{IPC}\times p}$
+  \State $\mu^{\mathcal{T}} \gets \mathrm{media}_1(Z^{\mathcal{T}})$, \quad $\mu^{\mathcal{S}} \gets \mathrm{media}_1(Z^{\mathcal{S}})$
+  \State $\tilde{Z}^{\mathcal{T}} \gets Z^{\mathcal{T}} - \mu^{\mathcal{T}}$, \quad $\tilde{Z}^{\mathcal{S}} \gets Z^{\mathcal{S}} - \mu^{\mathcal{S}}$
+  \State $\Sigma^{\mathcal{T}}_c \gets \tilde{Z}^{\mathcal{T}\top}_c \tilde{Z}^{\mathcal{T}}_c / B$, \quad $\Sigma^{\mathcal{S}}_c \gets \tilde{Z}^{\mathcal{S}\top}_c \tilde{Z}^{\mathcal{S}}_c / \text{IPC}$, \quad para todo $c$ en una sola multiplicación por lotes
+  \State $L_{\mathrm{mom}} \gets \|\mu^{\mathcal{T}} - \mu^{\mathcal{S}}\|_F^2 + \lambda\,\|\Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}}\|_F^2$
+  \State \si $L_{\mathrm{mom}} < L^\star$: \ $L^\star \gets L_{\mathrm{mom}}$, \ $\mathcal{S}^\star \gets \mathcal{S}$ \Comment{W1D no entra en la selección}
+  \State \hl{$L \gets L_{\mathrm{mom}} + \gamma\, L_{\mathrm{W1}}(\mathcal{S})$} \Comment{$L_{\mathrm{W1}}$ en el espacio de los datos, sin embedder}
+  \State $\mathcal{S} \gets \mathcal{S} - \eta\,\nabla_{\mathcal{S}} L$
+\EndFor
+\State \Return $\mathcal{S}^\star$
+\end{algorithmic}
+\end{algorithm}
+\end{document}

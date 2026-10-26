@@ -1,0 +1,26 @@
+% Preambulo comun de los algoritmos; el mismo estilo que los del notebook
+% (TAME/notes/alg_es.tex y alg_onehot_es.tex), mas \hl para resaltar.
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[margin=0.3in,paperwidth=8.2in,paperheight=11in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{newtxtext,newtxmath}
+\usepackage{xcolor}
+\floatname{algorithm}{Algoritmo}
+\renewcommand{\algorithmicrequire}{\textbf{Requiere:}}
+\renewcommand{\algorithmicfor}{\textbf{para}}
+\renewcommand{\algorithmicdo}{\textbf{hacer}}
+\renewcommand{\algorithmicend}{\textbf{fin}}
+\renewcommand{\algorithmicreturn}{\textbf{devolver}}
+\newcommand{\sg}{\operatorname{sg}}
+\newcommand{\si}{\textbf{si}\ }
+\definecolor{resalte}{HTML}{FDE6C4}
+\setlength{\fboxsep}{1.5pt}
+\newcommand{\hl}[1]{\colorbox{resalte}{#1}}
+\newcommand{\Def}{\Statex\vspace{2pt}\hrule\vspace{4pt}}
+\pagestyle{empty}

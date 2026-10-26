@@ -1,0 +1,25 @@
+\input{preambulo}
+\begin{document}
+\setcounter{algorithm}{1}
+\begin{algorithm}[H]
+\caption{TAME paralelizado: todas las clases en un solo lote}
+\begin{algorithmic}[1]
+\Require Conjunto de entrenamiento $\mathcal{T}$, clases $C$, presupuesto IPC, tasa de aprendizaje $\eta$, iteraciones $K$, tamaño del lote real $B$, distribución de embedders $P(\vartheta)$
+\State Inicializar el conjunto sintético $\mathcal{S}\in\mathbb{R}^{C\times \text{IPC}\times d}$ con IPC muestras por clase, tomadas de $\mathcal{T}$
+\State \hl{Instanciar un único embedder $f_\vartheta$ y conservarlo durante toda la corrida}
+\State $L^\star \gets \infty$
+\For{$k = 1$ hasta $K$}
+  \State \hl{Resortear $\vartheta \sim P(\vartheta)$ sobre $f_\vartheta$, en el mismo lugar}
+  \State \hl{Tomar los lotes reales $\mathcal{B}^{\mathcal{T}}\in\mathbb{R}^{C\times B\times d}$, con $B$ filas de cada clase}
+  \State $Z^{\mathcal{T}} \gets f_\vartheta(\mathcal{B}^{\mathcal{T}})\in\mathbb{R}^{C\times B\times p}$, \quad $Z^{\mathcal{S}} \gets f_\vartheta(\mathcal{S})\in\mathbb{R}^{C\times \text{IPC}\times p}$
+  \State $\mu^{\mathcal{T}} \gets \mathrm{media}_1(Z^{\mathcal{T}})$, \quad $\mu^{\mathcal{S}} \gets \mathrm{media}_1(Z^{\mathcal{S}})$
+  \State $\tilde{Z}^{\mathcal{T}} \gets Z^{\mathcal{T}} - \mu^{\mathcal{T}}$, \quad $\tilde{Z}^{\mathcal{S}} \gets Z^{\mathcal{S}} - \mu^{\mathcal{S}}$
+  \State \hl{$\Sigma^{\mathcal{T}}_c \gets \tilde{Z}^{\mathcal{T}\top}_c \tilde{Z}^{\mathcal{T}}_c / B$, \quad $\Sigma^{\mathcal{S}}_c \gets \tilde{Z}^{\mathcal{S}\top}_c \tilde{Z}^{\mathcal{S}}_c / \text{IPC}$, \quad para todo $c$ en una sola multiplicación por lotes}
+  \State $L \gets \|\mu^{\mathcal{T}} - \mu^{\mathcal{S}}\|_F^2 + \lambda\,\|\Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}}\|_F^2$
+  \State \hl{\si $L < L^\star$: \ $L^\star \gets L$, \ $\mathcal{S}^\star \gets \mathcal{S}$} \Comment{en la GPU, sin esperar a la CPU}
+  \State $\mathcal{S} \gets \mathcal{S} - \eta\,\nabla_{\mathcal{S}} L$
+\EndFor
+\State \Return $\mathcal{S}^\star$
+\end{algorithmic}
+\end{algorithm}
+\end{document}

@@ -1,0 +1,28 @@
+\input{preambulo}
+\begin{document}
+\setcounter{algorithm}{2}
+\begin{algorithm}[H]
+\caption{TAME con codificación lineal por tramos (PLE)}
+\begin{algorithmic}[1]
+\Require Lo mismo que el Algoritmo 2 y el número de intervalos $M$
+\Statex \textbf{Definiciones.} Para cada columna continua $j$, sean $e_{j,0} < \dots < e_{j,M_j}$ los cuantiles de $\mathcal{T}$ en $0, \tfrac{1}{M}, \dots, 1$, sin repetidos, y $\mathrm{PLE}(x)_{j,m} = \min\!\bigl(1, \max\bigl(0, \tfrac{x_j - e_{j,m-1}}{e_{j,m} - e_{j,m-1}}\bigr)\bigr)$. Las columnas binarias pasan sin cambio y $d'$ es el número de columnas que salen de PLE.
+\Def
+\State Inicializar el conjunto sintético $\mathcal{S}\in\mathbb{R}^{C\times \text{IPC}\times d}$ con IPC muestras por clase, tomadas de $\mathcal{T}$
+\State \hl{Calcular los bordes $e_{j,m}$ de cada columna continua $j$ con los cuantiles de $\mathcal{T}$} \Comment{una sola vez}
+\State Instanciar un único embedder $f_\vartheta$ \hl{con entrada de tamaño $d'$} y conservarlo durante toda la corrida
+\State $L^\star \gets \infty$
+\For{$k = 1$ hasta $K$}
+  \State Resortear $\vartheta \sim P(\vartheta)$ sobre $f_\vartheta$, en el mismo lugar
+  \State Tomar los lotes reales $\mathcal{B}^{\mathcal{T}}\in\mathbb{R}^{C\times B\times d}$, con $B$ filas de cada clase
+  \State \hl{$Z^{\mathcal{T}} \gets f_\vartheta(\mathrm{PLE}(\mathcal{B}^{\mathcal{T}}))$, \quad $Z^{\mathcal{S}} \gets f_\vartheta(\mathrm{PLE}(\mathcal{S}))$} \Comment{PLE es fijo: no se resortea}
+  \State $\mu^{\mathcal{T}} \gets \mathrm{media}_1(Z^{\mathcal{T}})$, \quad $\mu^{\mathcal{S}} \gets \mathrm{media}_1(Z^{\mathcal{S}})$
+  \State $\tilde{Z}^{\mathcal{T}} \gets Z^{\mathcal{T}} - \mu^{\mathcal{T}}$, \quad $\tilde{Z}^{\mathcal{S}} \gets Z^{\mathcal{S}} - \mu^{\mathcal{S}}$
+  \State $\Sigma^{\mathcal{T}}_c \gets \tilde{Z}^{\mathcal{T}\top}_c \tilde{Z}^{\mathcal{T}}_c / B$, \quad $\Sigma^{\mathcal{S}}_c \gets \tilde{Z}^{\mathcal{S}\top}_c \tilde{Z}^{\mathcal{S}}_c / \text{IPC}$, \quad para todo $c$ en una sola multiplicación por lotes
+  \State $L \gets \|\mu^{\mathcal{T}} - \mu^{\mathcal{S}}\|_F^2 + \lambda\,\|\Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}}\|_F^2$
+  \State \si $L < L^\star$: \ $L^\star \gets L$, \ $\mathcal{S}^\star \gets \mathcal{S}$
+  \State $\mathcal{S} \gets \mathcal{S} - \eta\,\nabla_{\mathcal{S}} L$ \Comment{el gradiente cruza $f_\vartheta$ y PLE hasta $\mathcal{S}$}
+\EndFor
+\State \Return $\mathcal{S}^\star$
+\end{algorithmic}
+\end{algorithm}
+\end{document}

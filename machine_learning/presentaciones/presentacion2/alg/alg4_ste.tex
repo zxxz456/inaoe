@@ -1,0 +1,28 @@
+\input{preambulo}
+\begin{document}
+\setcounter{algorithm}{3}
+\begin{algorithm}[H]
+\caption{TAME con la estructura one-hot preservada dentro del bucle (STE)}
+\begin{algorithmic}[1]
+\Require Lo mismo que el Algoritmo 2, los grupos one-hot $\mathcal{G}$ de $\mathcal{T}$ y sus valores $z^0_j < z^1_j$
+\Statex \textbf{Definiciones.} En cada $g \in \mathcal{G}$, $\Pi$ pone en $z^1$ la categoría ganadora $k^\star_g$ si su puntaje $s_{k^\star_g} \ge \tfrac12$, y las demás en $z^0$; las columnas fuera de los grupos no cambian. $\Pi_{\mathrm{ST}}(x) = x + \sg[\Pi(x) - x]$ vale $\Pi(x)$ hacia adelante y tiene jacobiano identidad hacia atrás.
+\Def
+\State Inicializar el conjunto sintético $\mathcal{S}\in\mathbb{R}^{C\times \text{IPC}\times d}$ con IPC muestras por clase, tomadas de $\mathcal{T}$
+\State Instanciar un único embedder $f_\vartheta$ y conservarlo durante toda la corrida
+\State $L^\star \gets \infty$
+\For{$k = 1$ hasta $K$}
+  \State Resortear $\vartheta \sim P(\vartheta)$ sobre $f_\vartheta$, en el mismo lugar
+  \State Tomar los lotes reales $\mathcal{B}^{\mathcal{T}}\in\mathbb{R}^{C\times B\times d}$, con $B$ filas de cada clase
+  \State \hl{$\widehat{\mathcal{S}} \gets \Pi_{\mathrm{ST}}(\mathcal{S})$} \Comment{las filas que ve el embedder ya son one-hot}
+  \State $Z^{\mathcal{T}} \gets f_\vartheta(\mathcal{B}^{\mathcal{T}})\in\mathbb{R}^{C\times B\times p}$, \quad \hl{$Z^{\mathcal{S}} \gets f_\vartheta(\widehat{\mathcal{S}})$} $\in\mathbb{R}^{C\times \text{IPC}\times p}$
+  \State $\mu^{\mathcal{T}} \gets \mathrm{media}_1(Z^{\mathcal{T}})$, \quad $\mu^{\mathcal{S}} \gets \mathrm{media}_1(Z^{\mathcal{S}})$
+  \State $\tilde{Z}^{\mathcal{T}} \gets Z^{\mathcal{T}} - \mu^{\mathcal{T}}$, \quad $\tilde{Z}^{\mathcal{S}} \gets Z^{\mathcal{S}} - \mu^{\mathcal{S}}$
+  \State $\Sigma^{\mathcal{T}}_c \gets \tilde{Z}^{\mathcal{T}\top}_c \tilde{Z}^{\mathcal{T}}_c / B$, \quad $\Sigma^{\mathcal{S}}_c \gets \tilde{Z}^{\mathcal{S}\top}_c \tilde{Z}^{\mathcal{S}}_c / \text{IPC}$, \quad para todo $c$ en una sola multiplicación por lotes
+  \State $L \gets \|\mu^{\mathcal{T}} - \mu^{\mathcal{S}}\|_F^2 + \lambda\,\|\Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}}\|_F^2$
+  \State \si $L < L^\star$: \ $L^\star \gets L$, \ $\mathcal{S}^\star \gets \mathcal{S}$
+  \State $\mathcal{S} \gets \mathcal{S} - \eta\,\nabla_{\mathcal{S}} L$ \Comment{$\mathcal{S}$ sigue siendo continuo; lo legal es $\Pi(\mathcal{S})$}
+\EndFor
+\State \Return \hl{$\Pi(\mathcal{S}^\star)$} \Comment{el conjunto que sale es one-hot exacto}
+\end{algorithmic}
+\end{algorithm}
+\end{document}
