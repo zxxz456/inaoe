@@ -367,48 +367,48 @@ Código de Barnoviciu y Florea (2026)
 <marker id="mAan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
 <path d="M0,0 L10,5 L0,10 z" fill="#c77700"/></marker>
 </defs>
-<rect x="60" y="130" width="1160" height="440" rx="6" fill="#f4f4f4" stroke="#999"/>
-<polyline points="260,190 356,190" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,190 540,190 540,163 586,163" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,190 540,190 540,217 586,217" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,163 710,163 710,190 756,190" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,217 710,217 710,190 756,190" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="860,190 930,190 930,340 986,340" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="260,322 356,322" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,322 540,322 540,295 586,295" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,322 540,322 540,349 586,349" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,295 710,295 710,322 756,322" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,349 710,349 710,322 756,322" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="860,322 930,322 930,340 986,340" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="260,490 356,490" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,490 540,490 540,463 586,463" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="490,490 540,490 540,517 586,517" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,463 710,463 710,490 756,490" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="662,517 710,517 710,490 756,490" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
-<polyline points="860,490 930,490 930,340 986,340" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<rect x="0" y="130" width="1240" height="475" rx="6" fill="#f4f4f4" stroke="#999"/>
+<polyline points="260,206 356,206" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,206 540,206 540,172 586,172" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,206 540,206 540,237 586,237" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,172 710,172 710,206 756,206" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,237 710,237 710,206 756,206" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="860,206 930,206 930,370 986,370" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="260,342 356,342" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,342 540,342 540,308 586,308" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,342 540,342 540,373 586,373" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,308 710,308 710,342 756,342" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,373 710,373 710,342 756,342" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="860,342 930,342 930,370 986,370" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="260,533 356,533" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,533 540,533 540,499 586,499" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="490,533 540,533 540,564 586,564" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,499 710,499 710,533 756,533" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="662,564 710,564 710,533 756,533" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
+<polyline points="860,533 930,533 930,370 986,370" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAa)"/>
 </svg>
-<div class="tb syn" data-id="ts2" style="left:110px;top:440px;width:150px;height:46px"></div>
-<div class="tb syn" data-id="ts1" style="left:110px;top:272px;width:150px;height:46px"></div>
+<div class="tb syn" data-id="ts2" style="left:110px;top:467px;width:150px;height:46px"></div>
+<div class="tb syn" data-id="ts1" style="left:110px;top:276px;width:150px;height:46px"></div>
 <div class="tb syn" data-id="ts0" style="left:110px;top:140px;width:150px;height:46px"></div>
-<div class="tb real" data-id="tr2" style="left:110px;top:494px;width:150px;height:46px"></div>
-<div class="tb real" data-id="tr1" style="left:110px;top:326px;width:150px;height:46px"></div>
-<div class="tb real" data-id="tr0" style="left:110px;top:194px;width:150px;height:46px"></div>
-<div class="card" data-id="em2" style="left:360px;top:445px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="card" data-id="em1" style="left:360px;top:277px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="card" data-id="em0" style="left:360px;top:145px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="cubo" data-id="zs2" style="left:590px;top:436px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zs1" style="left:590px;top:268px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zs0" style="left:590px;top:136px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt2" style="left:590px;top:490px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt1" style="left:590px;top:322px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt0" style="left:590px;top:190px;width:72px;height:54px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="perd" data-id="lc2" style="left:760px;top:467px;width:100px;height:46px"></div>
-<div class="perd" data-id="lc1" style="left:760px;top:299px;width:100px;height:46px"></div>
-<div class="perd" data-id="lc0" style="left:760px;top:167px;width:100px;height:46px"></div>
-<div class="perd" data-id="lt" style="left:990px;top:300px;width:190px;height:80px"></div>
+<div class="tb real" data-id="tr2" style="left:110px;top:535px;width:150px;height:46px"></div>
+<div class="tb real" data-id="tr1" style="left:110px;top:344px;width:150px;height:46px"></div>
+<div class="tb real" data-id="tr0" style="left:110px;top:208px;width:150px;height:46px"></div>
+<div class="card" data-id="em2" style="left:360px;top:488px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="card" data-id="em1" style="left:360px;top:297px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="card" data-id="em0" style="left:360px;top:161px;width:130px;height:90px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="cubo" data-id="zs2" style="left:590px;top:471px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zs1" style="left:590px;top:280px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zs0" style="left:590px;top:144px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt2" style="left:590px;top:536px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt1" style="left:590px;top:345px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt0" style="left:590px;top:209px;width:72px;height:48px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="perd" data-id="lc2" style="left:760px;top:510px;width:100px;height:46px"></div>
+<div class="perd" data-id="lc1" style="left:760px;top:319px;width:100px;height:46px"></div>
+<div class="perd" data-id="lc0" style="left:760px;top:183px;width:100px;height:46px"></div>
+<div class="perd" data-id="lt" style="left:990px;top:330px;width:190px;height:80px"></div>
 ```
 
-::: {.etq .ab data-id="nc0" style="top:176px;left:4px;width:104px"}
+::: {.etq .ab data-id="nc0" style="top:192px;left:6px;width:104px;white-space:nowrap;font-size:19px"}
 $c = 0$
 :::
 
@@ -416,59 +416,131 @@ $c = 0$
 $B_{0}^{\mathcal{S}}$
 :::
 
-::: {.etq .ab .chica data-id="bt0" style="top:211px;left:110px;width:150px"}
+::: {.etq .ab .chica data-id="bt0" style="top:225px;left:110px;width:150px"}
 $B_{0}^{\mathcal{T}}$
 :::
 
-::: {.etq .ab data-id="nl0" style="top:178px;left:760px;width:100px"}
+::: {.etq .ab data-id="nl0" style="top:194px;left:760px;width:100px"}
 $\mathcal{L}_{0}$
 :::
 
-::: {.etq .ab data-id="nc1" style="top:308px;left:4px;width:104px"}
+::: {.etq .ab data-id="nc1" style="top:328px;left:6px;width:104px;white-space:nowrap;font-size:19px"}
 $c = 1$
 :::
 
-::: {.etq .ab .chica data-id="bs1" style="top:289px;left:110px;width:150px"}
+::: {.etq .ab .chica data-id="bs1" style="top:293px;left:110px;width:150px"}
 $B_{1}^{\mathcal{S}}$
 :::
 
-::: {.etq .ab .chica data-id="bt1" style="top:343px;left:110px;width:150px"}
+::: {.etq .ab .chica data-id="bt1" style="top:361px;left:110px;width:150px"}
 $B_{1}^{\mathcal{T}}$
 :::
 
-::: {.etq .ab data-id="nl1" style="top:310px;left:760px;width:100px"}
+::: {.etq .ab data-id="nl1" style="top:330px;left:760px;width:100px"}
 $\mathcal{L}_{1}$
 :::
 
-::: {.etq .ab data-id="nc2" style="top:476px;left:4px;width:104px"}
+::: {.etq .ab data-id="nc2" style="top:519px;left:6px;width:104px;white-space:nowrap;font-size:19px"}
 $c = C{-}1$
 :::
 
-::: {.etq .ab .chica data-id="bs2" style="top:457px;left:110px;width:150px"}
+::: {.etq .ab .chica data-id="bs2" style="top:484px;left:110px;width:150px"}
 $B_{C-1}^{\mathcal{S}}$
 :::
 
-::: {.etq .ab .chica data-id="bt2" style="top:511px;left:110px;width:150px"}
+::: {.etq .ab .chica data-id="bt2" style="top:552px;left:110px;width:150px"}
 $B_{C-1}^{\mathcal{T}}$
 :::
 
-::: {.etq .ab data-id="nl2" style="top:478px;left:760px;width:100px"}
+::: {.etq .ab data-id="nl2" style="top:521px;left:760px;width:100px"}
 $\mathcal{L}_{C-1}$
 :::
 
-::: {.etq .ab .puntos style="top:372px;left:110px;width:150px"}
+::: {.etq .ab .chica style="top:161px;left:590px;width:64px"}
+$Z_{0}^{\mathcal{S}}$
+:::
+
+::: {.etq .ab .chica style="top:226px;left:590px;width:64px"}
+$Z_{0}^{\mathcal{T}}$
+:::
+
+::: {.etq .ab .chica style="top:297px;left:590px;width:64px"}
+$Z_{1}^{\mathcal{S}}$
+:::
+
+::: {.etq .ab .chica style="top:362px;left:590px;width:64px"}
+$Z_{1}^{\mathcal{T}}$
+:::
+
+::: {.etq .ab .chica style="top:488px;left:590px;width:64px"}
+$Z_{C-1}^{\mathcal{S}}$
+:::
+
+::: {.etq .ab .chica style="top:553px;left:590px;width:64px"}
+$Z_{C-1}^{\mathcal{T}}$
+:::
+
+::: {.etq .ab .dim style="top:187px;left:110px;width:150px"}
+$(\mathrm{IPC} {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:255px;left:110px;width:150px"}
+$(B {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:323px;left:110px;width:150px"}
+$(\mathrm{IPC} {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:391px;left:110px;width:150px"}
+$(B {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:514px;left:110px;width:150px"}
+$(\mathrm{IPC} {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:582px;left:110px;width:150px"}
+$(B {\times} d)$
+:::
+
+::: {.etq .ab .dim style="top:193px;left:586px;width:80px"}
+$(\mathrm{IPC} {\times} p)$
+:::
+
+::: {.etq .ab .dim style="top:258px;left:586px;width:80px"}
+$(B {\times} p)$
+:::
+
+::: {.etq .ab .dim style="top:329px;left:586px;width:80px"}
+$(\mathrm{IPC} {\times} p)$
+:::
+
+::: {.etq .ab .dim style="top:394px;left:586px;width:80px"}
+$(B {\times} p)$
+:::
+
+::: {.etq .ab .dim style="top:520px;left:586px;width:80px"}
+$(\mathrm{IPC} {\times} p)$
+:::
+
+::: {.etq .ab .dim style="top:585px;left:586px;width:80px"}
+$(B {\times} p)$
+:::
+
+::: {.etq .ab .puntos style="top:405px;left:110px;width:150px"}
 $\vdots$
 :::
 
-::: {.etq .ab .puntos style="top:372px;left:760px;width:100px"}
+::: {.etq .ab .puntos style="top:405px;left:760px;width:100px"}
 $\vdots$
 :::
 
-::: {.etq .ab data-id="nlt" style="top:322px;left:990px;width:190px"}
+::: {.etq .ab data-id="nlt" style="top:352px;left:990px;width:190px"}
 $\mathcal{L} = \sum_c \mathcal{L}_c$
 :::
 
-::: {.etq .ab .pie2 data-id="pieA" style="top:596px;left:60px;width:1160px"}
+::: {.etq .ab .pie2 data-id="pieA" style="top:620px;left:0px;width:1240px"}
 Antes: un forward, una covarianza y una suma **por clase**, $C$ veces en cada iteración
 :::
 
@@ -481,7 +553,7 @@ Con letter son 26 vueltas por iteracion, y cada vuelta lanza sus propias
 operaciones pequenas en la GPU.
 :::
 
-## bottleneck 1: un bucle sobre las clases {auto-animate=true .nostretch}
+## bottleneck 1 (un bucle sobre las clases) {auto-animate=true .nostretch}
 
 ```{=html}
 <svg class="fig tame-fig" viewBox="0 0 1280 720" width="1280" height="720"
@@ -492,65 +564,65 @@ operaciones pequenas en la GPU.
 <marker id="mAbn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
 <path d="M0,0 L10,5 L0,10 z" fill="#c77700"/></marker>
 </defs>
-<rect x="60" y="130" width="1160" height="440" rx="6" fill="#f4f4f4" stroke="#999"/>
-<polyline points="280,275 355,275 355,345 426,345" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline points="280,480 355,480 355,425 426,425" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline points="720,385 750,385 750,290 786,290" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline points="720,385 750,385 750,465 786,465" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline points="926,282 950,282 950,375 981,375" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline points="926,457 950,457 950,375 981,375" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
-<polyline class="retro" points="1080,335 1080,178 195,178 195,215" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<rect x="0" y="130" width="1240" height="475" rx="6" fill="#f4f4f4" stroke="#999"/>
+<polyline points="280,295 355,295 355,365 426,365" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline points="280,500 355,500 355,445 426,445" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline points="720,405 750,405 750,310 786,310" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline points="720,405 750,405 750,485 786,485" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline points="926,302 950,302 950,395 981,395" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline points="926,477 950,477 950,395 981,395" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
+<polyline class="retro" points="1080,355 1080,198 195,198 195,235" fill="none" stroke="#333" stroke-width="2.5" marker-end="url(#mAb)"/>
 </svg>
-<div class="tb syn" data-id="ts2" style="left:116px;top:219px;width:180px;height:80px"></div>
-<div class="tb syn" data-id="ts1" style="left:108px;top:227px;width:180px;height:80px"></div>
-<div class="tb syn" data-id="ts0" style="left:100px;top:235px;width:180px;height:80px"></div>
-<div class="tb real" data-id="tr2" style="left:116px;top:424px;width:180px;height:80px"></div>
-<div class="tb real" data-id="tr1" style="left:108px;top:432px;width:180px;height:80px"></div>
-<div class="tb real" data-id="tr0" style="left:100px;top:440px;width:180px;height:80px"></div>
-<div class="card" data-id="em2" style="left:452px;top:268px;width:290px;height:190px;background:#b9cdea"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="card" data-id="em1" style="left:441px;top:279px;width:290px;height:190px;background:#c7d8ef"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="card" data-id="em0" style="left:430px;top:290px;width:290px;height:190px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
-<div class="cubo" data-id="zs2" style="left:806px;top:213px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zs1" style="left:798px;top:221px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zs0" style="left:790px;top:229px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt2" style="left:806px;top:388px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt1" style="left:798px;top:396px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="cubo" data-id="zt0" style="left:790px;top:404px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
-<div class="perd" data-id="lc2" style="left:985px;top:335px;width:190px;height:80px"></div>
-<div class="perd" data-id="lc1" style="left:985px;top:335px;width:190px;height:80px"></div>
-<div class="perd" data-id="lc0" style="left:985px;top:335px;width:190px;height:80px"></div>
-<div class="perd" data-id="lt" style="left:985px;top:335px;width:190px;height:80px"></div>
+<div class="tb syn" data-id="ts2" style="left:116px;top:239px;width:180px;height:80px"></div>
+<div class="tb syn" data-id="ts1" style="left:108px;top:247px;width:180px;height:80px"></div>
+<div class="tb syn" data-id="ts0" style="left:100px;top:255px;width:180px;height:80px"></div>
+<div class="tb real" data-id="tr2" style="left:116px;top:444px;width:180px;height:80px"></div>
+<div class="tb real" data-id="tr1" style="left:108px;top:452px;width:180px;height:80px"></div>
+<div class="tb real" data-id="tr0" style="left:100px;top:460px;width:180px;height:80px"></div>
+<div class="card" data-id="em2" style="left:452px;top:288px;width:290px;height:190px;background:#b9cdea"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="card" data-id="em1" style="left:441px;top:299px;width:290px;height:190px;background:#c7d8ef"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="card" data-id="em0" style="left:430px;top:310px;width:290px;height:190px;background:#dbe7f6"><svg class="tame-fig" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet"><g stroke="#445" stroke-width="1.4"><line class="arista" style="animation-delay:0.00s" x1="60" y1="45" x2="130" y2="25"/><line class="arista" style="animation-delay:0.14s" x1="60" y1="45" x2="130" y2="65"/><line class="arista" style="animation-delay:0.27s" x1="60" y1="45" x2="130" y2="105"/><line class="arista" style="animation-delay:0.41s" x1="60" y1="45" x2="130" y2="145"/><line class="arista" style="animation-delay:0.55s" x1="60" y1="85" x2="130" y2="25"/><line class="arista" style="animation-delay:0.69s" x1="60" y1="85" x2="130" y2="65"/><line class="arista" style="animation-delay:0.82s" x1="60" y1="85" x2="130" y2="105"/><line class="arista" style="animation-delay:0.96s" x1="60" y1="85" x2="130" y2="145"/><line class="arista" style="animation-delay:1.10s" x1="60" y1="125" x2="130" y2="25"/><line class="arista" style="animation-delay:1.23s" x1="60" y1="125" x2="130" y2="65"/><line class="arista" style="animation-delay:1.37s" x1="60" y1="125" x2="130" y2="105"/><line class="arista" style="animation-delay:1.51s" x1="60" y1="125" x2="130" y2="145"/><line class="arista" style="animation-delay:0.04s" x1="130" y1="25" x2="200" y2="25"/><line class="arista" style="animation-delay:0.18s" x1="130" y1="25" x2="200" y2="65"/><line class="arista" style="animation-delay:0.32s" x1="130" y1="25" x2="200" y2="105"/><line class="arista" style="animation-delay:0.46s" x1="130" y1="25" x2="200" y2="145"/><line class="arista" style="animation-delay:0.59s" x1="130" y1="65" x2="200" y2="25"/><line class="arista" style="animation-delay:0.73s" x1="130" y1="65" x2="200" y2="65"/><line class="arista" style="animation-delay:0.87s" x1="130" y1="65" x2="200" y2="105"/><line class="arista" style="animation-delay:1.00s" x1="130" y1="65" x2="200" y2="145"/><line class="arista" style="animation-delay:1.14s" x1="130" y1="105" x2="200" y2="25"/><line class="arista" style="animation-delay:1.28s" x1="130" y1="105" x2="200" y2="65"/><line class="arista" style="animation-delay:1.41s" x1="130" y1="105" x2="200" y2="105"/><line class="arista" style="animation-delay:1.55s" x1="130" y1="105" x2="200" y2="145"/><line class="arista" style="animation-delay:0.09s" x1="130" y1="145" x2="200" y2="25"/><line class="arista" style="animation-delay:0.23s" x1="130" y1="145" x2="200" y2="65"/><line class="arista" style="animation-delay:0.36s" x1="130" y1="145" x2="200" y2="105"/><line class="arista" style="animation-delay:0.50s" x1="130" y1="145" x2="200" y2="145"/><line class="arista" style="animation-delay:0.64s" x1="200" y1="25" x2="270" y2="45"/><line class="arista" style="animation-delay:0.77s" x1="200" y1="25" x2="270" y2="85"/><line class="arista" style="animation-delay:0.91s" x1="200" y1="25" x2="270" y2="125"/><line class="arista" style="animation-delay:1.05s" x1="200" y1="65" x2="270" y2="45"/><line class="arista" style="animation-delay:1.18s" x1="200" y1="65" x2="270" y2="85"/><line class="arista" style="animation-delay:1.32s" x1="200" y1="65" x2="270" y2="125"/><line class="arista" style="animation-delay:1.46s" x1="200" y1="105" x2="270" y2="45"/><line class="arista" style="animation-delay:1.59s" x1="200" y1="105" x2="270" y2="85"/><line class="arista" style="animation-delay:0.13s" x1="200" y1="105" x2="270" y2="125"/><line class="arista" style="animation-delay:0.27s" x1="200" y1="145" x2="270" y2="45"/><line class="arista" style="animation-delay:0.41s" x1="200" y1="145" x2="270" y2="85"/><line class="arista" style="animation-delay:0.54s" x1="200" y1="145" x2="270" y2="125"/></g><g fill="#fff" stroke="#333" stroke-width="2"><circle cx="60" cy="45" r="9"/><circle cx="60" cy="85" r="9"/><circle cx="60" cy="125" r="9"/><circle cx="130" cy="25" r="9"/><circle cx="130" cy="65" r="9"/><circle cx="130" cy="105" r="9"/><circle cx="130" cy="145" r="9"/><circle cx="200" cy="25" r="9"/><circle cx="200" cy="65" r="9"/><circle cx="200" cy="105" r="9"/><circle cx="200" cy="145" r="9"/><circle cx="270" cy="45" r="9"/><circle cx="270" cy="85" r="9"/><circle cx="270" cy="125" r="9"/></g></svg></div>
+<div class="cubo" data-id="zs2" style="left:806px;top:233px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zs1" style="left:798px;top:241px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zs0" style="left:790px;top:249px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#d9d4ef" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#c9c3e6" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#b3abd8" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt2" style="left:806px;top:408px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt1" style="left:798px;top:416px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="cubo" data-id="zt0" style="left:790px;top:424px;width:136px;height:106px"><svg viewBox="0 0 136 106" preserveAspectRatio="none"><rect x="0" y="16" width="120" height="90" fill="#f0d9ea" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="0,16 16,0 136,0 120,16" fill="#e6c9e0" stroke="#555" vector-effect="non-scaling-stroke"/><polygon points="120,16 136,0 136,90 120,106" fill="#d6b0cc" stroke="#555" vector-effect="non-scaling-stroke"/></svg></div>
+<div class="perd" data-id="lc2" style="left:985px;top:355px;width:190px;height:80px"></div>
+<div class="perd" data-id="lc1" style="left:985px;top:355px;width:190px;height:80px"></div>
+<div class="perd" data-id="lc0" style="left:985px;top:355px;width:190px;height:80px"></div>
+<div class="perd" data-id="lt" style="left:985px;top:355px;width:190px;height:80px"></div>
 ```
 
-::: {.etq .ab style="top:254px;left:100px;width:180px"}
+::: {.etq .ab style="top:274px;left:100px;width:180px"}
 $\mathcal{S}$<br>$(C \times \mathrm{IPC} \times d)$
 :::
 
-::: {.etq .ab style="top:459px;left:100px;width:180px"}
+::: {.etq .ab style="top:479px;left:100px;width:180px"}
 $\mathcal{B}^{\mathcal{T}}$<br>$(C \times B \times d)$
 :::
 
-::: {.etq .ab style="top:240px;left:420px;width:320px"}
+::: {.etq .ab style="top:260px;left:420px;width:320px"}
 Embedders congelados $f_\vartheta$
 :::
 
-::: {.etq .ab .cara style="top:245px;left:790px;width:120px;height:90px"}
+::: {.etq .ab .cara style="top:265px;left:790px;width:120px;height:90px"}
 $Z^{\mathcal{S}}$<br>$(C {\times} \mathrm{IPC} {\times} p)$
 :::
 
-::: {.etq .ab .cara style="top:420px;left:790px;width:120px;height:90px"}
+::: {.etq .ab .cara style="top:440px;left:790px;width:120px;height:90px"}
 $Z^{\mathcal{T}}$<br>$(C {\times} B {\times} p)$
 :::
 
-::: {.etq .ab .cara style="top:335px;left:985px;width:190px;height:80px"}
+::: {.etq .ab .cara style="top:355px;left:985px;width:190px;height:80px"}
 $\mathcal{L}(\mu, \Sigma)$
 :::
 
-::: {.etq .ab .fondo style="top:160px;left:520px;width:260px"}
+::: {.etq .ab .fondo style="top:180px;left:520px;width:260px"}
 $\mathcal{S} \leftarrow \mathcal{S} - \eta \nabla_{\mathcal{S}} \mathcal{L}$
 :::
 
-::: {.etq .ab .pie2 data-id="pieB" style="top:596px;left:60px;width:1160px"}
+::: {.etq .ab .pie2 data-id="pieB" style="top:620px;left:0px;width:1240px"}
 Después: la clase es la primera dimensión. **Un** forward, **una** multiplicación por lotes y **una** suma
 :::
 
@@ -568,7 +640,7 @@ tiene ahora la clase como primera dimension.
 :::
 
 
-## bottleneck 2: un embedder nuevo en cada iteración {.smaller}
+## bottleneck 2 (un embedder nuevo en cada iteración) {.smaller}
 
 :::: {.columns}
 ::: {.column width="46%"}
@@ -623,7 +695,7 @@ Mismo inicializador que al construir (`reset_parameters`), así que los
 pesos salen de la misma distribución
 :::
 
-## bottleneck 3: leer la pérdida en cada iteración
+## bottleneck 3 (leer la pérdida en cada iteración)
 
 - Para quedarse con el mejor $\mathcal{S}$, el código leía la pérdida
   desde la CPU con `.item()`, en cada iteración
@@ -680,109 +752,6 @@ la GPU.
 ::: aside
 Lo resaltado cambia respecto al Algoritmo 1. La selección del mejor
 $\mathcal{S}$ ya estaba en el código publicado, no en el algoritmo del paper
-:::
-
-## Resultado: tiempo {.smaller}
-
-Veces más rápido (viejo / nuevo), por destilación de 1000 iteraciones:
-
-| Embedder | Datasets | IPC 10 | IPC 50 | IPC 200 |
-|---|---|---|---|---|
-| LnRes | binarios | 6.4× | 6.5× | 5.4× |
-| LnRes | multiclase | 6.9× | 6.4× | 4.8× |
-| DCNv2 | binarios | 2.5× | 2.6× | 2.6× |
-| DCNv2 | multiclase | 4.7× | 4.9× | 4.5× |
-| NODE | binarios | 1.6× | 1.5× | 1.2× |
-| NODE | multiclase | 1.9× | 1.2× | [0.9×]{.rojo} |
-
-900 destilaciones: 10 datasets (5 binarios, 5 multiclase) × 3 embedders ×
-3 IPC × 5 semillas × 2 versiones, una a la vez en la GPU.
-
-::: {.notes}
-El efecto total sobre destilaciones completas. LnRes, el embedder
-principal del paper, va de 4.8 a 6.9 veces mas rapido. DCNv2 de 2.5 a
-4.9. Ni una celda en contra en esos dos.
-
-La ganancia cae al subir el IPC: hay mas trabajo real por iteracion y el
-desperdicio pesa menos.
-
-NODE es la excepcion: en multiclase con IPC 200 sale mas lento. NODE
-guarda por cada fila las probabilidades de 64 hojas de 64 arboles, y
-apilar las clases multiplica las filas que viven a la vez. Ahi el
-bottleneck ya no son los lanzamientos sino la memoria.
-:::
-
-::: aside
-Cada celda promedia 5 datasets × 5 semillas; corridas en serie, sin otros
-procesos en la GPU
-:::
-
-## Resultado: memoria y equivalencia
-
-:::: {.columns}
-::: {.column width="50%"}
-**Memoria pico** (nuevo / viejo)
-
-- LnRes y DCNv2: de **0.74×** a **1.24×**
-- IPC chico: gasta **menos**, ya no hay un embedder nuevo en cada
-  iteración
-- IPC grande: gasta **más**, viven $C$ veces más filas a la vez
-- NODE: hasta **3.3×**
-:::
-::: {.column width="50%"}
-**Mismo resultado**
-
-- 450 pares: misma semilla, las dos versiones
-- Desviación, mínimo, máximo y rango de $\mathcal{S}$: Wilcoxon
-  **p = 0.63 a 0.81**
-- Diferencia media en la desviación: **0.024**, contra 0.105 entre
-  semillas
-:::
-::::
-
-::: {.notes}
-El precio es memoria, y depende del caso. Con IPC chico el optimizado
-gasta menos, porque ya no construye una red en cada iteracion. Con IPC
-grande gasta hasta un cuarto mas en LnRes y DCNv2, porque mantiene todas
-las clases a la vez. NODE vuelve a ser el caso malo.
-
-Y los conjuntos que salen son equivalentes. Corrimos la misma semilla con
-las dos versiones, 450 pares, y ninguna medida de la distribucion de S
-muestra diferencia: Wilcoxon da p entre 0.63 y 0.81. La diferencia media
-en la desviacion es la cuarta parte del ruido entre semillas.
-
-Bit a bit no podian ser iguales: el codigo publicado sortea cada
-embedder con el reloj, y dos corridas suyas con la misma semilla ya
-difieren. Lo que se podia comprobar es que las dos versiones sortean de
-la misma distribucion.
-:::
-
-::: aside
-Misma rejilla que la diapositiva anterior; Wilcoxon pareado de rangos con
-signo
-:::
-
-## Qué nos deja
-
-::: {.incremental}
-- No cambia el método: el mismo resultado, **2.5× a 6.9× más rápido**
-  con LnRes y DCNv2
-- Hace caber los barridos de las propuestas: 26 datasets × 3 IPC × 2
-  embedders × 10 semillas × cada variante
-- Nos quedamos con **LnRes y DCNv2**: NODE es el único que puede ir más
-  lento y el que más memoria pide
-- Todo lo que sigue parte del **Algoritmo 2**
-:::
-
-::: {.notes}
-No lo contamos como contribucion al metodo: es el mismo TAME, mas
-rapido. Pero es la base: sin esto los barridos de las propuestas no
-hubieran cabido.
-
-Y nos ayuda a decidir: nos enfocamos en LnRes y DCNv2.
-
-De aqui en adelante, todos los diagramas y algoritmos son la version en
-lote: las tablas apiladas y el Algoritmo 2 como punto de partida.
 :::
 
 # El defecto: valores sin restricción
