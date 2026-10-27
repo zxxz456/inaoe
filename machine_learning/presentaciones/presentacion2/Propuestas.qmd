@@ -43,7 +43,7 @@ format:
         @keyframes marcha { to { stroke-dashoffset: -34; } }
         @keyframes baraja { 0%, 100% { transform: translate(0, 0); }
           50% { transform: translate(6px, -6px); } }
-        @keyframes tiembla { 0%, 08:41:38100% { transform: translate(0, 0); }
+        @keyframes tiembla { 0%, 100% { transform: translate(0, 0); }
           25% { transform: translate(3px, -2px); }
           75% { transform: translate(-3px, 2px); } }
         .lienzo { position: relative; width: 1000px; height: 400px;
