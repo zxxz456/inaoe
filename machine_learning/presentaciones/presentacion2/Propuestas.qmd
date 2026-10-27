@@ -1153,188 +1153,104 @@ los datos reales; no cambian aunque S se mueva.
 Gorishniy et al. (2022)
 :::
 
-## Ejemplo de juguete: los bordes {.smaller}
-
-Columna $0, 0, 0, 10, 5, 15, 20, 25$, con $M = 4$. Ordenada: $0, 0, 0, 5, 10, 15, 20, 25$
-(posiciones 0 a 7).
-
-| Cuantil | Posición $7q$ | Cálculo | Borde |
-|---|---|---|---|
-| 0% | 0 | valor en 0 | 0 |
-| 25% | 1.75 | entre 0 y 0 | 0 |
-| 50% | 3.5 | entre 5 y 10, a la mitad | 7.5 |
-| 75% | 5.25 | entre 15 y 20, a un cuarto | 16.25 |
-| 100% | 7 | valor en 7 | 25 |
-
-::: {.fragment}
-Sin el 0 repetido: bordes $0,\ 7.5,\ 16.25,\ 25$ → **3 intervalos** y
-uno muerto (siempre 0).
-:::
-
-::: {.notes}
-Un ejemplo chico. La columna tiene ocho valores; ordenada queda 0, 0,
-0, 5, 10, 15, 20, 25.
-
-Con cuatro intervalos necesitamos cinco bordes, en los cuantiles 0, 25,
-50, 75 y 100 por ciento. El cuantil q cae en la posicion 7 por q; si no
-es entera, se interpola entre los vecinos.
-
-El 25 por ciento cae entre dos ceros, asi que da 0 otra vez. Al quitar
-el repetido quedan cuatro bordes: tres intervalos utiles y uno muerto,
-que siempre vale cero. Pasa en columnas donde un valor se repite mucho.
-:::
-
-## Ejemplo de juguete: codificar {auto-animate=true}
+## Ejemplo {.nostretch}
 
 ```{=html}
 <div class="lienzo">
-<div class="lin" style="left:100px;top:90px;width:700px"></div>
-<div class="vlin" style="left:100px;top:62px;height:56px"></div>
-<div class="vlin" style="left:310px;top:62px;height:56px"></div>
-<div class="vlin" style="left:555px;top:62px;height:56px"></div>
-<div class="vlin" style="left:800px;top:62px;height:56px"></div>
-<div class="lbl chico" style="left:100px;top:120px">0</div>
-<div class="lbl chico" style="left:310px;top:120px">7.5</div>
-<div class="lbl chico" style="left:555px;top:120px">16.25</div>
-<div class="lbl chico" style="left:800px;top:120px">25</div>
-<div class="lbl chico" style="left:205px;top:30px">intervalo 1</div>
-<div class="lbl chico" style="left:432px;top:30px">intervalo 2</div>
-<div class="lbl chico" style="left:677px;top:30px">intervalo 3</div>
-<div class="pt mk" data-id="mk" style="left:240px;top:90px"></div>
-<div class="lbl nar" data-id="mkl" style="left:240px;top:150px">x = 5</div>
-<div class="lbl l chico" style="left:40px;top:203px">int. 1</div>
-<div class="lbl l chico" style="left:40px;top:248px">int. 2</div>
-<div class="lbl l chico" style="left:40px;top:293px">int. 3</div>
-<div class="lbl l chico" style="left:40px;top:338px">int. 4</div>
-<div class="pista" style="left:150px;top:200px;width:400px"></div>
-<div class="pista" style="left:150px;top:245px;width:400px"></div>
-<div class="pista" style="left:150px;top:290px;width:400px"></div>
-<div class="pista" style="left:150px;top:335px;width:400px"></div>
-<div class="relleno" data-id="f1" style="left:150px;top:200px;width:267px"></div>
-<div class="relleno" data-id="f2" style="left:150px;top:245px;width:0px"></div>
-<div class="relleno" data-id="f3" style="left:150px;top:290px;width:0px"></div>
-<div class="relleno" data-id="f4" style="left:150px;top:335px;width:0px"></div>
-<div class="lbl l" data-id="v1" style="left:570px;top:201px">0.67</div>
-<div class="lbl l" data-id="v2" style="left:570px;top:246px">0</div>
-<div class="lbl l" data-id="v3" style="left:570px;top:291px">0</div>
-<div class="lbl l" data-id="v4" style="left:570px;top:336px">0 (muerto)</div>
-<div class="lbl l tit" data-id="vec" style="left:730px;top:246px">(0.67, 0, 0, 0)</div>
+<div class="lbl tit" style="left:80px;top:8px">antes</div>
+<div class="lbl tit fragment" data-fragment-index="1" style="left:777px;top:8px">después</div>
+<div class="celda enc" style="left:40px;top:38px;width:80px"><span class="math inline">x</span></div>
+<div class="celda enc fragment" data-fragment-index="1" style="left:600px;top:38px;width:84px">int. 1</div>
+<div class="celda enc fragment" data-fragment-index="1" style="left:690px;top:38px;width:84px">int. 2</div>
+<div class="celda enc fragment" data-fragment-index="1" style="left:780px;top:38px;width:84px">int. 3</div>
+<div class="celda enc fragment" data-fragment-index="1" style="left:870px;top:38px;width:84px">int. 4</div>
+<div class="celda" style="left:40px;top:78px;width:80px">0</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:78px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:78px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:78px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:78px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:116px;width:80px">0</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:116px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:116px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:116px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:116px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:154px;width:80px">0</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:154px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:154px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:154px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:154px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:192px;width:80px">10</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:192px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:192px;width:84px"><span class="lleno" style="width:24px"></span><span class="num">0.29</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:192px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:192px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:230px;width:80px">5</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:230px;width:84px"><span class="lleno" style="width:56px"></span><span class="num">0.67</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:230px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:230px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:230px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:268px;width:80px">15</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:268px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:268px;width:84px"><span class="lleno" style="width:72px"></span><span class="num">0.86</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:268px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:268px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:306px;width:80px">20</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:306px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:306px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:306px;width:84px"><span class="lleno" style="width:36px"></span><span class="num">0.43</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:306px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="celda" style="left:40px;top:344px;width:80px">25</div>
+<div class="celda fragment" data-fragment-index="1" style="left:600px;top:344px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:690px;top:344px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda fragment" data-fragment-index="1" style="left:780px;top:344px;width:84px"><span class="lleno" style="width:84px"></span><span class="num">1</span></div>
+<div class="celda muerto fragment" data-fragment-index="1" style="left:870px;top:344px;width:84px"><span class="lleno" style="width:0px"></span><span class="num">0</span></div>
+<div class="lbl chico" style="left:360px;top:30px">bordes: cuantiles 0, 25, 50, 75 y 100% de <span class="math inline">x</span></div>
+<div class="lin" style="left:180px;top:140px;width:360px"></div>
+<div class="vlin" style="left:180px;top:116px;height:48px"></div>
+<div class="lbl chico" style="left:180px;top:168px">0</div>
+<div class="vlin" style="left:288px;top:116px;height:48px"></div>
+<div class="lbl chico" style="left:288px;top:168px">7.5</div>
+<div class="vlin" style="left:414px;top:116px;height:48px"></div>
+<div class="lbl chico" style="left:414px;top:168px">16.25</div>
+<div class="vlin" style="left:540px;top:116px;height:48px"></div>
+<div class="lbl chico" style="left:540px;top:168px">25</div>
+<div class="lbl chico" style="left:234px;top:88px">int. 1</div>
+<div class="lbl chico" style="left:351px;top:88px">int. 2</div>
+<div class="lbl chico" style="left:477px;top:88px">int. 3</div>
+<div class="lbl chico" style="left:360px;top:204px">cuantiles: 0, 0, 7.5, 16.25, 25; el 0 se repite</div>
+<div class="lbl chico" style="left:360px;top:228px">3 intervalos útiles y el int. 4 muerto (siempre 0)</div>
+<svg class="fragment" data-fragment-index="1" style="position:absolute;left:0;top:0" width="1000" height="400"><defs><marker id="mPLE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs><line x1="180" y1="310" x2="570" y2="310" stroke="#555" stroke-width="2.5" marker-end="url(#mPLE)"/></svg>
+<div class="lbl tit fragment" data-fragment-index="1" style="left:375px;top:278px">PLE</div>
+<div class="resalta fragment" data-fragment-index="2" style="left:35px;top:302px;width:90px;height:42px"></div>
+<div class="resalta fragment" data-fragment-index="2" style="left:595px;top:302px;width:364px;height:42px"></div>
+<div class="pt mk fragment" data-fragment-index="2" style="left:468px;top:140px"></div>
 </div>
 ```
 
-::: {.pie data-id="pieP"}
-$x = 5$ va a dos tercios del intervalo 1: $5 / 7.5 = 0.67$
+::: {.pie .fragment fragment-index="2"}
+$x = 20$: dos intervalos llenos y $\tfrac{20 - 16.25}{8.75} = 0.43$ del tercero
 :::
 
 ::: {.notes}
-Ahora a codificar. Arriba el eje de la columna con sus bordes; abajo,
-cuanto se llena cada intervalo.
+Un ejemplo chico, con cuatro intervalos. A la izquierda la columna como
+esta en los datos, ocho valores.
 
-x igual a 5 cae dentro del primer intervalo, que va de 0 a 7.5: lo
-lleno en 5 entre 7.5, dos tercios. Los demas siguen en 0.
+Primero los bordes: los cuantiles 0, 25, 50, 75 y 100 por ciento de la
+columna. Ordenada queda 0, 0, 0, 5, 10, 15, 20, 25; el cuantil q cae en
+la posicion 7 por q y, si no es entera, se interpola entre los vecinos.
+Salen 0, 0, 7.5, 16.25 y 25. El 25 por ciento cae entre dos ceros y da 0
+otra vez; al quitar el repetido quedan tres intervalos utiles y uno
+muerto, que siempre vale cero. Pasa en columnas donde un valor se repite
+mucho.
+
+Despues cada valor se vuelve un vector de cuatro numeros: cuanto llena
+cada intervalo. 0 si todavia no llega, 1 si ya lo paso, la fraccion si
+cae adentro. Por ejemplo x igual a 20: los dos primeros intervalos
+llenos y 0.43 del tercero, porque va 3.75 de 8.75. La columna de un
+numero queda como una columna de vectores.
 :::
 
-## Ejemplo de juguete: codificar {auto-animate=true}
-
-```{=html}
-<div class="lienzo">
-<div class="lin" style="left:100px;top:90px;width:700px"></div>
-<div class="vlin" style="left:100px;top:62px;height:56px"></div>
-<div class="vlin" style="left:310px;top:62px;height:56px"></div>
-<div class="vlin" style="left:555px;top:62px;height:56px"></div>
-<div class="vlin" style="left:800px;top:62px;height:56px"></div>
-<div class="lbl chico" style="left:100px;top:120px">0</div>
-<div class="lbl chico" style="left:310px;top:120px">7.5</div>
-<div class="lbl chico" style="left:555px;top:120px">16.25</div>
-<div class="lbl chico" style="left:800px;top:120px">25</div>
-<div class="lbl chico" style="left:205px;top:30px">intervalo 1</div>
-<div class="lbl chico" style="left:432px;top:30px">intervalo 2</div>
-<div class="lbl chico" style="left:677px;top:30px">intervalo 3</div>
-<div class="pt mk" data-id="mk" style="left:380px;top:90px"></div>
-<div class="lbl nar" data-id="mkl" style="left:380px;top:150px">x = 10</div>
-<div class="lbl l chico" style="left:40px;top:203px">int. 1</div>
-<div class="lbl l chico" style="left:40px;top:248px">int. 2</div>
-<div class="lbl l chico" style="left:40px;top:293px">int. 3</div>
-<div class="lbl l chico" style="left:40px;top:338px">int. 4</div>
-<div class="pista" style="left:150px;top:200px;width:400px"></div>
-<div class="pista" style="left:150px;top:245px;width:400px"></div>
-<div class="pista" style="left:150px;top:290px;width:400px"></div>
-<div class="pista" style="left:150px;top:335px;width:400px"></div>
-<div class="relleno" data-id="f1" style="left:150px;top:200px;width:400px"></div>
-<div class="relleno" data-id="f2" style="left:150px;top:245px;width:114px"></div>
-<div class="relleno" data-id="f3" style="left:150px;top:290px;width:0px"></div>
-<div class="relleno" data-id="f4" style="left:150px;top:335px;width:0px"></div>
-<div class="lbl l" data-id="v1" style="left:570px;top:201px">1</div>
-<div class="lbl l" data-id="v2" style="left:570px;top:246px">0.29</div>
-<div class="lbl l" data-id="v3" style="left:570px;top:291px">0</div>
-<div class="lbl l" data-id="v4" style="left:570px;top:336px">0 (muerto)</div>
-<div class="lbl l tit" data-id="vec" style="left:730px;top:246px">(1, 0.29, 0, 0)</div>
-</div>
-```
-
-::: {.pie data-id="pieP"}
-$x = 10$ ya pasó el intervalo 1 y lleva $\tfrac{10 - 7.5}{8.75} = 0.29$
-del intervalo 2
-:::
-
-::: {.notes}
-x igual a 10 ya paso el primer intervalo completo: vale 1. Y esta
-dentro del segundo, que va de 7.5 a 16.25: lleva 2.5 de 8.75, o sea
-0.29.
-:::
-
-## Ejemplo de juguete: codificar {auto-animate=true}
-
-```{=html}
-<div class="lienzo">
-<div class="lin" style="left:100px;top:90px;width:700px"></div>
-<div class="vlin" style="left:100px;top:62px;height:56px"></div>
-<div class="vlin" style="left:310px;top:62px;height:56px"></div>
-<div class="vlin" style="left:555px;top:62px;height:56px"></div>
-<div class="vlin" style="left:800px;top:62px;height:56px"></div>
-<div class="lbl chico" style="left:100px;top:120px">0</div>
-<div class="lbl chico" style="left:310px;top:120px">7.5</div>
-<div class="lbl chico" style="left:555px;top:120px">16.25</div>
-<div class="lbl chico" style="left:800px;top:120px">25</div>
-<div class="lbl chico" style="left:205px;top:30px">intervalo 1</div>
-<div class="lbl chico" style="left:432px;top:30px">intervalo 2</div>
-<div class="lbl chico" style="left:677px;top:30px">intervalo 3</div>
-<div class="pt mk" data-id="mk" style="left:660px;top:90px"></div>
-<div class="lbl nar" data-id="mkl" style="left:660px;top:150px">x = 20</div>
-<div class="lbl l chico" style="left:40px;top:203px">int. 1</div>
-<div class="lbl l chico" style="left:40px;top:248px">int. 2</div>
-<div class="lbl l chico" style="left:40px;top:293px">int. 3</div>
-<div class="lbl l chico" style="left:40px;top:338px">int. 4</div>
-<div class="pista" style="left:150px;top:200px;width:400px"></div>
-<div class="pista" style="left:150px;top:245px;width:400px"></div>
-<div class="pista" style="left:150px;top:290px;width:400px"></div>
-<div class="pista" style="left:150px;top:335px;width:400px"></div>
-<div class="relleno" data-id="f1" style="left:150px;top:200px;width:400px"></div>
-<div class="relleno" data-id="f2" style="left:150px;top:245px;width:400px"></div>
-<div class="relleno" data-id="f3" style="left:150px;top:290px;width:171px"></div>
-<div class="relleno" data-id="f4" style="left:150px;top:335px;width:0px"></div>
-<div class="lbl l" data-id="v1" style="left:570px;top:201px">1</div>
-<div class="lbl l" data-id="v2" style="left:570px;top:246px">1</div>
-<div class="lbl l" data-id="v3" style="left:570px;top:291px">0.43</div>
-<div class="lbl l" data-id="v4" style="left:570px;top:336px">0 (muerto)</div>
-<div class="lbl l tit" data-id="vec" style="left:730px;top:246px">(1, 1, 0.43, 0)</div>
-</div>
-```
-
-::: {.pie data-id="pieP"}
-$x = 20$: dos intervalos llenos y $\tfrac{20 - 16.25}{8.75} = 0.43$ del
-tercero
-:::
-
-::: {.notes}
-Y x igual a 20: los dos primeros intervalos llenos, y 0.43 del
-tercero. El cuarto, el muerto, siempre en 0.
-
-Asi, un solo numero se vuelve un vector que dice en que parte de la
-distribucion real cae.
-:::
-
-## Sigue siendo diferenciable {.nostretch}
+## Es diferenciable {.nostretch}
 
 ```{=html}
 <svg class="fig" viewBox="0 0 1000 400" width="1000" height="400"
@@ -1389,7 +1305,7 @@ un escalon y su derivada es 0 casi en todos lados: no le serviria a
 TAME.
 :::
 
-## Cómo queda TAME con PLE {.nostretch}
+## PLE + TAME {.nostretch}
 
 ```{=html}
 <svg class="fig tame-fig" viewBox="0 0 1280 720" width="1280" height="720"
@@ -1495,7 +1411,7 @@ de regreso hasta S.
 Modificación propia sobre Barnoviciu y Florea (2026), figura 1
 :::
 
-## Algoritmo: TAME con PLE {.nostretch}
+## PLE + TAME (Algoritmo 3) {.nostretch}
 
 ![](img/alg3_ple.svg){width="1017px" fig-align="center"}
 
@@ -1552,29 +1468,36 @@ original con su puntaje s: 0 es apagada, 1 es encendida. Un valor
 destilado puede dar cualquier cosa, por ejemplo 0.46.
 :::
 
-## La proyección Π {.smaller}
+## La proyección Π {.smaller .rigor}
 
-En cada grupo one-hot $g$, la ganadora y la proyección:
+Sea $\mathcal{G}$ el conjunto de grupos one-hot de $\mathcal{T}$, deducidos de
+los datos: rachas de columnas de dos valores en las que, fila por fila, a lo
+más una está en su valor alto. Para cada columna $j$ de un grupo
+$g \in \mathcal{G}$, sean ${z_j^0 < z_j^1}$ los dos valores que $j$ toma en
+$\mathcal{T}$ tras el escalado, y sea
 
 $$
+s_j(x) = \frac{x_j - z_j^0}{z_j^1 - z_j^0}, \qquad
 k_g^\star(x) = \arg\max_{j \in g}\ s_j(x)
 $$
+
+su puntaje y la categoría ganadora del grupo. La proyección $\Pi$ deja
+intactas las columnas que no pertenecen a ningún grupo y, dentro de cada
+$g \in \mathcal{G}$, fija
 
 $$
 \Pi(x)_j =
 \begin{cases}
-z_j^1 & \text{si } j = k_g^\star(x) \text{ y } s_{k_g^\star}(x) \ge \tfrac{1}{2} \\
-z_j^0 & \text{en otro caso}
+z_j^1, & j = k_g^\star(x) \ \text{y}\ s_{k_g^\star}(x) \ge \tfrac{1}{2}, \\[4pt]
+z_j^0, & \text{en otro caso.}
 \end{cases}
 $$
 
-::: {.incremental}
-- $k^\star$ decide **quién** se enciende; $s_{k^\star} \ge \tfrac12$
-  decide **si** se enciende
-- Si nadie llega a $\tfrac12$, el grupo queda apagado, como una fila
-  real con el dato faltante
-- En filas reales, $\Pi$ no cambia nada
-- **Problema:** $\Pi$ es constante a tramos, su gradiente es **0**
+::: {.fragment}
+La condición $s_{k^\star} \ge \tfrac12$ deja el grupo entero apagado cuando
+ninguna categoría domina, que es como se ve una fila real con el dato
+ausente; gracias a ella $\Pi$ es la identidad sobre filas de $\mathcal{T}$.
+Como $\Pi$ es constante a trozos, **su gradiente es nulo** donde existe.
 :::
 
 ::: {.notes}
@@ -1645,33 +1568,7 @@ direccion util.
 Bengio, Léonard y Courville (2013)
 :::
 
-## Por qué no otras formas {.smaller}
-
-| Expresión | Valor | Derivada | Problema |
-|---|---|---|---|
-| $\Pi(x)$ | $\Pi(x)$ ✓ | 0 | el gradiente muere |
-| $\operatorname{sg}[\Pi(x)]$ | $\Pi(x)$ ✓ | 0 | todo congelado |
-| $x$ | $x$ ✗ | 1 ✓ | el embedder ve dummies embarradas |
-| $x + \operatorname{sg}[\Pi(x) - x]$ | $\Pi(x)$ ✓ | 1 ✓ | |
-
-::: {.fragment}
-**Clave:** $\mathcal{S}$ guarda $x$, no $\Pi(x)$. La $x$ es una
-variable **oculta** que se mueve con pasos chicos y cambia de categoría
-cuando cruza una frontera.
-:::
-
-::: {.notes}
-Por que esta forma y no otra. Pi solo o congelado dan el valor
-correcto pero matan el gradiente. x sola deja pasar el gradiente pero
-el embedder ve dummies embarradas. Solo la combinacion da las dos
-cosas.
-
-Lo importante: S guarda x, no Pi de x. x es continua y se mueve con
-pasos chicos; Pi de x solo cambia cuando x cruza una frontera, cuando
-otra categoria rebasa a la ganadora. Veamoslo en un ejemplo.
-:::
-
-## Ejemplo de juguete: cambiar de categoría {auto-animate=true}
+## Ejemplo {auto-animate=true}
 
 ```{=html}
 <div class="lienzo">
@@ -1690,13 +1587,22 @@ otra categoria rebasa a la ganadora. Veamoslo en un ejemplo.
 <div class="lbl" style="left:165px;top:345px">A</div>
 <div class="lbl" style="left:290px;top:345px">B</div>
 <div class="lbl" style="left:415px;top:345px">C</div>
-<div class="lbl l tit" data-id="it" style="left:560px;top:60px">iteración 1</div>
-<div class="lbl l chico" style="left:560px;top:120px"><span class="math inline">\mathcal{S}</span> guarda los puntajes x:</div>
-<div class="lbl l" data-id="xs" style="left:560px;top:148px">(0.20, 0.70, 0.40)</div>
-<div class="lbl l chico" style="left:560px;top:200px">el embedder ve Π(x):</div>
-<div class="lbl l tit" data-id="px" style="left:560px;top:228px">(0, 1, 0) → B</div>
-<div class="lbl l chico" style="left:560px;top:280px">la pérdida quiere más A y menos B:</div>
-<div class="lbl l" data-id="gr" style="left:560px;top:308px">x ← x + (0.12, −0.08, 0)</div>
+<div class="lbl l tit" data-id="it" style="left:560px;top:50px">iteración 1</div>
+<div class="lbl l chico" style="left:560px;top:92px">el grupo one-hot, columnas A, B y C:</div>
+<div class="celda enc" style="left:720px;top:120px;width:64px">A</div>
+<div class="celda enc" style="left:788px;top:120px;width:64px">B</div>
+<div class="celda enc" style="left:856px;top:120px;width:64px">C</div>
+<div class="lbl l chico" style="left:560px;top:161px"><span class="math inline">\mathcal{S}</span> guarda x</div>
+<div class="celda" data-id="xa" style="left:720px;top:154px;width:64px">0.20</div>
+<div class="celda" data-id="xb" style="left:788px;top:154px;width:64px">0.70</div>
+<div class="celda" data-id="xc" style="left:856px;top:154px;width:64px">0.40</div>
+<div class="lbl l chico" style="left:560px;top:199px">el embedder ve Π(x)</div>
+<div class="celda" data-id="pa" style="left:720px;top:192px;width:64px">0</div>
+<div class="celda on" data-id="pb" style="left:788px;top:192px;width:64px">1</div>
+<div class="celda" data-id="pc" style="left:856px;top:192px;width:64px">0</div>
+<div class="lbl l tit" data-id="px" style="left:932px;top:196px">→ B</div>
+<div class="lbl l chico" style="left:560px;top:258px">la pérdida quiere más A y menos B:</div>
+<div class="lbl l" data-id="gr" style="left:560px;top:286px">x ← x + (0.12, −0.08, 0)</div>
 </div>
 ```
 
@@ -1714,12 +1620,8 @@ gradiente dice sube A y baja B. Con el paso de SGD, x cambia en mas
 0.12 y menos 0.08.
 :::
 
-::: aside
-Ejemplo de juguete en escala de puntaje, con tasa de aprendizaje 0.4 y
-gradiente $(-0.3, +0.2, 0)$ en cada paso
-:::
 
-## Ejemplo de juguete: cambiar de categoría {auto-animate=true}
+## Ejemplo {auto-animate=true}
 
 ```{=html}
 <div class="lienzo">
@@ -1738,13 +1640,22 @@ gradiente $(-0.3, +0.2, 0)$ en cada paso
 <div class="lbl" style="left:165px;top:345px">A</div>
 <div class="lbl" style="left:290px;top:345px">B</div>
 <div class="lbl" style="left:415px;top:345px">C</div>
-<div class="lbl l tit" data-id="it" style="left:560px;top:60px">iteración 2</div>
-<div class="lbl l chico" style="left:560px;top:120px"><span class="math inline">\mathcal{S}</span> guarda los puntajes x:</div>
-<div class="lbl l" data-id="xs" style="left:560px;top:148px">(0.32, 0.62, 0.40)</div>
-<div class="lbl l chico" style="left:560px;top:200px">el embedder ve Π(x):</div>
-<div class="lbl l tit" data-id="px" style="left:560px;top:228px">(0, 1, 0) → B</div>
-<div class="lbl l chico" style="left:560px;top:280px">la pérdida quiere más A y menos B:</div>
-<div class="lbl l" data-id="gr" style="left:560px;top:308px">x ← x + (0.12, −0.08, 0)</div>
+<div class="lbl l tit" data-id="it" style="left:560px;top:50px">iteración 2</div>
+<div class="lbl l chico" style="left:560px;top:92px">el grupo one-hot, columnas A, B y C:</div>
+<div class="celda enc" style="left:720px;top:120px;width:64px">A</div>
+<div class="celda enc" style="left:788px;top:120px;width:64px">B</div>
+<div class="celda enc" style="left:856px;top:120px;width:64px">C</div>
+<div class="lbl l chico" style="left:560px;top:161px"><span class="math inline">\mathcal{S}</span> guarda x</div>
+<div class="celda" data-id="xa" style="left:720px;top:154px;width:64px">0.32</div>
+<div class="celda" data-id="xb" style="left:788px;top:154px;width:64px">0.62</div>
+<div class="celda" data-id="xc" style="left:856px;top:154px;width:64px">0.40</div>
+<div class="lbl l chico" style="left:560px;top:199px">el embedder ve Π(x)</div>
+<div class="celda" data-id="pa" style="left:720px;top:192px;width:64px">0</div>
+<div class="celda on" data-id="pb" style="left:788px;top:192px;width:64px">1</div>
+<div class="celda" data-id="pc" style="left:856px;top:192px;width:64px">0</div>
+<div class="lbl l tit" data-id="px" style="left:932px;top:196px">→ B</div>
+<div class="lbl l chico" style="left:560px;top:258px">la pérdida quiere más A y menos B:</div>
+<div class="lbl l" data-id="gr" style="left:560px;top:286px">x ← x + (0.12, −0.08, 0)</div>
 </div>
 ```
 
@@ -1761,7 +1672,7 @@ S, este empujon chico se borraria y la fila nunca cambiaria. Con STE
 el empujon se acumula en x.
 :::
 
-## Ejemplo de juguete: cambiar de categoría {auto-animate=true}
+## Ejemplo {auto-animate=true}
 
 ```{=html}
 <div class="lienzo">
@@ -1780,13 +1691,22 @@ el empujon se acumula en x.
 <div class="lbl" style="left:165px;top:345px">A</div>
 <div class="lbl" style="left:290px;top:345px">B</div>
 <div class="lbl" style="left:415px;top:345px">C</div>
-<div class="lbl l tit" data-id="it" style="left:560px;top:60px">iteración 3</div>
-<div class="lbl l chico" style="left:560px;top:120px"><span class="math inline">\mathcal{S}</span> guarda los puntajes x:</div>
-<div class="lbl l" data-id="xs" style="left:560px;top:148px">(0.44, 0.54, 0.40)</div>
-<div class="lbl l chico" style="left:560px;top:200px">el embedder ve Π(x):</div>
-<div class="lbl l tit" data-id="px" style="left:560px;top:228px">(0, 1, 0) → B</div>
-<div class="lbl l chico" style="left:560px;top:280px">la pérdida quiere más A y menos B:</div>
-<div class="lbl l" data-id="gr" style="left:560px;top:308px">x ← x + (0.12, −0.08, 0)</div>
+<div class="lbl l tit" data-id="it" style="left:560px;top:50px">iteración 3</div>
+<div class="lbl l chico" style="left:560px;top:92px">el grupo one-hot, columnas A, B y C:</div>
+<div class="celda enc" style="left:720px;top:120px;width:64px">A</div>
+<div class="celda enc" style="left:788px;top:120px;width:64px">B</div>
+<div class="celda enc" style="left:856px;top:120px;width:64px">C</div>
+<div class="lbl l chico" style="left:560px;top:161px"><span class="math inline">\mathcal{S}</span> guarda x</div>
+<div class="celda" data-id="xa" style="left:720px;top:154px;width:64px">0.44</div>
+<div class="celda" data-id="xb" style="left:788px;top:154px;width:64px">0.54</div>
+<div class="celda" data-id="xc" style="left:856px;top:154px;width:64px">0.40</div>
+<div class="lbl l chico" style="left:560px;top:199px">el embedder ve Π(x)</div>
+<div class="celda" data-id="pa" style="left:720px;top:192px;width:64px">0</div>
+<div class="celda on" data-id="pb" style="left:788px;top:192px;width:64px">1</div>
+<div class="celda" data-id="pc" style="left:856px;top:192px;width:64px">0</div>
+<div class="lbl l tit" data-id="px" style="left:932px;top:196px">→ B</div>
+<div class="lbl l chico" style="left:560px;top:258px">la pérdida quiere más A y menos B:</div>
+<div class="lbl l" data-id="gr" style="left:560px;top:286px">x ← x + (0.12, −0.08, 0)</div>
 </div>
 ```
 
@@ -1798,7 +1718,7 @@ A casi alcanza a B
 Iteracion 3: A en 0.44, B en 0.54. B sigue ganando, pero por poco.
 :::
 
-## Ejemplo de juguete: cambiar de categoría {auto-animate=true}
+## Ejemplo {auto-animate=true}
 
 ```{=html}
 <div class="lienzo">
@@ -1817,13 +1737,22 @@ Iteracion 3: A en 0.44, B en 0.54. B sigue ganando, pero por poco.
 <div class="lbl" style="left:165px;top:345px">A</div>
 <div class="lbl" style="left:290px;top:345px">B</div>
 <div class="lbl" style="left:415px;top:345px">C</div>
-<div class="lbl l tit" data-id="it" style="left:560px;top:60px">iteración 4</div>
-<div class="lbl l chico" style="left:560px;top:120px"><span class="math inline">\mathcal{S}</span> guarda los puntajes x:</div>
-<div class="lbl l" data-id="xs" style="left:560px;top:148px">(0.56, 0.46, 0.40)</div>
-<div class="lbl l chico" style="left:560px;top:200px">el embedder ve Π(x):</div>
-<div class="lbl l tit" data-id="px" style="left:560px;top:228px">(1, 0, 0) → A</div>
-<div class="lbl l chico" style="left:560px;top:280px">la fila cambió de categoría</div>
-<div class="lbl l" data-id="gr" style="left:560px;top:308px">sin dejar de ser legal</div>
+<div class="lbl l tit" data-id="it" style="left:560px;top:50px">iteración 4</div>
+<div class="lbl l chico" style="left:560px;top:92px">el grupo one-hot, columnas A, B y C:</div>
+<div class="celda enc" style="left:720px;top:120px;width:64px">A</div>
+<div class="celda enc" style="left:788px;top:120px;width:64px">B</div>
+<div class="celda enc" style="left:856px;top:120px;width:64px">C</div>
+<div class="lbl l chico" style="left:560px;top:161px"><span class="math inline">\mathcal{S}</span> guarda x</div>
+<div class="celda" data-id="xa" style="left:720px;top:154px;width:64px">0.56</div>
+<div class="celda" data-id="xb" style="left:788px;top:154px;width:64px">0.46</div>
+<div class="celda" data-id="xc" style="left:856px;top:154px;width:64px">0.40</div>
+<div class="lbl l chico" style="left:560px;top:199px">el embedder ve Π(x)</div>
+<div class="celda on" data-id="pa" style="left:720px;top:192px;width:64px">1</div>
+<div class="celda" data-id="pb" style="left:788px;top:192px;width:64px">0</div>
+<div class="celda" data-id="pc" style="left:856px;top:192px;width:64px">0</div>
+<div class="lbl l tit" data-id="px" style="left:932px;top:196px">→ A</div>
+<div class="lbl l chico" style="left:560px;top:258px">la fila cambió de categoría</div>
+<div class="lbl l" data-id="gr" style="left:560px;top:286px">sin dejar de ser legal</div>
 </div>
 ```
 
@@ -1840,7 +1769,7 @@ embedder siguio viendo B, pero x fue acumulando hasta que A gano. En
 todo momento el embedder vio una fila legal.
 :::
 
-## Cómo queda TAME con STE {.nostretch}
+## TAME + STE {.nostretch}
 
 ```{=html}
 <svg class="fig tame-fig" viewBox="0 0 1280 720" width="1280" height="720"
@@ -1944,7 +1873,7 @@ Pi del mejor S, con el one-hot exacto.
 Modificación propia sobre Barnoviciu y Florea (2026), figura 1
 :::
 
-## Algoritmo: TAME con STE {.nostretch}
+## TAME + STE (Algoritmo 4) {.nostretch}
 
 ![](img/alg4_ste.svg){width="988px" fig-align="center"}
 
@@ -1961,9 +1890,7 @@ Linea 13: el paso de gradiente actualiza S, que sigue continuo.
 Linea 15: al final se devuelve Pi del mejor S, con el one-hot exacto.
 :::
 
-::: aside
-Lo resaltado cambia respecto al Algoritmo 2 (TAME paralelizado)
-:::
+
 
 # Propuesta 3: W1D
 
@@ -1999,7 +1926,7 @@ La perdida total queda como la de TAME, que mira la conjunta despues
 del embedder, mas gamma por el nuevo termino, que mira cada marginal.
 :::
 
-## Wasserstein-1: mover tierra {.nostretch}
+## Wasserstein-1 {.nostretch}
 
 ```{=html}
 <svg class="fig" viewBox="0 0 1240 350" width="1180" height="333"
@@ -2108,28 +2035,35 @@ chico. Por eso en una dimension es exacto y barato, y por eso
 trabajamos columna por columna, que ademas es justo lo que ve un arbol.
 :::
 
-::: aside
-Ejemplo ilustrativo: real ~ Gamma(2, 1), sintético ~ Normal con la misma
-media y varianza. Peyré y Cuturi (2019), sección 2.6
-:::
 
-## Los cuantiles objetivo
+## Los cuantiles objetivo {.smaller .rigor}
 
-Por clase $c$ y columna $j$, un cuantil real por cada fila sintética,
-en el **punto medio** de su tramo:
+Sean $\mathcal{G}$, $z_j^0$ y $z_j^1$ como en la propuesta 2, $\mathcal{J}$ el
+conjunto de columnas que no pertenecen a ningún grupo de $\mathcal{G}$ y
+$\mathcal{T}_c$ las filas de $\mathcal{T}$ de la clase $c$. Para cada clase
+$c$, columna $j \in \mathcal{J}$ e $i = 1, \dots, \mathrm{IPC}$, el cuantil
+objetivo es
 
 $$
 q_{c,j,i} = Q_{\mathcal{T}_c,\, j}\!\left(\frac{i - \frac12}{\mathrm{IPC}}\right),
-\qquad i = 1, \dots, \mathrm{IPC}
 $$
 
-::: {.fragment}
-Ejemplo con IPC 3, clase A, `edad` real: $22, 25, 27, 29, 31, 34, 40$
+donde $Q_{\mathcal{T}_c, j}$ es la función cuantil de la columna $j$ en
+$\mathcal{T}_c$: el punto medio del $i$-ésimo de IPC tramos iguales.
 
-| Nivel | $\tfrac16$ | $\tfrac36$ | $\tfrac56$ |
-|---|---|---|---|
-| Posición ($\times 6$) | 1 | 3 | 5 |
-| Cuantil $q$ | **25** | **29** | **34** |
+::: {.fragment}
+El término W1D compara, clase por clase y columna por columna, los valores
+sintéticos ordenados con esos cuantiles:
+
+$$
+L_{\mathrm{W1}}(\mathcal{S}) = \sum_{c} \sum_{j \in \mathcal{J}}
+\frac{1}{\mathrm{IPC}} \sum_{i=1}^{\mathrm{IPC}}
+\bigl|\operatorname{sort}(\mathcal{S}_{c,\cdot,j})_i - q_{c,j,i}\bigr|,
+$$
+
+donde $\mathcal{S}_{c,\cdot,j}$ son los IPC valores de la columna $j$ en las
+filas sintéticas de la clase $c$. Es la distancia de Wasserstein-1 entre la
+marginal sintética y la real de cada columna.
 :::
 
 ::: {.notes}
@@ -2137,111 +2071,130 @@ Los cuantiles objetivo. Cada fila sintetica representa un tramo de 1
 entre IPC de la distribucion; su objetivo es el cuantil real del punto
 medio de ese tramo.
 
-Ejemplo: IPC 3, clase A, columna edad con siete valores reales. Los
-niveles son 1/6, 3/6 y 5/6. Por seis, caen en las posiciones 1, 3 y 5
-de la lista ordenada: 25, 29 y 34.
-
 Esto se calcula una sola vez, antes del bucle: los datos reales no
 cambian.
+
+J son las columnas fuera de los grupos one-hot: esas las cuida STE y
+W1D no las toca, para que los dos no empujen la misma columna. Despues,
+el termino: ordenar la columna sintetica de cada clase y compararla
+posicion por posicion con estos cuantiles.
+
+La funcion cuantil responde: que valor deja por debajo a una fraccion u
+de los datos. Es la inversa de la distribucion acumulada F, que pregunta
+al reves: dado x, que fraccion queda por debajo. Formalmente Q(u) es el
+infimo de los x con F(x) mayor o igual que u. Q de 0.5 es la mediana, Q
+de 0.25 y de 0.75 los cuartiles, Q de 0 y de 1 el minimo y el maximo.
+Con datos se ordena la columna y se lee la posicion u por n menos 1,
+contando desde 0; si no es entera se interpola entre los vecinos, como
+hace np.quantile. Con las edades de 22 a 40: Q de 1/6 cae en la
+posicion 1 y vale 25; Q de 0.25 cae en 1.5 y vale 26.
+
+Por que cuantiles: en una dimension, la distancia de Wasserstein-1 es
+el area entre las dos funciones cuantil, la integral de 0 a 1 de
+|Q_S(u) - Q_T(u)|. Con IPC puntos, la funcion cuantil sintetica es la
+columna ordenada; por eso el termino compara sort(S) contra los
+cuantiles reales en los puntos medios. Si dos columnas tienen la misma
+funcion cuantil, tienen la misma distribucion.
+
+Por que i menos un medio: cada fila sintetica carga 1 entre IPC de la
+masa, asi que la fila i, la i-esima mas chica, cubre el tramo de
+(i - 1)/IPC a i/IPC, y su centro es (i - 1/2)/IPC. Con IPC 3: 1/6, 3/6 y
+5/6. Es el mejor objetivo para un solo punto: sobre su tramo la fila vale
+una constante, y la constante que minimiza la distancia L1 a la Q real
+en ese tramo es la mediana de Q ahi, que por ser Q creciente es Q en el
+centro. Ademas evita las colas: con i/IPC el ultimo objetivo seria el
+maximo real, 40 en el ejemplo, que suele ser un valor atipico. Y es
+simetrico: con IPC 1 el objetivo es la mediana. Visto de otro modo, es
+la regla del punto medio para aproximar la integral de W1, un punto por
+tramo.
 :::
 
-::: aside
-Ejemplo de juguete; en TAME las columnas están estandarizadas, aquí se
-usan años para que se lea fácil
-:::
-
-## Ejemplo de juguete: ordenar y emparejar {auto-animate=true}
+## Ejemplo
 
 ```{=html}
-<div class="lienzo">
-<div class="lbl l chico" style="left:40px;top:108px">sintético</div>
-<div class="caja" data-id="c36" style="left:330px;top:120px">36</div>
-<div class="caja" data-id="c21" style="left:480px;top:120px">21</div>
-<div class="caja" data-id="c30" style="left:630px;top:120px">30</div>
-<div class="lbl l chico" data-id="est" style="left:720px;top:108px">como viene en <span class="math inline">\mathcal{S}</span></div>
+<div class="lienzo" style="height:440px">
+<div class="lbl l chico" style="left:40px;top:70px">real, ordenada</div>
+<div class="caja real" style="left:240px;top:82px">22</div>
+<div class="lbl chico" style="left:240px;top:112px">0</div>
+<div class="caja real" style="left:350px;top:82px">25</div>
+<div class="lbl chico" style="left:350px;top:112px">1</div>
+<div class="caja real" style="left:460px;top:82px">27</div>
+<div class="lbl chico" style="left:460px;top:112px">2</div>
+<div class="caja real" style="left:570px;top:82px">29</div>
+<div class="lbl chico" style="left:570px;top:112px">3</div>
+<div class="caja real" style="left:680px;top:82px">31</div>
+<div class="lbl chico" style="left:680px;top:112px">4</div>
+<div class="caja real" style="left:790px;top:82px">34</div>
+<div class="lbl chico" style="left:790px;top:112px">5</div>
+<div class="caja real" style="left:900px;top:82px">40</div>
+<div class="lbl chico" style="left:900px;top:112px">6</div>
+<div class="lbl nar fragment" data-fragment-index="1" style="left:350px;top:20px"><span class="math inline">\tfrac{1}{6} \times 6 = 1</span></div>
+<div class="resalta fragment" data-fragment-index="1" style="left:306px;top:51px;width:82px;height:56px"></div>
+<div class="vlin fragment" data-fragment-index="2" style="left:350px;top:138px;height:38px"></div>
+<div class="caja real fragment" data-fragment-index="2" style="left:350px;top:206px">25</div>
+<div class="lbl chico fragment" data-fragment-index="2" style="left:350px;top:236px"><span class="math inline">q_{A,\,\text{edad},\,1}</span></div>
+<div class="lbl nar fragment" data-fragment-index="1" style="left:570px;top:20px"><span class="math inline">\tfrac{3}{6} \times 6 = 3</span></div>
+<div class="resalta fragment" data-fragment-index="1" style="left:526px;top:51px;width:82px;height:56px"></div>
+<div class="vlin fragment" data-fragment-index="2" style="left:570px;top:138px;height:38px"></div>
+<div class="caja real fragment" data-fragment-index="2" style="left:570px;top:206px">29</div>
+<div class="lbl chico fragment" data-fragment-index="2" style="left:570px;top:236px"><span class="math inline">q_{A,\,\text{edad},\,2}</span></div>
+<div class="lbl nar fragment" data-fragment-index="1" style="left:790px;top:20px"><span class="math inline">\tfrac{5}{6} \times 6 = 5</span></div>
+<div class="resalta fragment" data-fragment-index="1" style="left:746px;top:51px;width:82px;height:56px"></div>
+<div class="vlin fragment" data-fragment-index="2" style="left:790px;top:138px;height:38px"></div>
+<div class="caja real fragment" data-fragment-index="2" style="left:790px;top:206px">34</div>
+<div class="lbl chico fragment" data-fragment-index="2" style="left:790px;top:236px"><span class="math inline">q_{A,\,\text{edad},\,3}</span></div>
+<div class="lbl l chico fragment" data-fragment-index="2" style="left:40px;top:194px">cuantil objetivo</div>
+<div class="caja fragment fade-in-then-out" data-fragment-index="3" style="left:350px;top:346px">36</div>
+<div class="caja fragment fade-in-then-out" data-fragment-index="3" style="left:570px;top:346px">21</div>
+<div class="caja fragment fade-in-then-out" data-fragment-index="3" style="left:790px;top:346px">30</div>
+<div class="lbl l chico fragment fade-in-then-out" data-fragment-index="3" style="left:40px;top:324px">sintético,<br>como viene en <span class="math inline">\mathcal{S}</span></div>
+<div class="caja fragment" data-fragment-index="4" style="left:350px;top:346px">21</div>
+<div class="lbl chico fragment" data-fragment-index="4" style="left:350px;top:376px">1º</div>
+<div class="caja fragment" data-fragment-index="4" style="left:570px;top:346px">30</div>
+<div class="lbl chico fragment" data-fragment-index="4" style="left:570px;top:376px">2º</div>
+<div class="caja fragment" data-fragment-index="4" style="left:790px;top:346px">36</div>
+<div class="lbl chico fragment" data-fragment-index="4" style="left:790px;top:376px">3º</div>
+<div class="lbl l chico fragment" data-fragment-index="4" style="left:40px;top:324px">sintético,<br>ordenado</div>
+<div class="vlin fragment" data-fragment-index="5" style="left:350px;top:260px;height:58px"></div>
+<div class="lbl nar fragment" data-fragment-index="5" style="left:390px;top:280px">4</div>
+<div class="vlin fragment" data-fragment-index="5" style="left:570px;top:260px;height:58px"></div>
+<div class="lbl nar fragment" data-fragment-index="5" style="left:610px;top:280px">1</div>
+<div class="vlin fragment" data-fragment-index="5" style="left:790px;top:260px;height:58px"></div>
+<div class="lbl nar fragment" data-fragment-index="5" style="left:830px;top:280px">2</div>
+<div class="lbl l tit fragment" data-fragment-index="5" style="left:40px;top:400px">W1 = (4 + 1 + 2) / 3 = 2.33</div>
 </div>
 ```
 
-::: {.pie data-id="pieW"}
-La columna `edad` de la clase A en $\mathcal{S}$, en algún paso del
-bucle
+::: {.pie}
+Clase A, columna `edad`, IPC 3
 :::
 
 ::: {.notes}
-Ahora el lado sintetico. La columna edad de la clase A, en algun paso
-del bucle, tiene tres valores: 36, 21 y 30, en el orden en que estan
-en S.
-:::
+El ejemplo completo: IPC 3, clase A, columna edad. Arriba los siete
+valores reales, ya ordenados, en las posiciones 0 a 6.
 
-## Ejemplo de juguete: ordenar y emparejar {auto-animate=true}
+Los niveles de los tres tramos son 1/6, 3/6 y 5/6. Por seis, que es la
+ultima posicion, caen exactamente en las posiciones 1, 3 y 5; si no
+fueran enteras se interpolaria entre los vecinos. Asi los tres
+objetivos son 25, 29 y 34. Esto se calcula una sola vez, antes del
+bucle.
 
-```{=html}
-<div class="lienzo">
-<div class="lbl l chico" style="left:40px;top:108px">sintético</div>
-<div class="caja" data-id="c21" style="left:330px;top:120px">21</div>
-<div class="caja" data-id="c30" style="left:480px;top:120px">30</div>
-<div class="caja" data-id="c36" style="left:630px;top:120px">36</div>
-<div class="lbl l chico" data-id="est" style="left:720px;top:108px">ordenado</div>
-<div class="lbl chico" style="left:330px;top:160px">1º</div>
-<div class="lbl chico" style="left:480px;top:160px">2º</div>
-<div class="lbl chico" style="left:630px;top:160px">3º</div>
-</div>
-```
+Ahora el lado sintetico: en algun paso del bucle la columna edad de la
+clase A tiene 36, 21 y 30, en el orden en que estan en S. Se ordena: 21,
+30, 36. Ordenada ya es su propia lista de cuantiles. Esto si se repite
+en cada paso, porque S cambia.
 
-::: {.pie data-id="pieW"}
-Se ordena de menor a mayor: ordenada ya es su propia lista de cuantiles
-:::
-
-::: {.notes}
-Se ordena: 21, 30, 36. Ordenada, la columna sintetica ya es su propia
-lista de cuantiles: el mas chico, el de en medio y el mas grande.
-
-Esto si se repite en cada paso, porque S cambia en cada paso.
-:::
-
-## Ejemplo de juguete: ordenar y emparejar {auto-animate=true}
-
-```{=html}
-<div class="lienzo">
-<div class="lbl l chico" style="left:40px;top:108px">sintético</div>
-<div class="caja" data-id="c21" style="left:330px;top:120px">21</div>
-<div class="caja" data-id="c30" style="left:480px;top:120px">30</div>
-<div class="caja" data-id="c36" style="left:630px;top:120px">36</div>
-<div class="lbl l chico" data-id="est" style="left:720px;top:108px">ordenado</div>
-<div class="lbl chico" style="left:330px;top:160px">1º</div>
-<div class="lbl chico" style="left:480px;top:160px">2º</div>
-<div class="lbl chico" style="left:630px;top:160px">3º</div>
-<div class="vlin" style="left:330px;top:190px;height:86px"></div>
-<div class="vlin" style="left:480px;top:190px;height:86px"></div>
-<div class="vlin" style="left:630px;top:190px;height:86px"></div>
-<div class="lbl nar" style="left:375px;top:218px">4</div>
-<div class="lbl nar" style="left:525px;top:218px">1</div>
-<div class="lbl nar" style="left:675px;top:218px">2</div>
-<div class="lbl l chico" style="left:40px;top:288px">cuantil real</div>
-<div class="caja real" style="left:330px;top:300px">25</div>
-<div class="caja real" style="left:480px;top:300px">29</div>
-<div class="caja real" style="left:630px;top:300px">34</div>
-<div class="lbl l tit" style="left:720px;top:205px">W1 = (4 + 1 + 2) / 3</div>
-<div class="lbl l nar" style="left:720px;top:245px">= 2.33</div>
-</div>
-```
-
-::: {.pie data-id="pieW"}
-Se empareja por posición y se promedia: 2.33 años, en promedio, de
-donde debería estar cada valor
-:::
-
-::: {.notes}
 Se empareja por posicion: el mas chico con el cuantil mas bajo, y asi.
-Las distancias, en valor absoluto, son 4, 1 y 2. Se promedian porque
-cada punto carga un tercio de la tierra: W1 igual a 2.33.
-
-Quiere decir que, en promedio, cada valor sintetico esta 2.33 anios
-lejos de donde deberia estar. Emparejar en orden es justo lo que hace
-que esto sea la distancia de mover tierra exacta.
+Las distancias son 4, 1 y 2; se promedian porque cada punto carga un
+tercio de la tierra: W1 igual a 2.33. En promedio, cada valor
+sintetico esta 2.33 anios lejos de donde deberia estar. Emparejar en
+orden es justo lo que hace que esta sea la distancia de mover tierra
+exacta.
 :::
 
-## El término completo {.smaller}
+
+
+## Full picture {.smaller}
 
 Lo mismo en cada pedazo (clase, columna), y se **suma**:
 
@@ -2269,50 +2222,16 @@ Se suman los cuatro: 9.5. Se suma sobre columnas, no se promedia, para
 que con muchas columnas cada una reciba el mismo empujon. Se
 multiplica por gamma y se suma a la perdida de momentos. Gamma se
 ajusta con validacion.
-:::
 
-::: aside
-Ejemplo de juguete: 2 clases, 2 columnas, IPC 3
-:::
-
-## Qué le pide a cada valor {.smaller}
-
-Al derivar, cada valor recibe un empujón de tamaño $\gamma / \mathrm{IPC}$
-hacia **su** cuantil; solo importa la dirección.
-
-| $\mathcal{S}$, clase A | `edad` | `horas` |
-|---|---|---|
-| fila 1 | 36 ↓ hacia 34 | 50 ↓ hacia 45 |
-| fila 2 | **21 ↑ hacia 25** | **41 ↓ hacia 40** |
-| fila 3 | 30 ↓ hacia 29 | 40 ↓ hacia 38 |
-
-::: {.incremental}
-- **Cada columna va por su cuenta:** en `edad` el 21 es el más chico,
-  en `horas` el 41 es el de en medio
-- **No llega de golpe:** a la vez recibe el empujón de los momentos
-- **Selección:** se guarda el $\mathcal{S}$ con menor $L_{\text{mom}}$;
-  W1D no vota
-:::
-
-::: {.notes}
 Al derivar, cada valor recibe un empujon hacia el cuantil con el que
 se emparejo: si esta arriba, hacia abajo; si esta abajo, hacia arriba.
 El tamanio es el mismo para todos, gamma entre IPC; solo cambia la
 direccion.
-
-La fila 2 de la clase A: en edad, el 21 es el mas chico y va hacia 25.
-En horas, el 41 es el de en medio y va hacia 40. La fila no se mueve
-en bloque: cada valor busca su lugar en su columna.
-
-Y no llega de golpe: en cada paso tambien recibe el empujon de los
-momentos. W1D es una de dos fuerzas.
-
-Un detalle: TAME guarda el S con menor perdida. Ahi usamos solo la
-perdida de momentos. Si W1D votara, favoreceria quedarse en el inicio,
-porque las filas reales del inicio ya estan cerca de los cuantiles.
 :::
 
-## Cómo queda TAME con W1D {.nostretch}
+
+
+## TAME + W1D {.nostretch}
 
 ```{=html}
 <svg class="fig tame-fig" viewBox="0 0 1280 720" width="1280" height="720"
@@ -2415,6 +2334,12 @@ $q$: cuantiles de $\mathcal{T}$, una vez
 espacio de los datos
 :::
 
+::: {.etq .ab style="top:14px;left:430px;width:820px;font-size:25px"}
+$\displaystyle L = \underbrace{\lVert \mu^{\mathcal{T}} - \mu^{\mathcal{S}} \rVert_F^2
++ \lambda \lVert \Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}} \rVert_F^2}_{L_{\mathrm{mom}}}
++ \gamma\, L_{\mathrm{W1}}(\mathcal{S})$
+:::
+
 ::: {.etq .ab .pie2 style="top:624px;left:60px;width:1160px"}
 En naranja, la rama nueva: lee $\mathcal{S}$ tal cual, sin pasar por el
 embedder.
@@ -2431,50 +2356,21 @@ los cuantiles reales calculados antes del bucle, y sale L W1.
 Las dos se suman. El gradiente de la suma le da a cada valor dos
 empujones a la vez: uno para que cuadren los momentos y otro para que su
 columna se parezca a la real.
+
+Arriba, la perdida completa: L mom mas gamma por L W1. Como S ya tiene
+la clase como primera dimension, L W1 es un solo sort sobre la
+dimension de las filas, para todas las clases y columnas a la vez;
+encaja con la paralelizacion sin volver a meter un ciclo. Ordenar es
+diferenciable: es una permutacion, y el gradiente regresa a cada celda
+por la posicion que ocupaba. Gamma lo elegimos con datos de
+validacion, no con test.
 :::
 
 ::: aside
 Modificación propia sobre Barnoviciu y Florea (2026), figura 1
 :::
 
-## W1D en fórmulas {.smaller}
-
-$$
-L_{\mathrm{W1}}(\mathcal{S}) = \sum_{c} \sum_{j \in \mathcal{J}}
-\frac{1}{\mathrm{IPC}} \sum_{i=1}^{\mathrm{IPC}}
-\bigl|\operatorname{sort}(\mathcal{S}_{c,\cdot,j})_i - q_{c,j,i}\bigr|
-$$
-
-$$
-L = \underbrace{\lVert \mu^{\mathcal{T}} - \mu^{\mathcal{S}} \rVert_F^2
-+ \lambda \lVert \Sigma^{\mathcal{T}} - \Sigma^{\mathcal{S}} \rVert_F^2}_{L_{\mathrm{mom}}}
-+ \gamma\, L_{\mathrm{W1}}(\mathcal{S})
-$$
-
-::: {.incremental}
-- $\mathcal{J}$: las columnas fuera de los grupos one-hot
-- Un solo $\operatorname{sort}$ sobre las filas: todas las clases y columnas
-  a la vez
-- $\operatorname{sort}$ es diferenciable: el gradiente regresa a la fila de
-  donde salió cada valor
-- $\gamma$ se elige con datos de **validación**
-:::
-
-::: {.notes}
-Las formulas, en la version en lote. S es un tensor de C por IPC por d.
-Para cada clase y cada columna que no es one-hot, se ordenan sus IPC
-valores y se comparan con sus cuantiles objetivo; se promedia y se suma.
-
-Como S ya tiene la clase como primera dimension, todo eso es un solo
-sort sobre la dimension de las filas, para todas las clases y columnas a
-la vez. Encaja con la paralelizacion sin volver a meter un ciclo.
-
-Ordenar es diferenciable: es una permutacion, y el gradiente regresa a
-cada celda por la posicion que ocupaba. Gamma lo elegimos con datos de
-validacion, no con test.
-:::
-
-## Algoritmo: TAME con W1D {.nostretch}
+## TAME + W1D (Algoritmo 5) {.nostretch}
 
 ![](img/alg5_w1d.svg){width="1014px" fig-align="center"}
 
@@ -2507,7 +2403,6 @@ Lo resaltado cambia respecto al Algoritmo 2 (TAME paralelizado)
 ::: {.fragment}
 - **STE y W1D** actúan sobre columnas distintas: se pueden **sumar**
   sin estorbarse
-- **PLE** cambia el embedder; se evalúa por separado
 :::
 
 ::: {.notes}
@@ -2555,7 +2450,7 @@ unica diferencia sea el metodo.
 Barnoviciu y Florea (2026); Kang et al. (2025)
 :::
 
-## Qué vamos a medir {.smaller}
+## Métricas {.smaller}
 
 | Métrica | Qué dice |
 |---|---|
