@@ -1,0 +1,20 @@
+- intro a la clasificacion de textos
+
+en internet hay mucha info textual y ucha gente que consume y crea textos
+
+es muy complicado para los humanos procesar esa informacion
+
+la mineria de textos es para eso 
+
+La clasificacion de textos es una tarea que consiste en asignar documentos en una o mas clases predefinidas
+basadas en su contenido
+
+Las caracteristicas dependen del problema que se. desea cordar
+
+por ejemplo un spam filtar
+deteccion de fake news
+deteccion de hate speech 
+analisis de sentimiento
+
+- analisis de sentimientos 
+determinar si un texto dado expresa un sentimiento, positivo, negativo o neutro
