@@ -1,0 +1,16 @@
+- Extraccion de caracteristicas
+
+extraemos comsas como emjis o hastags o todos esos meta info
+se ace como una bolsa de carayerisitcas como la bag of words 
+
+se hace el pre procesameinto,
+tokenizacion
+lematizacion
+pos tagging
+NER 
+quitar palabras vacias
+stemming
+
+
+
+- que tan grande debe ser un conjunto de datos para entrenar?
