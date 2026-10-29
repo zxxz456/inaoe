@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.13.0
+%   * Version: 2.14.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       28/10/2026      Clase 28 Oct, IID, error estandar y teoremas
 %  zxxz6       28/10/2026      Clase 26 Oct, graficas y distribuciones
 %  zxxz6       21/10/2026      Clase 21 Oct, centro, dispersion y forma
 %  zxxz6       21/10/2026      Clase 19 Oct, distribuciones conjuntas
@@ -7297,6 +7298,912 @@ Bernoulli, y una suma de muchas cosas independientes se vuelve normal.
     $21$ no pasan por normales, y cualquier cuenta que lo suponga, como
     la $t$ o la $F$, hereda ese problema.
 \end{ojo}
+
+
+\newpage
+% =====================================================================
+%  Clase 28 Oct - Independencia, error estandar y teoremas de muestreo
+% =====================================================================
+
+\clase{IID, error estándar y teoremas de muestreo}%
+      {28 de octubre de 2026}
+
+\begin{quick_sum}
+    Qué hace falta para que el promedio de una muestra sirva, y qué tan
+    bien sirve. Primero la suposición que está detrás de casi toda la
+    estadística: observaciones independientes e idénticamente
+    distribuidas (IID), y dónde se rompe en computación: validación
+    cruzada, benchmarks y series de tiempo. Luego el error de muestreo
+    y su tamaño típico, el error estándar $\sigma / \sqrt{n}$, que
+    explica por qué partir el error a la mitad cuesta cuatro veces más
+    datos, y en qué se distingue de la desviación estándar. Se cerró
+    con los tres resultados que justifican usar $\bar{x}$: la ley de
+    los grandes números, el teorema central del límite y la
+    desigualdad de Chebyshev.
+\end{quick_sum}
+
+Casi toda la clase usa la misma población: tiempos de respuesta que siguen
+el modelo exponencial de la clase del $14$, con media $\mu = 10$ ms.
+En la exponencial la desviación estándar es igual a la media, así que
+también $\sigma = 10$ ms. Es muy asimétrica, y por eso sirve para ver
+qué resultados dependen de la forma de los datos y cuáles no.
+
+% =====================================================================
+
+\subsection*{Independientes e idénticamente distribuidas}
+
+Una muestra es una lista de observaciones $X_1, X_2, \ldots, X_n$.
+Casi todo lo que sigue supone dos cosas de ellas, y son dos cosas
+distintas: una se puede cumplir sin la otra.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Independencia}: el valor de una observación no dice
+          nada de las demás. Es la definición de la clase del $19$,
+          extendida a $n$ variables.
+    \item \textbf{Idéntica distribución}: todas salen de la misma
+          distribución, con la misma media y la misma varianza.
+\end{itemize}
+
+\begin{definicion}[Variables IID]
+    $X_1, \ldots, X_n$ son \textbf{independientes e idénticamente
+    distribuidas} si su distribución conjunta es el producto de las
+    marginales,
+    \[
+        P(X_1 \le x_1, \ldots, X_n \le x_n)
+        = P(X_1 \le x_1) \cdots P(X_n \le x_n)
+        \quad \text{para todos los } x_1, \ldots, x_n ,
+    \]
+    y todas las marginales son la misma distribución. Sortear con
+    reemplazo de una población da una muestra IID.
+\end{definicion}
+
+En una muestra IID el orden no importa: si se barajan las
+observaciones, la secuencia se ve igual. Por eso la forma más rápida
+de sospechar de la suposición es graficar los datos en el orden en que
+se tomaron. Las cuatro combinaciones, con $40$ corridas simuladas de un
+programa:
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    panel/.style={
+        width=7.4cm, height=3.7cm, xmin=0, xmax=41, ymin=6, ymax=23,
+        ytick={10, 15, 20}, xtick={1, 10, 20, 30, 40},
+        tick label style={font=\scriptsize},
+        label style={font=\scriptsize},
+        title style={font=\small\bfseries, yshift=-1ex},
+        ylabel={ms}, ylabel style={yshift=-2ex}},
+    puntos/.style={only marks, mark=*, mark size=1.2pt, acento},
+    linea/.style={gray!60, thin}}
+\begin{axis}[panel, title={IID}]
+    \addplot[linea] coordinates {(0, 15) (41, 15)};
+    \addplot[puntos] coordinates {
+        (1, 16.39) (2, 16.33) (3, 13.13) (4, 17.05) (5, 17.49) (6, 17.98)
+        (7, 15.44) (8, 17.99) (9, 16.95) (10, 18.52) (11, 11.75) (12, 15.70)
+        (13, 19.07) (14, 13.84) (15, 14.77) (16, 18.44) (17, 13.40) (18, 17.87)
+        (19, 15.51) (20, 17.76) (21, 16.83) (22, 20.41) (23, 14.03) (24, 16.40)
+        (25, 15.62) (26, 11.19) (27, 9.95) (28, 16.84) (29, 15.55) (30, 15.77)
+        (31, 15.56) (32, 14.77) (33, 14.63) (34, 13.45) (35, 12.62) (36, 14.66)
+        (37, 13.27) (38, 16.21) (39, 13.72) (40, 15.11)
+    };
+\end{axis}
+\begin{axis}[panel, at={(7.6cm, 0)}, title={Independientes, no idénticas}]
+    \addplot[linea, domain=0:41] {12 + 0.15*x};
+    \addplot[puntos] coordinates {
+        (1, 13.35) (2, 8.50) (3, 8.80) (4, 7.89) (5, 16.25) (6, 13.57)
+        (7, 11.55) (8, 14.56) (9, 12.18) (10, 12.88) (11, 16.07) (12, 13.63)
+        (13, 14.37) (14, 15.96) (15, 17.00) (16, 17.11) (17, 15.03) (18, 16.23)
+        (19, 14.58) (20, 11.06) (21, 14.82) (22, 12.98) (23, 18.94) (24, 11.09)
+        (25, 17.18) (26, 17.13) (27, 18.55) (28, 17.33) (29, 15.80) (30, 16.05)
+        (31, 18.01) (32, 15.90) (33, 16.65) (34, 14.69) (35, 15.87) (36, 17.23)
+        (37, 16.47) (38, 18.98) (39, 21.84) (40, 13.06)
+    };
+\end{axis}
+\begin{axis}[panel, at={(0, -3.9cm)}, xlabel={corrida},
+             title={Idénticas, no independientes}]
+    \addplot[linea] coordinates {(0, 15) (41, 15)};
+    \addplot[thin, acento!40] coordinates {
+        (1, 15.57) (2, 16.45) (3, 16.01) (4, 14.77) (5, 13.62) (6, 13.11)
+        (7, 13.38) (8, 12.85) (9, 13.12) (10, 13.77) (11, 14.48) (12, 13.82)
+        (13, 13.12) (14, 12.57) (15, 11.09) (16, 11.87) (17, 12.51) (18, 14.19)
+        (19, 13.86) (20, 14.20) (21, 15.28) (22, 15.77) (23, 15.52) (24, 16.88)
+        (25, 16.96) (26, 16.30) (27, 16.09) (28, 16.16) (29, 15.61) (30, 16.21)
+        (31, 15.68) (32, 16.11) (33, 16.71) (34, 15.96) (35, 15.46) (36, 15.69)
+        (37, 17.07) (38, 17.68) (39, 17.25) (40, 17.55)
+    };
+    \addplot[puntos] coordinates {
+        (1, 15.57) (2, 16.45) (3, 16.01) (4, 14.77) (5, 13.62) (6, 13.11)
+        (7, 13.38) (8, 12.85) (9, 13.12) (10, 13.77) (11, 14.48) (12, 13.82)
+        (13, 13.12) (14, 12.57) (15, 11.09) (16, 11.87) (17, 12.51) (18, 14.19)
+        (19, 13.86) (20, 14.20) (21, 15.28) (22, 15.77) (23, 15.52) (24, 16.88)
+        (25, 16.96) (26, 16.30) (27, 16.09) (28, 16.16) (29, 15.61) (30, 16.21)
+        (31, 15.68) (32, 16.11) (33, 16.71) (34, 15.96) (35, 15.46) (36, 15.69)
+        (37, 17.07) (38, 17.68) (39, 17.25) (40, 17.55)
+    };
+\end{axis}
+\begin{axis}[panel, at={(7.6cm, -3.9cm)}, xlabel={corrida},
+             title={Ni una ni otra}]
+    \addplot[linea, domain=0:41] {12 + 0.15*x};
+    \addplot[thin, acento!40] coordinates {
+        (1, 11.81) (2, 12.67) (3, 12.83) (4, 12.78) (5, 14.57) (6, 13.36)
+        (7, 13.75) (8, 14.28) (9, 14.61) (10, 12.38) (11, 11.91) (12, 12.88)
+        (13, 12.62) (14, 11.73) (15, 11.70) (16, 11.75) (17, 12.47) (18, 12.98)
+        (19, 13.89) (20, 14.21) (21, 15.05) (22, 14.51) (23, 15.47) (24, 15.36)
+        (25, 16.24) (26, 17.42) (27, 17.40) (28, 16.67) (29, 17.57) (30, 17.04)
+        (31, 19.25) (32, 18.30) (33, 19.92) (34, 19.48) (35, 19.03) (36, 19.72)
+        (37, 20.48) (38, 20.04) (39, 19.25) (40, 18.12)
+    };
+    \addplot[puntos] coordinates {
+        (1, 11.81) (2, 12.67) (3, 12.83) (4, 12.78) (5, 14.57) (6, 13.36)
+        (7, 13.75) (8, 14.28) (9, 14.61) (10, 12.38) (11, 11.91) (12, 12.88)
+        (13, 12.62) (14, 11.73) (15, 11.70) (16, 11.75) (17, 12.47) (18, 12.98)
+        (19, 13.89) (20, 14.21) (21, 15.05) (22, 14.51) (23, 15.47) (24, 15.36)
+        (25, 16.24) (26, 17.42) (27, 17.40) (28, 16.67) (29, 17.57) (30, 17.04)
+        (31, 19.25) (32, 18.30) (33, 19.92) (34, 19.48) (35, 19.03) (36, 19.72)
+        (37, 20.48) (38, 20.04) (39, 19.25) (40, 18.12)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{IID}: corridas con la máquina en reposo. Cada tiempo
+          sale de la misma normal con media $15$ ms y no depende de los
+          anteriores; los puntos rebotan sin patrón alrededor de la
+          línea gris.
+    \item \textbf{Independientes, no idénticas}: la máquina se calienta
+          y baja su frecuencia, así que cada corrida tarda en promedio
+          un poco más que la anterior. El ruido de cada una es
+          independiente, pero la media cambia: la corrida $40$ no sale
+          de la misma distribución que la $1$.
+    \item \textbf{Idénticas, no independientes}: la carga del servidor
+          cambia despacio, y una corrida lenta suele ir seguida de otra
+          lenta. Cada tiempo, visto solo, sale de la misma normal con
+          media $15$; lo que se rompe es que cada uno arrastra al
+          siguiente.
+    \item \textbf{Ni una ni otra}: las dos cosas a la vez.
+\end{itemize}
+
+\begin{ojo}
+    El panel de abajo a la izquierda parece tener una tendencia, y no
+    la tiene: la distribución de cada corrida es la misma de principio
+    a fin. Como cada valor arrastra al siguiente, una racha larga en
+    $40$ corridas se ve como una deriva. Con datos dependientes, una
+    muestra chica engaña más.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Por qué importa en computación}
+
+Las fórmulas de esta clase suponen IID. Cuando la suposición falla,
+las cuentas siguen saliendo, pero dicen algo falso, y casi siempre a
+favor de quien las hizo: el error parece más chico de lo que es.
+
+\subsubsection*{Validación cruzada}
+
+En la validación cruzada con $k$ bloques ($k$-fold) los datos se parten
+en $k$ partes; se entrena con $k - 1$, se evalúa con la que sobra, y se
+repite hasta que cada parte fue la de prueba una vez. El promedio de
+los $k$ errores estima qué tan bien le irá al modelo con datos nuevos.
+Eso supone que los datos de prueba son nuevos de verdad, o sea, que
+son independientes de los de entrenamiento. Se rompe cuando hay
+\textbf{grupos}: varias radiografías del mismo paciente, varios
+mensajes del mismo usuario, o casi duplicados. Si el mismo paciente
+queda en entrenamiento y en prueba, el modelo aprende a reconocer al
+paciente y no la enfermedad, y el error de la validación sale
+optimista. La salida es partir por grupo: todos los datos de un
+paciente van al mismo bloque.
+
+\subsubsection*{Series de tiempo}
+
+En una serie de tiempo el valor de hoy depende del de ayer: las
+observaciones no son independientes, y muchas veces tampoco
+idénticas, porque hay tendencia o temporada. Barajar y hacer $k$-fold
+deja entrenar con el futuro para predecir el pasado. La validación
+correcta avanza en el tiempo: se entrena con todo lo anterior y se
+prueba con lo que sigue.
+
+\begin{center}
+\begin{tikzpicture}[x=0.55cm, y=0.48cm,
+    ent/.style={draw=white, fill=acento!35},
+    pru/.style={draw=white, fill=orange!70!black},
+    sin/.style={draw=white, fill=gray!15},
+    rot/.style={font=\scriptsize, anchor=east}]
+    \node[font=\small\bfseries, anchor=west] at (0, 1.4)
+        {$k$-fold con datos IID};
+    \foreach \r in {0, ..., 4} {
+        \pgfmathtruncatemacro{\vuelta}{\r + 1}
+        \node[rot] at (-0.2, -\r + 0.5) {vuelta \vuelta};
+        \foreach \c in {0, ..., 9} {
+            \pgfmathtruncatemacro{\bloque}{\c / 2}
+            \ifnum\bloque=\r
+                \fill[pru] (\c, -\r) rectangle ++(1, 1);
+            \else
+                \fill[ent] (\c, -\r) rectangle ++(1, 1);
+            \fi
+            \draw[white] (\c, -\r) rectangle ++(1, 1);
+        }
+    }
+    \begin{scope}[xshift=7cm]
+    \node[font=\small\bfseries, anchor=west] at (0, 1.4)
+        {Serie de tiempo};
+    \foreach \r in {0, ..., 4} {
+        \pgfmathtruncatemacro{\fin}{\r + 4}
+        \foreach \c in {0, ..., 9} {
+            \ifnum\c<\fin
+                \fill[ent] (\c, -\r) rectangle ++(1, 1);
+            \else\ifnum\c=\fin
+                \fill[pru] (\c, -\r) rectangle ++(1, 1);
+            \else
+                \fill[sin] (\c, -\r) rectangle ++(1, 1);
+            \fi\fi
+            \draw[white] (\c, -\r) rectangle ++(1, 1);
+        }
+    }
+    \draw[->, >=stealth] (0, -4.6) -- (10, -4.6)
+        node[font=\scriptsize, right] {tiempo};
+    \end{scope}
+    \fill[ent] (0, -5.6) rectangle ++(0.8, 0.6);
+    \node[font=\scriptsize, anchor=west] at (0.9, -5.3) {entrenamiento};
+    \fill[pru] (5.6, -5.6) rectangle ++(0.8, 0.6);
+    \node[font=\scriptsize, anchor=west] at (6.5, -5.3) {prueba};
+    \fill[sin] (9.4, -5.6) rectangle ++(0.8, 0.6);
+    \node[font=\scriptsize, anchor=west] at (10.3, -5.3) {sin usar};
+\end{tikzpicture}
+\end{center}
+
+A la izquierda cualquier bloque puede ser el de prueba porque el orden
+no importa. A la derecha la prueba siempre queda después de todo el
+entrenamiento, que es la situación en la que el modelo se va a usar.
+
+\subsubsection*{Benchmarks}
+
+Correr un programa $30$ veces seguidas no da $30$ observaciones IID.
+La primera corrida paga el calentamiento: caché fría, compilación
+\emph{just in time}, archivos que todavía no están en memoria. Si la
+máquina se calienta, las últimas son más lentas, como en el segundo
+panel. Y un proceso que despierta a media medición afecta a varias
+corridas seguidas, como en el tercero. Antes de promediar:
+
+\begin{itemize}[itemsep=0.3em]
+    \item descartar las corridas de calentamiento;
+    \item intercalar las versiones que se comparan, $A, B, A, B, \ldots$,
+          en lugar de todas las $A$ y luego todas las $B$, para que una
+          deriva de la máquina no se confunda con una diferencia entre
+          programas;
+    \item graficar los tiempos en el orden en que se midieron, como
+          arriba, y buscar patrones.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Error de muestreo}
+
+\begin{definicion}[Error de muestreo]
+    La diferencia entre una estadística y el parámetro que estima,
+    como $\bar{x} - \mu$, que aparece solo por haber observado una
+    muestra y no a toda la población.
+\end{definicion}
+
+No es una equivocación: nadie hizo nada mal. Otra muestra da otro
+$\bar{x}$ y otro error, unas veces positivo y otras negativo. Con un
+estimador insesgado, como $\bar{x}$, en promedio se cancela. Es lo
+contrario del sesgo de la clase del $12$: el sesgo empuja
+siempre hacia el mismo lado y no se va con más datos; el error de
+muestreo es aleatorio y se encoge conforme crece $n$.
+
+\begin{ejemplo}[Veinte muestras de la misma población]
+    Se toman $20$ muestras de $n = 25$ tiempos de la exponencial con
+    $\mu = 10$ ms, y se calcula $\bar{x}$ en cada una:
+    \begin{center}
+    \begin{tikzpicture}[x=1.15cm, >=stealth]
+        \draw[->] (6.5, 0) -- (13.6, 0);
+        \foreach \t in {7, 8, ..., 13} {
+            \draw (\t, 0.08) -- (\t, -0.08);
+            \node[font=\scriptsize, below] at (\t, -0.08) {$\t$};
+        }
+        \node[font=\scriptsize, anchor=west] at (13.6, 0) {$\bar{x}$ (ms)};
+        \fill[fondoIdea] (8, 0.15) rectangle (12, 1.75);
+        \draw[dashed, acento] (10, 0.1) -- (10, 2.05)
+            node[above, font=\scriptsize] {$\mu = 10$};
+        \fill[acento] (7.05, 0.40) circle (2.6pt);
+        \fill[acento] (7.40, 0.40) circle (2.6pt);
+        \fill[acento] (8.71, 0.40) circle (2.6pt);
+        \fill[acento] (9.03, 0.40) circle (2.6pt);
+        \fill[acento] (9.12, 0.72) circle (2.6pt);
+        \fill[acento] (9.16, 1.04) circle (2.6pt);
+        \fill[acento] (9.33, 0.40) circle (2.6pt);
+        \fill[acento] (9.65, 0.40) circle (2.6pt);
+        \fill[acento] (9.77, 0.72) circle (2.6pt);
+        \fill[acento] (9.94, 0.40) circle (2.6pt);
+        \fill[acento] (10.03, 0.72) circle (2.6pt);
+        \fill[acento] (10.14, 0.40) circle (2.6pt);
+        \fill[acento] (10.43, 0.40) circle (2.6pt);
+        \fill[acento] (10.79, 0.40) circle (2.6pt);
+        \fill[acento] (10.83, 0.72) circle (2.6pt);
+        \fill[acento] (11.68, 0.40) circle (2.6pt);
+        \fill[acento] (11.94, 0.40) circle (2.6pt);
+        \fill[acento] (12.69, 0.40) circle (2.6pt);
+        \fill[acento] (12.69, 0.72) circle (2.6pt);
+        \fill[orange!70!black] (12.92, 0.40) circle (2.6pt);
+        \draw[<->, orange!70!black, thick] (10, 1.95) -- (12.92, 1.95);
+        \node[font=\scriptsize, above, orange!70!black]
+            at (11.46, 1.95) {$+2.92$};
+        \node[font=\scriptsize, anchor=north west, acento]
+            at (8, -0.45) {la franja: $\mu \pm 2$ ms};
+    \end{tikzpicture}
+    \end{center}
+    La muestra que dio $\bar{x} = 12.92$ tiene un error de muestreo de
+    $+2.92$ ms; la que dio $7.05$, de $-2.95$. Ninguna está mal hecha.
+    Las $20$ medias promedian $10.17$, cerca de $\mu$, y $15$ de ellas
+    caen en la franja de $\pm 2$ ms. Ese $2$ no es casualidad: es el
+    error estándar, el tema de la sección que sigue.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Error estándar}
+
+\begin{definicion}[Error estándar]
+    La desviación estándar de un estimador sobre todas las muestras
+    posibles: el tamaño típico de su error de muestreo. Para la media
+    de $n$ observaciones IID con desviación estándar $\sigma$,
+    \[
+        EE(\bar{x}) = \frac{\sigma}{\sqrt{n}} .
+    \]
+    Como $\sigma$ casi nunca se conoce, se estima con la de la
+    muestra: $\widehat{EE} = s / \sqrt{n}$. En inglés es el
+    \emph{standard error}, SE.
+\end{definicion}
+
+La fórmula sale de las propiedades de la varianza de la clase del
+$21$:
+\begin{align*}
+    \operatorname{Var}(\bar{x})
+    &= \operatorname{Var}\left( \frac{1}{n} \sum_{i=1}^{n} X_i \right)
+       \razon{definición de $\bar{x}$} \\
+    &= \frac{1}{n^2}\, \operatorname{Var}\left( \sum_{i=1}^{n} X_i
+       \right)
+       \razon{propiedad 3, con $a = 1/n$} \\
+    &= \frac{1}{n^2} \sum_{i=1}^{n} \operatorname{Var}(X_i)
+       \razon{propiedad 5: son independientes} \\
+    &= \frac{1}{n^2}\, n\, \sigma^2
+       \razon{idénticas: todas tienen varianza $\sigma^2$} \\
+    &= \frac{\sigma^2}{n} ,
+\end{align*}
+y la raíz da $EE = \sigma / \sqrt{n}$.
+
+\begin{idea}
+    Las dos letras de IID entran en renglones distintos. La
+    independencia deja partir la varianza de la suma en una suma de
+    varianzas; sin ella aparecen covarianzas. La idéntica distribución
+    hace que todas valgan $\sigma^2$; sin ella no hay un solo $\sigma$
+    que poner en la fórmula.
+\end{idea}
+
+En el ejemplo de las veinte muestras, $EE = 10 / \sqrt{25} = 2$ ms: la
+franja del dibujo era $\mu \pm EE$. Con una normal se esperaría cerca
+del $68\%$ adentro, unas $14$ de $20$; cayeron $15$.
+
+\subsubsection*{¿Cuántas observaciones necesito?}
+
+El error estándar baja con $\sqrt{n}$, no con $n$. Despejando,
+\[
+    n = \left( \frac{\sigma}{EE} \right)^2 ,
+\]
+así que pedir la mitad de error cuesta cuatro veces más datos, y
+pedir la décima parte cuesta cien veces más.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=5.2cm, xmin=0, xmax=430, ymin=0, ymax=4.2,
+    xlabel={$n$}, ylabel={$EE$ (ms)},
+    xtick={0, 25, 100, 200, 300, 400},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \addplot[thick, acento, domain=4:430, samples=120] {10/sqrt(x)};
+    \addplot[only marks, mark=*, mark size=2pt, orange!70!black]
+        coordinates {(25, 2) (100, 1) (400, 0.5)};
+    \node[font=\scriptsize, anchor=south west] at (axis cs:27, 2.05)
+        {$n = 25$: $EE = 2$};
+    \node[font=\scriptsize, anchor=south west] at (axis cs:102, 1.05)
+        {$n = 100$: $EE = 1$};
+    \node[font=\scriptsize, anchor=south east] at (axis cs:425, 0.6)
+        {$n = 400$: $EE = 0.5$};
+    \draw[->, >=stealth, gray] (axis cs:30, 3.2) -- (axis cs:95, 3.2)
+        node[midway, above, font=\scriptsize] {$\times 4$ datos};
+    \draw[->, >=stealth, gray] (axis cs:110, 3.2) -- (axis cs:390, 3.2)
+        node[midway, above, font=\scriptsize] {otra vez $\times 4$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{ejemplo}[Los tiempos de la clase del $21$]
+    Diez tiempos con $s = 7.06$ ms:
+    \[
+        \widehat{EE} = \frac{7.06}{\sqrt{10}} = 2.23 \ \text{ms} .
+    \]
+    Para bajarlo a la mitad, $1.12$ ms, hacen falta $4 \cdot 10 = 40$
+    corridas. Para llegar a $0.5$ ms,
+    \[
+        n = \left( \frac{7.06}{0.5} \right)^2 = 199.4 ,
+    \]
+    o sea $200$ corridas. Se redondea hacia arriba: con $199$ el error
+    estándar todavía queda un poco arriba de $0.5$.
+\end{ejemplo}
+
+\begin{ojo}
+    La fórmula supone IID. Si las mediciones están correlacionadas
+    positivamente, como en el panel de la carga del servidor,
+    $s / \sqrt{n}$ subestima el error. Cuando cada corrida tiene
+    correlación $\rho$ con la anterior, el error estándar real es, para
+    $n$ grande,
+    \[
+        EE \approx \frac{\sigma}{\sqrt{n}}
+                   \sqrt{\frac{1 + \rho}{1 - \rho}} .
+    \]
+    Con $\rho = 0.9$ el factor es $\sqrt{19} = 4.36$: $1000$ mediciones
+    seguidas valen como unas $1000 \cdot 0.1 / 1.9 = 53$
+    independientes. Más datos del mismo tipo compran mucha menos
+    precisión de la que parece.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Desviación estándar contra error estándar}
+
+Se escriben parecido y se confunden mucho, pero contestan preguntas
+distintas.
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5cm}%
+                 >{\raggedright\arraybackslash}p{5cm}}
+    \toprule
+    & \textbf{Desviación estándar} & \textbf{Error estándar} \\
+    \midrule
+    Mide & qué tan regados están los datos
+         & qué tan regado está $\bar{x}$ de una muestra a otra \\
+    \addlinespace
+    Se calcula & $s$ & $s / \sqrt{n}$ \\
+    \addlinespace
+    Al crecer $n$ & se estabiliza cerca de $\sigma$
+                  & baja hacia $0$, como $1 / \sqrt{n}$ \\
+    \addlinespace
+    Contesta & ¿cómo es una observación típica?
+             & ¿qué tan bien conozco la media? \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=5.2cm, xmin=0, xmax=40, ymin=0, ymax=0.22,
+    xlabel={ms}, ylabel={densidad},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    yticklabel style={/pgf/number format/fixed},
+    legend style={font=\scriptsize, at={(0.98, 0.96)},
+                  anchor=north east}]
+    \addplot[thick, acento, fill=fondoIdea, domain=0:40, samples=120]
+        {0.1*exp(-0.1*x)} \closedcycle;
+    \addplot[thick, orange!70!black, domain=0:40, samples=160]
+        {exp(-(x-10)^2/8)/(2*sqrt(2*pi))};
+    \legend{un tiempo: $\sigma = 10$,
+            promedio de $25$: $EE = 2$}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+La curva azul es la de los tiempos individuales: muy ancha, con cola
+larga. La naranja es la de $\bar{x}$ con $n = 25$: centrada en el
+mismo $\mu$, cinco veces más angosta. Más datos no cambian la azul;
+angostan la naranja.
+
+\begin{ejemplo}[Dos formas de reportar los mismos datos]
+    Con los tiempos de la clase del $21$:
+    \begin{itemize}[itemsep=0.2em]
+        \item $17 \pm 7.06$ ms, con la desviación estándar, dice que
+              una petición típica queda a unos $7$ ms de la media.
+        \item $17 \pm 2.23$ ms, con el error estándar, dice que la
+              media de la población se conoce con una incertidumbre de
+              unos $2$ ms.
+    \end{itemize}
+    Las dos son ciertas y responden cosas distintas. Lo que no se
+    vale es escribir $17 \pm 2.23$ sin decir cuál es.
+\end{ejemplo}
+
+\begin{ojo}
+    Graficar barras de error estándar cuando se quiere mostrar la
+    variabilidad de los datos los hace ver mucho más estables de lo que
+    son. Con un millón de peticiones el error estándar sería
+    $7.06 / 1000 = 0.007$ ms, y aun así una petición sola puede tardar
+    $36$. Es pariente del error de la clase del $26$ de ocultar $n$:
+    sin $n$, no se puede pasar de una a la otra.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Ley de los grandes números}
+
+\begin{teorema}[Ley de los grandes números]
+    Si $X_1, X_2, \ldots$ son IID con media $\mu$, el promedio de las
+    primeras $n$, $\bar{X}_n$, se acerca a $\mu$ conforme $n$ crece:
+    para cualquier margen $\varepsilon > 0$,
+    \[
+        P\big( \abs{\bar{X}_n - \mu} \ge \varepsilon \big)
+        \longrightarrow 0
+        \quad \text{cuando } n \to \infty .
+    \]
+\end{teorema}
+
+Es lo que hace que $\bar{x}$ sirva para estimar $\mu$, y lo que la
+definición de esperanza de la clase del $21$ daba por hecho: que el
+promedio de muchas repeticiones tiende a $E[X]$. La ley lo vuelve
+teorema. La versión de arriba es la ley \emph{débil}; la fuerte dice
+algo más: con probabilidad $1$, la sucesión de promedios converge.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{semilogxaxis}[
+    width=12cm, height=6cm, xmin=1, xmax=2000, ymin=0, ymax=22,
+    axis on top,
+    xlabel={$n$, observaciones acumuladas},
+    ylabel={$\bar{X}_n$ (ms)},
+    xtick={1, 10, 100, 1000}, xticklabels={$1$, $10$, $100$, $1000$},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend style={font=\scriptsize, at={(0.98, 0.96)},
+                  anchor=north east}]
+    \addplot[draw=none, fill=gray!15, domain=1:2000, samples=80,
+             forget plot]
+        {min(22, 10 + 20/sqrt(x))} \closedcycle;
+    \addplot[draw=none, fill=white, domain=1:2000, samples=80,
+             forget plot]
+        {max(0, 10 - 20/sqrt(x))} \closedcycle;
+    \addplot[dashed, acento, forget plot] coordinates {(1, 10) (2000, 10)};
+    \addplot[thick, acento] coordinates {
+        (1, 1.14) (2, 0.62) (3, 1.22) (4, 1.09) (5, 3.07) (6, 4.01) (7, 4.48)
+        (8, 6.12) (9, 6.01) (10, 5.65) (11, 6.64) (13, 7.54) (14, 7.78)
+        (16, 8.83) (18, 8.26) (20, 7.61) (22, 7.02) (24, 7.39) (27, 7.71)
+        (30, 7.71) (34, 7.86) (38, 7.95) (42, 8.24) (47, 8.46) (53, 8.51)
+        (59, 8.30) (66, 7.86) (73, 7.62) (82, 8.19) (92, 8.51) (102, 8.23)
+        (114, 8.62) (127, 8.70) (142, 9.07) (159, 8.75) (177, 8.83) (198, 8.92)
+        (221, 9.05) (247, 8.83) (275, 9.06) (307, 9.00) (343, 8.91) (383, 8.77)
+        (428, 9.17) (478, 9.36) (533, 9.72) (595, 9.79) (665, 9.83) (742, 9.80)
+        (829, 9.75) (925, 9.82) (1033, 9.86) (1153, 9.88) (1287, 9.76)
+        (1437, 9.77) (1605, 9.82) (1791, 9.74) (2000, 9.76)
+    };
+    \addplot[thick, orange!70!black] coordinates {
+        (1, 0.06) (2, 5.30) (3, 19.40) (4, 16.44) (5, 13.89) (6, 13.08)
+        (7, 13.91) (8, 16.15) (9, 16.54) (10, 20.99) (11, 19.61) (13, 19.31)
+        (14, 18.94) (16, 19.23) (18, 17.95) (20, 17.66) (22, 16.53) (24, 16.82)
+        (27, 16.37) (30, 16.01) (34, 14.96) (38, 14.30) (42, 13.23) (47, 12.75)
+        (53, 12.94) (59, 12.98) (66, 12.51) (73, 11.74) (82, 11.90) (92, 11.78)
+        (102, 11.50) (114, 11.53) (127, 11.14) (142, 11.22) (159, 11.60)
+        (177, 11.56) (198, 11.27) (221, 11.08) (247, 10.89) (275, 10.79)
+        (307, 10.79) (343, 10.70) (383, 10.76) (428, 10.82) (478, 10.69)
+        (533, 10.54) (595, 10.53) (665, 10.35) (742, 10.28) (829, 10.25)
+        (925, 10.27) (1033, 10.10) (1153, 10.08) (1287, 10.14) (1437, 10.28)
+        (1605, 10.26) (1791, 10.15) (2000, 10.23)
+    };
+    \addplot[thick, green!45!black] coordinates {
+        (1, 8.10) (2, 6.34) (3, 7.74) (4, 9.27) (5, 9.24) (6, 8.00) (7, 8.99)
+        (8, 8.62) (9, 9.59) (10, 9.10) (11, 8.28) (13, 8.64) (14, 9.05)
+        (16, 8.91) (18, 8.04) (20, 7.71) (22, 8.14) (24, 7.54) (27, 8.57)
+        (30, 8.67) (34, 10.00) (38, 9.96) (42, 9.76) (47, 9.54) (53, 9.71)
+        (59, 9.93) (66, 10.75) (73, 10.39) (82, 10.57) (92, 10.50) (102, 10.71)
+        (114, 10.37) (127, 10.03) (142, 9.99) (159, 10.21) (177, 10.01)
+        (198, 10.15) (221, 10.21) (247, 10.20) (275, 9.94) (307, 10.08)
+        (343, 10.19) (383, 10.00) (428, 9.86) (478, 9.80) (533, 10.04)
+        (595, 9.95) (665, 9.80) (742, 9.90) (829, 9.94) (925, 9.86) (1033, 9.88)
+        (1153, 9.96) (1287, 9.91) (1437, 9.98) (1605, 9.91) (1791, 9.88)
+        (2000, 9.98)
+    };
+    \legend{trayectoria 1, trayectoria 2, trayectoria 3}
+\end{semilogxaxis}
+\end{tikzpicture}
+\end{center}
+
+Tres veces se van sacando tiempos uno por uno y se grafica el promedio
+acumulado; el eje horizontal es logarítmico. Al principio cada
+trayectoria va por su lado: con $10$ datos, una va en $5.65$ y otra en
+$20.99$. Con $2000$ las tres están entre $9.76$ y $10.23$. La franja
+gris es $\mu \pm 2\,EE = 10 \pm 20 / \sqrt{n}$: la ley dice que las
+trayectorias se meten al embudo, y el error estándar dice qué tan
+rápido se cierra.
+
+\begin{ojo}
+    La ley no dice que la suerte se compense. Si una moneda justa da
+    $10$ águilas seguidas, el siguiente lanzamiento sigue siendo
+    $50/50$. En los $990$ siguientes se esperan $495$ águilas: en total
+    $505$ de $1000$, una proporción de $0.505$. El exceso de $5$
+    águilas sobre las $500$ esperadas no se corrige nunca; se diluye
+    entre cada vez más lanzamientos. Creer que ``ya toca sol'' es la
+    falacia del jugador.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Teorema central del límite}
+
+La ley de los grandes números dice a dónde va $\bar{x}$. El teorema
+central del límite dice cómo se reparte alrededor de $\mu$ mientras
+llega.
+
+\begin{teorema}[Teorema central del límite]
+    Si $X_1, \ldots, X_n$ son IID con media $\mu$ y varianza
+    $\sigma^2$ finita, para $n$ grande
+    \[
+        \bar{X}_n \approx N\!\left( \mu,\ \frac{\sigma^2}{n} \right) ,
+        \qquad \text{o sea} \qquad
+        Z = \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \approx N(0, 1) ,
+    \]
+    sin importar la distribución de las $X_i$.
+\end{teorema}
+
+Lo sorprendente es la última frase. Los datos pueden ser asimétricos,
+discretos o de cualquier forma; mientras tengan varianza finita, su
+promedio termina pareciendo normal. Es la razón por la que la normal
+aparece en todas partes, la ``suma de muchos efectos chicos'' de la
+tabla de la clase del $14$. Con $20\,000$ muestras de cada tamaño:
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    tlc/.style={
+        width=5.9cm, height=4.6cm, xmin=0, xmax=30, ymin=0, ymax=0.24,
+        xtick={0, 10, 20, 30}, ytick={0, 0.1, 0.2},
+        tick label style={font=\scriptsize},
+        label style={font=\scriptsize},
+        title style={font=\small, yshift=-1ex},
+        yticklabel style={/pgf/number format/fixed},
+        xlabel={$\bar{x}$ (ms)}},
+    barras/.style={ybar interval, fill=fondoIdea, draw=acento},
+    normal/.style={thick, orange!70!black, samples=150}}
+\begin{axis}[tlc, title={$n = 1$}, ylabel={densidad}]
+    \addplot[barras] coordinates {
+        (0, 0.0878) (2.5, 0.0703) (5, 0.0536) (7.5, 0.0412) (10, 0.0319)
+        (12.5, 0.0255) (15, 0.0203) (17.5, 0.0159) (20, 0.0115) (22.5, 0.0095)
+        (25, 0.0073) (27.5, 0.0055) (30, 0.0045) (32.5, 0.0035) (35, 0.0024)
+        (37.5, 0.0021) (40, 0.0000)
+    };
+    \addplot[normal, domain=0:30]
+        {exp(-(x-10)^2/200)/(10*sqrt(2*pi))};
+\end{axis}
+\begin{axis}[tlc, at={(5.6cm, 0)}, title={$n = 5$},
+             yticklabels={}]
+    \addplot[barras] coordinates {
+        (0, 0.0005) (1.25, 0.0074) (2.5, 0.0282) (3.75, 0.0530) (5, 0.0781)
+        (6.25, 0.0918) (7.5, 0.0959) (8.75, 0.0919) (10, 0.0837) (11.25, 0.0694)
+        (12.5, 0.0534) (13.75, 0.0433) (15, 0.0308) (16.25, 0.0220)
+        (17.5, 0.0158) (18.75, 0.0104) (20, 0.0080) (21.25, 0.0050)
+        (22.5, 0.0032) (23.75, 0.0028) (25, 0.0017) (26.25, 0.0014)
+        (27.5, 0.0007) (28.75, 0.0006) (30, 0.0000)
+    };
+    \addplot[normal, domain=0:30]
+        {exp(-(x-10)^2/40)/(sqrt(20)*sqrt(2*pi))};
+\end{axis}
+\begin{axis}[tlc, at={(11.2cm, 0)}, title={$n = 30$},
+             yticklabels={}]
+    \addplot[barras] coordinates {
+        (3.75, 0.0001) (4.375, 0.0008) (5, 0.0041) (5.625, 0.0129)
+        (6.25, 0.0330) (6.875, 0.0709) (7.5, 0.1220) (8.125, 0.1670)
+        (8.75, 0.2124) (9.375, 0.2210) (10, 0.2040) (10.625, 0.1704)
+        (11.25, 0.1329) (11.875, 0.0959) (12.5, 0.0681) (13.125, 0.0384)
+        (13.75, 0.0218) (14.375, 0.0099) (15, 0.0075) (15.625, 0.0038)
+        (16.25, 0.0016) (16.875, 0.0010) (17.5, 0.0002) (18.125, 0.0002)
+        (18.75, 0.0000) (19.375, 0.0000) (20, 0.0000)
+    };
+    \addplot[normal, domain=0:30]
+        {exp(-(x-10)^2/(2*100/30))/(sqrt(100/30)*sqrt(2*pi))};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Las barras son los promedios simulados y la curva naranja es la normal
+que promete el teorema, $N(10, 100/n)$. Los tres paneles tienen los
+mismos ejes, para que se compare el ancho sin trampa.
+
+\begin{itemize}[itemsep=0.3em]
+    \item Con $n = 1$ el ``promedio'' es un solo dato, y se ve la
+          exponencial tal cual. La normal le queda muy mal: hasta le da
+          probabilidad a tiempos negativos.
+    \item Con $n = 5$ ya tiene joroba, pero sigue cargado a la
+          izquierda con cola a la derecha.
+    \item Con $n = 30$ casi no se distingue de la normal, centrada en
+          $10$ con desviación $10 / \sqrt{30} = 1.83$; la simulación
+          dio $1.84$.
+\end{itemize}
+
+\begin{ejemplo}[¿Qué tan seguido el promedio pasa de $12$ ms?]
+    Con $n = 25$, el error estándar es $2$, y por el teorema
+    \[
+        P(\bar{x} > 12)
+        \approx P\left( Z > \frac{12 - 10}{2} \right)
+        = P(Z > 1) = 0.159 .
+    \]
+    La probabilidad exacta, que se puede calcular porque la suma de
+    exponenciales tiene distribución conocida, es $0.157$: la
+    aproximación es muy buena. Con $n = 5$, en cambio,
+    $Z = 2 / (10 / \sqrt{5}) = 0.45$ y el teorema da $0.327$ contra
+    una exacta de $0.285$. Con pocos datos y una distribución tan
+    asimétrica, la aproximación todavía falla por cuatro puntos.
+\end{ejemplo}
+
+\begin{idea}
+    El $1.96$ del intervalo de confianza de la clase del $7$ sale de
+    aquí. Por el teorema, $\bar{x}$ cae a menos de $1.96\,EE$ de $\mu$
+    el $95\%$ de las veces, sin importar cómo se distribuyan los datos.
+    La regla de ``$n \ge 30$'' es una convención: con datos muy
+    asimétricos o con colas pesadas hacen falta más.
+\end{idea}
+
+\begin{ojo}
+    El teorema habla de la distribución del promedio, no de los datos.
+    Con un millón de tiempos, los tiempos siguen siendo exponenciales;
+    lo que se vuelve normal es $\bar{x}$. Para revisar si los datos
+    mismos son normales está la gráfica Q-Q de la clase del $26$, no
+    este teorema.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Desigualdad de Chebyshev}
+
+\begin{teorema}[Desigualdad de Chebyshev]
+    Para cualquier variable con media $\mu$ y desviación estándar
+    $\sigma$ finitas, y cualquier $k > 0$,
+    \[
+        P\big( \abs{X - \mu} \ge k\sigma \big) \le \frac{1}{k^2} .
+    \]
+\end{teorema}
+
+No supone nada sobre la forma de la distribución. A más de $2$
+desviaciones de la media puede quedar a lo más una cuarta parte de la
+probabilidad; a más de $3$, a lo más una novena parte. Dicho al revés,
+al menos el $75\%$ queda a menos de $2\sigma$ y al menos el $88.9\%$ a
+menos de $3\sigma$, para cualquier distribución.
+
+\subsubsection*{Por qué es cierta}
+
+Para una variable discreta, partiendo de la varianza:
+\begin{align*}
+    \sigma^2
+    &= \sum_{x} (x - \mu)^2\, p(x)
+       \razon{definición de varianza} \\
+    &\ge \sum_{\abs{x - \mu} \ge k\sigma} (x - \mu)^2\, p(x)
+       \razon{se quitan términos, todos $\ge 0$} \\
+    &\ge \sum_{\abs{x - \mu} \ge k\sigma} k^2 \sigma^2\, p(x)
+       \razon{en esos términos, $(x - \mu)^2 \ge k^2\sigma^2$} \\
+    &= k^2 \sigma^2\, P\big( \abs{X - \mu} \ge k\sigma \big)
+       \razon{la suma de $p(x)$ es esa probabilidad} .
+\end{align*}
+Al dividir entre $k^2 \sigma^2$ queda la desigualdad. La idea: cada
+pedazo de probabilidad que queda lejos le aporta a la varianza al
+menos $k^2\sigma^2$. Si hubiera más de $1/k^2$ lejos, la varianza
+pasaría de $\sigma^2$. Para continuas es la misma cuenta con
+integrales.
+
+\subsubsection*{Qué tan holgada es}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=5.4cm, xmin=1, xmax=4, ymin=0, ymax=1.05,
+    xlabel={$k$}, ylabel={$P(\abs{X - \mu} \ge k\sigma)$},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend style={font=\scriptsize, at={(0.98, 0.96)},
+                  anchor=north east}]
+    \addplot[thick, acento, domain=1:4, samples=80] {1/x^2};
+    \addplot[thick, orange!70!black, domain=1:4, samples=80]
+        {exp(-(1 + x))};
+    \addplot[thick, green!45!black, mark=none] coordinates {
+        (1, 0.3173) (1.25, 0.2113) (1.5, 0.1336) (1.75, 0.0801) (2, 0.0455)
+        (2.25, 0.0244) (2.5, 0.0124) (2.75, 0.0060) (3, 0.0027) (3.25, 0.0012)
+        (3.5, 0.0005) (3.75, 0.0002) (4, 0.0001)
+    };
+    \legend{cota de Chebyshev $1/k^2$, exponencial real, normal real}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{cccc}
+    \toprule
+    $k$ & \textbf{Cota de Chebyshev} & \textbf{Normal} &
+    \textbf{Exponencial} \\
+    \midrule
+    $1$ & $1$ (no dice nada) & $0.317$ & $0.135$ \\
+    $2$ & $0.250$ & $0.046$ & $0.050$ \\
+    $3$ & $0.111$ & $0.003$ & $0.018$ \\
+    $4$ & $0.063$ & $0.0001$ & $0.007$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La cota siempre se cumple y casi siempre sobra. Es el precio de no
+suponer nada: tiene que valer también para la peor distribución
+posible.
+
+\begin{ejemplo}[Peticiones lentas]
+    ¿Qué fracción de las peticiones tarda $30$ ms o más? Con
+    $\mu = \sigma = 10$, $30$ está a $2\sigma$ de la media, así que
+    Chebyshev garantiza que es a lo más $1/4$, sin saber nada de la
+    forma. Sabiendo que es exponencial, la fracción real es
+    $e^{-30/10} = e^{-3} = 0.050$: cinco veces menos que la cota.
+\end{ejemplo}
+
+\subsubsection*{Aplicada al promedio}
+
+$\bar{x}$ tiene media $\mu$ y desviación $\sigma / \sqrt{n}$. Con
+Chebyshev y $\varepsilon = k\,\sigma / \sqrt{n}$:
+\[
+    P\big( \abs{\bar{x} - \mu} \ge \varepsilon \big)
+    \le \frac{\sigma^2}{n\, \varepsilon^2} .
+\]
+El lado derecho se va a cero cuando $n$ crece, y eso es exactamente la
+ley de los grandes números: Chebyshev la demuestra en un renglón.
+También da un tamaño de muestra que no depende de la forma de los
+datos.
+
+\begin{ejemplo}[Tamaño de muestra por las dos vías]
+    Se quiere que $\bar{x}$ quede a menos de $\varepsilon = 1$ ms de
+    $\mu$ con probabilidad de al menos $0.95$, y $\sigma = 10$.
+    \begin{itemize}[itemsep=0.3em]
+        \item \textbf{Chebyshev}: basta
+              $\sigma^2 / (n \varepsilon^2) \le 0.05$, o sea
+              $n \ge 100 / 0.05 = 2000$.
+        \item \textbf{Teorema central del límite}: basta
+              $1.96\, \sigma / \sqrt{n} \le 1$, o sea
+              $n \ge (1.96 \cdot 10)^2 = 384.2$, $385$ datos.
+    \end{itemize}
+    Chebyshev pide cinco veces más, pero su respuesta está garantizada
+    con cualquier distribución. La del teorema es una aproximación que
+    vale cuando $n$ ya es grande, y aquí lo es.
+\end{ejemplo}
+
+\begin{ojo}
+    En las notas quedó ``distancia de Chebyshev'', pero el tema de la
+    clase es la \emph{desigualdad}. La distancia de Chebyshev es otra
+    cosa: la distancia entre dos vectores medida con la coordenada que
+    más difiere, $\max_i \abs{x_i - y_i}$, la del rey en el ajedrez.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Qué garantiza cada resultado}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.6cm}%
+                 >{\raggedright\arraybackslash}p{4.4cm}}
+    \toprule
+    \textbf{Resultado} & \textbf{Qué dice} & \textbf{Qué supone} \\
+    \midrule
+    Error estándar & el error típico de $\bar{x}$ es $\sigma/\sqrt{n}$
+                   & IID, $\sigma$ finita \\
+    \addlinespace
+    Grandes números & $\bar{x}$ se acerca a $\mu$
+                    & IID, media finita \\
+    \addlinespace
+    Central del límite & alrededor de $\mu$, $\bar{x}$ se reparte
+                         como $N(\mu, \sigma^2 / n)$
+                       & IID, $\sigma$ finita, $n$ grande \\
+    \addlinespace
+    Chebyshev & a $k\sigma$ o más queda a lo más $1/k^2$
+              & solo $\sigma$ finita \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Los cuatro suponen IID o algo parecido, salvo Chebyshev aplicada a
+    una sola variable. Por eso la primera pregunta ante cualquier
+    promedio no es cuántos datos tiene, sino si sus datos son IID:
+    graficarlos en orden, buscar grupos y revisar si el tiempo importa.
+\end{idea}
 
 
 \end{document}
