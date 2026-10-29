@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.18.0
+%   * Version: 2.19.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       28/10/2026      Clase 28 Oct, extraccion de caracteristicas
 %  zxxz6       27/10/2026      Clase 26 Oct, clasificacion de textos
 %  zxxz6       21/10/2026      Clase 21 Oct, morfologia y lexicografia
 %  zxxz6       21/10/2026      Clase 19 Oct, reconocimiento del habla
@@ -7849,6 +7850,422 @@ hacer a tres niveles:
     y la $F_1$ de la clase del $2$ de septiembre, calculadas sobre la
     clase que interesa: el spam, el odio, la noticia falsa.
 \end{idea}
+
+\newpage
+% =====================================================================
+%  Clase 22 - Extraccion de caracteristicas
+% =====================================================================
+
+\clase{Extracción de características}{28 de octubre de 2026}
+
+\begin{quick_sum}
+    Sigue la clasificación de textos. El clasificador no lee texto,
+    lee vectores, y decidir qué entra en el vector es la extracción de
+    características. En redes sociales las palabras no son todo:
+    emojis, hashtags, mayúsculas, ligas y metadatos dicen mucho, y
+    todo se junta en una bolsa de características, que generaliza la
+    bolsa de palabras. Se repasó el preprocesamiento que va antes:
+    tokenización, lematización, etiquetado gramatical, entidades
+    nombradas, palabras vacías y stemming. Se cerró con una pregunta
+    abierta: qué tan grande debe ser el conjunto de entrenamiento.
+\end{quick_sum}
+
+\subsection*{Del texto al vector}
+
+En el filtro de spam de la clase pasada cada correo se volvió un
+vector de ceros y unos, uno por palabra del vocabulario, y el
+clasificador solo comparó vectores. Lo que no quedó en el vector, el
+clasificador no lo vio.
+
+\begin{definicion}[Extracción de características]
+    Convertir cada documento $d$ en un vector
+    $x = \varphi(d) \in \R^m$, donde cada componente mide una
+    característica del documento. Elegir $\varphi$ es decidir qué
+    parte del texto puede ver el clasificador.
+\end{definicion}
+
+Por eso la tabla de la clase pasada importaba: si lo que delata una
+noticia falsa es la fuente, y la fuente no entra en $\varphi$, ningún
+clasificador la va a detectar, por bueno que sea.
+
+% =====================================================================
+
+\subsection*{Más allá de las palabras}
+
+En un tuit o una reseña hay cosas que no son palabras y cargan mucha
+información. A todo lo que describe al documento sin ser su
+contenido se le llama \textbf{metainformación}: el emoji, el hashtag,
+la forma en que está escrito, quién lo publicó y cuándo.
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.1cm}%
+                >{\raggedright\arraybackslash}p{3.3cm}%
+                >{\raggedright\arraybackslash}p{7.2cm}}
+    \toprule
+    \textbf{Característica} & \textbf{Ejemplo} & \textbf{Qué aporta} \\
+    \midrule
+    Emojis & cara enojada, corazón
+        & polaridad casi directa; a veces delatan el sarcasmo que las
+          palabras esconden \\
+    \addlinespace
+    Hashtags & \texttt{\#NuncaMás}
+        & el tema, y muchas veces la opinión: el hashtag trae palabras
+          pegadas \\
+    \addlinespace
+    Menciones y ligas & \texttt{@Cinepolis}, \texttt{https://\dots}
+        & a quién va dirigido; las ligas son típicas del spam y de las
+          noticias falsas \\
+    \addlinespace
+    Estilo & \textit{NO}, \textit{!!!}, \textit{buenísimooo}
+        & intensidad: mayúsculas, signos repetidos, letras
+          alargadas \\
+    \addlinespace
+    Metadatos & autor, fecha, seguidores, retuits
+        & la fuente y el alcance; para noticias falsas y spam pesan
+          más que el texto \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Casi nada de esto sobrevive al preprocesamiento de IR: los signos se
+quitaban, todo pasaba a minúsculas y un emoji ni siquiera es una
+palabra. Para clasificar opiniones hay que rescatarlo antes de
+limpiar. Lo común es cambiar cada emoji por su nombre, como el token
+\texttt{:cara\_enojada:}, y partir el hashtag donde cambian las
+mayúsculas: \texttt{\#NuncaMás} da \textit{nunca} y \textit{más}.
+
+% =====================================================================
+
+\subsection*{El preprocesamiento}
+
+Son los pasos que preparan el texto antes de contar nada. Casi todos
+se vieron por separado en clases anteriores:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Tokenización}: partir el texto en tokens, con las
+          decisiones de la clase del $21$ de octubre.
+    \item \textbf{Etiquetado gramatical (POS)}: la categoría de cada
+          palabra en esa oración, de la clase del $9$ de septiembre.
+    \item \textbf{Lematización}: llevar cada palabra a su lema,
+          \textit{gustaron} a \textit{gustar}.
+    \item \textbf{Entidades nombradas (NER)}: marcar personas,
+          lugares y organizaciones, de la clase del $14$ de
+          septiembre.
+    \item \textbf{Quitar palabras vacías}: artículos, preposiciones y
+          conjunciones, como en IR.
+    \item \textbf{Stemming}: truncar con reglas, como Porter, de la
+          clase del $24$ de agosto.
+\end{itemize}
+
+\begin{ejemplo}[Un tuit, paso a paso]
+    \label{fa28-tuit}
+    El tuit es \textit{``NO me gustaron las palomitas de Cinépolis en
+    Puebla!!!} \tikz[baseline=-0.75ex, x=1em, y=1em]{
+        \fill[orange!85!red] (0, 0) circle (0.5);
+        \fill (-0.17, 0.02) circle (0.07);
+        \fill (0.17, 0.02) circle (0.07);
+        \draw[line width=0.6pt] (-0.32, 0.27) -- (-0.07, 0.15);
+        \draw[line width=0.6pt] (0.32, 0.27) -- (0.07, 0.15);
+        \draw[line width=0.6pt] (-0.17, -0.28)
+            arc[start angle=160, end angle=20, radius=0.18];}
+    \textit{\#NuncaMás''}. Cada columna es lo que agrega un paso; las
+    etiquetas POS son las universales, que a diferencia de las de Penn
+    Treebank sirven para cualquier idioma.
+    \begin{center}
+    \small
+    \begin{tabular}{llllll}
+        \toprule
+        \textbf{Token} & \textbf{POS} & \textbf{Lema}
+            & \textbf{Entidad} & \textbf{¿Vacía?}
+            & \textbf{Stem} \\
+        \midrule
+        \textit{NO}        & ADV   & no       & & se queda & no \\
+        \textit{me}        & PRON  & yo       & & sí & \\
+        \textit{gustaron}  & VERB  & gustar   & & & gust \\
+        \textit{las}       & DET   & el       & & sí & \\
+        \textit{palomitas} & NOUN  & palomita & & & palomit \\
+        \textit{de}        & ADP   & de       & & sí & \\
+        \textit{Cinépolis} & PROPN & Cinépolis & organización & & \\
+        \textit{en}        & ADP   & en       & & sí & \\
+        \textit{Puebla}    & PROPN & Puebla   & lugar & & \\
+        \textit{!!!}       & PUNCT & !        & & & \\
+        \texttt{:cara\_enojada:} & SYM & & & & \\
+        \texttt{\#NuncaMás}      & X   & & & & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Lo que decidió cada paso:
+    \begin{itemize}[itemsep=0.2em]
+        \item El tokenizador dejó el emoji y el hashtag como un token
+              cada uno, y juntó los tres signos en \textit{!!!}. Uno
+              hecho para texto formal habría tirado el emoji y separado
+              el \# de \textit{NuncaMás}.
+        \item \textit{NO} es palabra vacía, y se queda: es una
+              negación, y para sentimientos es lo más importante del
+              tuit, como en el \textit{``no me gustó''} de la clase
+              pasada.
+        \item Las entidades se reconocieron antes de pasar a
+              minúsculas. En minúsculas, \textit{puebla} es el verbo
+              \textit{poblar}.
+        \item El stem y el lema son alternativas, no pasos seguidos:
+              se usa una de las dos columnas.
+    \end{itemize}
+    Del tuit quedan \textit{no}, \textit{gustar} y
+    \textit{palomita}, dos entidades, el emoji, el hashtag y el dato
+    de que venía en mayúsculas y con tres signos.
+\end{ejemplo}
+
+\begin{ojo}
+    El orden de la lista no es el orden en que se aplica. Cada paso
+    necesita algo que otro destruye:
+    \begin{itemize}[itemsep=0.2em]
+        \item El POS y las entidades necesitan la oración completa: el
+              etiquetador decide por la secuencia, y quitar las
+              palabras vacías antes se la rompe.
+        \item Las entidades necesitan las mayúsculas, así que se
+              reconocen antes de pasar todo a minúsculas.
+        \item El lema necesita el POS. \textit{Bajo} tiene lema
+              \textit{bajo} en \textit{``el bajo suena''}, donde es
+              sustantivo, y lema \textit{bajar} en \textit{``bajo del
+              coche''}, donde es verbo.
+        \item Las características de estilo se cuentan antes de
+              limpiar, o las mayúsculas y los \textit{!!!} ya no
+              están.
+    \end{itemize}
+    En la práctica: tokenizar, etiquetar, lematizar y reconocer
+    entidades sobre el texto intacto, contar el estilo, y al final
+    pasar a minúsculas y quitar las palabras vacías.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{La bolsa de características}
+
+\begin{definicion}[Bolsa de características]
+    La generalización de la bolsa de palabras: el documento se
+    representa como un multiconjunto de características, sin orden.
+    Cada dimensión del vector es una característica, sea una palabra,
+    un lema, un emoji, un hashtag, una entidad o un rasgo como
+    \textit{trae una liga}, y su valor dice cuánto la tiene el
+    documento: $0$ o $1$, un conteo, un peso tf-idf o una proporción.
+\end{definicion}
+
+Sigue siendo una bolsa, así que el orden se pierde igual que en la
+bolsa de palabras del $26$ de agosto. Lo que cambia es qué se mete en
+ella. El tuit del ejemplo~\ref{fa28-tuit} queda así:
+
+\begin{center}
+\begin{tikzpicture}[>=stealth,
+    celda/.style={draw, minimum width=0.9cm, minimum height=0.6cm,
+                  font=\small, inner sep=0pt},
+    nom/.style={font=\scriptsize\ttfamily, rotate=60, anchor=east,
+                inner sep=1pt}]
+    \colorlet{cPal}{acento}
+    \colorlet{cEmo}{orange!85!black}
+    \colorlet{cHas}{green!50!black}
+    \colorlet{cEnt}{violet!75!black}
+    \colorlet{cEst}{red!70!black}
+    % el tuit, con cada parte del color de su grupo
+    \node[draw, rounded corners=3pt, fill=gray!6, inner sep=6pt,
+          font=\small] (tuit) at (7.05, 2.5) {%
+        \textcolor{cEst}{\textbf{NO}}
+        \textcolor{cPal}{me \textbf{gustaron} las \textbf{palomitas}
+        de}
+        \textcolor{cEnt}{\textbf{Cinépolis}}
+        \textcolor{cPal}{en}
+        \textcolor{cEnt}{\textbf{Puebla}}\textcolor{cEst}{\textbf{!!!}}
+        \tikz[baseline=-0.75ex, x=1em, y=1em]{
+            \fill[orange!85!red] (0, 0) circle (0.5);
+            \fill (-0.17, 0.02) circle (0.07);
+            \fill (0.17, 0.02) circle (0.07);
+            \draw[line width=0.6pt] (-0.32, 0.27) -- (-0.07, 0.15);
+            \draw[line width=0.6pt] (0.32, 0.27) -- (0.07, 0.15);
+            \draw[line width=0.6pt] (-0.17, -0.28)
+                arc[start angle=160, end angle=20, radius=0.18];}
+        \textcolor{cHas}{\textbf{\#NuncaMás}}};
+    \draw[->, thick, gray] (tuit.south) -- ++(0, -0.75)
+        node[midway, right, font=\scriptsize, black]
+        {preprocesar y contar};
+    % las celdas del vector: posicion, nombre, valor, color, relleno
+    \foreach \x/\n/\v/\c/\f in {
+        0/no/1/cPal/18, 0.9/gustar/1/cPal/18,
+        1.8/palomita/1/cPal/18, 2.7/bueno/0/cPal/0,
+        4.0/:cara\_enojada:/1/cEmo/18, 4.9/:corazón:/0/cEmo/0,
+        6.2/\#nuncamás/1/cHas/18,
+        7.5/organización/1/cEnt/18, 8.4/lugar/1/cEnt/18,
+        9.3/persona/0/cEnt/0,
+        10.6/mayúsculas/1/cEst/18, 11.5/signos rep./1/cEst/18,
+        12.4/liga/0/cEst/0, 13.3/mención/0/cEst/0} {
+        \node[celda, fill=\c!\f!white] at (\x, 0) {$\v$};
+        \node[nom, text=\c] at (\x + 0.2, -0.4) {\n};
+    }
+    \node[celda, draw=none] at (3.4, 0) {$\cdots$};
+    \node[celda, draw=none] at (14.1, 0) {$\cdots$};
+    % los grupos
+    \foreach \a/\b/\c/\t in {
+        -0.45/3.15/cPal/palabras (lemas), 3.55/5.35/cEmo/emojis,
+        5.75/6.65/cHas/hashtags, 7.05/9.75/cEnt/entidades,
+        10.15/13.75/cEst/estilo} {
+        \draw[\c, line width=2pt] (\a, 0.5) -- (\b, 0.5);
+        \node[font=\scriptsize\bfseries, text=\c, above]
+            at ({(\a + \b) / 2}, 0.5) {\t};
+    }
+\end{tikzpicture}
+\end{center}
+
+El vector es ralo, como el de palabras: el vocabulario completo tiene
+miles de dimensiones y un tuit enciende una docena. Por eso conviene
+guardarlo como lista de pares, igual que el índice invertido.
+
+\begin{idea}
+    En la reseña sarcástica $r_4$ de la clase pasada,
+    \textit{``excelente, otra hora esperando la comida''}, el léxico
+    solo vio \textit{excelente}. En redes esa reseña casi nunca llega
+    sola: llega con un emoji de ojos en blanco o un
+    \texttt{\#NoVuelvo}. Las palabras dicen positivo y la
+    metainformación dice negativo, y un clasificador entrenado con las
+    dos aprende a creerle a la segunda.
+\end{idea}
+
+\begin{ojo}
+    Las características no viven en la misma escala. Las palabras
+    valen $0$ o $1$ y los seguidores de la cuenta pueden valer
+    $200\,000$. En el coseno o en una distancia, la dimensión grande
+    se come a las demás, y el clasificador termina decidiendo solo por
+    los seguidores. Antes de juntarlas se reescalan: proporciones,
+    logaritmos o normalizar cada dimensión.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{¿Qué tan grande debe ser el conjunto de entrenamiento?}
+
+La clase lo dejó como pregunta, y la respuesta honesta es que no hay
+un número. Depende de cuatro cosas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Ejemplos por clase, no en total.} Con $10\,000$
+          correos y $5\%$ de spam, el clasificador aprende el spam de
+          $500$. La clase más rara es la que pone el límite, por el
+          desbalance de la clase pasada.
+    \item \textbf{Cuántas características.} Cada dimensión es algo
+          que el clasificador tiene que aprender a pesar. Por la ley
+          de Zipf, cerca de la mitad de las palabras distintas
+          aparece una sola vez, y de una sola aparición no se aprende
+          nada. Lematizar, hacer stemming y tirar las palabras raras
+          achica el vocabulario: es la misma razón que en IR, ahora
+          para necesitar menos datos.
+    \item \textbf{Qué tan difícil es la tarea.} El spam se delata con
+          palabras obvias; el sarcasmo y el discurso de odio dependen
+          del contexto, y necesitan muchos más ejemplos para lo mismo.
+    \item \textbf{El modelo.} El vecino más cercano y Naive Bayes
+          aprenden con poco. Una red que empieza de cero necesita
+          muchísimo. Un modelo preentrenado, como los Transformers de
+          octubre, ya sabe el idioma y solo se ajusta a la tarea, así
+          que necesita pocos ejemplos etiquetados.
+\end{itemize}
+
+Como no hay fórmula, se mide. La herramienta es la curva de
+aprendizaje.
+
+\begin{definicion}[Curva de aprendizaje]
+    La gráfica del desempeño del clasificador contra el tamaño del
+    conjunto de entrenamiento. Se aparta un conjunto de validación
+    fijo, se entrena con subconjuntos cada vez más grandes, y para
+    cada tamaño se mide el desempeño sobre el propio entrenamiento y
+    sobre la validación.
+\end{definicion}
+
+\begin{ejemplo}[¿Le faltan correos al filtro de spam?]
+    Con números ilustrativos: se entrena el filtro con $100$, $200$,
+    $400$ y así, duplicando, hasta $6\,400$ correos, y se mide la
+    $F_1$ de la clase spam:
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\linewidth, height=6cm,
+        xmode=log, log basis x=2,
+        xtick={100, 200, 400, 800, 1600, 3200, 6400},
+        xticklabels={100, 200, 400, 800, 1\,600, 3\,200, 6\,400},
+        xlabel={correos de entrenamiento},
+        ylabel={$F_1$ de la clase spam},
+        ymin=0.55, ymax=1.03, grid=major, grid style={gray!20},
+        legend pos=south east, legend cell align=left,
+        legend style={font=\small},
+        tick label style={font=\small}, label style={font=\small}]
+        \addplot[acento, thick, mark=*, mark size=1.8pt] coordinates {
+            (100, 1.00) (200, 0.99) (400, 0.97) (800, 0.95)
+            (1600, 0.94) (3200, 0.93) (6400, 0.93)};
+        \addplot[orange!80!black, thick, mark=square*,
+                 mark size=1.6pt] coordinates {
+            (100, 0.62) (200, 0.71) (400, 0.79) (800, 0.85)
+            (1600, 0.88) (3200, 0.90) (6400, 0.91)};
+        \legend{entrenamiento, validación}
+        \node[font=\scriptsize, orange!80!black, right]
+            at (axis cs:135, 0.645) {$+0.09$};
+        \node[font=\scriptsize, orange!80!black, below]
+            at (axis cs:4500, 0.900) {$+0.01$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    Con $100$ correos el filtro saca $1.00$ en entrenamiento y $0.62$
+    en validación: se los aprendió de memoria y no generaliza. Al
+    duplicar los datos la validación sube, y cada vez menos: de $100$
+    a $200$ gana $0.09$, de $3\,200$ a $6\,400$ gana $0.01$. Las dos
+    curvas terminan a $0.02$ una de la otra.
+
+    Conseguir $6\,400$ correos más para ganar otro centésimo no vale
+    la pena. Para pasar de $0.91$ hay que cambiar lo que el filtro
+    ve, por ejemplo agregarle las ligas y el remitente como
+    características, o cambiar de modelo.
+\end{ejemplo}
+
+\begin{idea}
+    La curva distingue dos problemas que se ven igual en un solo
+    número:
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[name=izq, width=7cm, height=4.4cm,
+        title={\small Faltan datos}, axis lines=left,
+        xmin=0, xmax=1, ymin=0.4, ymax=1.05, xtick=\empty,
+        ytick=\empty, xlabel={\scriptsize tamaño del conjunto},
+        ylabel={\scriptsize desempeño}]
+        \addplot[acento, thick, domain=0.05:1, samples=30]
+            {0.99 - 0.06*x};
+        \addplot[orange!80!black, thick, domain=0.05:1, samples=30]
+            {0.48 + 0.33*x^0.8};
+        \draw[dashed, gray] (axis cs:0, 0.92) -- (axis cs:1, 0.92);
+    \end{axis}
+    \begin{axis}[at={(izq.east)}, anchor=west, xshift=1.3cm,
+        width=7cm, height=4.4cm,
+        title={\small Faltan características}, axis lines=left,
+        xmin=0, xmax=1, ymin=0.4, ymax=1.05, xtick=\empty,
+        ytick=\empty, xlabel={\scriptsize tamaño del conjunto},
+        ylabel={\scriptsize desempeño}]
+        \addplot[acento, thick, domain=0.05:1, samples=30]
+            {0.70 + 0.25*exp(-6*x)};
+        \addplot[orange!80!black, thick, domain=0.05:1, samples=30]
+            {0.67 - 0.22*exp(-6*x)};
+        \draw[dashed, gray] (axis cs:0, 0.92) -- (axis cs:1, 0.92);
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    Azul es entrenamiento, naranja validación y la punteada el
+    desempeño que se quiere. A la izquierda hay un hueco grande y la
+    validación sigue subiendo: más datos sí ayudan. A la derecha las
+    dos curvas se juntaron temprano y abajo de la meta: el modelo ni
+    siquiera puede con sus propios datos, y más datos no lo arreglan.
+    Hacen falta mejores características o un modelo más capaz.
+\end{idea}
+
+\begin{ojo}
+    La curva solo dice la verdad si la validación se queda fuera del
+    entrenamiento y se parece a lo que el clasificador va a ver: la
+    misma proporción de clases y el mismo tipo de texto. Medir sobre
+    los mismos correos con los que se entrenó da el $1.00$ de la curva
+    azul, que no dice nada de los correos nuevos.
+\end{ojo}
 
 
 \end{document}
