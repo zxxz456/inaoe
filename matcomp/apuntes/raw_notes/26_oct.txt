@@ -1,0 +1,40 @@
+- estadistica descriptiva
+
+el obj es elegir una grafica y reconocer distribucionrd comunes
+
+histograma es diferente de grafica de barras 
+
+boxplot, cajas y bigotes (explicar con grafica)
+
+violin plot {explicar con graficas y asi}
+
+bean plot {explciar con grafiac}
+
+Q-Q plot, comparar cuantiloes {explicar con graficas}
+
+-- erroes frecuentes al visualizar distribuciones
+user hisograma para variables nominales
+combinar bins hasta que aparezca la hisoria deseada
+interpretar q-q plot como prueba definitiva de normalidad
+ocultar n, unidades o criterios de outliers
+comparar grupos con escalas de ejes diferentes
+
+
+cmo se distribuye variable numerica -> hist/densidad
+
+como comparo varios grupos -> box plot
+
+outliers -> box plot 
+
+- dsitribuciones importantes {explicar todas con ejemplo y grafica}
+pueden ser discretas y continuas.
+{explicar que son los grados de libertad}
+
+Bernoulli
+Binomial
+Poisson
+Uniforma
+normalidad
+T
+Xi cuagrada
+F
