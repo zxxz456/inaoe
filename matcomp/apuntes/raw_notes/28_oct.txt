@@ -1,0 +1,36 @@
+- independencia, error estandar y teorema de muestreo
+
+una variable es independiente o no
+es undependiente pero la distribucion es la misma
+hay un error estandar
+ley de los grandes numeros
+teorema central del limite
+desigualdad de chebichev
+
+--IDD: INdependiente e identicamente distribuida
+{explicar}
+
+por que importa para compu?
+    - validacion cruzada
+    - benchmarks
+    - series temporales
+
+- cauntas observacions necesit?
+el error estandar mide la variacion esperada en el promedio muestral, {formula SE}
+
+reducir el error a la mitad existe 4 veces mas observaciones
+
+-- desviacion estandar vs error estandar
+{explicaar}
+
+-- error de muestreo 
+{explicar}
+
+-- ley de los gamdes numeros
+{explicar}
+
+-- TLC
+{exlpciar}
+
+-- distancia de chebyshev 
+{explciar}
