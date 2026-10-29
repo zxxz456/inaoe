@@ -12,12 +12,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.17.0
+%   * Version: 2.18.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       27/10/2026      Clase 26 Oct, clasificacion de textos
 %  zxxz6       21/10/2026      Clase 21 Oct, morfologia y lexicografia
 %  zxxz6       21/10/2026      Clase 19 Oct, reconocimiento del habla
 %  zxxz6       18/10/2026      Clase 14 Oct, el lenguaje para la computadora
@@ -7530,6 +7531,323 @@ una recta de pendiente $-1$:
     vocabulario de Word2Vec y la necesidad de partir en subpalabras:
     por más grande que sea el corpus, siempre habrá palabras que casi
     nunca se vieron.
+\end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 21 - Clasificacion de textos
+% =====================================================================
+
+\clase{Clasificación de textos}{26 de octubre de 2026}
+
+\begin{quick_sum}
+    Empieza la minería de textos. Hay mucho más texto del que una
+    persona puede leer, y la minería de textos saca información de él
+    de forma automática. Su tarea más común es la clasificación:
+    asignar cada documento a una o más clases predefinidas según su
+    contenido. Las características que conviene usar dependen del
+    problema; no delata lo mismo a un correo de spam que a una noticia
+    falsa, a un mensaje de odio o a una opinión. Se cerró con el
+    análisis de sentimientos: decidir si un texto expresa algo
+    positivo, negativo o neutro.
+\end{quick_sum}
+
+\subsection*{Por qué minería de textos}
+
+En internet hay muchísima información en forma de texto, y mucha gente
+que la produce y la consume: reseñas, noticias, correos, publicaciones
+en redes. Para una persona es imposible procesarla toda, y aunque
+pudiera, hay cosas que solo se ven al juntar miles de textos: qué
+opina la gente de un producto, qué rumor se está difundiendo, qué
+correos son fraude.
+
+\begin{definicion}[Minería de textos]
+    Extraer de forma automática información útil, y que no es evidente
+    a simple vista, de colecciones grandes de texto.
+\end{definicion}
+
+Es pariente de la recuperación de información de las primeras clases,
+pero con otra meta. En IR alguien hace una consulta y el sistema
+devuelve los documentos relevantes. En minería de textos no hay
+consulta: se quiere organizar, etiquetar o resumir la colección
+completa.
+
+% =====================================================================
+
+\subsection*{Clasificación de textos}
+
+\begin{definicion}[Clasificación de textos]
+    La tarea de asignar documentos a una o más clases predefinidas con
+    base en su contenido. Dados un conjunto de documentos $D$ y uno de
+    clases $C = \set{c_1, \dots, c_k}$, se busca una función
+    $f : D \to C$ que le asigne su clase a cada documento.
+\end{definicion}
+
+Que las clases sean \textbf{predefinidas} es lo que importa: se deciden
+antes, y el sistema aprende a reconocerlas a partir de documentos que
+alguien ya etiquetó. Eso la separa del clustering de la clase del $7$
+de septiembre, donde los grupos no existen de antemano y salen de los
+datos.
+
+Según cuántas clases hay y cuántas puede llevar un documento:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Binaria}: dos clases, como spam y no spam.
+    \item \textbf{Multiclase}: una entre varias, como la sección de un
+          periódico: deportes, política o cultura.
+    \item \textbf{Multietiqueta}: varias a la vez. Una nota sobre el
+          presupuesto de la Secretaría de Salud es de política, de
+          economía y de salud. Aquí la función devuelve un subconjunto
+          de clases, $f : D \to 2^C$.
+\end{itemize}
+
+\subsubsection*{Cómo se arma un clasificador}
+
+\begin{center}
+\begin{tikzpicture}[
+    paso/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.5cm, minimum height=0.75cm,
+                 font=\footnotesize\bfseries, align=center},
+    nota/.style={font=\scriptsize, align=center, text width=2.7cm,
+                 execute at begin node={\hyphenpenalty10000\relax}},
+    >=stealth]
+    \foreach \x/\n/\t/\d in {
+        0/d/Documento/{un correo, una reseña, una noticia},
+        3.2/p/Preprocesado/{tokenizar, quitar \textit{stop words},
+                            Porter},
+        6.4/r/Representación/{bolsa de palabras, tf-idf,
+                              embeddings},
+        9.6/c/Clasificador/{aprendido de documentos ya etiquetados},
+        12.8/k/Clase/{spam o no spam; positivo, negativo o neutro}} {
+        \node[paso] (\n) at (\x, 0) {\t};
+        \node[nota] at (\x, -1.05) {\d};
+    }
+    \foreach \a/\b in {d/p, p/r, r/c, c/k}
+        \draw[->] (\a) -- (\b);
+\end{tikzpicture}
+\end{center}
+
+Casi todo lo del curso entra en alguna caja. El preprocesado es el de
+la clase del $24$ de agosto; la representación, el modelo vectorial y
+tf-idf del $26$ de agosto, o los embeddings y el Transformer de
+octubre. Lo nuevo es la última caja: un modelo que aprende de un
+\textbf{conjunto de entrenamiento}, documentos con su clase ya
+puesta, y después predice la clase de documentos que nunca vio.
+
+\begin{ejemplo}[Un filtro de spam con lo que ya sabemos]
+    El clasificador más simple usa la similitud coseno del modelo
+    vectorial: a un correo nuevo le toca la clase del correo de
+    entrenamiento más parecido. Se llama el \textbf{vecino más
+    cercano}. Con vectores binarios, $1$ si la palabra aparece y $0$
+    si no, el coseno se reduce a contar palabras en común:
+    \[
+        \cos(q, d) = \frac{\abs{q \cap d}}{\sqrt{\abs{q}\,\abs{d}}} .
+    \]
+    El conjunto de entrenamiento:
+    \begin{center}
+    \small
+    \begin{tabular}{cll}
+        \toprule
+        & \textbf{Correo} & \textbf{Clase} \\
+        \midrule
+        $d_1$ & \textit{gana dinero gratis ahora}      & spam \\
+        $d_2$ & \textit{oferta gratis compra ahora}    & spam \\
+        $d_3$ & \textit{reunión mañana revisar proyecto} & no spam \\
+        $d_4$ & \textit{envía proyecto antes reunión}  & no spam \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Llega $q_1$ = \textit{compra ahora gratis}, con $3$ palabras. Cada
+    correo de entrenamiento tiene $4$, así que el denominador es
+    $\sqrt{3 \cdot 4} = \sqrt{12} = 3.46$ en los cuatro:
+    \begin{center}
+    \small
+    \begin{tabular}{cllc}
+        \toprule
+        & \textbf{En común con $q_1$} & \textbf{Coseno} & \\
+        \midrule
+        $d_1$ & \textit{gratis}, \textit{ahora}
+              & $2 / 3.46 = 0.58$ & \\
+        $d_2$ & \textit{compra}, \textit{gratis}, \textit{ahora}
+              & $3 / 3.46 = 0.87$ & $\leftarrow$ \\
+        $d_3$ & ninguna & $0$ & \\
+        $d_4$ & ninguna & $0$ & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    El más parecido es $d_2$, así que $q_1$ es spam. Con
+    $q_2$ = \textit{revisar oferta proyecto} gana $d_3$, que comparte
+    \textit{revisar} y \textit{proyecto}, con $0.58$, contra $0.29$ de
+    $d_2$ y de $d_4$, que comparten una sola palabra: no spam.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Las características dependen del problema}
+
+Una característica es lo que el clasificador mira de cada documento:
+qué palabras trae, cuántas, cómo están escritas, de dónde viene. Cuáles
+sirven depende de lo que se quiere detectar.
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}%
+                >{\raggedright\arraybackslash}p{3.2cm}%
+                >{\raggedright\arraybackslash}p{7.6cm}}
+    \toprule
+    \textbf{Tarea} & \textbf{Clases} & \textbf{Qué delata la clase} \\
+    \midrule
+    Filtro de spam & spam o no spam
+        & palabras como \textit{gratis} u \textit{oferta}, muchas
+          ligas, remitente desconocido, mayúsculas y signos de
+          admiración de sobra \\
+    \addlinespace
+    Noticias falsas & falsa o verdadera
+        & tono sensacionalista, la fuente, si otros medios la
+          confirman; las palabras solas engañan, porque una noticia
+          falsa imita a una verdadera \\
+    \addlinespace
+    Discurso de odio & odio o no; a veces también contra quién
+        & insultos y términos despectivos hacia un grupo, pero
+          depende del contexto: citar un insulto para denunciarlo no
+          es odio \\
+    \addlinespace
+    Análisis de sentimientos & positivo, negativo o neutro
+        & palabras de opinión, negaciones, intensificadores como
+          \textit{muy}, emojis \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    El preprocesado tampoco es el mismo para todo. En IR se quitaban
+    las \textit{stop words} porque casi no dicen de qué trata un
+    documento. Pero \textit{no} es una \textit{stop word}, y al
+    quitarla \textit{``no me gustó''} se vuelve \textit{``gustó''}:
+    para sentimientos se pierde justo lo que importa. Y para saber
+    quién escribió un texto, las \textit{stop words} son de lo más
+    útil, porque cada autor usa las suyas a su manera sin darse
+    cuenta.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Análisis de sentimientos}
+
+\begin{definicion}[Análisis de sentimientos]
+    Determinar si un texto dado expresa un sentimiento positivo,
+    negativo o neutro. A esa clase se le llama la \textbf{polaridad}
+    del texto.
+\end{definicion}
+
+Se aplica a reseñas de productos y restaurantes, a publicaciones sobre
+una marca o un político, a encuestas con respuestas abiertas. Se puede
+hacer a tres niveles:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Documento}: una polaridad para toda la reseña.
+    \item \textbf{Oración}: una por oración, porque una reseña puede
+          tener de las dos.
+    \item \textbf{Aspecto}: una por cada cosa de la que se opina. En
+          \textit{``la comida estuvo buena, pero el servicio fue
+          lento''} la comida es positiva y el servicio negativo, y la
+          reseña completa no es ninguna de las dos.
+\end{itemize}
+
+\begin{ejemplo}[Un clasificador con léxico]
+    La forma más directa es una lista de palabras de opinión con un
+    peso cada una:
+    \begin{center}
+    \small
+    \begin{tabular}{lr@{\qquad}lr}
+        \toprule
+        \textbf{Palabra} & \textbf{Peso} & \textbf{Palabra}
+            & \textbf{Peso} \\
+        \midrule
+        \textit{excelente} & $+2$ & \textit{pésimo} & $-2$ \\
+        \textit{bueno, buena} & $+1$ & \textit{malo, mala} & $-1$ \\
+        \textit{recomiendo} & $+1$ & \textit{lento} & $-1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La polaridad sale de sumar los pesos: positivo si la suma es
+    mayor que $0$, negativo si es menor y neutro si es $0$. Una regla
+    más: \textit{no} le voltea el signo a la siguiente palabra de
+    opinión.
+    \begin{center}
+    \small
+    \begin{tabular}{>{\raggedright\arraybackslash}p{5.4cm}lcl}
+        \toprule
+        \textbf{Reseña} & \textbf{Pesos} & \textbf{Suma}
+            & \textbf{Polaridad} \\
+        \midrule
+        $r_1$: \textit{excelente servicio y la comida buena}
+            & $+2 + 1$ & $+3$ & positivo \\
+        $r_2$: \textit{la comida no es buena y el servicio lento}
+            & $-1 - 1$ & $-2$ & negativo \\
+        $r_3$: \textit{el pedido llegó a las dos}
+            & & $0$ & neutro \\
+        $r_4$: \textit{excelente, otra hora esperando la comida}
+            & $+2$ & $+2$ & positivo \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    En $r_2$, \textit{buena} vale $+1$, pero la precede un
+    \textit{no} y cuenta como $-1$. Las tres primeras salen bien. La
+    cuarta es sarcasmo: quien la escribió está molesto, y el léxico
+    solo ve \textit{excelente}.
+    \begin{center}
+    \begin{tikzpicture}[>=stealth,
+        res/.style={circle, fill=acento, inner sep=1.8pt},
+        et/.style={font=\scriptsize, above=3pt}]
+        \draw[->, gray] (-3.4, 0) -- (3.6, 0)
+            node[right, font=\scriptsize, black] {suma};
+        \foreach \x in {-3, ..., 3}
+            \draw[gray] (\x, 0.08) -- (\x, -0.08)
+                node[below, font=\scriptsize] {$\x$};
+        \fill[red!12] (-3.3, 0.9) rectangle (-0.15, 1.5);
+        \fill[gray!15] (-0.15, 0.9) rectangle (0.15, 1.5);
+        \fill[green!12] (0.15, 0.9) rectangle (3.3, 1.5);
+        \node[font=\scriptsize] at (-1.7, 1.2) {negativo};
+        \node[font=\scriptsize] at (1.7, 1.2) {positivo};
+        \node[res] at (3, 0) {};   \node[et] at (3, 0) {$r_1$};
+        \node[res] at (-2, 0) {};  \node[et] at (-2, 0) {$r_2$};
+        \node[res] at (0, 0) {};   \node[et] at (0, 0) {$r_3$};
+        \node[res, fill=orange!80!black] at (2, 0) {};
+        \node[et] at (2, 0) {$r_4$};
+        \draw[->, orange!80!black] (2, -0.45) to[bend left=25]
+            node[below, font=\scriptsize] {en realidad, negativa}
+            (-0.9, -0.45);
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\begin{ojo}
+    Un léxico fijo falla donde el sentimiento no está en las palabras
+    sueltas:
+    \begin{itemize}[itemsep=0.2em]
+        \item \textbf{Sarcasmo e ironía}, como $r_4$.
+        \item \textbf{Dominio}: \textit{impredecible} es bueno para la
+              trama de una película y malo para los frenos de un
+              coche; una batería que dura \textit{mucho} es buena y una
+              espera que dura \textit{mucho} es mala.
+        \item \textbf{Negaciones y alcance}: en \textit{``no creo que
+              sea mala''} el \textit{no} está lejos de \textit{mala}, y
+              la regla de la palabra siguiente ya no alcanza.
+    \end{itemize}
+    Por eso en la práctica se entrena un clasificador con reseñas ya
+    etiquetadas, y la representación con embeddings o con un
+    Transformer ve el contexto que el léxico no ve.
+\end{ojo}
+
+\begin{idea}
+    En estas tareas las clases casi nunca están parejas. Si el $95\%$
+    de los correos no son spam, un clasificador que dice ``no spam'' a
+    todo acierta el $95\%$ de las veces y no atrapa ningún spam. Por
+    eso la exactitud engaña, y se evalúa con la precisión, el recall
+    y la $F_1$ de la clase del $2$ de septiembre, calculadas sobre la
+    clase que interesa: el spam, el odio, la noticia falsa.
 \end{idea}
 
 
