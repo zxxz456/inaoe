@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.12.0
+%   * Version: 2.13.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       28/10/2026      Clase 26 Oct, graficas y distribuciones
 %  zxxz6       21/10/2026      Clase 21 Oct, centro, dispersion y forma
 %  zxxz6       21/10/2026      Clase 19 Oct, distribuciones conjuntas
 %  zxxz6       18/10/2026      Clase 14 Oct, variables aleatorias
@@ -6105,6 +6106,1197 @@ los lunes en la mañana, no a la de todo el día.
     sería $2.42$. Lo honesto es la mediana y el IQR, $15$ ms con un IQR
     de $4$, y mencionar aparte el valor atípico de $36$.
 \end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 26 Oct - Graficas de distribuciones y modelos importantes
+% =====================================================================
+
+\clase{Gráficas de distribuciones y modelos importantes}%
+{26 de octubre de 2026}
+
+\begin{quick_sum}
+    Dos objetivos: escoger la gráfica correcta para una distribución y
+    reconocer las distribuciones que más aparecen. Primero las gráficas:
+    el histograma no es una gráfica de barras; el diagrama de caja
+    compara grupos y marca atípicos, pero esconde la forma; el violín
+    y el frijol la recuperan, y el Q-Q compara los datos contra un
+    modelo. Luego los errores frecuentes al graficar y qué gráfica
+    contesta qué pregunta. Después los modelos, cada uno con su
+    ejemplo: Bernoulli, binomial y Poisson entre las discretas;
+    uniforme y normal entre las continuas; y la ji cuadrada, la $t$ y
+    la $F$, que dependen de los grados de libertad.
+\end{quick_sum}
+
+\subsection*{Histograma contra gráfica de barras}
+
+Se parecen porque los dos son barras, pero contestan cosas distintas.
+La \textbf{gráfica de barras} cuenta categorías; el
+\textbf{histograma} reparte una variable numérica en intervalos que
+cubren la recta.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    name=barras, width=6.5cm, height=4.8cm,
+    ybar, bar width=0.6cm, ymin=0, ymax=4,
+    symbolic x coords={Python, C++, Java}, xtick=data,
+    enlarge x limits=0.3, ylabel={programas},
+    title={barras: lenguaje, $n = 7$}, title style={font=\small},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \addplot[fill=fondoIdea, draw=acento]
+        coordinates {(Python, 3) (C++, 2) (Java, 2)};
+\end{axis}
+\begin{axis}[
+    at={(barras.east)}, anchor=west, xshift=1.4cm,
+    width=7.5cm, height=4.8cm, xmin=0, xmax=35, ymin=0, ymax=0.09,
+    xlabel={$t$ (ms)}, ylabel={densidad},
+    title={histograma: tiempo, $n = 100$}, title style={font=\small},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    scaled y ticks=false,
+    yticklabel style={/pgf/number format/fixed}]
+    \addplot[ybar interval, fill=fondoIdea, draw=acento]
+        coordinates {(0, 0.082) (5, 0.044) (10, 0.030)
+                     (15, 0.018) (20, 0.010) (25, 0.006)
+                     (30, 0)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+La de la izquierda es la tabla de lenguajes de la clase del $12$; la
+de la derecha, los $100$ tiempos de la clase del $14$.
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}%
+                 >{\raggedright\arraybackslash}p{5.6cm}}
+    \toprule
+    & \textbf{Barras} & \textbf{Histograma} \\
+    \midrule
+    Variable & categórica & numérica \\
+    \addlinespace
+    Eje horizontal & categorías; si son nominales, el orden da igual
+                   & una escala numérica con orden fijo \\
+    \addlinespace
+    Las barras & separadas, porque entre Python y C++ no hay nada
+               & pegadas, porque los intervalos cubren la recta \\
+    \addlinespace
+    Lo que se lee & la altura & el área, si el eje es densidad \\
+    \addlinespace
+    Lo que decide quien grafica & el orden de las categorías
+                                & el ancho y el inicio de los
+                                  intervalos \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Diagrama de caja para comparar grupos}
+
+El diagrama de caja de la clase del $21$ resume una variable en cinco
+números: mínimo, $Q_1$, mediana, $Q_3$ y máximo, con los atípicos
+aparte. Lo que lo hace útil es que ocupa poco, y varios caben uno
+encima de otro sobre la misma escala.
+
+\begin{ejemplo}[Tres servidores]
+    Se midieron $40$ tiempos de respuesta en cada uno de tres
+    servidores. En el $A$ los tiempos se reparten parejo entre $10$ y
+    $30$ ms. El $B$ tiene un caché: la mitad de las peticiones lo
+    encuentra y tarda alrededor de $15$ ms, y la otra mitad no y tarda
+    alrededor de $25$. El $C$ es más lento, y una petición tardó $47$.
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccccc}
+        \toprule
+        \textbf{Servidor} & $n$ & mín & $Q_1$ & mediana & $Q_3$ & máx
+        & $\bar{x}$ & $s$ \\
+        \midrule
+        $A$ & $40$ & $10$ & $15$ & $20$ & $25$ & $30$ & $20.0$ & $5.86$ \\
+        $B$ & $40$ & $10$ & $15$ & $20$ & $25$ & $30$ & $20.0$ & $5.54$ \\
+        $C$ & $40$ & $21$ & $27$ & $30$ & $33$ & $47$ & $30.2$ & $4.59$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    En $C$ el IQR es $6$, así que la cerca de arriba queda en
+    $33 + 1.5 \cdot 6 = 42$: el $47$ es atípico, y el bigote llega al
+    dato más alto que no la pasa, $37$.
+    \begin{center}
+    \begin{tikzpicture}[x=0.3cm, y=1cm]
+        \draw[->] (5, 0) -- (50, 0);
+        \foreach \t in {10, 20, 30, 40} {
+            \draw (\t, 0.08) -- (\t, -0.08);
+            \node[font=\scriptsize, below] at (\t, -0.08) {$\t$};
+        }
+        \node[font=\scriptsize, anchor=west] at (50.2, 0) {ms};
+        \foreach \y/\nom/\mn/\qa/\me/\qb/\mx in
+            {3/A/10/15/20/25/30, 2/B/10/15/20/25/30,
+             1/C/21/27/30/33/37} {
+            \draw[fill=fondoIdea] (\qa, \y - 0.3) rectangle
+                (\qb, \y + 0.3);
+            \draw[thick] (\me, \y - 0.3) -- (\me, \y + 0.3);
+            \draw (\mn, \y) -- (\qa, \y);
+            \draw (\qb, \y) -- (\mx, \y);
+            \draw (\mn, \y - 0.15) -- (\mn, \y + 0.15);
+            \draw (\mx, \y - 0.15) -- (\mx, \y + 0.15);
+            \node[font=\small, anchor=east] at (4.5, \y) {$\nom$};
+        }
+        \node[circle, draw, inner sep=1.5pt, fill=fondoOjo]
+            at (47, 1) {};
+    \end{tikzpicture}
+    \end{center}
+    De un vistazo: $C$ es unos $10$ ms más lento que los otros dos,
+    menos disperso, y tiene un atípico. $A$ y $B$ salen idénticos.
+\end{ejemplo}
+
+\begin{ojo}
+    $A$ y $B$ tienen los mismos cinco números, así que su caja es la
+    misma, y no son el mismo servidor: en $B$ casi no hay peticiones
+    de $20$ ms, que es justo su mediana. La caja resume la posición y
+    la dispersión, pero no la forma. Una distribución con dos modos
+    no se ve.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Diagrama de violín}
+
+El violín dibuja la densidad de los datos a los dos lados de un eje,
+como un espejo, y suele llevar adentro una caja angosta. Donde el
+violín es ancho hay muchos datos; donde se adelgaza, pocos.
+
+\subsubsection*{De dónde sale la silueta}
+
+La silueta es una \textbf{densidad estimada por núcleos} (KDE, por
+\textit{kernel density estimation}). Sobre cada dato se pone una
+campana chica de área $1/n$ y se suman todas. El resultado es una
+curva suave de área $1$, como la densidad de la clase del $14$, pero
+sacada de los datos y no de un modelo.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=4.6cm, domain=6:32, samples=120,
+    xmin=6, xmax=32, ymin=0, ymax=0.12,
+    xlabel={$t$ (ms)}, ylabel={densidad},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    yticklabel style={/pgf/number format/fixed},
+    legend style={font=\scriptsize, at={(0.98, 0.97)},
+                  anchor=north east},
+    legend cell align=left]
+    \addplot[dashed, gray] {exp(-(x-12)^2/4.5)/(1.5*2.5066*5)};
+    \addlegendentry{una campana por dato}
+    \pgfplotsinvokeforeach{14, 15, 23, 25}{
+        \addplot[dashed, gray, forget plot]
+            {exp(-(x-#1)^2/4.5)/(1.5*2.5066*5)};
+    }
+    \addplot[thick, acento]
+        {(exp(-(x-12)^2/4.5) + exp(-(x-14)^2/4.5)
+          + exp(-(x-15)^2/4.5) + exp(-(x-23)^2/4.5)
+          + exp(-(x-25)^2/4.5))/(1.5*2.5066*5)};
+    \addlegendentry{su suma}
+    \addplot[only marks, mark=|, mark size=4pt, orange!70!black,
+             forget plot]
+        coordinates {(12, 0) (14, 0) (15, 0) (23, 0) (25, 0)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Cinco datos: $12$, $14$, $15$, $23$ y $25$ ms. Los tres primeros
+están juntos y sus campanas se apilan en un pico; los otros dos hacen
+otro. El ancho de cada campana, el \textbf{ancho de banda}, hace con la
+curva lo mismo que el ancho de los intervalos con el histograma:
+angosto da una curva con un pico por dato, ancho la aplana.
+
+\begin{ejemplo}[Los tres servidores en violín]
+    Los mismos datos del diagrama de caja, con ancho de banda de
+    $1.5$ ms y la caja adentro:
+    \begin{center}
+    \begin{tikzpicture}[x=0.3cm, y=1cm,
+        declare function={
+            ac(\z) = 1/(1 + exp(-1.702*max(min(\z, 5), -5)));
+            cp(\x,\m,\s) = exp(-min((\x - \m)^2/(2*\s^2), 20))
+                             /(\s*2.5066);
+            fa(\x) = (ac((\x - 10)/1.5) - ac((\x - 30)/1.5))/20;
+            fb(\x) = 0.5*cp(\x, 15, 2.5) + 0.5*cp(\x, 25, 2.5);
+            fc(\x) = 0.975*cp(\x, 30, 4.27) + 0.025*cp(\x, 47, 1.5);
+        }]
+        \draw[->] (5, 0) -- (50, 0);
+        \foreach \t in {10, 20, 30, 40} {
+            \draw (\t, 0.08) -- (\t, -0.08);
+            \node[font=\scriptsize, below] at (\t, -0.08) {$\t$};
+        }
+        \node[font=\scriptsize, anchor=west] at (50.2, 0) {ms};
+        \draw[fill=fondoIdea, draw=acento]
+            plot[domain=6:34, samples=90] (\x, {3.5 + 6.5*fa(\x)})
+            -- plot[domain=34:6, samples=90] (\x, {3.5 - 6.5*fa(\x)})
+            -- cycle;
+        \draw[fill=fondoIdea, draw=acento]
+            plot[domain=6:34, samples=90] (\x, {2.25 + 6.5*fb(\x)})
+            -- plot[domain=34:6, samples=90] (\x, {2.25 - 6.5*fb(\x)})
+            -- cycle;
+        \draw[fill=fondoIdea, draw=acento]
+            plot[domain=16:51, samples=110] (\x, {1 + 6.5*fc(\x)})
+            -- plot[domain=51:16, samples=110] (\x, {1 - 6.5*fc(\x)})
+            -- cycle;
+        \foreach \y/\nom/\mn/\qa/\me/\qb/\mx in
+            {3.5/A/10/15/20/25/30, 2.25/B/10/15/20/25/30,
+             1/C/21/27/30/33/37} {
+            \draw[acento] (\mn, \y) -- (\mx, \y);
+            \fill[acento] (\qa, \y - 0.05) rectangle (\qb, \y + 0.05);
+            \fill[white] (\me, \y) circle (1.8pt);
+            \node[font=\small, anchor=east] at (4.5, \y) {$\nom$};
+        }
+        \fill[acento] (47, 1) circle (1.2pt);
+    \end{tikzpicture}
+    \end{center}
+    Ahora $A$ y $B$ ya no se confunden. $A$ es una banda pareja: todos
+    los tiempos entre $10$ y $30$ son igual de comunes. $B$ tiene dos
+    bultos, las peticiones que encontraron el caché y las que no, y
+    una cintura en $20$ ms, su mediana, donde casi no hay datos. El
+    atípico de $C$ queda como una pestaña chica en $47$.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Diagrama de frijol}
+
+El diagrama de frijol (\textit{bean plot}) es un violín que además
+dibuja \textbf{cada observación} como una raya corta. Dos datos
+repetidos caen en la misma raya, que se ve más oscura. Lleva también
+una raya larga en la media de cada grupo y una línea punteada en la
+media de todos los datos juntos.
+
+\begin{ejemplo}[Los tres servidores en frijol]
+    Los mismos datos. La media de los $120$ tiempos juntos es
+    $23.4$ ms:
+    \begin{center}
+    \begin{tikzpicture}[x=0.3cm, y=1cm,
+        declare function={
+            ac(\z) = 1/(1 + exp(-1.702*max(min(\z, 5), -5)));
+            cp(\x,\m,\s) = exp(-min((\x - \m)^2/(2*\s^2), 20))
+                             /(\s*2.5066);
+            fa(\x) = (ac((\x - 10)/1.5) - ac((\x - 30)/1.5))/20;
+            fb(\x) = 0.5*cp(\x, 15, 2.5) + 0.5*cp(\x, 25, 2.5);
+            fc(\x) = 0.975*cp(\x, 30, 4.27) + 0.025*cp(\x, 47, 1.5);
+        }]
+        \draw[->] (5, 0) -- (50, 0);
+        \foreach \t in {10, 20, 30, 40} {
+            \draw (\t, 0.08) -- (\t, -0.08);
+            \node[font=\scriptsize, below] at (\t, -0.08) {$\t$};
+        }
+        \node[font=\scriptsize, anchor=west] at (50.2, 0) {ms};
+        \draw[fill=fondoIdea!50, draw=acento!60]
+            plot[domain=6:34, samples=90] (\x, {3.5 + 6.5*fa(\x)})
+            -- plot[domain=34:6, samples=90] (\x, {3.5 - 6.5*fa(\x)})
+            -- cycle;
+        \draw[fill=fondoIdea!50, draw=acento!60]
+            plot[domain=6:34, samples=90] (\x, {2.25 + 6.5*fb(\x)})
+            -- plot[domain=34:6, samples=90] (\x, {2.25 - 6.5*fb(\x)})
+            -- cycle;
+        \draw[fill=fondoIdea!50, draw=acento!60]
+            plot[domain=16:51, samples=110] (\x, {1 + 6.5*fc(\x)})
+            -- plot[domain=51:16, samples=110] (\x, {1 - 6.5*fc(\x)})
+            -- cycle;
+        \foreach \v in {10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15,
+                        16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21,
+                        21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26,
+                        27, 27, 28, 28, 29, 29, 30}
+            \draw[acento, draw opacity=0.45] (\v, 3.33) -- (\v, 3.67);
+        \foreach \v in {10, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15,
+                        15, 16, 16, 16, 17, 17, 17, 18, 19, 21, 22,
+                        23, 23, 23, 24, 24, 24, 25, 25, 25, 25, 26,
+                        26, 26, 27, 27, 27, 28, 30}
+            \draw[acento, draw opacity=0.45] (\v, 2.08) -- (\v, 2.42);
+        \foreach \v in {21, 23, 24, 25, 25, 26, 26, 26, 27, 27, 27,
+                        28, 28, 28, 29, 29, 29, 29, 30, 30, 30, 30,
+                        31, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34,
+                        34, 34, 35, 35, 36, 37, 47}
+            \draw[acento, draw opacity=0.45] (\v, 0.83) -- (\v, 1.17);
+        \foreach \y/\m in {3.5/20, 2.25/20, 1/30.2}
+            \draw[very thick, orange!70!black] (\m, \y - 0.5)
+                -- (\m, \y + 0.5);
+        \draw[dashed, gray] (23.4, 0.3) -- (23.4, 4.0);
+        \node[font=\scriptsize, gray, above] at (23.4, 4.0)
+            {media general};
+        \foreach \y/\nom in {3.5/A, 2.25/B, 1/C}
+            \node[font=\small, anchor=east] at (4.5, \y) {$\nom$};
+    \end{tikzpicture}
+    \end{center}
+    En $A$ las rayas están a intervalos regulares; en $B$ se amontonan
+    en dos grupos y dejan un hueco entre $19$ y $21$; en $C$ el $47$
+    queda solo. Contando rayas se ve que cada grupo tiene $40$ datos,
+    algo que ni la caja ni el violín dicen.
+\end{ejemplo}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{3.6cm}%
+                 >{\raggedright\arraybackslash}p{3.6cm}%
+                 >{\raggedright\arraybackslash}p{3.8cm}}
+    \toprule
+    & \textbf{Caja} & \textbf{Violín} & \textbf{Frijol} \\
+    \midrule
+    Muestra & cinco números y atípicos & la forma, con la caja adentro
+            & la forma y cada dato \\
+    \addlinespace
+    Esconde & la forma y el tamaño $n$ & el tamaño $n$
+            & nada, pero se satura con miles de datos \\
+    \addlinespace
+    Conviene & muchos grupos, o buscar atípicos
+             & comparar formas entre pocos grupos
+             & muestras chicas o medianas \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Gráfica Q-Q}
+
+Las tres gráficas anteriores describen los datos. La gráfica Q-Q
+(cuantil contra cuantil) contesta otra pregunta: ¿los datos se
+parecen a una distribución teórica, casi siempre la normal?
+
+\begin{definicion}[Cuantil]
+    El cuantil $p$ de una distribución es el valor que deja abajo una
+    fracción $p$ de ella. La mediana es el cuantil $0.5$; $Q_1$ y
+    $Q_3$, los cuantiles $0.25$ y $0.75$.
+\end{definicion}
+
+\begin{definicion}[Gráfica Q-Q]
+    Grafica los cuantiles de los datos contra los cuantiles de la
+    distribución teórica. Si los datos vienen de esa distribución,
+    salvo por su centro y su escala, los puntos caen sobre una recta.
+\end{definicion}
+
+Para construirla con $n$ datos:
+
+\begin{enumerate}[itemsep=0.3em]
+    \item Ordenar los datos: $x_{(1)} \le x_{(2)} \le \cdots \le
+          x_{(n)}$. El dato $x_{(i)}$ es el cuantil empírico de
+          $p_i = (i - 0.5)/n$. Se resta $0.5$ para no pedir el cuantil
+          $1$, que en la normal está en el infinito.
+    \item Calcular el cuantil teórico $z_i$ de la normal estándar que
+          deja abajo $p_i$.
+    \item Graficar los puntos $(z_i,\ x_{(i)})$ y una recta de
+          referencia. La usual pasa por los cuartiles de los dos
+          lados.
+\end{enumerate}
+
+\begin{ejemplo}[Los diez tiempos de la clase del $21$]
+    Ordenados, con su $p_i$ y su $z_i$:
+    \begin{center}
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{lcccccccccc}
+        \toprule
+        $i$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$ & $9$
+            & $10$ \\
+        $x_{(i)}$ & $12$ & $13$ & $13$ & $14$ & $15$ & $15$ & $15$
+                  & $17$ & $20$ & $36$ \\
+        $p_i$ & $0.05$ & $0.15$ & $0.25$ & $0.35$ & $0.45$ & $0.55$
+              & $0.65$ & $0.75$ & $0.85$ & $0.95$ \\
+        $z_i$ & $-1.64$ & $-1.04$ & $-0.67$ & $-0.39$ & $-0.13$
+              & $0.13$ & $0.39$ & $0.67$ & $1.04$ & $1.64$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    La recta de referencia une $(-0.674,\ 13)$ con $(0.674,\ 17)$, los
+    dos cuartiles: pendiente $4 / 1.349 = 2.97$ y ordenada $15$.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=8.5cm, height=6cm, xmin=-2, xmax=2, ymin=8, ymax=38,
+        xlabel={cuantil teórico $z_i$},
+        ylabel={dato $x_{(i)}$ (ms)},
+        tick label style={font=\scriptsize},
+        label style={font=\small}]
+        \addplot[dashed, gray, domain=-2:2] {15 + 2.965*x};
+        \addplot[only marks, mark=*, acento,
+                 mark options={fill=fondoIdea}]
+            coordinates {(-1.645, 12) (-1.036, 13) (-0.674, 13)
+                         (-0.385, 14) (-0.126, 15) (0.126, 15)
+                         (0.385, 15) (0.674, 17) (1.036, 20)
+                         (1.645, 36)};
+        \node[font=\scriptsize, anchor=east] at (axis cs:1.55, 36)
+            {el $36$};
+        \draw[<->, orange!70!black] (axis cs:1.645, 20.3)
+            -- (axis cs:1.645, 35);
+        \node[font=\scriptsize, anchor=west] at (axis cs:1.67, 27.5)
+            {$16$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    En medio los puntos siguen la recta. Arriba se despegan: la recta
+    dice que en una normal el dato más alto de diez estaría en
+    $15 + 2.97 \cdot 1.645 = 19.9$ ms, y salió $36$, unos $16$ ms
+    arriba. Abajo pasa lo contrario: el $12$ queda por encima de los
+    $10.1$ que tocaría. La cola de abajo es más corta que la de una
+    normal y la de arriba mucho más larga. Es la asimetría a la derecha
+    de la clase del $21$, $g_1 = 2.20$, vista en una gráfica.
+\end{ejemplo}
+
+\subsubsection*{Cómo leer una gráfica Q-Q}
+
+Cada forma de despegarse de la recta corresponde a una forma de la
+distribución. En las cuatro gráficas siguientes, $20$ datos de cuatro
+modelos, escalados para que la recta de referencia sea la diagonal:
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{qq/.style={
+    scale only axis, width=3.0cm, height=3.0cm,
+    xmin=-2.2, xmax=2.2, ymin=-3, ymax=3.6,
+    xtick={-2, 0, 2}, ytick={-2, 0, 2},
+    tick label style={font=\tiny}, title style={font=\scriptsize}}}
+\begin{axis}[qq, name=q1, title={normal}]
+    \addplot[dashed, gray, domain=-2.2:2.2] {x};
+    \addplot[only marks, mark=*, mark size=1.3pt, acento]
+        coordinates {(-1.96, -1.96) (-1.44, -1.44) (-1.15, -1.15)
+            (-0.93, -0.93) (-0.76, -0.76) (-0.60, -0.60)
+            (-0.45, -0.45) (-0.32, -0.32) (-0.19, -0.19)
+            (-0.06, -0.06) (0.06, 0.06) (0.19, 0.19) (0.32, 0.32)
+            (0.45, 0.45) (0.60, 0.60) (0.76, 0.76) (0.93, 0.93)
+            (1.15, 1.15) (1.44, 1.44) (1.96, 1.96)};
+\end{axis}
+\begin{axis}[qq, name=q2, at={(q1.east)}, anchor=west, xshift=0.5cm,
+             title={cola a la derecha}]
+    \addplot[dashed, gray, domain=-2.2:2.2] {x};
+    \addplot[only marks, mark=*, mark size=1.3pt, acento]
+        coordinates {(-1.96, -1.00) (-1.44, -0.93) (-1.15, -0.86)
+            (-0.93, -0.79) (-0.76, -0.71) (-0.60, -0.63)
+            (-0.45, -0.55) (-0.32, -0.45) (-0.19, -0.35)
+            (-0.06, -0.24) (0.06, -0.11) (0.19, 0.02) (0.32, 0.18)
+            (0.45, 0.35) (0.60, 0.56) (0.76, 0.80) (0.93, 1.11)
+            (1.15, 1.53) (1.44, 2.15) (1.96, 3.50)};
+\end{axis}
+\begin{axis}[qq, name=q3, at={(q2.east)}, anchor=west, xshift=0.5cm,
+             title={colas pesadas}]
+    \addplot[dashed, gray, domain=-2.2:2.2] {x};
+    \addplot[only marks, mark=*, mark size=1.3pt, acento]
+        coordinates {(-1.96, -2.81) (-1.44, -1.70) (-1.15, -1.25)
+            (-0.93, -0.97) (-0.76, -0.76) (-0.60, -0.59)
+            (-0.45, -0.44) (-0.32, -0.31) (-0.19, -0.18)
+            (-0.06, -0.06) (0.06, 0.06) (0.19, 0.18) (0.32, 0.31)
+            (0.45, 0.44) (0.60, 0.59) (0.76, 0.76) (0.93, 0.97)
+            (1.15, 1.25) (1.44, 1.70) (1.96, 2.81)};
+\end{axis}
+\begin{axis}[qq, name=q4, at={(q3.east)}, anchor=west, xshift=0.5cm,
+             title={colas ligeras}]
+    \addplot[dashed, gray, domain=-2.2:2.2] {x};
+    \addplot[only marks, mark=*, mark size=1.3pt, acento]
+        coordinates {(-1.96, -1.28) (-1.44, -1.15) (-1.15, -1.01)
+            (-0.93, -0.88) (-0.76, -0.74) (-0.60, -0.61)
+            (-0.45, -0.47) (-0.32, -0.34) (-0.19, -0.20)
+            (-0.06, -0.07) (0.06, 0.07) (0.19, 0.20) (0.32, 0.34)
+            (0.45, 0.47) (0.60, 0.61) (0.76, 0.74) (0.93, 0.88)
+            (1.15, 1.01) (1.44, 1.15) (1.96, 1.28)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Normal}: los puntos siguen la diagonal.
+    \item \textbf{Cola a la derecha} (una exponencial): curva hacia
+          arriba. Los datos altos están más lejos de lo que diría la
+          normal y los bajos, más cerca. Es el caso de los tiempos.
+    \item \textbf{Colas pesadas} (una $t$ con $3$ grados de libertad,
+          más adelante): forma de S. Los extremos de los dos lados se
+          salen, abajo hacia abajo y arriba hacia arriba.
+    \item \textbf{Colas ligeras} (una uniforme, como el servidor $A$):
+          la S al revés. Los extremos se quedan cortos, porque los datos
+          no pasan de un límite.
+\end{itemize}
+
+% =====================================================================
+
+\subsection*{Errores frecuentes al visualizar distribuciones}
+
+\begin{itemize}[itemsep=0.5em]
+    \item \textbf{Usar histograma para una variable nominal.} Con
+          barras pegadas, Python, C++ y Java parecen tramos de una
+          escala continua, con un orden y un ancho que no tienen. Para
+          categorías van barras separadas.
+    \item \textbf{Mover los intervalos hasta que aparezca la historia
+          que se quería.} El ancho y el inicio de los intervalos
+          cambian la forma del histograma, y con los mismos datos se
+          pueden contar historias opuestas. Ver el ejemplo de abajo.
+    \item \textbf{Tomar la gráfica Q-Q como prueba definitiva de
+          normalidad.} Es un diagnóstico visual, no una prueba. Con
+          $10$ datos, una muestra que sí viene de una normal se tuerce
+          por puro azar. Y que los puntos sigan la recta no demuestra
+          que los datos sean normales: solo dice que la gráfica no
+          muestra nada en contra.
+    \item \textbf{Ocultar el tamaño de la muestra, las unidades o el
+          criterio de atípicos.} Una caja con $n = 8$ y otra con
+          $n = 8000$ se dibujan igual, y no merecen la misma
+          confianza. Unos bigotes al mínimo y al máximo no son los de
+          $1.5\,\text{IQR}$. Sin unidades, $30$ puede ser milisegundos
+          o segundos. Todo eso va en el eje o en el pie de la figura.
+    \item \textbf{Comparar grupos con escalas de eje distintas.} Si $A$
+          se grafica de $0$ a $40$ ms y $C$ de $20$ a $50$, las dos
+          cajas quedan en el mismo lugar del papel y parecen iguales,
+          cuando $C$ es $10$ ms más lento. Varios grupos van sobre el
+          mismo eje, como en las figuras de esta clase.
+\end{itemize}
+
+\begin{ejemplo}[Los mismos $40$ tiempos del servidor $B$]
+    Dos histogramas de los mismos datos, con intervalos de $10$ y de
+    $2$ ms:
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        name=ancho, width=6.8cm, height=4.6cm,
+        xmin=10, xmax=30, ymin=0, ymax=22, xtick={10, 20, 30},
+        xlabel={$t$ (ms)}, ylabel={peticiones},
+        title={intervalos de $10$ ms}, title style={font=\small},
+        tick label style={font=\scriptsize}, label style={font=\small}]
+        \addplot[ybar interval, fill=fondoIdea, draw=acento]
+            coordinates {(10, 20) (20, 20) (30, 0)};
+    \end{axis}
+    \begin{axis}[
+        at={(ancho.east)}, anchor=west, xshift=1.2cm,
+        width=6.8cm, height=4.6cm,
+        xmin=10, xmax=30, ymin=0, ymax=8, xtick={10, 15, 20, 25, 30},
+        xlabel={$t$ (ms)}, ylabel={peticiones},
+        title={intervalos de $2$ ms}, title style={font=\small},
+        tick label style={font=\scriptsize}, label style={font=\small}]
+        \addplot[ybar interval, fill=fondoIdea, draw=acento]
+            coordinates {(10, 1) (12, 4) (14, 7) (16, 6) (18, 2)
+                         (20, 1) (22, 4) (24, 7) (26, 6) (28, 2)
+                         (30, 0)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    Con intervalos de $10$ ms salen dos barras de $20$, y la historia
+    es ``los tiempos se reparten parejo''; el servidor $A$ da casi lo
+    mismo, $19$ y $21$. Con intervalos de $2$ ms aparecen los dos
+    grupos del caché. Ninguno de los dos histogramas miente, pero solo
+    el segundo deja ver lo que pasa. Lo honesto es probar varios
+    anchos y reportar el que muestra la estructura, diciendo cuál fue.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Qué gráfica contesta qué pregunta}
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{8.6cm}%
+                >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    \textbf{Pregunta} & \textbf{Gráfica} \\
+    \midrule
+    ¿Cuántos hay de cada categoría? & barras \\
+    ¿Cómo se distribuye una variable numérica? & histograma o
+        densidad \\
+    ¿Cómo se comparan varios grupos? & cajas sobre el mismo eje \\
+    ¿Hay valores atípicos? & caja \\
+    ¿Los grupos tienen la misma forma, o alguno tiene dos modos? &
+        violín \\
+    ¿Cuántos datos hay y dónde cae cada uno? & frijol, o los puntos
+        sueltos \\
+    ¿Los datos se parecen a una normal, u otro modelo? & Q-Q \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Distribuciones importantes}
+
+En la clase del $14$ quedaron en dos tablas cortas. Aquí va cada una
+con su fórmula, su media y su varianza, un ejemplo y su gráfica. Las
+tres primeras son discretas y tienen función de masa; las demás son
+continuas y tienen densidad.
+
+\subsubsection*{Bernoulli}
+
+Un solo ensayo con dos resultados: éxito ($1$) con probabilidad $p$ o
+fracaso ($0$). Se escribe $X \sim \text{Bernoulli}(p)$:
+\[
+    P(X = 1) = p , \qquad P(X = 0) = 1 - p , \qquad
+    E[X] = p , \qquad \operatorname{Var}(X) = p\,(1 - p) .
+\]
+
+\begin{ejemplo}[¿Es spam?]
+    Un correo es spam con probabilidad $p = 0.3$. Con $X = 1$ si es
+    spam, $E[X] = 0.3$ y $\operatorname{Var}(X) = 0.3 \cdot 0.7 =
+    0.21$. La media de una Bernoulli es la proporción de éxitos: el
+    promedio de muchos ceros y unos es la fracción de unos.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=5.5cm, height=4.2cm, ybar, bar width=0.7cm,
+        ymin=0, ymax=0.9, xtick={0, 1}, xmin=-0.7, xmax=1.7,
+        xlabel={$x$}, ylabel={$P(X = x)$},
+        nodes near coords, nodes near coords style={font=\scriptsize},
+        tick label style={font=\scriptsize}, label style={font=\small}]
+        \addplot[fill=fondoIdea, draw=acento]
+            coordinates {(0, 0.7) (1, 0.3)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\subsubsection*{Binomial}
+
+El número de éxitos en $n$ ensayos de Bernoulli independientes, todos
+con la misma $p$. Se escribe $X \sim \text{Bin}(n, p)$:
+\[
+    P(X = k) = \binom{n}{k}\, p^{k} (1 - p)^{n - k} ,
+    \quad k = 0, 1, \ldots, n ;
+    \qquad E[X] = np , \qquad \operatorname{Var}(X) = np\,(1 - p) .
+\]
+El $\binom{n}{k}$ cuenta de cuántas formas se pueden escoger cuáles
+$k$ de los $n$ ensayos son los éxitos, y $p^k (1-p)^{n-k}$ es la
+probabilidad de cada una de esas formas.
+
+\begin{ejemplo}[Spam en $10$ correos]
+    Llegan $10$ correos, cada uno spam con $p = 0.3$ y sin depender de
+    los demás. ¿Qué probabilidad hay de que exactamente $3$ sean
+    spam?
+    \[
+        P(X = 3) = \binom{10}{3}\, 0.3^{3}\, 0.7^{7}
+                 = 120 \cdot 0.027 \cdot 0.0824 = 0.2668 .
+    \]
+    Se esperan $E[X] = 10 \cdot 0.3 = 3$, con varianza
+    $10 \cdot 0.3 \cdot 0.7 = 2.1$. Que la mitad o más sean spam,
+    sumando las barras de $5$ a $10$, tiene probabilidad $0.1503$.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=10cm, height=4.6cm, ybar, bar width=0.45cm,
+        bar shift=0pt,
+        ymin=0, ymax=0.3, xtick={0, 1, ..., 10}, xmin=-0.7, xmax=10.7,
+        xlabel={$k$, correos spam}, ylabel={$P(X = k)$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[fill=fondoIdea, draw=acento]
+            coordinates {(0, 0.0282) (1, 0.1211) (2, 0.2335)
+                         (4, 0.2001) (5, 0.1029) (6, 0.0368)
+                         (7, 0.0090) (8, 0.0014) (9, 0.0001)
+                         (10, 0.0000)};
+        \addplot[fill=fondoOjo, draw=orange!70!black]
+            coordinates {(3, 0.2668)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    La barra naranja es $P(X = 3)$. La forma tiene una joroba alrededor
+    de $np = 3$ y una cola a la derecha, porque $p < 0.5$; con
+    $p = 0.5$ sería simétrica.
+\end{ejemplo}
+
+\subsubsection*{Poisson}
+
+El número de eventos en un intervalo de tiempo o de espacio, cuando
+ocurren de forma independiente y a una tasa promedio $\lambda$
+constante. Se escribe $X \sim \text{Poisson}(\lambda)$:
+\[
+    P(X = k) = \frac{e^{-\lambda}\, \lambda^{k}}{k!} ,
+    \quad k = 0, 1, 2, \ldots ;
+    \qquad E[X] = \lambda , \qquad \operatorname{Var}(X) = \lambda .
+\]
+No tiene tope: en un segundo pueden llegar $0$, $10$ o $100$
+peticiones, aunque las muy grandes sean improbables. Que la media y la
+varianza coincidan es su firma: si en los datos la varianza sale mucho
+mayor que la media, el modelo de Poisson no sirve.
+
+\begin{ejemplo}[Peticiones por segundo]
+    A un servidor llegan en promedio $\lambda = 4$ peticiones por
+    segundo.
+    \[
+        P(X = 6) = \frac{e^{-4}\, 4^{6}}{6!}
+                 = \frac{0.0183 \cdot 4096}{720} = 0.1042 .
+    \]
+    Si el servidor solo atiende $7$ por segundo, se satura cuando
+    llegan $8$ o más:
+    \[
+        P(X \ge 8) = 1 - \sum_{k=0}^{7} P(X = k) = 1 - 0.9489 = 0.0511 ,
+    \]
+    uno de cada veinte segundos.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=10cm, height=4.6cm, ybar, bar width=0.4cm,
+        bar shift=0pt,
+        ymin=0, ymax=0.22, xtick={0, 1, ..., 12}, xmin=-0.7, xmax=12.7,
+        xlabel={$k$, peticiones en un segundo}, ylabel={$P(X = k)$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[fill=fondoIdea, draw=acento]
+            coordinates {(0, 0.0183) (1, 0.0733) (2, 0.1465)
+                         (3, 0.1954) (4, 0.1954) (5, 0.1563)
+                         (6, 0.1042) (7, 0.0595)};
+        \addplot[fill=fondoOjo, draw=orange!70!black]
+            coordinates {(8, 0.0298) (9, 0.0132) (10, 0.0053)
+                         (11, 0.0019) (12, 0.0006)};
+        \node[font=\scriptsize, anchor=south] at (axis cs:10, 0.04)
+            {saturado: $0.0511$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\begin{idea}
+    La Poisson es el límite de la binomial cuando hay muchos ensayos y
+    cada uno es raro, con $\lambda = np$. Si en un segundo hay
+    $1000$ clientes que podrían mandar una petición, cada uno con
+    probabilidad $0.004$, la binomial da $P(X = 6) = 0.1043$ y la
+    Poisson con $\lambda = 4$ da $0.1042$. Por eso sirve para contar
+    cosas raras entre muchas oportunidades: peticiones, errores en un
+    log, paquetes perdidos.
+\end{idea}
+
+\subsubsection*{Uniforme}
+
+Todos los valores de un intervalo $[a, b]$ son igual de probables. Se
+escribe $X \sim U(a, b)$:
+\[
+    f(x) = \frac{1}{b - a} \quad \text{para } a \le x \le b ;
+    \qquad E[X] = \frac{a + b}{2} , \qquad
+    \operatorname{Var}(X) = \frac{(b - a)^2}{12} .
+\]
+La densidad es un rectángulo de base $b - a$ y altura $1/(b - a)$, así
+que la probabilidad de un subintervalo es su largo entre $b - a$.
+
+\begin{ejemplo}[Esperar a un proceso periódico]
+    Un trabajo corre cada $10$ segundos. Una petición llega en un
+    momento cualquiera y espera $W \sim U(0, 10)$ segundos a la
+    siguiente corrida.
+    \[
+        P(W > 7) = \frac{10 - 7}{10} = 0.3 , \qquad
+        E[W] = 5 \text{ s} , \qquad
+        \sigma = \sqrt{\frac{100}{12}} = 2.89 \text{ s} .
+    \]
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=8cm, height=4.2cm, xmin=-2, xmax=12, ymin=0, ymax=0.15,
+        xlabel={$w$ (s)}, ylabel={$f(w)$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[draw=none, fill=fondoOjo] coordinates
+            {(7, 0) (7, 0.1) (10, 0.1) (10, 0)} \closedcycle;
+        \addplot[thick, acento] coordinates
+            {(-2, 0) (0, 0) (0, 0.1) (10, 0.1) (10, 0) (12, 0)};
+        \node[font=\scriptsize] at (axis cs:8.5, 0.05) {$0.3$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\begin{idea}
+    \texttt{random()} devuelve una $U(0, 1)$, y de ella sale cualquier
+    otra distribución. Si $U \sim U(0, 1)$, entonces
+    $T = -10 \ln(1 - U)$ es la exponencial con media $10$ ms de la
+    clase del $14$: se despeja $t$ de $u = F(t) = 1 - e^{-0.1 t}$. Así
+    se simulan tiempos de respuesta con un generador uniforme.
+\end{idea}
+
+\subsubsection*{Normal}
+
+La campana. Se escribe $X \sim N(\mu, \sigma^2)$:
+\[
+    f(x) = \frac{1}{\sigma \sqrt{2\pi}}\,
+           e^{-\frac{(x - \mu)^2}{2\sigma^2}} ;
+    \qquad E[X] = \mu , \qquad \operatorname{Var}(X) = \sigma^2 .
+\]
+Es simétrica alrededor de $\mu$, y $\sigma$ dice qué tan ancha es.
+Todas las normales son la misma curva recorrida y estirada: si
+$X \sim N(\mu, \sigma^2)$, la variable \textbf{estandarizada}
+\[
+    Z = \frac{X - \mu}{\sigma}
+\]
+es una $N(0, 1)$, la \textbf{normal estándar}. Por eso basta una sola
+tabla, la de $Z$. $Z$ cuenta a cuántas desviaciones estándar de la
+media está un valor. Aparece tanto porque la suma de muchos efectos
+chicos e independientes tiende a ser normal; eso lo dice el teorema
+central del límite.
+
+\begin{ejemplo}[Latencia de un enlace]
+    La latencia de un enlace estable es $N(50, 4^2)$, en ms. ¿Qué
+    fracción de los paquetes tarda más de $58$ ms?
+    \[
+        P(X > 58) = P\left( Z > \frac{58 - 50}{4} \right)
+                  = P(Z > 2) = 0.0228 .
+    \]
+    Y menos de $45$ ms:
+    $P(X < 45) = P(Z < -1.25) = 0.1056$.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=11cm, height=5.6cm, domain=34:66, samples=120,
+        xmin=34, xmax=66, ymin=0, ymax=0.14,
+        xtick={38, 42, 46, 50, 54, 58, 62},
+        ytick={0, 0.05, 0.1},
+        xlabel={$x$ (ms)}, ylabel={$f(x)$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[draw=none, fill=fondoIdea, domain=38:62]
+            {exp(-(x-50)^2/32)/(4*2.5066)} \closedcycle;
+        \addplot[draw=none, fill=acento!20, domain=42:58]
+            {exp(-(x-50)^2/32)/(4*2.5066)} \closedcycle;
+        \addplot[draw=none, fill=acento!35, domain=46:54]
+            {exp(-(x-50)^2/32)/(4*2.5066)} \closedcycle;
+        \addplot[draw=none, fill=orange!35, domain=58:66]
+            {exp(-(x-50)^2/32)/(4*2.5066)} \closedcycle;
+        \addplot[thick, acento] {exp(-(x-50)^2/32)/(4*2.5066)};
+        \draw[<->, gray] (axis cs:46, 0.107) -- (axis cs:54, 0.107);
+        \node[font=\scriptsize, fill=white, inner sep=1pt]
+            at (axis cs:50, 0.107) {$68.3\%$};
+        \draw[<->, gray] (axis cs:42, 0.119) -- (axis cs:58, 0.119);
+        \node[font=\scriptsize, fill=white, inner sep=1pt]
+            at (axis cs:50, 0.119) {$95.4\%$};
+        \draw[<->, gray] (axis cs:38, 0.131) -- (axis cs:62, 0.131);
+        \node[font=\scriptsize, fill=white, inner sep=1pt]
+            at (axis cs:50, 0.131) {$99.7\%$};
+        \draw[->] (axis cs:62, 0.04) -- (axis cs:59.3, 0.004);
+        \node[font=\scriptsize, anchor=south] at (axis cs:62, 0.04)
+            {$P(X > 58) = 0.0228$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    Las bandas son la regla $68$-$95$-$99.7$: a una, dos y tres
+    desviaciones de la media cae el $68.3\%$, el $95.4\%$ y el
+    $99.7\%$ de los valores. Es la que se usó en la clase del $21$
+    para leer la desviación estándar.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Grados de libertad}
+
+Las tres distribuciones que faltan, la ji cuadrada, la $t$ y la $F$, no
+modelan datos sino \textbf{estadísticas}: números calculados con una
+muestra. Su forma depende de cuánta información trae la muestra, y esa
+información se mide en grados de libertad.
+
+\begin{definicion}[Grados de libertad]
+    El número de valores de un cálculo que pueden variar libremente
+    una vez impuestas las restricciones. Casi siempre es el número de
+    datos menos el número de cantidades que se estimaron con esos
+    mismos datos.
+\end{definicion}
+
+El caso de la clase del $21$: las desviaciones respecto a la media
+muestral suman cero. Con cuatro datos, si se conocen tres desviaciones
+la cuarta ya está decidida:
+
+\begin{center}
+\begin{tikzpicture}[
+    caja/.style={draw, rounded corners=2pt, minimum width=1.3cm,
+                 minimum height=0.8cm, font=\small},
+    >=stealth]
+    \node[caja, fill=fondoIdea] (a) at (0, 0)   {$-3$};
+    \node[caja, fill=fondoIdea] (b) at (1.8, 0) {$1$};
+    \node[caja, fill=fondoIdea] (c) at (3.6, 0) {$4$};
+    \node[caja, fill=fondoOjo]  (d) at (5.4, 0) {$-2$};
+    \node[font=\small, anchor=west] at (6.4, 0)
+        {suma $= 0$};
+    \draw (-0.65, -0.5) -- (-0.65, -0.6) -- (4.25, -0.6)
+        -- (4.25, -0.5);
+    \node[font=\scriptsize] at (1.8, -0.9) {libres: $3$};
+    \node[font=\scriptsize] at (5.4, -0.9) {forzada};
+\end{tikzpicture}
+\end{center}
+
+Por eso la varianza muestral divide entre $n - 1$: de las $n$
+desviaciones solo $n - 1$ son información nueva. La misma cuenta
+aparece en otros lados:
+
+\begin{itemize}[itemsep=0.3em]
+    \item Una tabla de conteos de $6$ categorías que suman $60$ tiene
+          $5$ grados de libertad: el sexto conteo es $60$ menos los
+          otros cinco.
+    \item Una recta ajustada a $n$ puntos estima dos números,
+          pendiente y ordenada, y deja $n - 2$ grados de libertad para
+          medir qué tan lejos quedan los puntos.
+\end{itemize}
+
+Más grados de libertad quieren decir más información, y una
+estadística que varía menos. Las tres distribuciones siguientes llevan
+los grados de libertad como parámetro.
+
+% =====================================================================
+
+\subsubsection*{Ji cuadrada}
+
+Si $Z_1, \ldots, Z_k$ son normales estándar independientes, la suma de
+sus cuadrados
+\[
+    Q = Z_1^2 + Z_2^2 + \cdots + Z_k^2
+\]
+sigue una \textbf{ji cuadrada con $k$ grados de libertad}, $Q \sim
+\chi^2_k$, con $E[Q] = k$ y $\operatorname{Var}(Q) = 2k$. Como es una
+suma de cuadrados, nunca es negativa. Con $k$ chica está pegada al
+cero con cola a la derecha; al crecer $k$ se corre a la derecha y se
+vuelve más simétrica.
+
+Aparece cada vez que se suman desviaciones al cuadrado. Si los datos
+son normales, $(n - 1)\, s^2 / \sigma^2 \sim \chi^2_{n-1}$, con los
+$n - 1$ grados de libertad de la varianza muestral. También aparece en
+la prueba de bondad de ajuste, que compara conteos observados con los
+que predice un modelo, y en la de independencia de las tablas
+conjuntas de la clase del $19$.
+
+\begin{ejemplo}[¿El generador de dados está cargado?]
+    Un programa simula $60$ tiradas de un dado. Si es justo, cada cara
+    debería salir $E = 10$ veces. Se mide qué tan lejos quedaron los
+    conteos observados $O$:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccc}
+        \toprule
+        Cara & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
+        \midrule
+        $O$ & $8$ & $9$ & $12$ & $11$ & $6$ & $14$ \\
+        $(O - E)^2 / E$ & $0.4$ & $0.1$ & $0.4$ & $0.1$ & $1.6$
+                        & $1.6$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \[
+        \chi^2 = \sum \frac{(O - E)^2}{E} = 4.2 .
+    \]
+    Si el dado es justo, esta estadística sigue una $\chi^2_5$: seis
+    conteos que suman $60$ dan $5$ grados de libertad. En una
+    $\chi^2_5$, solo el $5\%$ de los valores pasa de $11.07$, y $4.2$
+    queda en la parte más común de la curva. Las diferencias son las
+    que el azar produce solo; no hay evidencia de que esté cargado.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        name=familia, width=7cm, height=4.8cm, domain=0.05:16,
+        samples=120, xmin=0, xmax=16, ymin=0, ymax=0.5,
+        restrict y to domain=0:0.6,
+        xlabel={$q$}, title={$\chi^2_k$ para varias $k$},
+        title style={font=\small},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        legend style={font=\scriptsize, at={(0.98, 0.97)},
+                      anchor=north east},
+        legend cell align=left]
+        \addplot[thick, acento!40] {0.398942*x^(-0.5)*exp(-x/2)};
+        \addlegendentry{$k = 1$}
+        \addplot[thick, acento!65] {0.5*exp(-x/2)};
+        \addlegendentry{$k = 2$}
+        \addplot[thick, acento] {0.25*x*exp(-x/2)};
+        \addlegendentry{$k = 4$}
+        \addplot[thick, orange!70!black] {0.0104167*x^3*exp(-x/2)};
+        \addlegendentry{$k = 8$}
+    \end{axis}
+    \begin{axis}[
+        at={(familia.east)}, anchor=west, xshift=1.0cm,
+        width=7cm, height=4.8cm, domain=0:18, samples=120,
+        xmin=0, xmax=18, ymin=0, ymax=0.18,
+        xlabel={$q$}, title={$\chi^2_5$ y el dado},
+        title style={font=\small},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        yticklabel style={/pgf/number format/fixed}]
+        \addplot[draw=none, fill=orange!35, domain=11.07:18]
+            {0.132981*x^1.5*exp(-x/2)} \closedcycle;
+        \addplot[thick, acento] {0.132981*x^1.5*exp(-x/2)};
+        \draw[thick, acento] (axis cs:4.2, 0) -- (axis cs:4.2, 0.140);
+        \node[font=\scriptsize, anchor=west] at (axis cs:4.3, 0.07)
+            {$4.2$};
+        \node[font=\scriptsize, anchor=south] at (axis cs:13, 0.02)
+            {$5\%$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+\subsubsection*{$t$ de Student}
+
+Si $Z \sim N(0, 1)$ y $V \sim \chi^2_\nu$ son independientes,
+\[
+    T = \frac{Z}{\sqrt{V / \nu}}
+\]
+sigue una \textbf{$t$ con $\nu$ grados de libertad}, $T \sim t_\nu$.
+Es simétrica alrededor de $0$, como la normal estándar, pero con colas
+más pesadas. $E[T] = 0$ si $\nu > 1$ y $\operatorname{Var}(T) = \nu /
+(\nu - 2)$ si $\nu > 2$, mayor que $1$. Al crecer $\nu$ se acerca a la
+$N(0, 1)$, y con $\nu = 30$ ya casi no se distinguen.
+
+Sale al estandarizar un promedio cuando $\sigma$ no se conoce. Con
+datos normales, $(\bar{x} - \mu)/(\sigma / \sqrt{n})$ es una
+$N(0, 1)$; si $\sigma$ se cambia por la $s$ de la muestra,
+\[
+    \frac{\bar{x} - \mu}{s / \sqrt{n}} \sim t_{n - 1} .
+\]
+El denominador es el error estándar de la clase del $7$, estimado.
+$s$ también varía de muestra en muestra, y esa incertidumbre extra es
+la que engorda las colas. Con pocos datos $s$ es poco confiable y la
+$t$ es mucho más ancha que la normal; con muchos, $s \approx \sigma$
+y la diferencia desaparece.
+
+\begin{ejemplo}[Diez mediciones]
+    Con $n = 10$ hay $9$ grados de libertad. En la normal, el $95\%$
+    central va de $-1.96$ a $1.96$; en la $t_9$, de $-2.262$ a
+    $2.262$. Si se usara la normal con solo $10$ datos, un valor más
+    allá de $\pm 1.96$ no saldría el $5\%$ de las veces sino el
+    $8.2\%$. Con $3$ grados de libertad la diferencia es enorme:
+    $P(\abs{T} > 3) = 0.0577$, contra $0.0027$ en la normal, unas
+    $21$ veces más.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=11cm, height=5cm, domain=-4.5:4.5, samples=120,
+        xmin=-4.5, xmax=4.5, ymin=0, ymax=0.43,
+        xlabel={$t$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        legend style={font=\scriptsize, at={(0.98, 0.97)},
+                      anchor=north east},
+        legend cell align=left]
+        \addplot[thick, dashed, black] {exp(-x^2/2)/2.5066};
+        \addlegendentry{$N(0, 1)$}
+        \addplot[thick, orange!70!black] {0.31831/(1 + x^2)};
+        \addlegendentry{$t_1$}
+        \addplot[thick, acento!60] {0.36755*(1 + x^2/3)^(-2)};
+        \addlegendentry{$t_3$}
+        \addplot[thick, acento] {0.39563*(1 + x^2/30)^(-15.5)};
+        \addlegendentry{$t_{30}$}
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    La $t_1$ apenas se levanta en el centro y en $\pm 4$ todavía está
+    muy por encima de la normal. La $t_{30}$ queda casi encima de la
+    curva punteada.
+\end{ejemplo}
+
+\subsubsection*{$F$ de Fisher}
+
+Si $V_1 \sim \chi^2_{d_1}$ y $V_2 \sim \chi^2_{d_2}$ son independientes,
+\[
+    F = \frac{V_1 / d_1}{V_2 / d_2}
+\]
+sigue una \textbf{$F$ con $d_1$ y $d_2$ grados de libertad}, $F \sim
+F_{d_1, d_2}$. Lleva dos parámetros, uno por cada ji cuadrada, y el
+orden importa: $d_1$ es el del numerador. Es positiva, con cola a la
+derecha, y está centrada cerca de $1$: $E[F] = d_2 / (d_2 - 2)$ si
+$d_2 > 2$.
+
+Sirve para comparar varianzas. Si dos grupos normales tienen la misma
+varianza, el cociente de sus varianzas muestrales, $s_1^2 / s_2^2$,
+sigue una $F_{n_1 - 1,\, n_2 - 1}$. Un cociente cerca de $1$ es lo
+esperado; uno muy grande dice que la primera varianza es mayor. Es
+también la base del análisis de varianza (ANOVA), que compara las
+medias de varios grupos.
+
+\begin{ejemplo}[¿Un cambio de configuración redujo la variabilidad?]
+    Antes del cambio, $10$ mediciones dieron $s_1^2 = 16$ ms$^2$;
+    después, otras $10$ dieron $s_2^2 = 4$ ms$^2$.
+    \[
+        F = \frac{s_1^2}{s_2^2} = \frac{16}{4} = 4.0 ,
+        \quad \text{con } 9 \text{ y } 9 \text{ grados de libertad.}
+    \]
+    Si el cambio no hubiera hecho nada, el cociente seguiría una
+    $F_{9, 9}$, y valores arriba de $3.18$ salen solo el $5\%$ de las
+    veces. $4.0$ queda en esa cola: es difícil que fuera azar, y el
+    cambio sí redujo la variabilidad. Supone que los tiempos son
+    normales; con una cola larga como la de los diez tiempos de la
+    clase del $21$, la prueba $F$ no es confiable.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=11cm, height=5cm, domain=0.01:6, samples=150,
+        xmin=0, xmax=6, ymin=0, ymax=1.05,
+        xlabel={$f$},
+        tick label style={font=\scriptsize}, label style={font=\small},
+        legend style={font=\scriptsize, at={(0.98, 0.97)},
+                      anchor=north east},
+        legend cell align=left]
+        \addplot[draw=none, fill=orange!35, domain=3.18:6, forget plot]
+            {298.0108*x^3.5*(1 + x)^(-9)} \closedcycle;
+        \addplot[thick, acento!45] {(1 + x/5)^(-6)};
+        \addlegendentry{$F_{2, 10}$}
+        \addplot[thick, acento!70] {8.864914*x^1.5*(1 + x/4)^(-12.5)};
+        \addlegendentry{$F_{5, 20}$}
+        \addplot[thick, acento] {298.0108*x^3.5*(1 + x)^(-9)};
+        \addlegendentry{$F_{9, 9}$}
+        \draw[thick, orange!70!black] (axis cs:4, 0)
+            -- (axis cs:4, 0.18);
+        \node[font=\scriptsize, anchor=south] at (axis cs:4, 0.18)
+            {$4.0$};
+        \node[font=\scriptsize, anchor=south] at (axis cs:3.45, 0.04)
+            {$5\%$};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Cómo se relacionan}
+
+\begin{center}
+\begin{tikzpicture}[
+    dist/.style={draw, rounded corners=2pt, fill=fondoIdea,
+                 minimum width=2.2cm, minimum height=0.75cm,
+                 font=\small\bfseries},
+    rel/.style={font=\scriptsize, align=center},
+    >=stealth]
+    \node[dist] (ber) at (0, 2.4)      {Bernoulli};
+    \node[dist] (bin) at (4.3, 2.4)    {Binomial};
+    \node[dist] (poi) at (8.8, 2.4)    {Poisson};
+    \node[dist] (uni) at (0, 0)        {Uniforme};
+    \node[dist] (nor) at (4.3, 0)      {Normal};
+    \node[dist] (chi) at (8.8, 0)      {$\boldsymbol{\chi^2}$};
+    \node[dist] (t)   at (12.9, 1.0)   {$\boldsymbol{t}$};
+    \node[dist] (f)   at (12.9, -1.0)  {$\boldsymbol{F}$};
+    \draw[->] (ber) -- node[rel, above] {suma de $n$} (bin);
+    \draw[->] (bin) -- node[rel, above] {$n$ grande,\\$p$ chica}
+        (poi);
+    \draw[->] (bin) -- node[rel, right] {$n$ grande} (nor);
+    \draw[->] (uni) -- node[rel, above] {$F^{-1}(U)$} (nor);
+    \draw[->] (nor) -- node[rel, above] {suma de\\cuadrados} (chi);
+    \draw[->] (chi) -- node[rel, above left] {con una\\normal} (t);
+    \draw[->] (chi) -- node[rel, below left] {cociente\\de dos} (f);
+\end{tikzpicture}
+\end{center}
+
+La flecha de la uniforme dice que de ella se genera cualquiera,
+como la exponencial de la idea de arriba. La de la binomial a la normal
+es el teorema central del límite: una binomial es una suma de
+Bernoulli, y una suma de muchas cosas independientes se vuelve normal.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{llccl}
+    \toprule
+    \textbf{Modelo} & \textbf{Parámetros} & \textbf{Media}
+    & \textbf{Varianza} & \textbf{Para qué} \\
+    \midrule
+    Bernoulli & $p$ & $p$ & $p(1-p)$ & ¿sí o no? \\
+    Binomial & $n, p$ & $np$ & $np(1-p)$ & ¿cuántos de $n$? \\
+    Poisson & $\lambda$ & $\lambda$ & $\lambda$
+            & ¿cuántos en un intervalo? \\
+    Uniforme & $a, b$ & $\frac{a+b}{2}$ & $\frac{(b-a)^2}{12}$
+             & todo igual de probable \\
+    Normal & $\mu, \sigma^2$ & $\mu$ & $\sigma^2$
+           & suma de muchos efectos chicos \\
+    Ji cuadrada & $k$ & $k$ & $2k$
+                & sumas de cuadrados, conteos \\
+    $t$ & $\nu$ & $0$ & $\frac{\nu}{\nu - 2}$
+        & promedio con $\sigma$ desconocida \\
+    $F$ & $d_1, d_2$ & $\frac{d_2}{d_2 - 2}$
+        & $\frac{2 d_2^2 (d_1 + d_2 - 2)}{d_1 (d_2 - 2)^2 (d_2 - 4)}$
+        & comparar varianzas \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    Ningún dato ``es'' Poisson o normal. El modelo es una suposición, y
+    las gráficas de la primera mitad de la clase son la forma de
+    revisarla: el histograma y el violín para ver la forma, el Q-Q
+    para compararla con el modelo. Los diez tiempos de la clase del
+    $21$ no pasan por normales, y cualquier cuenta que lo suponga, como
+    la $t$ o la $F$, hereda ese problema.
+\end{ojo}
 
 
 \end{document}
