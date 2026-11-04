@@ -23,19 +23,22 @@ Van en linea y no como imagen para que usen las fuentes de la
 presentacion y conserven los tooltips. Se corre con
 "python3 FigurasGrafosDelHabla.py" desde esta carpeta.
 
-Los colores son los de la presentacion y pasaron el validador de la
-guia de visualizacion en sus combinaciones de dos y de tres series.
+Los colores son los de la plantilla, teal, magenta y ambar, y pasaron
+el validador de la guia de visualizacion en sus combinaciones de dos
+y de tres series. Toda barra lleva su valor como etiqueta directa.
 
 
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.0.0
+* Version: 1.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       03/11/2026      Paleta y fuente de la plantilla nueva; nota de
+                            que evalua cada metrica de clasificacion
 zxxz6       02/11/2026      Creation
 
 
@@ -46,24 +49,29 @@ from pathlib import Path
 
 PRESENTACION = Path(__file__).resolve().parent / "GrafosDelHabla.qmd"
 
-AZUL = "#2a78d6"
-NARANJA = "#eb6834"
-MORADO = "#6c4fc4"
-TINTA = "#2b2b2b"
+TEAL = "#0b9aa6"
+MAGENTA = "#a83487"
+AMBAR = "#c97a05"
+TINTA = "#0f4c5c"
 TINTA_2 = "#52514e"
 TENUE = "#8a8984"
-REJILLA = "#e8e6e1"
-FUENTE = "Lato, sans-serif"
+REJILLA = "#d9d5c6"
+FUENTE = "Palatino Linotype, Book Antiqua, Palatino, serif"
 
 ANCHO = 1180
 COMPARACIONES = ["S x M", "S x C", "M x C"]
 
-# Figura 8: (metrica, maximo del eje, [(grafos, escalas)] por comparacion)
+# Figura 8: (metrica, maximo del eje, [(grafos, escalas)] por comparacion,
+# que evalua)
 FIGURA_8 = [
-    ("AUC", 1.0, [(0.88, 0.57), (0.90, 0.84), (0.80, 0.98)]),
-    ("Kappa", 1.0, [(0.88, 0.25), (0.75, 0.75), (0.37, 0.75)]),
-    ("Sensibilidad %", 100, [(93.8, 62.5), (87.5, 87.5), (68.8, 87.5)]),
-    ("Especificidad %", 100, [(93.7, 62.5), (87.5, 87.5), (68.7, 87.5)]),
+    ("AUC", 1.0, [(0.88, 0.57), (0.90, 0.84), (0.80, 0.98)],
+     "qué tan lejos del azar queda; 0.5 es azar"),
+    ("Kappa", 1.0, [(0.88, 0.25), (0.75, 0.75), (0.37, 0.75)],
+     "acuerdo con el diagnóstico, sin el azar"),
+    ("Sensibilidad %", 100, [(93.8, 62.5), (87.5, 87.5), (68.8, 87.5)],
+     "de los del grupo, cuántos detectó"),
+    ("Especificidad %", 100, [(93.7, 62.5), (87.5, 87.5), (68.7, 87.5)],
+     "de los ajenos al grupo, cuántos rechazó"),
 ]
 
 # Figura 7, leida del boxplot: (medida, maximo del eje,
@@ -78,8 +86,8 @@ FIGURA_7 = [
         "S": (0.045, 0.062, 0.09), "M": (0.012, 0.025, 0.05),
         "C": (0.01, 0.032, 0.105)}),
 ]
-GRUPOS = [("S", "Esquizofrenia", AZUL), ("M", "Manía", NARANJA),
-          ("C", "Control", MORADO)]
+GRUPOS = [("S", "Esquizofrenia", TEAL), ("M", "Manía", MAGENTA),
+          ("C", "Control", AMBAR)]
 
 
 def abrir(ancho, alto):
@@ -187,15 +195,15 @@ def figura_clasificacion():
     str: SVG completo
 
     """
-    alto = 380
-    arriba, abajo = 70, 320
+    alto = 400
+    arriba, abajo = 70, 310
     margen, hueco = 60, 40
     ancho_panel = (ANCHO - 2 * margen - 3 * hueco) / 4
     ancho_barra, separacion = 30, 2
     out = [abrir(ANCHO, alto)]
-    out += leyenda(26, [(AZUL, "Medidas de grafo"),
-                        (NARANJA, "Escalas BPRS y PANSS")])
-    for i, (nombre, maximo, valores) in enumerate(FIGURA_8):
+    out += leyenda(26, [(TEAL, "Medidas de grafo"),
+                        (AMBAR, "Escalas BPRS y PANSS")])
+    for i, (nombre, maximo, valores, evalua) in enumerate(FIGURA_8):
         izq = margen + i * (ancho_panel + hueco)
         der = izq + ancho_panel
         out.append(texto((izq + der) / 2, arriba - 14, nombre, tam=18,
@@ -212,8 +220,8 @@ def figura_clasificacion():
             centro = izq + paso * (j + 0.5)
             x0 = centro - ancho_barra - separacion / 2
             for k, (valor, color, serie) in enumerate([
-                    (grafo, AZUL, "medidas de grafo"),
-                    (escala, NARANJA, "escalas")]):
+                    (grafo, TEAL, "medidas de grafo"),
+                    (escala, AMBAR, "escalas")]):
                 x = x0 + k * (ancho_barra + separacion)
                 y = abajo - valor / maximo * (abajo - arriba)
                 fmt = f"{valor:.2f}" if maximo == 1.0 else f"{valor:.1f}"
@@ -224,6 +232,9 @@ def figura_clasificacion():
                                  ancla="middle"))
             out.append(texto(centro, abajo + 22, COMPARACIONES[j], tam=15,
                              ancla="middle"))
+        out.append(texto((izq + der) / 2, abajo + 48, evalua, tam=13,
+                         color=TENUE, ancla="middle",
+                         extra=' font-style="italic"'))
     out.append(texto(ANCHO / 2, alto - 10,
                      "S: esquizofrenia, M: manía, C: control",
                      tam=14, color=TENUE, ancla="middle"))
