@@ -13,12 +13,14 @@ Disorder in Psychosis" (Mota et al., PLoS ONE 2012)
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 2.0.0
+* Version: 2.1.0
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       03/11/2026      Presentacion reestructurada en el orden del
+                            articulo, con plantilla propia
 zxxz6       02/11/2026      Paper cambiado a Mota et al. 2012; presentacion
                             y figuras nuevas
 zxxz6       01/11/2026      Paper elegido, presentacion y figuras
@@ -34,7 +36,9 @@ Psychosis.** Mota, Vasconcelos, Lemos, Pieretti, Kinouchi, Cecchi, Copelli y
 Ribeiro. PLoS ONE 7(4): e34928, 2012.
 [doi:10.1371/journal.pone.0034928](https://doi.org/10.1371/journal.pone.0034928).
 
-La presentación explica el problema del diagnóstico diferencial de la psicosis, cómo se convierte una entrevista en un grafo de palabras, las catorce medidas del grafo, los resultados crudos y normalizados por número de palabras, la clasificación automática contra las escalas psiquiátricas, y la discusión con sus límites. Son 17 diapositivas de contenido en cuatro secciones. Las notas del presentador son un guion corto en viñetas.
+La presentación sigue el orden del artículo con una introducción previa: qué es la psicosis y cómo se diagnostica, qué es un grafo del habla con el ejemplo del paper, y después el paper en sí: participantes, entrevista, las catorce medidas, el análisis, los resultados crudos y normalizados, la clasificación automática contra las escalas psiquiátricas, y la discusión con sus límites. Son 23 diapositivas de contenido en cinco secciones numeradas. Las notas del presentador son un guion corto en viñetas.
+
+La plantilla es propia, sobre el tema serif de reveal.js: fondo crema, títulos en serif con subrayado teal, secciones en claro con número grande y portada en teal oscuro. La paleta teal, magenta y ámbar pasó el validador de la guía de visualización.
 
 ## Estructura
 
