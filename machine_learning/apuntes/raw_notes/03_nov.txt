@@ -1,0 +1,3 @@
+- Clasificadores basados en reglas
+
+{explicar con ejemplos y asi}
