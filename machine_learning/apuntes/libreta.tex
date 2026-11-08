@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 1.11.0
+%   * Version: 1.12.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       08/11/2026      Clase 3 Nov, clasificadores basados en reglas
 %  zxxz6       22/10/2026      Clase 22 Oct, seleccion de atributos
 %  zxxz6       21/10/2026      Clase 20 Oct, arboles de decision
 %  zxxz6       18/10/2026      Clase 15 Oct, medidas de desempeno
@@ -6758,6 +6759,490 @@ reglas; se ajustan para cada problema.
     \addlinespace
     Algoritmo genético & wrapper & sí
         & población de subconjuntos; sin garantía de óptimo \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+
+\newpage
+
+% =====================================================================
+%  Clase - Clasificadores basados en reglas
+% =====================================================================
+
+\clase{Clasificadores basados en reglas}{3 de noviembre de 2026}
+
+\begin{quick_sum}
+    Un clasificador basado en reglas guarda lo que aprendió como una
+    lista de reglas \textit{si-entonces}, que una persona puede leer y
+    revisar. Cada regla se mide por su cobertura y su precisión. Para
+    clasificar hay que decidir qué hacer cuando se disparan varias
+    reglas o ninguna: listas ordenadas, votación y regla por defecto.
+    Las reglas se obtienen de dos formas: leyéndolas de un árbol de
+    decisión, o aprendiéndolas directo con covering secuencial, que
+    aprende una regla, quita lo que ya cubre y repite. Con jugar tenis,
+    dos reglas y una regla por defecto clasifican los $14$ días.
+\end{quick_sum}
+
+\subsection*{Qué es una regla}
+
+\begin{definicion}[Regla de clasificación]
+    Una expresión de la forma
+    \[
+        \textbf{si}\ \text{antecedente}\ \textbf{entonces}\ \text{clase} ,
+    \]
+    donde el antecedente es una conjunción de condiciones sobre los
+    atributos, como $\text{Cielo} = \text{soleado}$ o
+    $\text{Temperatura} \leq 22$, y el consecuente es una clase.
+\end{definicion}
+
+Se dice que la regla \textbf{cubre} a un ejemplo, o que \textbf{se
+dispara}, cuando el ejemplo cumple todas las condiciones del
+antecedente. Una regla con antecedente vacío cubre a todos los
+ejemplos.
+
+\begin{ejemplo}[Reglas para jugar tenis]
+    Con los $14$ días de la clase de árboles de decisión:
+    \begin{itemize}[itemsep=0.2em]
+        \item \textbf{si} $\text{Cielo} = \text{nublado}$
+              \textbf{entonces} sí.
+        \item \textbf{si} $\text{Cielo} = \text{soleado}$ \textbf{y}
+              $\text{Humedad} = \text{alta}$ \textbf{entonces} no.
+    \end{itemize}
+    D1 (soleado, calurosa, alta, débil) dispara la segunda, porque
+    cumple sus dos condiciones; no dispara la primera.
+\end{ejemplo}
+
+\subsubsection*{Cobertura y precisión de una regla}
+
+Cada regla se evalúa con dos números. Sea $D$ el conjunto de
+entrenamiento y $r$ una regla que predice la clase $y$:
+\[
+    \text{cobertura}(r) = \frac{\abs{\text{ejemplos que cubre } r}}
+                               {\abs{D}} ,
+    \qquad
+    \text{precisión}(r) = \frac{\abs{\text{ejemplos que cubre } r
+                                     \text{ y son de clase } y}}
+                               {\abs{\text{ejemplos que cubre } r}} .
+\]
+La cobertura dice a cuántos ejemplos se aplica; la precisión, qué tan
+seguido acierta cuando se aplica. Es la misma precisión de la clase de
+medidas de desempeño, calculada solo sobre lo que cubre la regla.
+
+\begin{ejemplo}[Cuatro reglas sobre los $14$ días]
+    \begin{center}
+    \small
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Regla} & \textbf{Cubre} & \textbf{Cobertura}
+        & \textbf{Precisión} \\
+        \midrule
+        si Cielo $=$ nublado entonces sí & $4$ & $4/14 = 0.29$
+            & $4/4 = 1.00$ \\
+        si Humedad $=$ normal entonces sí & $7$ & $7/14 = 0.50$
+            & $6/7 = 0.86$ \\
+        si Humedad $=$ alta entonces no & $7$ & $7/14 = 0.50$
+            & $4/7 = 0.57$ \\
+        si soleado y Humedad $=$ alta entonces no & $3$
+            & $3/14 = 0.21$ & $3/3 = 1.00$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Agregar condiciones baja la cobertura y casi siempre sube la
+    precisión: \textit{Humedad alta} sola acierta el $57\%$; con
+    \textit{y soleado} acierta todo, pero en $3$ días en vez de $7$.
+    Aprender reglas es negociar entre los dos números.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Clasificar con un conjunto de reglas}
+
+Un clasificador es un conjunto de reglas. Para un ejemplo nuevo se
+revisa cuáles se disparan, y pueden pasar tres cosas: se dispara
+exactamente una, que es lo fácil; se disparan varias que no están de
+acuerdo; o no se dispara ninguna.
+
+Dos propiedades evitan los casos difíciles:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Mutuamente excluyentes}: ningún ejemplo dispara dos
+          reglas a la vez. Así no hay conflictos.
+    \item \textbf{Exhaustivas}: todo ejemplo dispara al menos una. Así
+          nadie se queda sin clase.
+\end{itemize}
+
+Cuando no se cumplen hacen falta dos mecanismos:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Para los conflictos}, se ordenan las reglas y gana la
+          primera que se dispare. A un conjunto ordenado se le llama
+          \textbf{lista de decisión}. La otra opción es no ordenarlas y
+          dejar que voten las que se disparan, pesando cada voto por la
+          precisión de la regla.
+    \item \textbf{Para los no cubiertos}, se agrega al final una
+          \textbf{regla por defecto}, con antecedente vacío, que
+          predice la clase mayoritaria de los ejemplos que ninguna
+          regla cubrió.
+\end{itemize}
+
+\begin{ejemplo}[Un conflicto]
+    Con las reglas
+    \begin{itemize}[itemsep=0.2em]
+        \item $r_1$: si Cielo $=$ lluvioso y Viento $=$ fuerte entonces
+              no, con precisión $1.00$ y $2$ días cubiertos;
+        \item $r_2$: si Humedad $=$ normal entonces sí, con precisión
+              $0.86$ y $7$ días,
+    \end{itemize}
+    el día nuevo (lluvioso, templada, normal, fuerte) dispara las dos.
+    En una lista de decisión con $r_1$ primero, gana $r_1$ y se predice
+    no. Votando por precisión también gana $r_1$, $1.00$ contra $0.86$.
+    Con otro orden la respuesta cambiaría: en una lista de decisión el
+    orden es parte del modelo.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Reglas a partir de un árbol}
+
+La forma más directa de obtener reglas es leerlas de un árbol de
+decisión: cada camino de la raíz a una hoja es una regla, con las
+condiciones del camino como antecedente y la clase de la hoja como
+consecuente.
+
+\begin{ejemplo}[El árbol de jugar tenis]
+    El árbol que construyó ID3 tiene cinco hojas, así que da cinco
+    reglas:
+    \begin{enumerate}[itemsep=0.2em]
+        \item si Cielo $=$ soleado y Humedad $=$ alta entonces no;
+        \item si Cielo $=$ soleado y Humedad $=$ normal entonces sí;
+        \item si Cielo $=$ nublado entonces sí;
+        \item si Cielo $=$ lluvioso y Viento $=$ débil entonces sí;
+        \item si Cielo $=$ lluvioso y Viento $=$ fuerte entonces no.
+    \end{enumerate}
+\end{ejemplo}
+
+Las reglas que salen de un árbol son mutuamente excluyentes y
+exhaustivas, porque cada ejemplo baja por un solo camino. No necesitan
+orden ni regla por defecto.
+
+Después se pueden \textbf{simplificar}: se prueba quitar cada
+condición de cada regla y, si la precisión estimada no empeora, se
+quita. Es lo que hace C4.5, el sucesor de ID3. En este ejemplo ninguna
+condición sobra: quitar \textit{Cielo $=$ soleado} de la primera regla
+deja \textit{si Humedad $=$ alta entonces no}, que baja de $3/3$ a
+$4/7$. Al simplificar, las reglas pueden dejar de ser excluyentes, y
+entonces vuelven a hacer falta el orden y la regla por defecto.
+
+% =====================================================================
+
+\subsection*{Covering secuencial}
+
+La otra forma es aprender las reglas directamente de los datos, sin
+construir un árbol. La estrategia se llama \textbf{covering} (de
+cubrir): aprender una regla que cubra muchos ejemplos de una clase y
+casi ninguno de las otras, quitar los ejemplos que ya cubre, y repetir
+con los que quedan.
+
+\begin{algorithm}[H]
+\caption{\textsc{Covering-Secuencial}$(D, y)$}
+\begin{algorithmic}[1]
+\State $R \gets$ lista vacía
+\While{en $D$ queden ejemplos de la clase $y$}
+  \State $r \gets \textsc{Aprender-Una-Regla}(D, y)$
+  \State agregar $r$ al final de $R$
+  \State quitar de $D$ los ejemplos que cubre $r$
+\EndWhile
+\State \Return $R$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{\textsc{Aprender-Una-Regla}$(D, y)$}
+\begin{algorithmic}[1]
+\State $\mathit{antecedente} \gets$ vacío \Comment{cubre todo $D$}
+\While{la regla cubra ejemplos de otra clase \textbf{y} queden
+       atributos sin usar}
+  \State de todas las condiciones $\text{atributo} = \text{valor}$ con
+         atributos sin usar,
+  \Statex \hspace{\algorithmicindent} agregar la que dé mayor
+         precisión sobre lo que sigue cubierto
+  \State en empate, la que cubra más ejemplos de la clase $y$
+\EndWhile
+\State \Return \textbf{si} $\mathit{antecedente}$ \textbf{entonces} $y$
+\end{algorithmic}
+\end{algorithm}
+
+Cada regla se construye de lo general a lo específico: empieza
+cubriendo todo y cada condición la vuelve más estrecha y más pura. Esta
+versión, con la precisión como criterio, es el algoritmo
+\textbf{PRISM} (Cendrowska, 1987).
+
+\begin{ejemplo}[Covering para la clase ``no'' en jugar tenis]
+    Hay $5$ días de la clase no: D1, D2, D6, D8 y D14.
+
+    \paso{Regla 1, primera condición.} Para cada condición posible se
+    cuenta, entre los días que cumple, cuántos son ``no'':
+    \begin{center}
+    \small
+    \begin{tabular}{lcl}
+        \toprule
+        \textbf{Condición} & \textbf{``No'' / cubiertos}
+        & \textbf{Precisión} \\
+        \midrule
+        Cielo $=$ soleado & $3/5$ & $0.60$ \\
+        Humedad $=$ alta & $4/7$ & $0.57$ \\
+        Viento $=$ fuerte & $3/6$ & $0.50$ \\
+        Temperatura $=$ calurosa & $2/4$ & $0.50$ \\
+        Cielo $=$ lluvioso & $2/5$ & $0.40$ \\
+        \multicolumn{3}{c}{$\vdots$} \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Gana \textit{Cielo $=$ soleado}. La regla ahora cubre D1, D2, D8,
+    D9 y D11: tres ``no'' y dos ``sí''. Todavía no es pura.
+
+    \paso{Regla 1, segunda condición.} Solo entre esos cinco días:
+    \begin{center}
+    \small
+    \begin{tabular}{lcl}
+        \toprule
+        \textbf{Condición agregada} & \textbf{``No'' / cubiertos}
+        & \textbf{Precisión} \\
+        \midrule
+        Humedad $=$ alta & $3/3$ & $1.00$ \\
+        Temperatura $=$ calurosa & $2/2$ & $1.00$ \\
+        Viento $=$ débil & $2/3$ & $0.67$ \\
+        Temperatura $=$ templada & $1/2$ & $0.50$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Hay empate en $1.00$ y se rompe por cobertura: \textit{Humedad $=$
+    alta} cubre tres ``no'' y \textit{calurosa} solo dos. La regla
+    queda pura:
+    \[
+        r_1: \ \textbf{si}\ \text{Cielo} = \text{soleado}\ \textbf{y}\
+        \text{Humedad} = \text{alta}\ \textbf{entonces}\ \text{no} ,
+    \]
+    y cubre D1, D2 y D8. Se quitan del conjunto; quedan $11$ días, con
+    dos ``no'': D6 y D14.
+
+    \paso{Regla 2.} Con los $11$ días que quedan, las mejores
+    condiciones empatan: \textit{Cielo $=$ lluvioso} y \textit{Viento
+    $=$ fuerte} tienen las dos $2/5$. Se toma cualquiera; con
+    \textit{lluvioso} la regla cubre D4, D5, D6, D10 y D14, y al
+    agregar \textit{Viento $=$ fuerte} quedan D6 y D14, $2/2$:
+    \[
+        r_2: \ \textbf{si}\ \text{Cielo} = \text{lluvioso}\ \textbf{y}\
+        \text{Viento} = \text{fuerte}\ \textbf{entonces}\ \text{no} .
+    \]
+    Empezando por \textit{Viento $=$ fuerte} se llega a la misma regla.
+    Ya no quedan ``no'' y el algoritmo termina.
+\end{ejemplo}
+
+\subsubsection*{Una clase con reglas y la otra por defecto}
+
+Con las reglas de ``no'' y una regla por defecto para todo lo demás,
+el clasificador completo es una lista de decisión de tres reglas:
+
+\begin{center}
+\begin{tabular}{cl}
+    \toprule
+    \textbf{Orden} & \textbf{Regla} \\
+    \midrule
+    $1$ & si Cielo $=$ soleado y Humedad $=$ alta entonces no \\
+    $2$ & si Cielo $=$ lluvioso y Viento $=$ fuerte entonces no \\
+    $3$ & en otro caso, sí \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Clasifica bien los $14$ días, igual que el árbol, con tres reglas en
+lugar de cinco hojas. Es la estrategia de \textbf{RIPPER} (Cohen,
+1995), el algoritmo de reglas más usado: aprende reglas para la clase
+minoritaria, que suele ser la que interesa detectar, y deja la
+mayoritaria como regla por defecto.
+
+\begin{ejemplo}[Dos días nuevos]
+    \textbf{(soleado, fresca, alta, fuerte).} La regla $1$ se dispara:
+    soleado y humedad alta. Se predice no, y no se revisa nada más.
+
+    \textbf{(lluvioso, templada, normal, débil).} La $1$ no, porque no
+    está soleado; la $2$ tampoco, porque el viento es débil. Llega a la
+    regla por defecto: sí.
+\end{ejemplo}
+
+\begin{observacion}
+    PRISM, tal cual, aprende reglas para \emph{cada} clase por separado.
+    Para ``sí'' en jugar tenis le salen cuatro reglas más: nublado;
+    humedad normal y viento débil; templada y humedad normal; lluvioso
+    y viento débil. Las dos últimas cubren un solo día cada una, D11 y
+    D4. Con todas juntas el conjunto ya no es excluyente: el día del
+    ejemplo del conflicto dispara una regla de cada clase.
+\end{observacion}
+
+% =====================================================================
+
+\subsection*{Precisión contra cobertura}
+
+Elegir condiciones solo por precisión tiene un defecto: premia las
+reglas diminutas. Una condición que cubre un ejemplo y acierta tiene
+precisión $1/1 = 1$, y le gana a una que cubre $31$ y acierta $30$,
+con $30/31 = 0.97$. La segunda es mucho más confiable: la primera
+puede ser pura casualidad.
+
+La corrección más simple es el \textbf{estimador de Laplace}, la misma
+idea que el suavizado de Naive Bayes. Con $p$ aciertos de $t$
+cubiertos y $k$ clases,
+\[
+    \text{Laplace}(r) = \frac{p + 1}{t + k} .
+\]
+
+\begin{ejemplo}
+    Con dos clases:
+    \[
+        \frac{1 + 1}{1 + 2} = 0.67 ,
+        \qquad
+        \frac{30 + 1}{31 + 2} = 0.94 .
+    \]
+    Ahora gana la regla grande. Con pocos datos el estimador se acerca
+    a $1/k$, adivinar; con muchos, a la precisión.
+\end{ejemplo}
+
+RIPPER usa otra medida, la ganancia de FOIL, que también favorece las
+condiciones que conservan muchos ejemplos positivos.
+
+\begin{ojo}
+    Las reglas sobreajustan igual que los árboles. Aprender hasta que
+    cada regla sea pura produce reglas que cubren uno o dos ejemplos,
+    como las de D11 y D4 de la observación anterior, que probablemente
+    describen ruido y no un patrón. Las defensas son las mismas que la
+    poda: exigir una cobertura mínima, dejar de agregar condiciones
+    cuando ya no mejoran lo suficiente, y podar cada regla contra un
+    conjunto de validación, que es lo que hace RIPPER.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Reglas contra árboles}
+
+Toda regla de un árbol empieza con la condición de la raíz, aunque esa
+condición no tenga nada que ver con lo que la regla describe. Por eso
+hay conceptos que en reglas son cortos y en árboles son enormes.
+
+\begin{ejemplo}[El problema del subárbol replicado]
+    Con cuatro atributos binarios, el concepto
+    \[
+        (A \wedge B) \vee (C \wedge D)
+    \]
+    son dos reglas: \textbf{si} $A$ \textbf{y} $B$ \textbf{entonces} sí;
+    \textbf{si} $C$ \textbf{y} $D$ \textbf{entonces} sí; en otro caso,
+    no. El árbol más chico, empezando por $A$, necesita siete hojas:
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.0cm,
+        level 1/.style={sibling distance=5.2cm},
+        level 2/.style={sibling distance=2.6cm},
+        level 3/.style={sibling distance=1.5cm},
+        level 4/.style={sibling distance=1.0cm},
+        nodo/.style={draw, circle, inner sep=1.5pt, font=\small,
+                     fill=fondoIdea},
+        rep/.style={nodo, fill=fondoOjo},
+        hoja/.style={font=\small\itshape},
+        etq/.style={font=\scriptsize, fill=white, inner sep=1pt},
+        edge from parent/.style={draw, gray}]
+        \node[nodo] {$A$}
+            child {node[nodo] {$B$}
+                child {node[hoja] {sí}
+                       edge from parent node[etq] {$1$}}
+                child {node[rep] {$C$}
+                    child {node[rep] {$D$}
+                        child {node[hoja] {sí}
+                               edge from parent node[etq] {$1$}}
+                        child {node[hoja] {no}
+                               edge from parent node[etq] {$0$}}
+                        edge from parent node[etq] {$1$}}
+                    child {node[hoja] {no}
+                           edge from parent node[etq] {$0$}}
+                    edge from parent node[etq] {$0$}}
+                edge from parent node[etq] {$1$}}
+            child {node[rep] {$C$}
+                child {node[rep] {$D$}
+                    child {node[hoja] {sí}
+                           edge from parent node[etq] {$1$}}
+                    child {node[hoja] {no}
+                           edge from parent node[etq] {$0$}}
+                    edge from parent node[etq] {$1$}}
+                child {node[hoja] {no}
+                       edge from parent node[etq] {$0$}}
+                edge from parent node[etq] {$0$}};
+    \end{tikzpicture}
+    \end{center}
+    El subárbol de $C$ y $D$, en naranja, aparece dos veces: una para
+    $A = 0$ y otra para $A = 1, B = 0$. El árbol tiene que repetir la
+    regla de $C$ y $D$ en cada rama donde la de $A$ y $B$ no se cumplió.
+    Con más términos en la disyunción, el árbol crece mucho más rápido
+    que el conjunto de reglas.
+\end{ejemplo}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.4cm}%
+                 >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    & \textbf{Árbol de decisión} & \textbf{Reglas} \\
+    \midrule
+    Se lee como & un camino desde la raíz & condiciones sueltas, cada
+                                             regla por su cuenta \\
+    \addlinespace
+    Traslapes & nunca: un ejemplo baja por un camino
+              & posibles; hace falta orden o votación \\
+    \addlinespace
+    Tamaño & puede repetir subárboles
+           & suele ser más compacto \\
+    \addlinespace
+    Modificar & cambiar un nodo afecta a todo lo de abajo
+              & se puede agregar o quitar una regla sola \\
+    \addlinespace
+    Aprendizaje & divide y vencerás, rápido
+                & covering, más lento; aprende una regla a la vez \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    La gran ventaja de los dos es la misma: se pueden leer. Un médico
+    puede revisar \textit{si fiebre alta y tos seca entonces
+    sospechoso} y decir si tiene sentido, cosa imposible con los pesos
+    de una red neuronal. Por eso los clasificadores de reglas se siguen
+    usando donde hay que explicar o auditar las decisiones, como en
+    créditos y diagnóstico, aunque otros modelos clasifiquen un poco
+    mejor.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Resumen}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.6cm}}
+    \toprule
+    \textbf{Concepto} & \textbf{En una línea} \\
+    \midrule
+    Regla & si conjunción de condiciones entonces clase \\
+    Cobertura & fracción de ejemplos a los que se aplica \\
+    Precisión & fracción de aciertos entre los que cubre \\
+    Lista de decisión & reglas ordenadas; gana la primera que se dispara \\
+    Regla por defecto & antecedente vacío al final; atrapa lo no
+                        cubierto \\
+    Reglas de un árbol & un camino, una regla; excluyentes y exhaustivas \\
+    Covering & aprender una regla, quitar lo que cubre, repetir \\
+    PRISM & covering con precisión, una lista por clase \\
+    RIPPER & covering para la minoritaria, poda con validación,
+             mayoritaria por defecto \\
+    OneR & una sola condición por regla, sobre un solo atributo (clase
+           del $22$ de octubre) \\
     \bottomrule
 \end{tabular}
 \end{center}
