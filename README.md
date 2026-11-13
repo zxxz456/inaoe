@@ -21,13 +21,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.22.0
+* Version: 1.23.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       12/11/2026      Agregue matcomp/tarea_regresion
 zxxz6       22/10/2026      matcomp/proyecto2 con los cuatro cortes
 zxxz6       22/10/2026      matcomp/proyecto2 cambia a Airbnb CDMX
 zxxz6       21/10/2026      Agregue exposicion/ y proyecto/ de AAL
@@ -149,6 +150,9 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
     - `presentacion/` - Presentación en Quarto.
     - `requirements.txt` - El entorno de Python con las versiones
       fijadas; el `.venv` no se versiona.
+  - [tarea_regresion/](matcomp/tarea_regresion/) - Tarea de correlación
+    y regresión: modelo lineal del precio de Airbnb con los datos del
+    proyecto 2, en notebook y reporte en formato Springer.
 - [seminario1/](seminario1/) - Seminario de Metodología.
   - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
     solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
