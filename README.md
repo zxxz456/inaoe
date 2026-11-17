@@ -21,13 +21,15 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.24.0
+* Version: 1.24.1
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       17/11/2026      Presentacion del capitulo 9 con los
+                            ejemplos del libro
 zxxz6       16/11/2026      Agregue matcomp/presentacion_cap9
 zxxz6       12/11/2026      Agregue matcomp/tarea_regresion
 zxxz6       22/10/2026      matcomp/proyecto2 con los cuatro cortes
@@ -157,8 +159,8 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
   - [presentacion_cap9/](matcomp/presentacion_cap9/) - Presentación
     por equipos del capítulo 9 de *Calling Bullshit*, la
     susceptibilidad de la ciencia: valor p, p-hacking, sesgo de
-    publicación e Ioannidis, con ejemplos propios y gráficas
-    simuladas.
+    publicación e Ioannidis, en el orden del capítulo y con sus
+    ejemplos.
 - [seminario1/](seminario1/) - Seminario de Metodología.
   - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
     solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
