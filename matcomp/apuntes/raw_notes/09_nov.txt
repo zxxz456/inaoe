@@ -1,0 +1,79 @@
+Estadistica inferencial
+-----------------------
+
+Parte de una muestra representativa para hablar de una poblacion
+Estima parametros mediante intervalod de conciafnza
+
+{Diferencias entre ellas}
+
+La descriptiva lo que los datos muestran
+Inferencial - hasta donde podemos llevarlas
+
+- Regresion
+Tnemos unos datos -> hacemos un modelo -> ajustamos -> 
+
+- Variables dependientes
+    Resultado que queremos xpplicar, resumir o predecir
+
+
+- variables independientes
+    informacion usada para explicar o predecir la respuesta (predictores, regresores o variables)
+
+Controlsr uns vsriable significa mantenerla fija o introdcuirla para aisalar y ver como se controlan las otras
+
+{definicion formal de regrecion}
+
+hiperparametros, ajuste y asi
+
+{Ejemplo de vialuazacion de regrecion}
+
+La linea de tendencia no garantiza que el modelo sea correcto
+
+- intervalos de confianza
+{explicar}
+
+-- correlacion y regresion 
+
+{que es la correlacion}
+
+--- modelos deterministas vs estocasticos
+{explicar}
+
+Regresion lineal univariable
+en dependencia estocastica podemso llevar a cabo 2 tipos de analisis estrechaetne correlacionados
+
+    - analisis de correlacion {explicar}   
+
+    - analisis de regresion {explicar}
+
+Correlacion no implica causalidad, regresion con buen ajuste tampoco
+
+-Correlacion de pearson
+{explicar}
+
+r es muestra
+ro es la poblacion 
+
+Covarianza, variacion conjunta
+{expicar}
+
+hay mas coef de correlacion, spearman, tau de kendall, gamma/kendall, biserial puntual {explicar brevemente}
+
+elegir el coeficiente depende de la escala de mediciion y de la forma esperada de la relacion 
+
+- regresion lineal
+{explicar que es, con modelo determinista, estocastico}
+
+- Error y residuo
+{explicar}
+
+- Regresion multiple
+{explicar}
+
+- Ajuste por minimos cuadrados
+{explicar}
+
+SS(Res)
+SS(Regres)
+SS(Total)
+
