@@ -8,17 +8,16 @@
 #  ------------
 #  Presentacion por equipos de Matematicas para la Computacion sobre el
 #  capitulo 9 de Calling Bullshit (Bergstrom y West, 2020), "The
-#  Susceptibility of Science". Explica los conceptos del capitulo con
-#  ejemplos propios, no con los del libro: incentivos de la ciencia,
-#  valor p y falacia del fiscal, tasa base, p-hacking, sesgo de
-#  publicacion, el argumento de Ioannidis, la ciencia en los medios,
-#  revistas depredadoras y por que la ciencia funciona de todos modos.
-#  Se compila con "quarto render SusceptibilidadCiencia.qmd".
+#  Susceptibility of Science". Sigue el orden del capitulo y sus
+#  ejemplos, con poco texto por diapositiva: incentivos de la ciencia,
+#  valor p y falacia del fiscal, p-hacking y sesgo de publicacion, tasa
+#  base e Ioannidis, la ciencia en los medios, revistas depredadoras y
+#  por que la ciencia funciona de todos modos. Se compila con
+#  "quarto render SusceptibilidadCiencia.qmd".
 #
-#  Las graficas de datos y el arbol de Ioannidis, entre los comentarios
-#  inicio:nombre y fin:nombre, los escribe FigurasSusceptibilidad.py
-#  a partir de simulaciones con semilla fija; no se editan a mano. El
-#  control deslizante es HTML con un script al final.
+#  Las graficas de datos, entre los comentarios inicio:nombre y
+#  fin:nombre, las escribe FigurasSusceptibilidad.py; no se editan a
+#  mano.
 #
 #  Las notas del presentador son un guion corto: solo lo que se dice.
 #
@@ -31,12 +30,30 @@
 #  Metadata:
 #  ----------
 #   * Author: zxxz6 (Bryan Violante Arriaga)
-#   * Version: 1.2.0
+#   * Version: 1.5.0
 #
 #
 #  History:
 #  ------------
 #  Author      Date            Description
+#  zxxz6       17/11/2026      Imagenes en la portada de la seccion 01,
+#                              al pie de puros y contaminados, junto a
+#                              la conclusion de la economia del
+#                              reconocimiento y en el robo de arte
+#  zxxz6       17/11/2026      Sin el modelo contra el de referencia, los
+#                              titulares del Higgs, Scott Kelly ni las
+#                              correcciones que no viajan
+#  zxxz6       17/11/2026      Sin la diapositiva del argumento de
+#                              Ioannidis
+#  zxxz6       17/11/2026      Sin el control deslizante de Ioannidis
+#  zxxz6       17/11/2026      Del p-hacking en adelante, mas breve y con
+#                              los ejemplos del libro: analgesicos, Lyme
+#                              y Helicobacter, Turner, Dumas-Mallet,
+#                              Scott Kelly, McCool y Pauling
+#  zxxz6       17/11/2026      Seccion del valor p con la estructura y
+#                              los ejemplos del libro: la huella, las
+#                              cartas de Carl, lo que dice y no dice el
+#                              valor p, y los titulares que lo voltean
 #  zxxz6       16/11/2026      Solo contenido del capitulo 9: fuera la
 #                              maldicion del ganador, la potencia y
 #                              los ejemplos y fuentes externos
@@ -152,6 +169,14 @@ format:
         .t-nar { border-top: 6px solid var(--naranja) !important; }
         .t-aqua { border-top: 6px solid var(--aqua) !important; }
         .t-tinta { border-top: 6px solid var(--tinta) !important; }
+        .carta-foto { display: flex; flex-direction: column; }
+        .carta-foto > span { flex: 1; }
+        .carta-foto .foto { display: block; height: 200px; width: auto;
+          margin: 12px auto 0; border-radius: 6px; }
+        .con-foto { display: grid; grid-template-columns: 1fr auto;
+          gap: 24px; align-items: center; }
+        .con-foto .foto-lado { display: block; height: 200px;
+          width: auto; border-radius: 6px; }
         .cifras { display: flex; margin-top: 18px;
           border-top: 1px solid var(--linea);
           border-bottom: 1px solid var(--linea); }
@@ -207,39 +232,6 @@ format:
           font-size: 15px; color: var(--tenue);
           border-bottom: 1px solid var(--linea); padding-bottom: 6px;
           margin-bottom: 8px; }
-        .control { display: flex; align-items: center; gap: 16px;
-          font-size: 24px; margin: 8px 0; }
-        .control label { width: 300px; color: var(--texto2); }
-        .control input[type=range] { width: 380px; accent-color:
-          var(--tinta); }
-        .control output { font-weight: 800; color: var(--tinta);
-          min-width: 90px; }
-        .alfas { display: flex; gap: 10px; }
-        .alfas button { font: inherit; font-size: 19px; padding: 4px 14px;
-          border-radius: 4px; border: 1.5px solid var(--tinta);
-          background: #fff; color: var(--tinta); cursor: pointer; }
-        .alfas button.activo { background: var(--tinta); color: #fff; }
-        .resultado { display: grid; grid-template-columns: 260px 1fr;
-          gap: 28px; align-items: center; margin-top: 18px;
-          background: #fff; border: 1px solid var(--linea);
-          border-radius: 6px; padding: 16px 22px; }
-        .resultado .grande { font-size: 76px; font-weight: 800;
-          color: var(--tinta); line-height: 1; }
-        .resultado .grande small { display: block; font-size: 17px;
-          font-weight: 400; color: var(--texto2); margin-top: 8px;
-          line-height: 1.3; }
-        .apilada { display: flex; gap: 2px; height: 44px; width: 100%; }
-        .apilada div { border-radius: 4px; min-width: 3px;
-          transition: flex-grow .35s ease; }
-        .apilada .v { background: var(--azul); }
-        .apilada .f { background: var(--naranja); }
-        .leyenda-ap { display: flex; gap: 26px; font-size: 19px;
-          color: var(--texto2); margin-top: 10px; }
-        .leyenda-ap span::before { content: ""; display: inline-block;
-          width: 14px; height: 14px; border-radius: 3px;
-          margin-right: 8px; vertical-align: -1px; }
-        .leyenda-ap .v::before { background: var(--azul); }
-        .leyenda-ap .f::before { background: var(--naranja); }
         .reveal ol.lista-chk { list-style: none; display: block;
           margin: 8px 0 0 !important; padding: 0; counter-reset: q; }
         .reveal ol.lista-chk li { counter-increment: q;
@@ -292,48 +284,17 @@ format:
             l.textContent = "Matemáticas para la Computación, Otoño 2026";
             t.appendChild(l);
           }
-          function pct(x, d) {
-            return (x * 100).toFixed(d === undefined ? 0 : d) + " %";
-          }
-          function escalaLog(v, min, max) {
-            return min * Math.pow(max / min, v / 100);
-          }
-          function fija(el, txt) { if (el) el.textContent = txt; }
-          var ip = document.getElementById("io-prev");
-          var alfa = 0.05;
-          function ioannidis() {
-            var prev = escalaLog(+ip.value, 0.005, 0.5);
-            var v = 1000 * prev, f = 1000 * (1 - prev) * alfa;
-            fija(document.getElementById("io-prev-o"),
-              pct(prev, prev < 0.01 ? 1 : 0));
-            fija(document.getElementById("io-vpp"), pct(v / (v + f)));
-            fija(document.getElementById("io-v"), v.toFixed(0));
-            fija(document.getElementById("io-f"), f.toFixed(0));
-            document.getElementById("io-bv").style.flexGrow = v;
-            document.getElementById("io-bf").style.flexGrow = f;
-          }
-          if (ip) {
-            ip.addEventListener("input", ioannidis);
-            document.querySelectorAll(".alfas button").forEach(
-              function (b) {
-                b.addEventListener("click", function () {
-                  document.querySelectorAll(".alfas button").forEach(
-                    function (o) { o.classList.remove("activo"); });
-                  b.classList.add("activo");
-                  alfa = +b.dataset.alfa;
-                  ioannidis();
-                });
-              });
-            ioannidis();
-          }
         })();
         </script>
 ---
 
 
-# [01]{.num}La ciencia {background-color="#1b2a41"}
+# [01]{.num}La 100cia {background-color="#1b2a41"}
 
-## El mejor invento humano, hecho por humanos
+![](img/FormulaPortapapeles.png){.absolute right=40 top=170 width="520"
+style="border-radius:8px;"}
+
+## Que es?
 
 La ciencia nos lleva **más allá de nuestras escalas**: de lo que dura un
 parpadeo y mide un grano de arena, a todo el universo.
@@ -362,14 +323,17 @@ Entonces, **¿cómo se le cuela el bullshit a la ciencia?**
 
 ```{=html}
 <div class="dos">
-<div class="t-azul"><b>Epistémicamente puro</b>Un científico ideal que
-solo busca entender el mundo. Sin interés por el dinero, la fama ni el
-poder.<br><span class="gris" style="font-size:18px;">El que pedía Francis
-Bacon.</span></div>
-<div class="t-nar fragment fade-up"><b>Epistémicamente
-contaminado</b>Curiosos, sí, pero también
-quieren una plaza, financiamiento, prestigio y que sus colegas los
-admiren.</div>
+<div class="t-azul carta-foto"><b>Epistémicamente puro</b><span>Un
+científico ideal que solo busca entender el mundo. Sin interés por el
+dinero, la fama ni el poder.<br><span class="gris"
+style="font-size:18px;">El que pedía Francis Bacon.</span></span><img
+src="img/PatricioCientifico.png" alt="Patricio con bata y microscopio"
+class="foto"></div>
+<div class="t-nar fragment fade-up carta-foto"><b>Epistémicamente
+contaminado</b><span>Curiosos, sí, pero también quieren una plaza,
+financiamiento, prestigio y que sus colegas los admiren.</span><img
+src="img/CientificoBata.png" alt="Un hombre con bata de médico"
+class="foto"></div>
 </div>
 ```
 
@@ -459,12 +423,18 @@ cualquier persona.
 ```
 
 ::: {.fragment .fade-up fragment-index=6}
+:::: {.con-foto}
 ::: {.ficha .f-azul}
 Premiar el **prestigio** en vez de la producción es un buen truco:
 todos publican lo que encuentran y nadie repite trabajo. Pero cada
 incentivo **abre una puerta**: lo que se premia no es la verdad, es
 **publicar**.
 :::
+```{=html}
+<img src="img/BobEsponjaDinero.png" alt="Bob Esponja con dinero"
+  class="foto-lado">
+```
+::::
 :::
 
 ::: {.notes}
@@ -493,417 +463,487 @@ pide.
 # [02]{.num}p value{background-color="#1b2a41"}
 
 
-## ¿Mi modelo es mejor que el de referencia?
+## ¿Patrón o ruido?
 
-Comparo mi modelo contra el de referencia en **20 conjuntos de datos**.
-El mío gana en **15**.
+Casi todos los estudios buscan **patrones** en los datos. Pero los
+datos traen ruido: ¿cómo distinguimos un patrón real de uno que salió
+**por azar**?
 
-::: {.dos style="margin-top:4px;font-size:24px;"}
-<div style="padding:8px 18px;">
-**H~0~ (nula):** son igual de buenos. Ganar en cada conjunto es un
-volado.
-</div>
-<div style="padding:8px 18px;">
-**H~1~ (alternativa):** el mío es mejor.
-</div>
+::: {.fragment .fade-up}
+::: {.ficha .f-azul}
+**Valor p**, dicho a la ligera: qué tan probable es ver un patrón así
+**solo por azar**. Si es muy improbable, el resultado se llama
+**estadísticamente significativo**.
+:::
 :::
 
-<!-- inicio:binomial -->
-```{=html}
-<svg viewBox="0 0 1180 290" width="1180" height="290" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<line x1="80.0" y1="177.2" x2="1140.0" y2="177.2" stroke="#e3e1da" stroke-width="1"/>
-<text x="70.0" y="182.2" font-size="17" fill="#52514e" text-anchor="end">0.05</text>
-<line x1="80.0" y1="124.4" x2="1140.0" y2="124.4" stroke="#e3e1da" stroke-width="1"/>
-<text x="70.0" y="129.4" font-size="17" fill="#52514e" text-anchor="end">0.10</text>
-<line x1="80.0" y1="71.7" x2="1140.0" y2="71.7" stroke="#e3e1da" stroke-width="1"/>
-<text x="70.0" y="76.7" font-size="17" fill="#52514e" text-anchor="end">0.15</text>
-<line x1="80.0" y1="230.0" x2="1140.0" y2="230.0" stroke="#8a8984" stroke-width="1"/>
-
-<text x="105.2" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">0</text>
-
-<text x="155.7" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">1</text>
-
-<text x="206.2" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">2</text>
-<path d="M244.7,230.0 V229.4 a0.6,0.6 0 0 1 0.6,-0.6 H268.1 a0.6,0.6 0 0 1 0.6,0.6 V230.0 Z" fill="#b9b7af"><title>3 victorias: 0.0011</title></path>
-<text x="256.7" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">3</text>
-<path d="M295.1,230.0 V227.6 a2.4,2.4 0 0 1 2.4,-2.4 H316.7 a2.4,2.4 0 0 1 2.4,2.4 V230.0 Z" fill="#b9b7af"><title>4 victorias: 0.0046</title></path>
-<text x="307.1" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">4</text>
-<path d="M345.6,230.0 V218.4 a4.0,4.0 0 0 1 4.0,-4.0 H365.6 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>5 victorias: 0.0148</title></path>
-<text x="357.6" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">5</text>
-<path d="M396.1,230.0 V195.0 a4.0,4.0 0 0 1 4.0,-4.0 H416.1 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>6 victorias: 0.0370</title></path>
-<text x="408.1" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">6</text>
-<path d="M446.6,230.0 V156.0 a4.0,4.0 0 0 1 4.0,-4.0 H466.6 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>7 victorias: 0.0739</title></path>
-<text x="458.6" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">7</text>
-<path d="M497.0,230.0 V107.2 a4.0,4.0 0 0 1 4.0,-4.0 H517.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>8 victorias: 0.1201</title></path>
-<text x="509.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">8</text>
-<path d="M547.5,230.0 V64.9 a4.0,4.0 0 0 1 4.0,-4.0 H567.5 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>9 victorias: 0.1602</title></path>
-<text x="559.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">9</text>
-<path d="M598.0,230.0 V48.0 a4.0,4.0 0 0 1 4.0,-4.0 H618.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>10 victorias: 0.1762</title></path>
-<text x="610.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">10</text>
-<path d="M648.5,230.0 V64.9 a4.0,4.0 0 0 1 4.0,-4.0 H668.5 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>11 victorias: 0.1602</title></path>
-<text x="660.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">11</text>
-<path d="M699.0,230.0 V107.2 a4.0,4.0 0 0 1 4.0,-4.0 H719.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>12 victorias: 0.1201</title></path>
-<text x="711.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">12</text>
-<path d="M749.4,230.0 V156.0 a4.0,4.0 0 0 1 4.0,-4.0 H769.4 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>13 victorias: 0.0739</title></path>
-<text x="761.4" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">13</text>
-<path d="M799.9,230.0 V195.0 a4.0,4.0 0 0 1 4.0,-4.0 H819.9 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>14 victorias: 0.0370</title></path>
-<text x="811.9" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">14</text>
-<path d="M850.4,230.0 V218.4 a4.0,4.0 0 0 1 4.0,-4.0 H870.4 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>15 victorias: 0.0148</title></path>
-<path d="M850.4,230.0 V218.4 a4.0,4.0 0 0 1 4.0,-4.0 H870.4 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>15 victorias: 0.0148</title></path>
-<text x="862.4" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">15</text>
-<path d="M900.9,230.0 V227.6 a2.4,2.4 0 0 1 2.4,-2.4 H922.4 a2.4,2.4 0 0 1 2.4,2.4 V230.0 Z" fill="#b9b7af"><title>16 victorias: 0.0046</title></path>
-<path d="M900.9,230.0 V227.6 a2.4,2.4 0 0 1 2.4,-2.4 H922.4 a2.4,2.4 0 0 1 2.4,2.4 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>16 victorias: 0.0046</title></path>
-<text x="912.9" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">16</text>
-<path d="M951.3,230.0 V229.4 a0.6,0.6 0 0 1 0.6,-0.6 H974.8 a0.6,0.6 0 0 1 0.6,0.6 V230.0 Z" fill="#b9b7af"><title>17 victorias: 0.0011</title></path>
-<path d="M951.3,230.0 V229.4 a0.6,0.6 0 0 1 0.6,-0.6 H974.8 a0.6,0.6 0 0 1 0.6,0.6 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>17 victorias: 0.0011</title></path>
-<text x="963.3" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">17</text>
-
-
-<text x="1013.8" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">18</text>
-
-
-<text x="1064.3" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">19</text>
-
-
-<text x="1114.8" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">20</text>
-<text x="610.0" y="280.0" font-size="18" fill="#52514e" text-anchor="middle">victorias de mi modelo en 20 conjuntos de datos, si H<tspan baseline-shift='sub' font-size='11'>0</tspan> es cierta</text>
-<text x="20.0" y="26.0" font-size="17" fill="#52514e" text-anchor="start">probabilidad</text>
-<g class="fragment" data-fragment-index="1">
-<line x1="837.1" y1="50.0" x2="1134.0" y2="50.0" stroke="#1b2a41" stroke-width="1.5"/>
-<line x1="837.1" y1="44.0" x2="837.1" y2="56.0" stroke="#1b2a41" stroke-width="1.5"/>
-<text x="988.6" y="42.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">P(X &#8805; 15 | H<tspan baseline-shift='sub' font-size='12'>0</tspan>) = 0.021</text>
-</g>
-</svg>
-```
-<!-- fin:binomial -->
-
-::: {.fragment .fade-up fragment-index=2}
-**Valor p:** probabilidad de datos **al menos tan extremos** como los
-observados, **si H~0~ fuera cierta**. Como $p < 0.05$, el resultado es
-*estadísticamente significativo*.
+::: {.fragment .fade-up}
+¿Qué quiere decir eso exactamente, y qué **no** quiere decir? El libro
+lo explica con un juicio.
 :::
 
 ::: {.notes}
-- Ejemplo: mi modelo gana 15 de 20 contra el de referencia.
-- Hipótesis nula: son iguales, cada conjunto es un volado.
-- Si la nula fuera cierta, la gráfica dice cuántas victorias
-  esperaríamos. 15 o más pasa 2 % de las veces.
-- Eso es el valor p: 0.021. Menor que 0.05, se llama significativo.
+- Los estudios buscan patrones, pero los datos traen ruido.
+- La herramienta más común para separarlos es el valor p.
+- A grandes rasgos: qué tan probable es el patrón solo por azar. Si es
+  muy improbable, se dice significativo.
+- Para ver qué significa de verdad, el libro cuenta un juicio.
 :::
 
-## Voltear la condicional
+## Ejemplo: El robo
 
 :::: {.columns}
-::: {.column width="50%"}
+::: {.column width="56%"}
+::: {.incremental}
+- Una coleccionista manda **30 cuadros** en tren a Nueva York. Al
+  llegar, faltan **los 4 más valiosos**.
+- La única pista: **una huella** en uno de los marcos.
+- La policía la busca en la base de huellas del FBI y aparece un
+  **biólogo** que dice haber pasado esas semanas siguiendo aves en la
+  sierra. No tiene coartada.
+:::
+:::
+::: {.column width="44%"}
 ```{=html}
-<svg viewBox="0 0 560 360" width="560" height="360"
-  font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<ellipse cx="280" cy="180" rx="265" ry="160" fill="#e3eefb"
-  stroke="#2a78d6" stroke-width="2"/>
-<text x="280" y="50" font-size="19" font-weight="700" fill="#1b2a41"
-  text-anchor="middle">cosas con cuatro patas</text>
-<text x="120" y="130" font-size="17" fill="#52514e">gatos</text>
-<text x="380" y="120" font-size="17" fill="#52514e">mesas</text>
-<text x="100" y="230" font-size="17" fill="#52514e">caballos</text>
-<text x="400" y="250" font-size="17" fill="#52514e">sillas</text>
-<text x="230" y="300" font-size="17" fill="#52514e">vacas</text>
-<text x="300" y="95" font-size="17" fill="#52514e">camas</text>
-<circle cx="275" cy="190" r="48" fill="#eb6834" opacity="0.9"/>
-<text x="275" y="196" font-size="19" font-weight="700" fill="#fff"
-  text-anchor="middle">perros</text>
-</svg>
+<img src="img/HuellaLadron.png" alt="Una huella digital con antifaz"
+  style="display:block;height:250px;width:auto;margin:0 auto 10px;
+  border-radius:6px;">
 ```
-:::
-::: {.column width="50%"}
 ::: {.fragment .fade-up}
-$P(\text{4 patas} \mid \text{perro}) \approx 1$
-
-[Casi todo perro está dentro de la elipse.]{.nota}
+::: {.ficha .f-nar}
+**La fiscal:** "Que dos huellas distintas coincidan así pasa **una vez
+en diez millones**. Eso está más allá de toda duda razonable."
 :::
-::: {.fragment .fade-up}
-$P(\text{perro} \mid \text{4 patas})$ es chica
-
-[Los perros son una parte pequeña de todo lo que tiene cuatro
-patas.]{.nota}
-:::
-::: {.fragment .fade-up}
-[$P(A \mid B) \neq P(B \mid A)$]{.mark}, y la diferencia la decide
-qué tan comunes son $A$ y $B$.
 :::
 :::
 ::::
 
-::: {.fragment .fade-up}
+::: {.notes}
+- Una coleccionista manda 30 cuadros en tren; al llegar faltan los 4
+  más valiosos.
+- Única pista: una huella. La buscan en la base del FBI y sale un
+  biólogo sin coartada.
+- La fiscal dice que una coincidencia así por accidente pasa una vez
+  en diez millones.
+- Suena a culpable seguro. Veamos qué responde el defensor.
+:::
+
+## Prosecutor´s Fallacy
+
+:::: {.lado style="grid-template-columns: 560px 1fr; gap: 26px;"}
+::: {.figura}
+```{=html}
+<svg viewBox="0 0 560 320" width="560" height="320"
+  font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
+<text x="285" y="44" font-size="19" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">Coincide</text>
+<text x="455" y="44" font-size="19" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">No coincide</text>
+<text x="180" y="117" font-size="19" fill="#52514e"
+  text-anchor="end">Culpable</text>
+<text x="180" y="217" font-size="19" fill="#52514e"
+  text-anchor="end">Inocente</text>
+<rect x="200" y="60" width="340" height="200" fill="#fff"
+  stroke="#e3e1da"/>
+<line x1="370" y1="60" x2="370" y2="260" stroke="#e3e1da"/>
+<line x1="200" y1="160" x2="540" y2="160" stroke="#e3e1da"/>
+<text x="285" y="121" font-size="30" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">1</text>
+<text x="455" y="121" font-size="30" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">0</text>
+<g class="fragment" data-fragment-index="1">
+<text x="455" y="220" font-size="26" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">50 000 000</text>
+</g>
+<g class="fragment" data-fragment-index="2">
+<text x="285" y="221" font-size="30" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">5</text>
+</g>
+<g class="fragment" data-fragment-index="3">
+<ellipse cx="372" cy="210" rx="180" ry="40" fill="none"
+  stroke="#eb6834" stroke-width="3"/>
+<text x="470" y="300" font-size="17" font-weight="700" fill="#eb6834"
+  text-anchor="middle">renglón de la fiscal</text>
+</g>
+<g class="fragment" data-fragment-index="4">
+<ellipse cx="285" cy="160" rx="66" ry="110" fill="#2a78d6"
+  fill-opacity="0.12" stroke="#2a78d6" stroke-width="3"/>
+<text x="270" y="300" font-size="17" font-weight="700" fill="#2a78d6"
+  text-anchor="middle">columna del jurado</text>
+</g>
+</svg>
+```
+:::
+::: {.texto}
+::: {.paso .fragment fragment-index=1}
+La base tiene unos **50 millones** de personas; casi todas son
+inocentes que no coinciden.
+:::
+::: {.paso .fragment fragment-index=2}
+Con un error de 1 en 10 millones, coinciden unos **5 inocentes**.
+:::
+::: {.paso .nar .fragment fragment-index=3}
+**La fiscal** lee el renglón:\
+$P(\text{coincide} \mid \text{inocente})$ = 1 en 10 millones.
+:::
+::: {.paso .azul .fragment fragment-index=4}
+**El jurado** necesita la columna:\
+$P(\text{inocente} \mid \text{coincide}) = 5/6$.
+:::
+:::
+::::
+
+::: {.fragment .fade-up fragment-index=5}
 ::: {.ficha .f-nar}
-El valor p es $P(\text{datos} \mid H_0)$. Lo que queremos saber es
+**Falacia del fiscal:** confundir qué tan rara sería la evidencia **si
+fuera inocente** con qué tan probable es que sea inocente **dada la
+evidencia**.
+:::
+:::
+
+::: {.notes}
+- El defensor arma una tabla: culpable o inocente, coincide o no.
+- El culpable está en la base y coincide: un uno arriba a la
+  izquierda.
+- En la base hay unos 50 millones de inocentes.
+- Con un error de uno en diez millones, coinciden unos 5 inocentes.
+- La fiscal compara en el renglón de los inocentes: 5 de 50 millones.
+- Pero ya sabemos que hay coincidencia, así que importa la columna: 1
+  culpable y 5 inocentes. Cinco de seis de que sea inocente.
+- Confundir las dos es la falacia del fiscal.
+:::
+
+## Ejemplos: Telekinesis
+
+Unos morrillos intentan **adivinar el
+palo** de 52 cartas sin verlas. Al azar se acierta una de cada cuatro:
+**13**. Él acertó **19**.
+
+::: {.dos style="margin-top:4px;font-size:24px;"}
+<div style="padding:8px 18px;">
+**H~0~ (nula):** adivina al azar; cada carta, 1 de 4.
+</div>
+<div style="padding:8px 18px;">
+**H~1~ (alternativa):** acierta más de lo que da el azar.
+</div>
+:::
+
+<!-- inicio:cartas -->
+```{=html}
+<svg viewBox="0 0 1180 290" width="1180" height="290" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
+<line x1="80.0" y1="175.7" x2="1140.0" y2="175.7" stroke="#e3e1da" stroke-width="1"/>
+<text x="70.0" y="180.7" font-size="17" fill="#52514e" text-anchor="end">0.04</text>
+<line x1="80.0" y1="121.4" x2="1140.0" y2="121.4" stroke="#e3e1da" stroke-width="1"/>
+<text x="70.0" y="126.4" font-size="17" fill="#52514e" text-anchor="end">0.08</text>
+<line x1="80.0" y1="67.1" x2="1140.0" y2="67.1" stroke="#e3e1da" stroke-width="1"/>
+<text x="70.0" y="72.1" font-size="17" fill="#52514e" text-anchor="end">0.12</text>
+<line x1="80.0" y1="230.0" x2="1140.0" y2="230.0" stroke="#8a8984" stroke-width="1"/>
+
+<text x="97.1" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">0</text>
+
+<text x="131.3" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">1</text>
+
+<text x="165.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">2</text>
+
+<text x="199.7" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">3</text>
+<path d="M221.9,230.0 V229.3 a0.7,0.7 0 0 1 0.7,-0.7 H245.1 a0.7,0.7 0 0 1 0.7,0.7 V230.0 Z" fill="#b9b7af"><title>4 aciertos: 0.0011</title></path>
+<text x="233.9" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">4</text>
+<path d="M256.1,230.0 V227.7 a2.3,2.3 0 0 1 2.3,-2.3 H277.8 a2.3,2.3 0 0 1 2.3,2.3 V230.0 Z" fill="#b9b7af"><title>5 aciertos: 0.0034</title></path>
+<text x="268.1" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">5</text>
+<path d="M290.3,230.0 V221.9 a4.0,4.0 0 0 1 4.0,-4.0 H310.3 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>6 aciertos: 0.0089</title></path>
+<text x="302.3" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">6</text>
+<path d="M324.5,230.0 V207.6 a4.0,4.0 0 0 1 4.0,-4.0 H344.5 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>7 aciertos: 0.0195</title></path>
+<text x="336.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">7</text>
+<path d="M358.6,230.0 V184.4 a4.0,4.0 0 0 1 4.0,-4.0 H378.6 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>8 aciertos: 0.0365</title></path>
+<text x="370.6" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">8</text>
+<path d="M392.8,230.0 V153.2 a4.0,4.0 0 0 1 4.0,-4.0 H412.8 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>9 aciertos: 0.0595</title></path>
+<text x="404.8" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">9</text>
+<path d="M427.0,230.0 V118.2 a4.0,4.0 0 0 1 4.0,-4.0 H447.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>10 aciertos: 0.0853</title></path>
+<text x="439.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">10</text>
+<path d="M461.2,230.0 V86.6 a4.0,4.0 0 0 1 4.0,-4.0 H481.2 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>11 aciertos: 0.1086</title></path>
+<text x="473.2" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">11</text>
+<path d="M495.4,230.0 V66.1 a4.0,4.0 0 0 1 4.0,-4.0 H515.4 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>12 aciertos: 0.1237</title></path>
+<text x="507.4" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">12</text>
+<path d="M529.6,230.0 V61.8 a4.0,4.0 0 0 1 4.0,-4.0 H549.6 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>13 aciertos: 0.1269</title></path>
+<text x="541.6" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">13</text>
+<path d="M563.8,230.0 V74.1 a4.0,4.0 0 0 1 4.0,-4.0 H583.8 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>14 aciertos: 0.1178</title></path>
+<text x="575.8" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">14</text>
+<path d="M598.0,230.0 V99.0 a4.0,4.0 0 0 1 4.0,-4.0 H618.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>15 aciertos: 0.0995</title></path>
+<text x="610.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">15</text>
+<path d="M632.2,230.0 V129.9 a4.0,4.0 0 0 1 4.0,-4.0 H652.2 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>16 aciertos: 0.0767</title></path>
+<text x="644.2" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">16</text>
+<path d="M666.4,230.0 V160.5 a4.0,4.0 0 0 1 4.0,-4.0 H686.4 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>17 aciertos: 0.0541</title></path>
+<text x="678.4" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">17</text>
+<path d="M700.6,230.0 V186.4 a4.0,4.0 0 0 1 4.0,-4.0 H720.6 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>18 aciertos: 0.0351</title></path>
+<text x="712.6" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">18</text>
+<path d="M734.8,230.0 V205.6 a4.0,4.0 0 0 1 4.0,-4.0 H754.8 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>19 aciertos: 0.0209</title></path>
+<path d="M734.8,230.0 V205.6 a4.0,4.0 0 0 1 4.0,-4.0 H754.8 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>19 aciertos: 0.0209</title></path>
+<text x="746.8" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">19</text>
+<path d="M769.0,230.0 V218.4 a4.0,4.0 0 0 1 4.0,-4.0 H789.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>20 aciertos: 0.0115</title></path>
+<path d="M769.0,230.0 V218.4 a4.0,4.0 0 0 1 4.0,-4.0 H789.0 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>20 aciertos: 0.0115</title></path>
+<text x="781.0" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">20</text>
+<path d="M803.2,230.0 V226.0 a4.0,4.0 0 0 1 4.0,-4.0 H823.2 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#b9b7af"><title>21 aciertos: 0.0058</title></path>
+<path d="M803.2,230.0 V226.0 a4.0,4.0 0 0 1 4.0,-4.0 H823.2 a4.0,4.0 0 0 1 4.0,4.0 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>21 aciertos: 0.0058</title></path>
+<text x="815.2" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">21</text>
+<path d="M837.4,230.0 V228.1 a1.9,1.9 0 0 1 1.9,-1.9 H859.5 a1.9,1.9 0 0 1 1.9,1.9 V230.0 Z" fill="#b9b7af"><title>22 aciertos: 0.0027</title></path>
+<path d="M837.4,230.0 V228.1 a1.9,1.9 0 0 1 1.9,-1.9 H859.5 a1.9,1.9 0 0 1 1.9,1.9 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>22 aciertos: 0.0027</title></path>
+<text x="849.4" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">22</text>
+<path d="M871.5,230.0 V229.2 a0.8,0.8 0 0 1 0.8,-0.8 H894.7 a0.8,0.8 0 0 1 0.8,0.8 V230.0 Z" fill="#b9b7af"><title>23 aciertos: 0.0012</title></path>
+<path d="M871.5,230.0 V229.2 a0.8,0.8 0 0 1 0.8,-0.8 H894.7 a0.8,0.8 0 0 1 0.8,0.8 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>23 aciertos: 0.0012</title></path>
+<text x="883.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">23</text>
+<path d="M905.7,230.0 V229.7 a0.3,0.3 0 0 1 0.3,-0.3 H929.4 a0.3,0.3 0 0 1 0.3,0.3 V230.0 Z" fill="#b9b7af"><title>24 aciertos: 0.0005</title></path>
+<path d="M905.7,230.0 V229.7 a0.3,0.3 0 0 1 0.3,-0.3 H929.4 a0.3,0.3 0 0 1 0.3,0.3 V230.0 Z" fill="#eb6834" class="fragment" data-fragment-index="1"><title>24 aciertos: 0.0005</title></path>
+<text x="917.7" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">24</text>
+
+
+<text x="951.9" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">25</text>
+
+
+<text x="986.1" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">26</text>
+
+
+<text x="1020.3" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">27</text>
+
+
+<text x="1054.5" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">28</text>
+
+
+<text x="1088.7" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">29</text>
+
+
+<text x="1122.9" y="252.0" font-size="17" fill="#52514e" text-anchor="middle">30</text>
+<text x="610.0" y="280.0" font-size="18" fill="#52514e" text-anchor="middle">aciertos de Carl en 52 cartas, si H<tspan baseline-shift='sub' font-size='11'>0</tspan> es cierta</text>
+<text x="20.0" y="26.0" font-size="17" fill="#52514e" text-anchor="start">probabilidad</text>
+<g class="fragment" data-fragment-index="1">
+<line x1="729.7" y1="50.0" x2="1134.0" y2="50.0" stroke="#1b2a41" stroke-width="1.5"/>
+<line x1="729.7" y1="44.0" x2="729.7" y2="56.0" stroke="#1b2a41" stroke-width="1.5"/>
+<text x="934.8" y="42.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">P(X &#8805; 19 | H<tspan baseline-shift='sub' font-size='12'>0</tspan>) = 0.043</text>
+</g>
+</svg>
+```
+<!-- fin:cartas -->
+
+::: {.fragment .fade-up fragment-index=2}
+Al azar, el **95.7&#8201;%** de las veces acertaría menos de 19. Eso
+**no** quiere decir que estemos 95.7&#8201;% seguros de que H~0~ es
+falsa.
+:::
+
+::: {.notes}
+- Carl, de niño, quiso ver si podía adivinar el palo de las cartas.
+- Al azar se esperan 13 de 52. Acertó 19. ¿Es mucho?
+- Nula: adivina al azar. Alternativa: le atina más que el azar.
+- La gráfica dice cuántos aciertos salen solo por azar. 19 o más pasa
+  4.3 % de las veces: ese es el valor p, 0.043.
+- Cuidado: 95.7 % no es qué tan seguros estamos de que tiene poderes.
+:::
+
+## Lo que queremos VS lo que nos dan
+
+```{=html}
+<svg viewBox="0 0 1180 320" width="1180" height="320"
+  style="display:block;margin:0 auto;"
+  font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
+<text x="310" y="34" font-size="22" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">La huella</text>
+<text x="230" y="74" font-size="18" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">Coincide</text>
+<text x="390" y="74" font-size="18" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">No coincide</text>
+<text x="138" y="136" font-size="18" fill="#52514e"
+  text-anchor="end">Culpable</text>
+<text x="138" y="216" font-size="18" fill="#52514e"
+  text-anchor="end">Inocente</text>
+<rect x="150" y="90" width="320" height="160" fill="#fff"
+  stroke="#e3e1da"/>
+<line x1="310" y1="90" x2="310" y2="250" stroke="#e3e1da"/>
+<line x1="150" y1="170" x2="470" y2="170" stroke="#e3e1da"/>
+<text x="980" y="34" font-size="22" font-weight="800" fill="#1b2a41"
+  text-anchor="middle">Las cartas</text>
+<text x="900" y="74" font-size="18" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">Acierta &#8805; 19</text>
+<text x="1060" y="74" font-size="18" font-weight="700" fill="#1b2a41"
+  text-anchor="middle">Acierta &lt; 19</text>
+<text x="808" y="136" font-size="18" fill="#52514e"
+  text-anchor="end">H<tspan baseline-shift="sub"
+  font-size="13">1</tspan>: hay telepatía</text>
+<text x="808" y="216" font-size="18" fill="#52514e"
+  text-anchor="end">H<tspan baseline-shift="sub"
+  font-size="13">0</tspan>: no hay</text>
+<rect x="820" y="90" width="320" height="160" fill="#fff"
+  stroke="#e3e1da"/>
+<line x1="980" y1="90" x2="980" y2="250" stroke="#e3e1da"/>
+<line x1="820" y1="170" x2="1140" y2="170" stroke="#e3e1da"/>
+<g class="fragment" data-fragment-index="1">
+<ellipse cx="310" cy="210" rx="164" ry="34" fill="none"
+  stroke="#eb6834" stroke-width="3"/>
+<ellipse cx="980" cy="210" rx="164" ry="34" fill="none"
+  stroke="#eb6834" stroke-width="3"/>
+<rect x="150" y="286" width="16" height="16" rx="3" fill="#eb6834"/>
+<text x="176" y="300" font-size="19" fill="#52514e">lo que da el valor
+  p: P(datos | H<tspan baseline-shift="sub"
+  font-size="13">0</tspan>), el renglón</text>
+</g>
+<g class="fragment" data-fragment-index="2">
+<ellipse cx="230" cy="170" rx="62" ry="90" fill="#2a78d6"
+  fill-opacity="0.12" stroke="#2a78d6" stroke-width="3"/>
+<ellipse cx="900" cy="170" rx="62" ry="90" fill="#2a78d6"
+  fill-opacity="0.12" stroke="#2a78d6" stroke-width="3"/>
+<rect x="680" y="286" width="16" height="16" rx="3" fill="#2a78d6"/>
+<text x="706" y="300" font-size="19" fill="#52514e">lo que queremos:
+  P(H<tspan baseline-shift="sub" font-size="13">0</tspan> | datos), la
+  columna</text>
+</g>
+</svg>
+```
+
+::: {.fragment .fade-up fragment-index=3}
+::: {.ficha .f-nar}
+El valor p es $P(\text{datos al menos tan extremos} \mid H_0)$: qué tan
+**raros** serían los datos si solo hubiera azar. Lo que queremos es
 $P(H_0 \mid \text{datos})$. **No son lo mismo.**
 :::
 :::
 
-::: {.notes}
-- Una probabilidad condicional es la probabilidad de algo dado otra
-  cosa.
-- Si es perro, casi seguro tiene cuatro patas. Si tiene cuatro patas,
-  casi seguro no es perro: puede ser una mesa.
-- Voltear la condicional cambia el número por completo.
-- El valor p es la probabilidad de los datos dada la nula. Nosotros
-  queremos la de la nula dados los datos.
+::: {.fragment .fade-up fragment-index=4}
+[Los científicos no engañan como la fiscal: reportan el valor p porque
+la probabilidad de la hipótesis casi nunca se puede calcular.]{.nota}
 :::
 
-## La falacia del fiscal
-
-::: {.ficha .f-nar}
-**Qué es:** confundir "qué tan raro sería ver esta evidencia **si fuera
-inocente**" con "qué tan probable es que sea inocente **dada la
-evidencia**". Es voltear la condicional.
-:::
-
-
-
 ::: {.notes}
-- La falacia del fiscal: confundir lo raro que sería la evidencia si
-  fuera inocente con lo probable que es que sea inocente.
-- Es lo mismo que voltear la condicional, y el valor p cae en la misma
-  trampa.
+- El valor p es la versión científica del número de la fiscal.
+- Misma tabla con las cartas: arriba, hay telepatía; abajo, no hay.
+- El valor p lee el renglón de abajo: sin telepatía, qué tan seguido se
+  aciertan 19 o más. 4.3 %.
+- Lo que queremos es la columna: ya acertó 19, ¿qué tan probable es
+  que no haya telepatía?
+- Ese es el secreto del valor p: los científicos lo reportan porque la
+  otra probabilidad casi nunca se puede calcular, no por engañar.
 :::
 
 ## Lo que queremos depende de lo que creíamos
 
-Con el valor p pasa lo mismo: $P(H_1 \mid \text{datos})$ depende de qué
-tan probable era $H_1$ **antes** del experimento.
+$P(H_1 \mid \text{datos})$ depende de qué tan probable era $H_1$
+**antes** del experimento
 
 ```{=html}
 <div class="dos">
-<div class="t-nar fragment fade-up"><b>H<sub>1a</sub>: mi red de tres
-capas, entrenada un fin de semana, supera al estado del arte</b>Antes
-del experimento era muy improbable. Con p = 0.021 <mark>sigue siendo
-improbable</mark>.</div>
-<div class="t-azul fragment fade-up"><b>H<sub>1b</sub>: se coló parte
-del conjunto de prueba en el entrenamiento</b>Pasa seguido. Explica las
-15 victorias igual de bien, y sin ningún mérito del modelo.</div>
+<div class="t-nar fragment fade-up"><b>H<sub>1a</sub>: la telepatía
+existe</b>Nadie la había visto hasta que dos niños jugaron con cartas
+en una sala de Ann Arbor. Antes era una en un millón, o menos. Con 19
+aciertos <mark>sigue siendo improbable</mark>.</div>
+<div class="t-azul fragment fade-up"><b>H<sub>1b</sub>: el amigo hizo
+trampa</b>Arnie, que hacía trampa en todo, a veces dijo "acertaste"
+cuando no. Era probable desde antes, y explica los 19 aciertos sin
+ningún poder.</div>
 </div>
 ```
 
 ::: {.fragment .fade-up}
 ::: {.ficha}
-**Rechazar H~0~ no prueba tu hipótesis favorita.** Solo dice que algo
-fuera del azar pasó. Una hipótesis improbable sigue siendo improbable
-aunque el valor p sea muy bajo.
+**Rechazar H~0~ no prueba tu hipótesis favorita.** Solo dice que pasó
+algo además del azar.
 :::
-:::
-
-::: {.fragment .fade-up}
-[Los científicos reportan $P(\text{datos} \mid H_0)$ porque la
-probabilidad previa de $H_1$ casi nunca se puede medir ni poner de
-acuerdo.]{.nota}
 :::
 
 ::: {.notes}
-- Lo que queremos es la probabilidad de la alternativa dados los
-  datos, y eso depende de qué tan creíble era antes.
-- Si la alternativa es que mi red de fin de semana le gana a todo, era
-  improbable y sigue siéndolo.
-- Si la alternativa es una fuga de datos, era probable y explica todo.
+- Lo que queremos depende de qué tan creíble era la alternativa antes
+  del experimento.
+- Si la alternativa es que existe la telepatía, era improbable y
+  sigue siéndolo con 19 aciertos.
+- Si es que el amigo hizo trampa, era probable y explica todo.
 - Rechazar la nula no confirma la explicación que me gusta.
 :::
-
-
 
 # [03]{.num}p-hacking y sesgo de publicación {background-color="#1b2a41"}
 
 
-## Nadie publica lo que no funcionó
+## pq nadie publica lo negativo
 
 Por **pura convención**, $p < 0.05$ es la frontera de lo
-"significativo". Hay quien propone bajarla a $0.005$.
+"significativo". Y casi solo se publica lo que la cruza.
 
-::: {.incremental}
-- Los resultados **negativos** casi no se publican:
-  - se sienten aburridos: "estos dos grupos no difieren";
-  - se confunden con no haber sabido hacer el experimento;
-  - las hipótesis falsas sobran: saber que tu contraseña **no** es
-    `1234` no te acerca a adivinarla.
-:::
-
-::: {.fragment .fade-up}
-::: {.ficha .f-nar}
-El incentivo queda claro: **sin $p < 0.05$ no hay artículo**. Y si no
-hay artículo, no hay reputación.
-:::
-:::
-
-::: {.notes}
-- 0.05 es una convención, no una ley. Hay debate para bajarla.
-- Los negativos no se publican: son aburridos, parecen error, y hay
-  infinitas hipótesis falsas, así que descartar una no dice mucho.
-- Resultado: sin p menor a 0.05 no hay artículo.
-:::
-
-
-## Muchas pruebas, algún "éxito"
-
-Si todas las hipótesis son falsas, cada prueba tiene **5&#8201;%** de
-salir significativa por azar. Con varias, la probabilidad de **al menos
-un falso positivo** crece rápido: $1 - 0.95^k$.
-
-<!-- inicio:comparaciones -->
 ```{=html}
-<svg viewBox="0 0 1180 340" width="1180" height="340" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<line x1="90.0" y1="222.5" x2="960.0" y2="222.5" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="227.5" font-size="17" fill="#52514e" text-anchor="end">25&#8201;%</text>
-<line x1="90.0" y1="165.0" x2="960.0" y2="165.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="170.0" font-size="17" fill="#52514e" text-anchor="end">50&#8201;%</text>
-<line x1="90.0" y1="107.5" x2="960.0" y2="107.5" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="112.5" font-size="17" fill="#52514e" text-anchor="end">75&#8201;%</text>
-<line x1="90.0" y1="50.0" x2="960.0" y2="50.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="55.0" font-size="17" fill="#52514e" text-anchor="end">100&#8201;%</text>
-<line x1="90.0" y1="280.0" x2="960.0" y2="280.0" stroke="#8a8984" stroke-width="1"/>
-<text x="80.0" y="285.0" font-size="17" fill="#52514e" text-anchor="end">0</text>
-<text x="90.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">1</text>
-<text x="210.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">5</text>
-<text x="360.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">10</text>
-<text x="510.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">15</text>
-<text x="660.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">20</text>
-<text x="810.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">25</text>
-<text x="960.0" y="304.0" font-size="17" fill="#52514e" text-anchor="middle">30</text>
-<text x="525.0" y="332.0" font-size="18" fill="#52514e" text-anchor="middle">número de hipótesis probadas con los mismos datos</text>
-<rect x="90" y="12" width="14" height="14" rx="3" fill="#eb6834"/>
-<text x="112.0" y="24.0" font-size="19" fill="#52514e" text-anchor="start">sin corrección</text>
-<rect x="294.3" y="12" width="14" height="14" rx="3" fill="#2a78d6"/>
-<text x="316.3" y="24.0" font-size="19" fill="#52514e" text-anchor="start">con Bonferroni (α / k en cada prueba)</text>
-<polyline points="90.0,268.5 120.0,268.6 150.0,268.7 180.0,268.7 210.0,268.7 240.0,268.7 270.0,268.7 300.0,268.7 330.0,268.8 360.0,268.8 390.0,268.8 420.0,268.8 450.0,268.8 480.0,268.8 510.0,268.8 540.0,268.8 570.0,268.8 600.0,268.8 630.0,268.8 660.0,268.8 690.0,268.8 720.0,268.8 750.0,268.8 780.0,268.8 810.0,268.8 840.0,268.8 870.0,268.8 900.0,268.8 930.0,268.8 960.0,268.8" fill="none" stroke="#2a78d6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" class="" pathLength="1"/>
-<polyline points="90.0,268.5 120.0,257.6 150.0,247.2 180.0,237.3 210.0,228.0 240.0,219.1 270.0,210.6 300.0,202.6 330.0,195.0 360.0,187.7 390.0,180.8 420.0,174.3 450.0,168.1 480.0,162.2 510.0,156.6 540.0,151.2 570.0,146.2 600.0,141.4 630.0,136.8 660.0,132.5 690.0,128.3 720.0,124.4 750.0,120.7 780.0,117.2 810.0,113.8 840.0,110.6 870.0,107.6 900.0,104.7 930.0,102.0 960.0,99.4" fill="none" stroke="#eb6834" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" class="dibuja" pathLength="1"/>
-<circle cx="90.0" cy="268.5" r="5" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>1 pruebas: 5.0&#8201;%</title></circle>
-<text x="82.0" y="256.5" font-size="19" fill="#1b2a41" text-anchor="end" font-weight="700">5&#8201;%</text>
-<circle cx="210.0" cy="228.0" r="5" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>5 pruebas: 22.6&#8201;%</title></circle>
-<text x="202.0" y="216.0" font-size="19" fill="#1b2a41" text-anchor="end" font-weight="700">23&#8201;%</text>
-<circle cx="360.0" cy="187.7" r="5" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>10 pruebas: 40.1&#8201;%</title></circle>
-<text x="352.0" y="175.7" font-size="19" fill="#1b2a41" text-anchor="end" font-weight="700">40&#8201;%</text>
-<circle cx="660.0" cy="132.5" r="5" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>20 pruebas: 64.2&#8201;%</title></circle>
-<text x="652.0" y="120.5" font-size="19" fill="#1b2a41" text-anchor="end" font-weight="700">64&#8201;%</text>
-<text x="972.0" y="104.4" font-size="18" fill="#52514e" text-anchor="start">79&#8201;% sin corregir</text>
-<text x="972.0" y="273.8" font-size="18" fill="#52514e" text-anchor="start">4.9&#8201;% con Bonferroni</text>
-</svg>
+<div class="tres">
+<div class="t-nar fragment fade-up"><b>Aburren</b>"Estos dos grupos no
+difieren." Se siente como volver al inicio.</div>
+<div class="t-nar fragment fade-up"><b>Parecen error</b>Carl no lograba
+cultivar <i>E. coli</i>. No era un hallazgo: era torpeza en el
+laboratorio.</div>
+<div class="t-nar fragment fade-up"><b>Sobran</b>"Los tulipanes
+muerden." "Los elefantes son aves." Como en la batalla naval: fallar
+casi no enseña nada.</div>
+</div>
 ```
-<!-- fin:comparaciones -->
-
-::: {.fragment .fade-up}
-**Corrección de Bonferroni:** con $k$ pruebas, exigir $p < 0.05/k$ en
-cada una. Así la probabilidad de algún falso positivo vuelve a quedar
-cerca de 5&#8201;%.
-:::
 
 ::: {.notes}
-- Con 20 hipótesis falsas, 64 % de probabilidad de que alguna salga
-  significativa.
-- Bonferroni: dividir 0.05 entre el número de pruebas. La línea azul
-  se queda abajo de 5 %.
+- 0.05 es una convención, nada más.
+- Los negativos casi no se publican: aburren, se confunden con no saber
+  hacer el experimento, y las afirmaciones falsas sobran.
+- En la batalla naval casi todo es agua: fallar no dice mucho, atinar
+  sí.
 :::
 
-## "Junto más datos hasta que salga"
+## Ejemplo: elecciones y analgésicos
 
-Datos de **puro ruido**. Cada 10 observaciones reviso el valor p y me
-detengo en cuanto baja de 0.05.
-
-<!-- inicio:parar -->
-```{=html}
-<svg viewBox="0 0 1180 360" width="1180" height="360" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<rect x="90" y="147.1" width="910" height="152.9" fill="#eb6834" opacity="0.08"/>
-<line x1="90.0" y1="30.0" x2="1000.0" y2="30.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="35.0" font-size="17" fill="#52514e" text-anchor="end">1</text>
-<line x1="90.0" y1="120.0" x2="1000.0" y2="120.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="125.0" font-size="17" fill="#52514e" text-anchor="end">0.1</text>
-<line x1="90.0" y1="210.0" x2="1000.0" y2="210.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="215.0" font-size="17" fill="#52514e" text-anchor="end">0.01</text>
-<line x1="90.0" y1="300.0" x2="1000.0" y2="300.0" stroke="#e3e1da" stroke-width="1"/>
-<text x="80.0" y="305.0" font-size="17" fill="#52514e" text-anchor="end">0.001</text>
-<line x1="90.0" y1="147.1" x2="1000.0" y2="147.1" stroke="#eb6834" stroke-width="1.5"/>
-<text x="1012.0" y="152.1" font-size="18" fill="#1b2a41" text-anchor="start" font-weight="700">p = 0.05</text>
-<text x="1012.0" y="237.1" font-size="17" fill="#52514e" text-anchor="start">zona</text>
-<text x="1012.0" y="255.1" font-size="17" fill="#52514e" text-anchor="start">significativa</text>
-<text x="90.0" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">10</text>
-<text x="215.5" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">50</text>
-<text x="372.4" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">100</text>
-<text x="529.3" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">150</text>
-<text x="686.2" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">200</text>
-<text x="843.1" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">250</text>
-<text x="1000.0" y="324.0" font-size="17" fill="#52514e" text-anchor="middle">300</text>
-<text x="545.0" y="352.0" font-size="18" fill="#52514e" text-anchor="middle">observaciones juntadas hasta el momento</text>
-<text x="20.0" y="18.0" font-size="17" fill="#52514e" text-anchor="start">valor p</text>
-<polyline points="90.0,41.0 121.4,45.4 152.8,117.6 184.1,58.9 215.5,62.4 246.9,63.8 278.3,45.2 309.7,46.6 341.0,55.4 372.4,39.9 403.8,50.8 435.2,37.6 466.6,34.3 497.9,44.3 529.3,73.8 560.7,75.4 592.1,83.7 623.4,70.2 654.8,72.7 686.2,62.5 717.6,68.1 749.0,70.0 780.3,72.7 811.7,71.0 843.1,67.1 874.5,52.7 905.9,48.6 937.2,52.0 968.6,48.6 1000.0,37.2" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,93.9 121.4,58.5 152.8,55.0 184.1,44.5 215.5,37.2 246.9,45.3 278.3,34.2 309.7,36.1 341.0,46.6 372.4,41.1 403.8,53.0 435.2,41.8 466.6,41.4 497.9,38.8 529.3,38.5 560.7,42.1 592.1,33.8 623.4,30.2 654.8,41.1 686.2,38.4 717.6,38.3 749.0,37.4 780.3,31.9 811.7,33.8 843.1,35.9 874.5,43.0 905.9,44.2 937.2,35.8 968.6,31.9 1000.0,37.9" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,47.3 121.4,32.2 152.8,39.5 184.1,94.5 215.5,62.8 246.9,55.2 278.3,43.3 309.7,39.3 341.0,30.0 372.4,31.2 403.8,35.7 435.2,46.0 466.6,43.5 497.9,44.7 529.3,42.6 560.7,30.9 592.1,38.4 623.4,38.9 654.8,43.0 686.2,43.2 717.6,38.2 749.0,38.7 780.3,36.2 811.7,41.5 843.1,34.2 874.5,36.7 905.9,49.7 937.2,47.4 968.6,41.5 1000.0,45.0" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,115.6 121.4,68.8 152.8,90.3 184.1,106.3 215.5,64.0 246.9,50.4 278.3,42.4 309.7,33.2 341.0,43.1 372.4,46.7 403.8,71.5 435.2,55.1 466.6,66.4 497.9,59.5 529.3,68.7 560.7,45.3 592.1,50.7 623.4,59.3 654.8,50.9 686.2,41.0 717.6,46.1 749.0,35.0 780.3,37.3 811.7,33.4 843.1,41.7 874.5,73.9 905.9,69.4 937.2,68.3 968.6,67.2 1000.0,109.6" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,35.1 121.4,55.9 152.8,89.0 184.1,46.0 215.5,63.1 246.9,79.7 278.3,84.1 309.7,91.5 341.0,57.7 372.4,53.5 403.8,37.6 435.2,31.9 466.6,38.2 497.9,35.9 529.3,40.3 560.7,49.4 592.1,39.9 623.4,49.6 654.8,33.8 686.2,35.4 717.6,30.3 749.0,31.3 780.3,38.0 811.7,41.6 843.1,30.3 874.5,33.1 905.9,35.6 937.2,42.6 968.6,30.4 1000.0,33.5" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,33.8 121.4,42.8 152.8,42.8 184.1,35.0 215.5,37.9 246.9,39.6 278.3,44.0 309.7,52.3 341.0,40.2 372.4,39.7 403.8,30.4 435.2,34.2 466.6,41.1 497.9,31.1 529.3,35.5 560.7,39.1 592.1,41.6 623.4,32.8 654.8,50.5 686.2,37.8 717.6,32.6 749.0,49.5 780.3,37.3 811.7,39.4 843.1,50.1 874.5,42.9 905.9,35.9 937.2,35.8 968.6,37.3 1000.0,37.6" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,59.8 121.4,35.1 152.8,34.6 184.1,40.4 215.5,57.2 246.9,37.9 278.3,31.0 309.7,74.0 341.0,82.9 372.4,68.0 403.8,119.5 435.2,122.4 466.6,104.1 497.9,98.9 529.3,98.2 560.7,83.7 592.1,86.3 623.4,86.3 654.8,81.5 686.2,74.2 717.6,72.8 749.0,61.2 780.3,77.4 811.7,72.4 843.1,75.1 874.5,95.0 905.9,84.1 937.2,84.7 968.6,104.3 1000.0,111.7" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,31.8 121.4,38.3 152.8,32.2 184.1,43.6 215.5,37.7 246.9,31.6 278.3,57.9 309.7,33.5 341.0,37.5 372.4,47.1 403.8,46.0 435.2,52.9 466.6,55.1 497.9,63.5 529.3,47.3 560.7,44.2 592.1,54.3 623.4,66.4 654.8,48.5 686.2,44.4 717.6,40.4 749.0,31.8 780.3,38.2 811.7,40.7 843.1,32.7 874.5,39.4 905.9,37.1 937.2,36.9 968.6,30.9 1000.0,31.7" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,81.0 121.4,77.9 152.8,68.0 184.1,57.0 215.5,59.2 246.9,78.7 278.3,95.5 309.7,91.9 341.0,96.0 372.4,96.6 403.8,115.1 435.2,129.9 466.6,111.6 497.9,90.4 529.3,85.4 560.7,74.4 592.1,83.7 623.4,104.2 654.8,104.9 686.2,88.1 717.6,84.5 749.0,63.9 780.3,67.4 811.7,48.6 843.1,55.5 874.5,70.9 905.9,53.4 937.2,55.7 968.6,52.7 1000.0,65.4" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,69.5 121.4,37.6 152.8,43.2 184.1,43.3 215.5,78.6 246.9,50.7 278.3,67.5 309.7,50.1 341.0,77.4 372.4,70.5 403.8,59.9 435.2,53.5 466.6,59.1 497.9,52.4 529.3,53.9 560.7,53.0 592.1,51.9 623.4,47.5 654.8,48.0 686.2,50.7 717.6,45.6 749.0,39.5 780.3,30.3 811.7,46.2 843.1,40.3 874.5,38.2 905.9,37.6 937.2,31.0 968.6,37.1 1000.0,41.2" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,32.6 121.4,44.8 152.8,30.8 184.1,55.1 215.5,70.3 246.9,84.8 278.3,76.1 309.7,70.4 341.0,56.8 372.4,45.5 403.8,43.6 435.2,49.3 466.6,34.4 497.9,30.4 529.3,38.0 560.7,33.9 592.1,59.4 623.4,82.9 654.8,101.4 686.2,108.2 717.6,120.7 749.0,117.2 780.3,94.9 811.7,90.6 843.1,72.2 874.5,71.1 905.9,68.7 937.2,73.8 968.6,63.8 1000.0,63.8" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,38.3 121.4,38.9 152.8,36.9 184.1,72.4 215.5,81.6 246.9,41.7 278.3,58.1 309.7,58.5 341.0,64.1 372.4,72.5 403.8,127.6 435.2,122.3 466.6,138.0 497.9,136.4 529.3,106.6 560.7,94.2 592.1,105.1 623.4,131.9 654.8,128.6 686.2,97.6 717.6,81.7 749.0,76.2 780.3,62.3 811.7,58.1 843.1,62.6 874.5,52.8 905.9,58.6 937.2,54.8 968.6,68.5 1000.0,56.5" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,64.7 121.4,45.1 152.8,45.1 184.1,57.9 215.5,47.9 246.9,34.8 278.3,30.9 309.7,31.4 341.0,34.2 372.4,35.6 403.8,31.5 435.2,34.9 466.6,34.7 497.9,41.8 529.3,67.7 560.7,86.3 592.1,92.2 623.4,101.3 654.8,119.2 686.2,112.7 717.6,136.2 749.0,111.1 780.3,117.4 811.7,107.8 843.1,115.2 874.5,100.6 905.9,98.4 937.2,94.5 968.6,99.6 1000.0,102.6" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="90.0,62.7 121.4,61.5 152.8,68.1 184.1,49.4 215.5,74.8 246.9,79.3 278.3,63.8 309.7,76.2 341.0,114.7 372.4,84.9 403.8,68.9 435.2,69.6 466.6,51.0 497.9,36.5 529.3,35.4 560.7,35.0 592.1,34.3 623.4,32.6 654.8,32.2 686.2,37.3 717.6,39.1 749.0,44.7 780.3,38.0 811.7,43.5 843.1,39.2 874.5,44.5 905.9,51.9 937.2,42.3 968.6,42.4 1000.0,41.7" fill="none" stroke="#b9b7af" stroke-width="2" stroke-linejoin="round"/>
-<g class="fragment" data-fragment-index="1">
-<polyline points="90.0,40.9 121.4,47.9 152.8,67.3 184.1,101.6 215.5,82.9 246.9,93.4 278.3,77.7 309.7,71.8 341.0,66.9 372.4,71.6 403.8,86.3 435.2,110.6 466.6,111.4 497.9,123.7 529.3,153.0" fill="none" stroke="#eb6834" stroke-width="2.5" stroke-linejoin="round"/><circle cx="529.3" cy="153.0" r="6" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>se detiene con n = 150, p = 0.043</title></circle>
-<polyline points="90.0,178.7" fill="none" stroke="#eb6834" stroke-width="2.5" stroke-linejoin="round"/><circle cx="90.0" cy="178.7" r="6" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>se detiene con n = 10, p = 0.022</title></circle>
-<polyline points="90.0,88.3 121.4,67.4 152.8,100.8 184.1,129.0 215.5,90.9 246.9,163.8" fill="none" stroke="#eb6834" stroke-width="2.5" stroke-linejoin="round"/><circle cx="246.9" cy="163.8" r="6" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>se detiene con n = 60, p = 0.033</title></circle>
-<polyline points="90.0,48.6 121.4,37.3 152.8,37.9 184.1,30.7 215.5,44.5 246.9,59.1 278.3,55.3 309.7,107.8 341.0,137.5 372.4,121.6 403.8,128.9 435.2,170.0" fill="none" stroke="#eb6834" stroke-width="2.5" stroke-linejoin="round"/><circle cx="435.2" cy="170.0" r="6" fill="#eb6834" stroke="#fbfaf7" stroke-width="2"><title>se detiene con n = 120, p = 0.028</title></circle>
-</g>
-</svg>
-```
-<!-- fin:parar -->
-
-::: {.fragment .fade-up fragment-index=2}
-::: {.ficha .f-nar}
-Con esta regla, **29&#8201;%** de los experimentos terminan
-"significativos", no 5&#8201;%. El tamaño de muestra se tiene que fijar
-**antes**.
-:::
-:::
-
-::: {.notes}
-- Otra forma de p-hacking: seguir juntando datos y parar cuando sale.
-- No hay ningún efecto, es ruido.
-- Las líneas naranjas cruzaron 0.05 en algún momento y ahí pararon.
-- En 10 mil simulaciones, 29 % terminan significativas. El 5 % que
-  prometía el umbral ya no vale.
-:::
-
-## Antídotos
+¿El resultado de una elección cambia el consumo de analgésicos? Antes
+de analizar hay que decidir:
 
 ```{=html}
-<div class="cuatro">
-<div class="t-azul fragment fade-up"><b>Decidir antes de ver los
-datos</b>Qué se va a medir, en quiénes y con qué prueba. Después se
-prueba solo esa hipótesis.</div>
-<div class="t-azul fragment fade-up"><b>Muestra fija</b>Decidir cuántos
-datos se van a juntar antes de empezar, no mirando el valor p.</div>
-<div class="t-aqua fragment fade-up"><b>Corregir por comparaciones</b>Si
-se prueban varias hipótesis, cada una necesita evidencia más fuerte:
-la corrección de Bonferroni.</div>
-<div class="t-aqua fragment fade-up"><b>No esconder decisiones</b>Un
-artículo puede reportar el tamaño final de la muestra y la variable que
-se controló sin decir que se decidieron sobre la marcha.</div>
+<div class="tres" style="gap:12px 18px;">
+<div class="fragment fade-up">¿Qué elección? Presidente, senado,
+alcaldía.</div>
+<div class="fragment fade-up">¿Hombres, mujeres o ambos?</div>
+<div class="fragment fade-up">¿Qué edades?</div>
+<div class="fragment fade-up">¿Ganó un partido, o ganó mi
+candidato?</div>
+<div class="fragment fade-up">¿Qué cuenta como analgésico? ¿Aspirina?
+¿Opioides?</div>
+<div class="fragment fade-up">¿Antes y después, o entre lugares?</div>
 </div>
 ```
 
 ::: {.fragment .fade-up}
 ::: {.ficha .f-nar}
-Y la prueba de fuego: **replicar** con datos nuevos. Un hallazgo
-hackeado no sobrevive a la segunda vez.
+Con tantas combinaciones, **alguna** sale significativa aunque no haya
+ninguna relación. La salida: decidir todo **antes** de ver los datos.
 :::
 :::
 
 ::: {.notes}
-- Decidir el análisis antes de ver los datos.
-- Fijar el tamaño de muestra antes de empezar.
-- Corregir cuando hay varias pruebas: Bonferroni.
-- Las decisiones tomadas sobre la marcha se pueden esconder en el
-  artículo.
-- Al final, replicar: lo hackeado no se repite.
+- Ejemplo del libro: elecciones y consumo de analgésicos.
+- Antes de analizar hay decenas de decisiones: qué elección, quiénes,
+  qué edades, qué medicamentos, qué comparación.
+- Con tantas combinaciones, alguna sale significativa por azar.
+- Por eso hay que fijarlas antes de ver los datos.
 :::
 
+## Las tentaciones
+
+Meses juntando datos, y el resultado sale **casi** significativo.
+
+```{=html}
+<div class="cuatro">
+<div class="t-nar fragment fade-up"><b>Juntar más datos</b>Hasta que p
+baje de 0.05, y parar justo ahí.</div>
+<div class="t-nar fragment fade-up"><b>Probar otras pruebas</b>Hasta que
+alguna pase.</div>
+<div class="t-nar fragment fade-up"><b>Quedarse con un subgrupo</b>"En
+hombres sí sale. Siempre pensé quitar a las mujeres."</div>
+<div class="t-nar fragment fade-up"><b>Cambiar lo que se mide</b>La
+supervivencia a cinco años no mejora; la calidad de vida a tres años,
+sí.</div>
+</div>
+```
+
+
+::: {.notes}
+- Póngase en los zapatos del investigador: meses de trabajo y p casi
+  significativo.
+- Juntar datos hasta que salga, probar otras pruebas, quedarse con los
+  hombres, cambiar la variable del ensayo clínico.
+- Nada es fraude, pero todo es p-hacking.
+:::
 
 
 ## La ley de Goodhart
@@ -912,346 +952,236 @@ hackeado no sobrevive a la segunda vez.
 "Cuando una medida se vuelve objetivo, deja de ser una buena medida."
 :::
 
-
-```{=html}
-<div class="dos">
-<div class="t-nar fragment fade-up"><b>El valor p</b>Medía qué tanto
-apoyan los datos una hipótesis. Desde que <i>p &lt; 0.05</i> decide si
-se publica, dejó de medirlo.</div>
-<div class="t-nar fragment fade-up"><b>La consecuencia</b>Si una
-revista solo publica con p &lt; 0.05, el valor p que aparece impreso ya
-no se puede tomar al pie de la letra.</div>
-</div>
-```
+::: {.fragment .fade-up}
+::: {.ficha .f-nar}
+El valor p medía qué tanto apoyan los datos una hipótesis. Desde que
+$p < 0.05$ decide si se publica, **dejó de medirlo**.
+:::
+:::
 
 ::: {.notes}
-- La ley de Goodhart: si una medida se vuelve meta, se corrompe.
-- El valor p era una medida de evidencia. Al volverse requisito de
-  publicación, ya no mide eso.
-- Por eso un valor p ya publicado no se puede leer al pie de la
-  letra.
+- Si una medida se vuelve meta, se corrompe.
+- El valor p era evidencia; al volverse requisito para publicar, ya no
+  lo es.
 :::
 
 # [04]{.num}¿La mayoría de los hallazgos son falsos? {background-color="#1b2a41"}
 
 [El argumento de Ioannidis (2005)]{.lema}
 
-## Un estudio como una prueba médica
+## La falacia de la tasa base
 
-Si se prueban **1000 hipótesis**, 10&#8201;% verdaderas, y casi solo se
-publican los resultados positivos:
-
-<!-- inicio:arbol -->
-```{=html}
-<svg viewBox="0 0 1180 380" width="1180" height="380" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<g><rect x="20" y="152" width="230" height="76" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="20" y="152" width="8" height="76" rx="3" fill="#1b2a41"/><text x="42.0" y="184.9" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">1000</text><text x="42.0" y="207.0" font-size="17" fill="#52514e" text-anchor="start">hipótesis probadas</text></g>
-<g class="fragment" data-fragment-index="1">
-<path d="M250.0,190.0 C290.0,190.0 290.0,95.0 330.0,95.0" fill="none" stroke="#b9b7af" stroke-width="1.5"/>
-<path d="M250.0,190.0 C290.0,190.0 290.0,285.0 330.0,285.0" fill="none" stroke="#b9b7af" stroke-width="1.5"/>
-<text x="262.0" y="120.0" font-size="17" fill="#52514e" text-anchor="start">10&#8201;%</text>
-<text x="262.0" y="270.0" font-size="17" fill="#52514e" text-anchor="start">90&#8201;%</text>
-</g>
-<g class="fragment" data-fragment-index="1"><rect x="330" y="57" width="230" height="76" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="330" y="57" width="8" height="76" rx="3" fill="#2a78d6"/><text x="352.0" y="89.9" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">100</text><text x="352.0" y="112.0" font-size="17" fill="#52514e" text-anchor="start">verdaderas</text></g>
-<g class="fragment" data-fragment-index="1"><rect x="330" y="247" width="230" height="76" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="330" y="247" width="8" height="76" rx="3" fill="#b9b7af"/><text x="352.0" y="279.9" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">900</text><text x="352.0" y="302.0" font-size="17" fill="#52514e" text-anchor="start">falsas</text></g>
-<g class="fragment" data-fragment-index="2">
-<path d="M560.0,95.0 C600.0,95.0 600.0,95.0 640.0,95.0" fill="none" stroke="#b9b7af" stroke-width="1.5"/>
-<path d="M560.0,285.0 C600.0,285.0 600.0,240.0 640.0,240.0" fill="none" stroke="#b9b7af" stroke-width="1.5"/>
-<path d="M560.0,285.0 C600.0,285.0 600.0,330.0 640.0,330.0" fill="none" stroke="#b9b7af" stroke-width="1.5"/>
-<text x="630.0" y="205.0" font-size="17" fill="#52514e" text-anchor="end">α = 5&#8201;%</text>
-</g>
-<g class="fragment" data-fragment-index="2"><rect x="640" y="65" width="230" height="60" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="640" y="65" width="8" height="60" rx="3" fill="#2a78d6"/><text x="662.0" y="101.0" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">100 significativas</text></g>
-<g class="fragment" data-fragment-index="2"><rect x="640" y="210" width="230" height="60" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="640" y="210" width="8" height="60" rx="3" fill="#eb6834"/><text x="662.0" y="245.9" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">45 significativas</text></g>
-<g class="fragment" data-fragment-index="2"><rect x="640" y="300" width="230" height="60" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="640" y="300" width="8" height="60" rx="3" fill="#dcd9d0"/><text x="662.0" y="335.9" font-size="17" fill="#52514e" text-anchor="start">855 no</text></g>
-<g class="fragment" data-fragment-index="3">
-<path d="M870.0,95.0 C905.0,95.0 905.0,150.0 940.0,150.0" fill="none" stroke="#2a78d6" stroke-width="2.5"/>
-<path d="M870.0,240.0 C905.0,240.0 905.0,200.0 940.0,200.0" fill="none" stroke="#eb6834" stroke-width="2.5"/>
-<g><rect x="940" y="120" width="220" height="112" rx="6" fill="#ffffff" stroke="#e3e1da"/><rect x="940" y="120" width="8" height="112" rx="3" fill="#1b2a41"/><text x="962.0" y="159.8" font-size="17" fill="#1b2a41" text-anchor="start" font-weight="700">145 hallazgos</text><text x="962.0" y="181.9" font-size="17" fill="#52514e" text-anchor="start">100 verdaderos,</text><text x="962.0" y="204.1" font-size="17" fill="#52514e" text-anchor="start">45 falsos</text></g>
-<text x="1050.0" y="268.0" font-size="17" fill="#1b2a41" text-anchor="middle">verdaderos: 100 / 145</text>
-<text x="1050.0" y="300.0" font-size="26" fill="#1b2a41" text-anchor="middle" font-weight="800">= 69&#8201;%</text>
-</g>
-</svg>
-```
-<!-- fin:arbol -->
-
-::: {.fragment .fade-up fragment-index=4}
-::: {.ficha .f-azul}
-Es la **falacia de la tasa base**: la "tasa base" es **qué tan seguido
-probamos hipótesis verdaderas**. Si casi nunca, casi todos los
-hallazgos publicados son falsos positivos, como las pruebas positivas
-de una enfermedad rara.
-:::
-:::
-
-::: {.notes}
-- Ioannidis trata a cada estudio como una prueba médica.
-- Mil hipótesis, 100 verdaderas, que salen positivas.
-- De las 900 falsas, 5 % salen significativas por azar: 45.
-- De 145 hallazgos, 100 son verdaderos: 69 %.
-- Como casi solo se publica lo positivo, la literatura es esa columna.
-:::
-
-## Juega con los supuestos
-
-```{=html}
-<div class="control"><label for="io-prev">Hipótesis verdaderas</label>
-<input type="range" id="io-prev" min="0" max="100" value="65">
-<output id="io-prev-o"></output></div>
-<div class="control"><label>Umbral α</label>
-<div class="alfas"><button class="activo" data-alfa="0.05">0.05</button>
-<button data-alfa="0.005">0.005</button></div></div>
-<div class="resultado">
-<div class="grande"><span id="io-vpp"></span>
-<small>de los hallazgos significativos son verdaderos</small></div>
-<div>
-<div class="apilada"><div class="v" id="io-bv"></div>
-<div class="f" id="io-bf"></div></div>
-<div class="leyenda-ap"><span class="v">verdaderos positivos:
-<b id="io-v"></b></span><span class="f">falsos positivos:
-<b id="io-f"></b></span><span>de 1000 hipótesis</span></div>
-</div>
-</div>
-```
-
-::: {.notes}
-- Bajar las hipótesis verdaderas a 1 %: menos de una de cada cinco
-  publicaciones positivas es cierta.
-- Subirlas a 50 %: casi todas son ciertas.
-- Cambiar el umbral a 0.005: los falsos positivos bajan a la décima
-  parte.
-:::
-
-## ¿Exagera Ioannidis?
-
-Sus matemáticas son correctas **dado su modelo**. Lo discutible son los
-supuestos.
+Una prueba con **5&#8201;%** de falsos positivos sale positiva. ¿Qué tan
+probable es que el paciente esté enfermo? En 10&#8201;000 personas:
 
 ```{=html}
 <div class="dos">
-<div class="t-azul fragment fade-up"><b>Los científicos no prueban
-hipótesis al azar</b>Eligen las que tienen buena probabilidad de ser
-ciertas, porque los negativos no se publican. La tasa base no es
-1&#8201;%, quizá 10&#8201;% o 50&#8201;%.</div>
-<div class="t-nar fragment fade-up"><b>Lo que habría que medir</b>(1)
-Qué fracción de las hipótesis probadas son verdaderas.<br>(2) Qué
-fracción de los resultados negativos se publica.</div>
+<div class="t-nar"><b>Lyme: 1 de cada 1000</b>
+<table class="tabla-fiscal" style="font-size:24px;margin:2px 0 8px;">
+<tr><th></th><th>Positivo</th><th>Negativo</th></tr>
+<tr><td>Enfermo</td><td class="col">10</td><td>0</td></tr>
+<tr><td>Sano</td><td class="col nar">500</td><td>9&#8201;490</td></tr>
+</table>
+De los positivos, <mark>menos del 2&#8201;%</mark> está enfermo.</div>
+<div class="t-azul fragment fade-up"><b><i>Helicobacter</i>: 1 de cada
+5</b>
+<table class="tabla-fiscal" style="font-size:24px;margin:2px 0 8px;">
+<tr><th></th><th>Positivo</th><th>Negativo</th></tr>
+<tr><td>Enfermo</td><td class="col">2&#8201;000</td><td>0</td></tr>
+<tr><td>Sano</td><td class="col nar">400</td><td>7&#8201;600</td></tr>
+</table>
+De los positivos, <mark>5 de cada 6</mark> lo portan.</div>
 </div>
 ```
 
 ::: {.fragment .fade-up}
 ::: {.ficha .f-nar}
-Otra vez la condicional volteada: "el 10&#8201;% de lo publicado es
-negativo" **no** es "se publica el 10&#8201;% de los negativos".
+Es la falacia del fiscal otra vez: el 5&#8201;% se lee en el renglón,
+y lo que importa está en la **columna**.
 :::
 :::
 
 ::: {.notes}
-- Ioannidis tiene razón con sus supuestos.
-- Pero los científicos eligen hipótesis plausibles, así que la tasa
-  base no es tan baja.
-- Para medir el problema hay que saber dos cosas, y la segunda está
-  escondida en los cajones.
-- Ojo: la fracción de lo publicado que es negativo no es la fracción de
-  negativos que se publica. Es la misma trampa del principio.
+- Una prueba de Lyme con 5 % de falsos positivos sale positiva.
+- Si solo 1 de cada 1000 está infectado: 10 positivos verdaderos y
+  500 falsos. Menos de 2 % de los positivos está enfermo.
+- Con Helicobacter, que porta 1 de cada 5: 2000 verdaderos y 400
+  falsos. 5 de 6 lo portan.
+- Depende de qué tan común es la condición: la tasa base.
+:::
+
+## Lo que no se publica: los antidepresivos
+
+Erick Turner revisó los **74 ensayos** de 12 antidepresivos que la FDA
+obliga a registrar, se publiquen o no.
+
+<!-- inicio:turner -->
+```{=html}
+<svg viewBox="0 0 1180 262" width="1180" height="262" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
+<g>
+<text x="244.0" y="60.0" font-size="19" fill="#1b2a41" text-anchor="end">Registrados ante la FDA</text>
+<rect x="260.0" y="24" width="455.0" height="58" rx="4" fill="#2a78d6"><title>38 ensayos</title></rect>
+<text x="488.5" y="60.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">38 positivos</text>
+<rect x="717.0" y="24" width="142.3" height="58" rx="4" fill="#b9b7af"><title>12 ensayos</title></rect>
+<text x="789.2" y="60.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">12 dudosos</text>
+<rect x="861.4" y="24" width="286.6" height="58" rx="4" fill="#eb6834"><title>24 ensayos</title></rect>
+<text x="1005.7" y="60.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">24 negativos</text>
+</g>
+<g class="fragment" data-fragment-index="1">
+<text x="244.0" y="152.0" font-size="19" fill="#1b2a41" text-anchor="end">Publicados en revistas</text>
+<rect x="260.0" y="116" width="443.0" height="58" rx="4" fill="#2a78d6"><title>37 ensayos</title></rect>
+<text x="482.5" y="152.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">37 positivos</text>
+<rect x="705.0" y="116" width="130.3" height="58" rx="4" fill="#f4b08f"><title>11 ensayos</title></rect>
+<text x="771.1" y="152.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">11</text>
+<rect x="837.3" y="116" width="34.1" height="58" rx="4" fill="#eb6834"><title>3 ensayos</title></rect>
+<text x="855.3" y="152.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">3</text>
+<rect x="873.4" y="116" width="274.6" height="58" rx="4" fill="none" stroke="#8a8984" stroke-dasharray="6 4"><title>23 ensayos</title></rect>
+<text x="1011.7" y="152.0" font-size="19" fill="#52514e" text-anchor="middle" font-weight="700">23 sin publicar</text>
+</g>
+<rect x="260" y="224" width="14" height="14" rx="3" fill="#2a78d6"/>
+<text x="282.0" y="236.0" font-size="17" fill="#52514e" text-anchor="start">positivo</text>
+<rect x="392.8" y="224" width="14" height="14" rx="3" fill="#b9b7af"/>
+<text x="414.8" y="236.0" font-size="17" fill="#52514e" text-anchor="start">dudoso</text>
+<rect x="506.90000000000003" y="224" width="14" height="14" rx="3" fill="#eb6834"/>
+<text x="528.9" y="236.0" font-size="17" fill="#52514e" text-anchor="start">negativo</text>
+<rect x="639.7" y="224" width="14" height="14" rx="3" fill="#f4b08f"/>
+<text x="661.7" y="236.0" font-size="17" fill="#52514e" text-anchor="start">negativo o dudoso, publicado como positivo</text>
+</svg>
+```
+<!-- fin:turner -->
+
+::: {.fragment .fade-up fragment-index=2}
+::: {.ficha .f-nar}
+En la FDA, **51&#8201;%** salieron positivos. En las revistas,
+**94&#8201;%**. Lo publicado es la punta del iceberg.
+:::
+:::
+
+::: {.notes}
+- Para medir el sesgo hay que ver lo que no se publicó. La FDA obliga
+  a registrar los ensayos clínicos.
+- De 74 ensayos, 38 positivos, 12 dudosos, 24 negativos.
+- Casi todos los positivos se publicaron; de los otros, menos de la
+  mitad, y 11 de esos 14 se presentaron como positivos.
+- La literatura dice 94 % de éxito; la realidad, 51 %.
 :::
 
 # [05]{.num}Del laboratorio al titular {background-color="#1b2a41"}
 
 [Cómo viaja, y cómo se vende, un resultado]{.lema}
 
-## El teléfono descompuesto
-
-```{=html}
-<div class="cadena">
-<div><span class="etq">Artículo</span>En <b>40 ratones</b>, un
-suplemento de flavonoides de cacao <b>se asoció</b> con menos tiempo en
-un laberinto de agua (p = 0.04).</div>
-<div class="fragment fade-up"><span class="etq">Comunicado de
-prensa</span>El cacao <b>mejora</b> la memoria, según estudio de la
-universidad.<span class="perdio">se perdió: <del>en ratones</del>,
-<del>se asoció</del></span></div>
-<div class="fragment fade-up"><span class="etq">Nota en un
-portal</span>Comer <b>chocolate</b> mejora tu memoria.<span
-class="perdio">se perdió: <del>flavonoides</del>, <del>un estudio
-preliminar</del></span></div>
-<div class="fragment fade-up"><span class="etq">Titular
-viral</span>Científicos <b>confirman</b>: el chocolate previene el
-Alzheimer.<span class="perdio">se perdió: <del>memoria espacial</del>,
-<del>p = 0.04</del></span></div>
-</div>
-```
-
-::: {.fragment .fade-up}
-Los errores típicos: omitir las advertencias, convertir **correlación
-en causa**, pasar de **animales a humanos**, dar consejos más fuertes
-de lo que el estudio permite. Muchas veces el error **ya viene en el
-comunicado** de la propia universidad.
-:::
-
-::: {.notes}
-- Un ejemplo inventado, pero muy típico.
-- El artículo: ratones, asociación, p de 0.04.
-- El comunicado ya dice "mejora". La nota habla de chocolate. El
-  titular, de Alzheimer.
-- Cada paso quita una advertencia. Y el primer error lo comete la
-  universidad.
-:::
-
-## Las correcciones no viajan
-
-```{=html}
-<div class="dos">
-<div class="t-nar fragment fade-up"><b>Selección por sorpresa</b>Los
-medios no cubren una muestra al azar de los estudios: cubren los más
-sorprendentes. Y lo sorprendente es, justo, lo que menos se
-replica.</div>
-<div class="t-nar fragment fade-up"><b>Silencio después</b>Cuando un
-estudio famoso no se replica, casi nadie lo cuenta. Un resultado
-negativo no es noticia.</div>
-</div>
-```
-
-::: {.fragment .fade-up}
-::: {.ficha}
-Resultado: el público ve a la ciencia **cambiar de opinión cada
-semana** y se vuelve cínico. No porque la ciencia oscile, sino porque
-solo le llegan los extremos.
-:::
-:::
-
-::: {.fragment .fade-up}
-::: {.ficha .f-azul}
-**Prueba de plausibilidad:** antes de compartir, ¿el titular pasa una
-revisión básica de sentido común con lo que ya sé?
-:::
-:::
-
-::: {.notes}
-- Los medios eligen lo más sorprendente, que es lo que menos aguanta.
-- Cuando se cae, no lo reportan.
-- La gente ve a la ciencia cambiar de opinión cada semana y deja de
-  creerle.
-- Antes de compartir: ¿es plausible?
-:::
-
 ## Un estudio no es un hecho
 
 ```{=html}
 <div class="dos">
-<div class="t-nar"><b>Colección de estampas</b>Cada artículo es un
-hecho que se pega en el álbum y ya no se mueve. Así la pintan muchas
-notas, y hasta algunos libros de texto.</div>
-<div class="t-azul"><b>Balanza de evidencia</b>Cada estudio es un
-<b>argumento</b> que mueve un poco lo que creemos. Se juzga junto con el
-resto de la literatura.</div>
+<div class="t-nar"><b>Álbum de estampas</b>Cada artículo es un hecho
+que se pega y ya no se mueve. Así lo pintan muchas notas.</div>
+<div class="t-azul"><b>Un argumento más</b>Cada estudio mueve un poco lo
+que creemos. Se juzga junto con el resto de la literatura.</div>
 </div>
-<svg viewBox="0 0 1180 150" width="1180" height="150"
-  font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif"
-  style="display:block;margin:14px auto 0;">
-<text x="40" y="26" font-size="18" fill="#52514e">qué tanto creemos la
-hipótesis</text>
-<rect x="40" y="48" width="1100" height="16" rx="8" fill="#e6e4dd"/>
-<text x="40" y="92" font-size="16" fill="#8a8984">0 %</text>
-<text x="1140" y="92" font-size="16" fill="#8a8984"
-  text-anchor="end">100 %</text>
-<g class="fragment current-visible" data-fragment-index="1">
-<circle cx="590" cy="56" r="14" fill="#1b2a41" stroke="#fbfaf7"
-  stroke-width="3"/>
-<text x="590" y="128" font-size="21" fill="#1b2a41"
-  text-anchor="middle">sin estudios: 50 %</text></g>
-<g class="fragment current-visible" data-fragment-index="2">
-<circle cx="722" cy="56" r="14" fill="#2a78d6" stroke="#fbfaf7"
-  stroke-width="3"/>
-<text x="722" y="128" font-size="21" fill="#1b2a41"
-  text-anchor="middle">un estudio chico a favor: 62 %</text></g>
-<g class="fragment current-visible" data-fragment-index="3">
-<circle cx="810" cy="56" r="14" fill="#2a78d6" stroke="#fbfaf7"
-  stroke-width="3"/>
-<text x="810" y="128" font-size="21" fill="#1b2a41"
-  text-anchor="middle">otro a favor: 70 %</text></g>
-<g class="fragment current-visible" data-fragment-index="4">
-<circle cx="634" cy="56" r="14" fill="#eb6834" stroke="#fbfaf7"
-  stroke-width="3"/>
-<text x="634" y="128" font-size="21" fill="#1b2a41"
-  text-anchor="middle">uno grande y bien hecho en contra: 54 %</text></g>
-<g class="fragment" data-fragment-index="5">
-<circle cx="700" cy="56" r="14" fill="#1b2a41" stroke="#fbfaf7"
-  stroke-width="3"/>
-<text x="700" y="128" font-size="21" fill="#1b2a41"
-  text-anchor="middle">un metaanálisis de todos: 60 %</text></g>
-</svg>
 ```
 
-::: {.fragment .fade-up fragment-index=6}
+::: {.fragment .fade-up}
 ::: {.ficha .f-nar}
-**Ciencia de cafetería:** escoger del menú solo los estudios que cuentan
-la historia que uno quiere. Lo hacen periodistas, y a veces también
-científicos.
+**Ciencia de cafetería:** escoger solo los estudios que cuentan la
+historia que uno quiere. En 1980, una carta de **100 palabras** en el
+*NEJM* se citó tanto como prueba de que los opioides casi no causan
+adicción que en 2017 la revista le puso una advertencia.
 :::
 :::
 
 ::: {.notes}
-- Muchos imaginan la ciencia como un álbum: cada estudio es un hecho
-  pegado.
-- En realidad cada estudio mueve un poco la aguja.
-- Dos chicos a favor la suben, uno grande en contra la baja, el
-  metaanálisis la deja en medio.
-- Ciencia de cafetería: quedarse solo con los estudios que me
-  convienen.
+- La prensa pinta la ciencia como un álbum de estampas: cada estudio es
+  un hecho.
+- En realidad cada estudio es un argumento que se pesa con los demás.
+- Ciencia de cafetería: quedarse con los que convienen. La carta de
+  1980 sobre opioides se citó sin crítica durante décadas.
 :::
 
 ## ¿Quién le paga a quién?
 
 ```{=html}
 <div class="tres">
-<div class="t-azul fragment fade-up"><b>Suscripción</b>El autor entrega
-el artículo <b>gratis</b>. Las bibliotecas <b>pagan por leer</b>. A la
-revista le conviene publicar cosas que valga la pena leer.</div>
-<div class="t-aqua fragment fade-up"><b>Acceso abierto</b>El autor, o su
-beca, <b>paga por publicar</b>. Cualquiera lee gratis. La revista seria
-cuida su reputación revisando en serio.</div>
+<div class="t-azul fragment fade-up"><b>Suscripción</b>El autor publica
+gratis y las bibliotecas <b>pagan por leer</b>.</div>
+<div class="t-aqua fragment fade-up"><b>Acceso abierto</b>El autor
+<b>paga por publicar</b> y cualquiera lee gratis.</div>
 <div class="t-nar fragment fade-up"><b>Depredadora</b>El autor <b>paga
-por publicar</b>. Nadie revisa de verdad. La revista gana con cada
-artículo aceptado, sea lo que sea.</div>
-</div>
-```
-
-
-
-::: {.notes}
-- Tres modelos de negocio.
-- En suscripción la revista vive de que la lean. En acceso abierto
-  vive de los autores, y las serias cuidan su nombre.
-- Las depredadoras cobran y publican lo que sea. Te escriben correos
-  así, con tu título copiado.
-- Si contamos artículos, nace el mercado. Y se usa para dar apariencia
-  de ciencia a cualquier cosa.
-:::
-
-## ¿Es legítimo este artículo?
-
-```{=html}
-<div class="dos">
-<div class="t-tinta"><b>Lo que sí revisa la revisión por pares</b>Que
-los métodos sean razonables, que el razonamiento sea lógico y que las
-conclusiones se sigan de los resultados.</div>
-<div class="t-nar"><b>Lo que no revisa</b>No repite los experimentos,
-no corre el código, no rehace cada derivación ni revisa los datos a
-fondo. No detecta un fraude bien escondido.</div>
+por publicar</b> y nadie revisa: se acepta lo que sea.</div>
 </div>
 ```
 
 ::: {.fragment .fade-up}
-Ningún artículo es seguro, aunque esté en *Nature*. Lo que sí se puede
-juzgar es si es **legítimo**: escrito de **buena fe**, con **métodos
-apropiados** y **tomado en serio** por la comunidad del área.
+::: {.ficha .f-nar}
+John McCool mandó un "caso clínico" de la **uromicitisis**, una
+enfermedad inventada en *Seinfeld*. Se lo aceptaron en días, a cambio
+de 799 dólares. Nunca pagó.
+:::
 :::
 
+::: {.notes}
+- En suscripción, la revista vive de que la lean.
+- En acceso abierto, de los autores; las serias cuidan su nombre.
+- Las depredadoras cobran y publican cualquier cosa. Otra vez Goodhart:
+  si se cuentan artículos, nace el mercado.
+- McCool les mandó el capítulo de Seinfeld como caso clínico y se lo
+  aceptaron.
+:::
+
+## Cualquier artículo puede estar mal
+
+```{=html}
+<div class="tres">
+<div class="t-nar"><b>Linus Pauling</b>Dos premios Nobel, y propuso un
+ADN de <b>tres</b> hélices.</div>
+<div class="t-nar fragment fade-up"><b><i>Science</i>, 1969</b>El
+"poliagua", un polímero de agua que no existe.</div>
+<div class="t-nar fragment fade-up"><b><i>Nature</i>, 1988</b>Un
+artículo según el cual la homeopatía funciona.</div>
+</div>
+```
+
+::: {.fragment .fade-up}
+::: {.ficha}
+La **revisión por pares** revisa que los métodos y el razonamiento sean
+razonables. No repite los experimentos, no corre el código ni rehace
+las cuentas.
+:::
+:::
 
 ::: {.notes}
-- La revisión por pares ayuda, pero no repite el trabajo.
-- Ningún artículo es infalible. Lo que podemos ver es si es legítimo.
-- Revisiones rápidas: dónde se publicó, si la afirmación corresponde
-  al nivel de la revista, tamaño de muestra, retractaciones.
+- Nadie es infalible: ni Pauling, ni Science, ni Nature.
+- La revisión por pares ayuda, pero no repite el trabajo ni detecta un
+  fraude bien escondido.
+:::
+
+## ¿Es legítimo este artículo?
+
+**Legítimo:** escrito de buena fe, con métodos apropiados y tomado en
+serio por la comunidad del área.
+
+```{=html}
+<div class="dos">
+<div class="t-azul fragment fade-up"><b>¿Corresponde al foro?</b>"Pesos
+de algunas ranas ribereñas" en una revista modesta: normal. "Los
+neandertales se extinguieron en la Guerra de los Cien Años" en la misma
+revista: alarma.</div>
+<div class="t-nar fragment fade-up"><b>El café verde del Dr. Oz</b>Un
+"milagro" para bajar de peso, en una revista marginal y con 16
+personas. Después se retractó.</div>
+</div>
+```
+
+::: {.fragment .fade-up}
+[Antes de apostar por un artículo: revisar la revista, la editorial y si
+tiene retractación.]{.nota}
+:::
+
+::: {.notes}
+- No podemos saber si un artículo es correcto, pero sí si es legítimo.
+- Una afirmación extraordinaria en una revista menor es una alarma.
+- El café verde del Dr. Oz: revista marginal, 16 personas, retractado.
+- Revisar revista, editorial y retractaciones.
 :::
 
 # [06]{.num}Por qué la ciencia funciona {background-color="#1b2a41"}
@@ -1260,30 +1190,36 @@ apropiados** y **tomado en serio** por la comunidad del área.
 
 ```{=html}
 <div class="cuatro">
-<div class="t-azul fragment fade-up"><b>Hipótesis plausibles</b>Se
-prueban ideas con buena probabilidad de ser ciertas, así que la mayoría
-de los positivos son verdaderos.</div>
-<div class="t-azul fragment fade-up"><b>Es acumulativa</b>Sobre un
-resultado falso no se puede construir: quien lo intente va a fallar,
-regresará a revisar el original y el error saldrá a la luz.</div>
+<div class="t-azul fragment fade-up"><b>Hipótesis plausibles</b>Nadie
+gasta años en tiros al aire, así que casi todos los positivos son
+verdaderos.</div>
+<div class="t-azul fragment fade-up"><b>Es acumulativa</b>Un mecanismo
+hallado en moscas se prueba en ratones y gusanos. Si era falso, ahí se
+cae.</div>
 <div class="t-aqua fragment fade-up"><b>La dirección delata al
-ruido</b>Si unos estudios dicen que algo ayuda y otros que daña, lo más
-probable es que no haga nada.</div>
+ruido</b>Si un fármaco mejora la memoria en unos estudios y la empeora
+en otros, lo más probable es que no haga nada.</div>
 <div class="t-aqua fragment fade-up"><b>Contradecir se vuelve
-noticia</b>Cuando algo se da por hecho, un experimento que lo
-contradice deja de ser negativo y pasa a ser publicable.</div>
+noticia</b>Medir que la velocidad de la luz <b>no</b> cambia era un
+negativo aburrido; ahora que se discute, es publicable.</div>
 </div>
 ```
 
+::: {.fragment .fade-up}
+::: {.ficha}
+Y, sobre todo, **funciona**: los artículos sueltos fallan, la
+institución no.
+:::
+:::
 
 ::: {.notes}
 - Se prueban hipótesis razonables.
 - Es acumulativa: lo falso no aguanta que construyan encima.
 - Si hay efectos en las dos direcciones, es ruido.
 - Lo establecido se vuelve objetivo: contradecirlo es publicable.
-- Y empíricamente funciona. El problema son artículos sueltos, no la
-  ciencia.
+- Y empíricamente funciona.
 :::
+
 
 ## Para leer un hallazgo
 
