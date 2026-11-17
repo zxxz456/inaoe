@@ -1010,61 +1010,7 @@ y lo que importa está en la **columna**.
 - Depende de qué tan común es la condición: la tasa base.
 :::
 
-## Lo que no se publica: los antidepresivos
 
-Erick Turner revisó los **74 ensayos** de 12 antidepresivos que la FDA
-obliga a registrar, se publiquen o no.
-
-<!-- inicio:turner -->
-```{=html}
-<svg viewBox="0 0 1180 262" width="1180" height="262" style="display:block;margin:0 auto;" font-family="Inter, Segoe UI, Helvetica Neue, Arial, sans-serif">
-<g>
-<text x="244.0" y="60.0" font-size="19" fill="#1b2a41" text-anchor="end">Registrados ante la FDA</text>
-<rect x="260.0" y="24" width="455.0" height="58" rx="4" fill="#2a78d6"><title>38 ensayos</title></rect>
-<text x="488.5" y="60.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">38 positivos</text>
-<rect x="717.0" y="24" width="142.3" height="58" rx="4" fill="#b9b7af"><title>12 ensayos</title></rect>
-<text x="789.2" y="60.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">12 dudosos</text>
-<rect x="861.4" y="24" width="286.6" height="58" rx="4" fill="#eb6834"><title>24 ensayos</title></rect>
-<text x="1005.7" y="60.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">24 negativos</text>
-</g>
-<g class="fragment" data-fragment-index="1">
-<text x="244.0" y="152.0" font-size="19" fill="#1b2a41" text-anchor="end">Publicados en revistas</text>
-<rect x="260.0" y="116" width="443.0" height="58" rx="4" fill="#2a78d6"><title>37 ensayos</title></rect>
-<text x="482.5" y="152.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">37 positivos</text>
-<rect x="705.0" y="116" width="130.3" height="58" rx="4" fill="#f4b08f"><title>11 ensayos</title></rect>
-<text x="771.1" y="152.0" font-size="19" fill="#1b2a41" text-anchor="middle" font-weight="700">11</text>
-<rect x="837.3" y="116" width="34.1" height="58" rx="4" fill="#eb6834"><title>3 ensayos</title></rect>
-<text x="855.3" y="152.0" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="700">3</text>
-<rect x="873.4" y="116" width="274.6" height="58" rx="4" fill="none" stroke="#8a8984" stroke-dasharray="6 4"><title>23 ensayos</title></rect>
-<text x="1011.7" y="152.0" font-size="19" fill="#52514e" text-anchor="middle" font-weight="700">23 sin publicar</text>
-</g>
-<rect x="260" y="224" width="14" height="14" rx="3" fill="#2a78d6"/>
-<text x="282.0" y="236.0" font-size="17" fill="#52514e" text-anchor="start">positivo</text>
-<rect x="392.8" y="224" width="14" height="14" rx="3" fill="#b9b7af"/>
-<text x="414.8" y="236.0" font-size="17" fill="#52514e" text-anchor="start">dudoso</text>
-<rect x="506.90000000000003" y="224" width="14" height="14" rx="3" fill="#eb6834"/>
-<text x="528.9" y="236.0" font-size="17" fill="#52514e" text-anchor="start">negativo</text>
-<rect x="639.7" y="224" width="14" height="14" rx="3" fill="#f4b08f"/>
-<text x="661.7" y="236.0" font-size="17" fill="#52514e" text-anchor="start">negativo o dudoso, publicado como positivo</text>
-</svg>
-```
-<!-- fin:turner -->
-
-::: {.fragment .fade-up fragment-index=2}
-::: {.ficha .f-nar}
-En la FDA, **51&#8201;%** salieron positivos. En las revistas,
-**94&#8201;%**. Lo publicado es la punta del iceberg.
-:::
-:::
-
-::: {.notes}
-- Para medir el sesgo hay que ver lo que no se publicó. La FDA obliga
-  a registrar los ensayos clínicos.
-- De 74 ensayos, 38 positivos, 12 dudosos, 24 negativos.
-- Casi todos los positivos se publicaron; de los otros, menos de la
-  mitad, y 11 de esos 14 se presentaron como positivos.
-- La literatura dice 94 % de éxito; la realidad, 51 %.
-:::
 
 # [05]{.num}Del laboratorio al titular {background-color="#1b2a41"}
 
@@ -1160,20 +1106,9 @@ las cuentas.
 **Legítimo:** escrito de buena fe, con métodos apropiados y tomado en
 serio por la comunidad del área.
 
-```{=html}
-<div class="dos">
-<div class="t-azul fragment fade-up"><b>¿Corresponde al foro?</b>"Pesos
-de algunas ranas ribereñas" en una revista modesta: normal. "Los
-neandertales se extinguieron en la Guerra de los Cien Años" en la misma
-revista: alarma.</div>
-<div class="t-nar fragment fade-up"><b>El café verde del Dr. Oz</b>Un
-"milagro" para bajar de peso, en una revista marginal y con 16
-personas. Después se retractó.</div>
-</div>
-```
 
 ::: {.fragment .fade-up}
-[Antes de apostar por un artículo: revisar la revista, la editorial y si
+[Antes de apostar por un artículo: revisar la revista, ver si corresponde al foro, la editorial y si
 tiene retractación.]{.nota}
 :::
 
