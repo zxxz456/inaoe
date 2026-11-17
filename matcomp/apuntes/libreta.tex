@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.15.0
+%   * Version: 2.16.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       17/11/2026      Clase 11 Nov, pruebas de hipotesis
 %  zxxz6       11/11/2026      Clase 9 Nov, regresion y correlacion
 %  zxxz6       28/10/2026      Clase 28 Oct, IID, error estandar y teoremas
 %  zxxz6       28/10/2026      Clase 26 Oct, graficas y distribuciones
@@ -9908,6 +9909,1169 @@ límites de la interpretación.
     $\hat{\beta}$ salen inestables. A eso se le llama
     multicolinealidad.
 \end{ojo}
+
+
+\newpage
+% =====================================================================
+%  Clase 11 Nov - Pruebas de hipotesis
+% =====================================================================
+
+\clase{Pruebas de hipótesis}{11 de noviembre de 2026}
+
+\begin{quick_sum}
+    Cómo se decide con datos si un efecto es real o salió por azar.
+    Primero la parte conceptual: qué es una hipótesis científica, por
+    qué tiene que ser falseable y operacional, y cómo se traduce a un
+    par de hipótesis estadísticas, la nula y la alternativa. Una prueba
+    calcula una estadística con la muestra y mide, con el valor $p$,
+    qué tan rara sería si la nula fuera cierta. Luego las pruebas
+    básicas, cada una con un ejemplo de computación: la $t$ para
+    medias, pareada y no pareada; la ji cuadrada para tablas de
+    contingencia; Mann-Whitney cuando no hay normalidad; la $F$ para
+    varianzas, y el ANOVA para las medias de más de dos grupos. Cierra
+    con una tabla para escoger la prueba.
+\end{quick_sum}
+
+La clase siguió dos presentaciones: una de prueba de hipótesis y otra
+de pruebas básicas. Las distribuciones que usan, la $t$, la ji cuadrada
+y la $F$, con sus grados de libertad, ya están en la clase del $26$;
+aquí solo se usan.
+
+% =====================================================================
+
+\subsection*{Ciencia y evidencia}
+
+La presentación abre con una frase de Ernest Rutherford: \emph{``If
+your experiment needs statistics, you ought to have done a better
+experiment''}. Puede valer para un experimento de física bien
+controlado. En computación casi nunca: el mismo programa no tarda lo
+mismo dos veces y la exactitud de un modelo cambia con la semilla, así
+que hace falta una forma de separar el efecto del ruido.
+
+El método científico, en breve:
+\begin{enumerate}[itemsep=0.2em]
+    \item se observa un \textbf{fenómeno};
+    \item se propone una \textbf{hipótesis}, una explicación plausible
+          que dé cuenta de las observaciones;
+    \item se \textbf{experimenta}: se cambian las condiciones y se mide
+          el fenómeno en cada una;
+    \item con la evidencia del experimento se \textbf{confirma o
+          refuta} la hipótesis;
+    \item si se confirma, se tiene una tesis o teoría científica.
+\end{enumerate}
+Falta a propósito la palabra \emph{demostrar}. Un experimento no
+demuestra una hipótesis; acumula evidencia a favor o en contra.
+
+La versión formal de los mismos pasos:
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm}%
+                >{\raggedright\arraybackslash}p{4.6cm}l}
+    \toprule
+    \textbf{Divulgativo} & \textbf{Formal} & \\
+    \midrule
+    Observar un fenómeno & construir un constructo
+                         & $X \mathrel{R} Y \mid C$ \\
+    \addlinespace
+    Proponer una hipótesis falseable & formular un modelo
+                                     & $Y = f(X, C)$ \\
+    \addlinespace
+    Experimentar & diseñar el experimento, tomar y analizar datos
+                 & $\mu_{Y \mid X, C} \neq \mu_{Y \mid \neg X, C}$ \\
+    \addlinespace
+    Confirmar o rechazar & validar el modelo
+                         & $X \mathrel{R} Y \mid C \iff Y = f(X, C)$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+$X \mathrel{R} Y \mid C$ se lee ``$X$ se relaciona con $Y$, con las
+condiciones $C$ fijas'': las variables independiente, dependiente y
+controladas de la clase del $9$. El experimento compara la media de
+$Y$ con $X$ y sin $X$, todo lo demás igual. En la presentación el
+``sin $X$'' sale como $\bar{X}$, que aquí no es una media.
+
+Un \textbf{fenómeno} es cualquier ocurrencia o evento observable:
+directamente, con instrumentos, o incluso de forma indirecta por sus
+consecuencias. Un pico de latencia se ve en un monitor; una fuga de
+memoria se infiere porque el proceso crece hasta que lo matan.
+
+% =====================================================================
+
+\subsection*{Hipótesis de investigación}
+
+\begin{definicion}[Hipótesis]
+    Una explicación propuesta para un fenómeno: una proposición
+    consistente con las observaciones que todavía no se ha verificado
+    ni refutado. Hay dos tipos, relacionados entre sí: la hipótesis
+    \textbf{de investigación} o científica, y la \textbf{estadística}.
+\end{definicion}
+
+La hipótesis de investigación es una afirmación sobre la asociación
+que se espera entre variables. Por eso una bien definida dice, al menos
+de forma implícita, cuáles son las independientes y la dependiente, y
+de preferencia también las controladas: es un modelo. Es la conjetura
+que motiva la investigación, y tiene que cumplir dos cosas.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Falseable} o refutable: se puede diseñar un
+          experimento cuyo resultado, si sale distinto a lo predicho,
+          la tumba. Formalmente, de ella se deduce al menos un
+          enunciado que la observación podría mostrar falso. Es el
+          criterio de Karl Popper para separar ciencia de lo que no lo
+          es, y puede cumplirse de forma directa o indirecta.
+    \item \textbf{Operacional}: escrita sin ambigüedades, de modo que
+          se pueda deducir de ella (i) cómo se relacionan las
+          variables, (ii) qué implica esa relación y (iii) qué índices
+          se van a medir.
+\end{itemize}
+
+Muchas veces se escribe como ``si \ldots{} entonces''. Si se toma una
+aspirina, entonces el dolor disminuye. Si fumar causa cáncer de pulmón,
+entonces quienes fuman deben desarrollarlo con más frecuencia.
+
+\begin{ejemplo}[Las truchas]
+    En una piscifactoría se observa que las truchas arcoíris tienen más
+    liendres en verano, cuando baja el nivel del agua. ¿Cuál hipótesis
+    está mejor formulada?
+    \begin{enumerate}[label=\alph*), itemsep=0.2em]
+        \item ``El nivel del agua afecta la cantidad de liendres de la
+              trucha arcoíris.''
+        \item ``La trucha arcoíris padece más liendres con niveles de
+              agua bajos porque el agua contiene menos oxígeno.''
+    \end{enumerate}
+    La b): nombra a los participantes, las truchas; la variable
+    independiente, el oxígeno; la dependiente, el número de liendres; y
+    el efecto, menos oxígeno lleva a más liendres. Se puede poner a
+    prueba oxigenando el agua sin cambiar el nivel. La a) no explica
+    por qué ocurre nada, y el nivel del agua ni siquiera es una
+    variable del mecanismo: es parte del fenómeno que se quiere
+    explicar.
+\end{ejemplo}
+
+\begin{ejemplo}[Las catarinas]
+    ¿Bien o mal formuladas?
+    \begin{enumerate}[label=\alph*), itemsep=0.2em]
+        \item ``Nuestro universo está rodeado por otro universo mayor,
+              con el que no tenemos contacto.'' Mal: sea cierta o no,
+              ninguna observación puede refutarla. Es especulación, no
+              hipótesis.
+        \item ``Las plantas infestadas de áfidos expuestas a catarinas
+              tendrán menos áfidos tras una semana que las infestadas
+              no expuestas.'' Bien: variable independiente, la
+              exposición; dependiente, el número de áfidos; efecto
+              predicho y hasta el plazo del experimento.
+        \item ``Las catarinas son un buen pesticida natural para plantas
+              con áfidos.'' Mal: ``buen pesticida'' es vago y no dice
+              cómo se va a medir.
+    \end{enumerate}
+\end{ejemplo}
+
+En computación, ``la caché mejora el sistema'' no es operacional.
+``Con una caché de $64$ MB, el tiempo medio de respuesta de las
+consultas repetidas baja respecto a no tener caché, con el mismo
+servidor y la misma carga'' sí: dice qué se cambia, qué se mide y qué
+se mantiene fijo.
+
+% =====================================================================
+
+\subsection*{Hipótesis estadísticas}
+
+\begin{definicion}[Hipótesis estadística]
+    Una proposición sobre una o más poblaciones, casi siempre sobre sus
+    parámetros. Es \textbf{simple} si solo usa igualdades, como
+    $\mu = 0$, $\mu_1 = \mu_2 = \mu_3$ o $a + b = c$, y
+    \textbf{compuesta} si usa desigualdades, como $\mu \neq 0$,
+    $\mu > 0$ o $a < b < c$. Una compuesta es \textbf{de un lado} si
+    usa $>$ o $<$, y \textbf{de dos lados} si usa $\neq$.
+\end{definicion}
+
+Una prueba siempre enfrenta dos:
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Hipótesis nula}, $H_0$: no hay diferencia ni relación;
+          lo que se ve se explica por el azar. Ejemplo:
+          $H_0\colon \mu_1 = \mu_2$.
+    \item \textbf{Hipótesis alternativa}, $H_a$ o $H_1$: hay una
+          diferencia o relación genuina. Ejemplo:
+          $H_a\colon \mu_1 \neq \mu_2$.
+\end{itemize}
+Las dos podrían ser simples o compuestas, pero lo normal es una nula
+simple y una alternativa compuesta. La nula tiene que ser simple para
+poder calcular cómo se distribuiría la estadística si fuera cierta.
+
+\begin{ejemplo}[Estatura]
+    ¿Los hombres son más altos que las mujeres? $H_0$: no hay diferencia
+    de estatura entre géneros, $\mu_H = \mu_M$. $H_a$: la hay,
+    $\mu_H \neq \mu_M$. Con datos del CDC de 2007 las medias son
+    $174$ y $161$ cm, y aun así las dos distribuciones se traslapan
+    mucho: muchas mujeres son más altas que muchos hombres. Una
+    diferencia de medias real no quiere decir que cada individuo de un
+    grupo supere a cada uno del otro.
+\end{ejemplo}
+
+\subsubsection*{De la hipótesis de investigación a la estadística}
+
+La traducción es directa: el azar de la ciencia es la hipótesis nula, y
+la hipótesis científica es la alternativa.
+
+\begin{ejemplo}[Seminarios]
+    Se quiere saber si los seminarios mejoran el rendimiento.
+    Hipótesis de investigación: ``si los estudiantes asisten a
+    seminarios además de las clases con el profesor, su rendimiento
+    mejora''. Se definen dos distribuciones: $n$ alumnos que solo toman
+    las clases y $n$ que además toman seminarios. Con
+    $\delta = \mu_{\text{con}} - \mu_{\text{sin}}$, la diferencia de
+    calificación media:
+    \[
+        H_0\colon \delta = 0
+        \quad \text{(los seminarios no mejoran nada)} ,
+        \qquad
+        H_a\colon \delta > 0
+        \quad \text{(tienen un efecto positivo)} .
+    \]
+    Es de un lado porque la hipótesis predice una dirección.
+\end{ejemplo}
+
+\begin{ojo}
+    Rechazar $H_0$ no necesariamente respalda la hipótesis de
+    investigación. Si los alumnos escogieron ir a los seminarios,
+    los que fueron pueden ser los más motivados, y la diferencia sería
+    de motivación, no de seminarios: la confusión de la clase del $19$.
+    La prueba dice que la diferencia no es azar; por qué existe lo dice
+    el diseño. Y una hipótesis aceptada en una investigación puede caer
+    en la siguiente.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{La prueba de hipótesis}
+
+\begin{definicion}[Prueba de hipótesis]
+    Un procedimiento para decidir, con una muestra, si hay evidencia
+    suficiente para rechazar $H_0$. Usa una \textbf{estadística de
+    prueba}: una función de la muestra, y por lo tanto una variable
+    aleatoria, cuya distribución se conoce suponiendo que $H_0$ es
+    cierta.
+\end{definicion}
+
+Visto de otra forma: decidir si un parámetro cae en un subconjunto
+$\Theta_0$ del espacio de parámetros, el que describe $H_0$, o en su
+complemento.
+
+\begin{ojo}
+    Una de las definiciones de la presentación dice que la prueba
+    ``determina la probabilidad de que una hipótesis sea cierta''. No es
+    así, y es el error de la clase del $7$: el valor $p$ es la
+    probabilidad de ver datos así de extremos \emph{suponiendo} que
+    $H_0$ es cierta, no la probabilidad de que $H_0$ lo sea. Por lo
+    mismo se dice ``no se rechaza $H_0$'', no ``se acepta''.
+\end{ojo}
+
+El proceso, en su versión informal:
+\begin{enumerate}[itemsep=0.2em]
+    \item definir la hipótesis nula y la alternativa;
+    \item tomar los datos;
+    \item elegir la prueba apropiada;
+    \item calcular la estadística de prueba: $t$, $F$, $\chi^2$, $z$;
+    \item decidir si se rechaza $H_0$ con una regla fijada de antemano.
+\end{enumerate}
+
+\subsubsection*{De la estadística al valor $p$}
+
+Si $\Theta$ es la estadística y $\theta_{\text{obs}}$ el valor que
+salió con los datos,
+\[
+    p = P(\Theta \ge \theta_{\text{obs}} \mid H_0)
+    = \int_{\theta_{\text{obs}}}^{\infty} f_\Theta(u)\, du ,
+\]
+el área bajo la densidad de $\Theta$ más allá de lo observado. En una
+prueba de dos lados se suman las dos colas:
+$p = P(\abs{T} \ge \abs{t_{\text{obs}}})$. La regla de decisión: con un
+nivel de significancia $\alpha$, típicamente $0.05$, se rechaza $H_0$
+si $p < \alpha$. Es lo mismo que comparar la estadística contra el
+\textbf{valor crítico}, el punto que deja exactamente $\alpha$ en la
+cola.
+
+La integral casi nunca tiene forma cerrada. Hay tres salidas: una
+tabla, una calculadora en línea o una función de software. Para leer la
+tabla de la $t$:
+\begin{enumerate}[itemsep=0.2em]
+    \item escoger el renglón de encabezado según la alternativa: una
+          cola o dos;
+    \item escoger la columna del nivel de significancia;
+    \item escoger el renglón de los grados de libertad;
+    \item el valor crítico está en el cruce.
+\end{enumerate}
+Con $25$ grados de libertad, dos colas y $\alpha = 0.05$, el cruce da
+$2.060$. Una $t$ observada mayor en valor absoluto rechaza $H_0$.
+
+\subsubsection*{Una cola o dos}
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    colas/.style={
+        width=7.6cm, height=4.4cm, domain=-3.8:3.8, samples=120,
+        xmin=-3.8, xmax=3.8, ymin=0, ymax=0.45, axis on top,
+        ytick=\empty, tick label style={font=\scriptsize},
+        title style={font=\small}},
+    curva/.style={thick, acento},
+    region/.style={draw=none, fill=orange!60, samples=40}}
+\begin{axis}[colas, title={Dos colas: $H_a\colon \mu \neq \mu_0$},
+             xtick={-1.96, 0, 1.96}]
+    \addplot[region, domain=-3.8:-1.96]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[region, domain=1.96:3.8]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[curva] {0.398942*exp(-x^2/2)};
+    \node[font=\scriptsize] at (axis cs:-2.7, 0.09) {$2.5\%$};
+    \node[font=\scriptsize] at (axis cs:2.7, 0.09) {$2.5\%$};
+\end{axis}
+\begin{axis}[colas, at={(8.2cm, 0)},
+             title={Una cola: $H_a\colon \mu > \mu_0$},
+             xtick={0, 1.645}, xticklabels={$0$, $1.645$}]
+    \addplot[region, domain=1.645:3.8]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[curva] {0.398942*exp(-x^2/2)};
+    \node[font=\scriptsize] at (axis cs:2.6, 0.11) {$5\%$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Las dos regiones de rechazo tienen el mismo $\alpha = 0.05$ bajo una
+normal estándar. La de una cola lo concentra todo en un lado, así que
+rechaza con $z \ge 1.645$ en lugar de $1.96$, pero nunca puede detectar
+un efecto en la dirección contraria. Se usa solo cuando la hipótesis
+predice la dirección, como en los seminarios, y se decide antes de ver
+los datos. Escoger la cola después de ver hacia dónde salió la
+diferencia duplica el $\alpha$ real.
+
+\subsubsection*{Los dos errores}
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+    \toprule
+    & \textbf{$H_0$ es cierta} & \textbf{$H_0$ es falsa} \\
+    \midrule
+    Se rechaza $H_0$ & error tipo I, probabilidad $\alpha$
+                     & acierto, probabilidad $1 - \beta$ \\
+    No se rechaza $H_0$ & acierto, probabilidad $1 - \alpha$
+                        & error tipo II, probabilidad $\beta$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+$\alpha$ lo fija uno; $\beta$ depende del tamaño real del efecto, de la
+dispersión y de $n$. $1 - \beta$ es la \textbf{potencia}: la
+probabilidad de detectar un efecto que sí existe. Con pocos datos la
+potencia es baja, y por eso no rechazar $H_0$ no dice que no haya
+efecto: puede que el experimento fuera muy chico para verlo.
+
+% =====================================================================
+
+\subsection*{De la regresión a la prueba}
+
+Un modelo de regresión expresa una asociación; la prueba dice si es
+genuina o se debe al azar. En
+\[
+    Y = \beta_0 + \beta_1 X_1 + \varepsilon
+\]
+el grado y la dirección de la asociación están en $\beta_1$. Si
+$\beta_1 = 0$, $X_1$ no se relaciona con $Y$, así que
+\[
+    H_0\colon \beta_1 = 0 \quad \text{(no hay relación)} ,
+    \qquad
+    H_a\colon \beta_1 \neq 0 \quad \text{(hay una relación genuina)} .
+\]
+La intersección $\beta_0$ casi nunca interesa. En regresión la nula
+siempre es simple, $\beta_1 = 0$, $\beta_1 + \beta_2 = 0$,
+$\beta_1 = \beta_2 = 0$, $\beta_2 + \beta_3 = 1$, y la alternativa
+compuesta: $\beta_1 \neq 0$ de dos colas, $\beta_1 < 0$ o
+$\beta_1 > 0$ de una. En la presentación las alternativas salen
+etiquetadas como $H_0$; son $H_a$.
+
+\begin{ejemplo}[¿El tamaño del archivo importa?]
+    Con los cinco archivos de la clase del $9$, $\hat{\beta}_1 = 0.043$
+    ms/MB, $s_e = 1.140$ ms y $S_{xx} = 100\,000$. El error estándar de
+    la pendiente y la estadística son
+    \[
+        EE(\hat{\beta}_1) = \frac{s_e}{\sqrt{S_{xx}}}
+        = \frac{1.140}{316.2} = 0.00361 ,
+        \qquad
+        t = \frac{\hat{\beta}_1}{EE(\hat{\beta}_1)}
+          = \frac{0.043}{0.00361} = 11.93 ,
+    \]
+    con $n - 2 = 3$ grados de libertad. El valor crítico de dos colas
+    es $3.182$, el mismo de las bandas de confianza, y $p = 0.0013$. Se
+    rechaza $H_0$: con solo cinco puntos ya hay evidencia de que el
+    tiempo depende del tamaño.
+\end{ejemplo}
+
+Cada vez que se aplica una prueba se está suponiendo un modelo, aunque
+no se vea. El modelo lineal general implementa casi todas las de esta
+clase (Friston et al., 1995). La prueba $t$ de dos grupos, por ejemplo,
+es una regresión con una variable indicadora $x = 1$ para un grupo y
+$x = 0$ para el otro: $\hat{\beta}_1$ sale igual a la diferencia de
+medias, y su prueba $t$ es la prueba $t$ de dos muestras.
+
+% =====================================================================
+
+\subsection*{Prueba $t$: diferencia de medias}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+    \toprule
+    Hipótesis & las medias difieren \\
+    Requisitos & variables numéricas \\
+    Supuestos & cada grupo normal; observaciones independientes; en la
+                versión clásica de dos muestras, varianzas iguales \\
+    Versiones & una muestra o dos; datos independientes o pareados \\
+    Resultado & valor $t$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La de una muestra compara una media contra un valor fijo; la de dos
+muestras compara dos grupos. Las tres versiones:
+\[
+    \text{una muestra:}\;
+    t = \frac{\bar{x} - \mu_0}{s / \sqrt{n}} ,
+    \qquad
+    \text{dos muestras:}\;
+    t = \frac{\bar{x}_1 - \bar{x}_2}
+             {\sqrt{s_1^2 / n_1 + s_2^2 / n_2}} ,
+    \qquad
+    \text{pareada:}\;
+    t = \frac{\bar{d}}{s_d / \sqrt{n}} .
+\]
+La de una muestra y la pareada tienen $n - 1$ grados de libertad. La de
+dos muestras escrita así es la de Welch, que no pide varianzas iguales;
+sus grados de libertad salen de una fórmula aparte y casi nunca son
+enteros. La pareada no es una prueba nueva: es la de una muestra
+aplicada a las diferencias $d_i$, con $\mu_0 = 0$.
+
+La presentación pone entre los supuestos ``media y desviación estándar
+independientes, falla si son asimétricos''. Se refiere a que la
+estadística $t$ solo sigue una distribución $t$ si $\bar{x}$ y $s$ son
+independientes, y eso solo pasa con datos normales. Con datos
+asimétricos, como los tiempos con cola larga, una muestra con $\bar{x}$
+alta suele traer también $s$ alta, y la cuenta deja de seguir la $t$.
+
+\begin{ejemplo}[ResNet-50 contra ViT-S/16]
+    Dos clasificadores de imágenes se entrenan y evalúan en las mismas
+    $10$ particiones de una validación cruzada. Cada partición da un
+    par de exactitudes, y $d_i = B_i - A_i$ en puntos porcentuales:
+    \begin{center}
+    \small
+    \begin{tabular}{lcccccccccc}
+        \toprule
+        Partición & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$
+                  & $9$ & $10$ \\
+        \midrule
+        ResNet-50 ($A$) & $94.0$ & $90.0$ & $91.2$ & $92.6$ & $89.8$
+                        & $92.8$ & $91.6$ & $90.8$ & $90.9$ & $91.4$ \\
+        ViT-S/16 ($B$) & $95.0$ & $90.5$ & $92.5$ & $92.8$ & $90.7$
+                       & $93.8$ & $92.3$ & $91.3$ & $91.6$ & $92.4$ \\
+        $d_i$ & $1.0$ & $0.5$ & $1.3$ & $0.2$ & $0.9$ & $1.0$ & $0.7$
+              & $0.5$ & $0.7$ & $1.0$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    $H_0\colon \mu_d = 0$, misma exactitud media; $H_a\colon
+    \mu_d \neq 0$, con $\alpha = 0.05$. La media de las diferencias es
+    $\bar{d} = 7.8 / 10 = 0.78$, y la suma de sus desviaciones al
+    cuadrado $0.936$:
+    \[
+        s_d = \sqrt{\frac{0.936}{9}} = 0.322 ,
+        \qquad
+        t = \frac{0.78}{0.322 / \sqrt{10}} = \frac{0.78}{0.102}
+          = 7.65 .
+    \]
+    Con $9$ grados de libertad el valor crítico es $\pm 2.262$, y
+    $p = 3.2 \times 10^{-5}$. Se rechaza $H_0$: ViT-S/16 es más exacto
+    por unos $0.8$ puntos, y la ventaja se repite en cada partición.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=7.4cm, height=4.8cm, xmin=89, xmax=96, ymin=0.4, ymax=2.6,
+    ytick={1, 2}, yticklabels={ResNet-50, ViT-S/16},
+    xlabel={exactitud (\%)}, title={Sin parear},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    title style={font=\small}]
+    \addplot[only marks, mark=*, mark size=1.8pt, orange!70!black]
+        coordinates {
+        (94.0, 1) (90.0, 1) (91.2, 1) (92.6, 1) (89.8, 1)
+        (92.8, 1) (91.6, 1) (90.8, 1) (90.9, 1) (91.4, 1)};
+    \addplot[only marks, mark=*, mark size=1.8pt, acento] coordinates {
+        (95.0, 2) (90.5, 2) (92.5, 2) (92.8, 2) (90.7, 2)
+        (93.8, 2) (92.3, 2) (91.3, 2) (91.6, 2) (92.4, 2)};
+\end{axis}
+\begin{axis}[
+    at={(9.2cm, 0)}, width=6.2cm, height=4.8cm,
+    xmin=-0.3, xmax=1.3, ymin=89, ymax=96,
+    xtick={0, 1}, xticklabels={ResNet-50, ViT-S/16},
+    ylabel={exactitud (\%)}, title={Pareadas por partición},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    title style={font=\small}]
+    \pgfplotsset{par/.style={gray!70, mark=*, mark size=1.4pt}}
+    \addplot[par] coordinates {(0, 94.0) (1, 95.0)};
+    \addplot[par] coordinates {(0, 90.0) (1, 90.5)};
+    \addplot[par] coordinates {(0, 91.2) (1, 92.5)};
+    \addplot[par] coordinates {(0, 92.6) (1, 92.8)};
+    \addplot[par] coordinates {(0, 89.8) (1, 90.7)};
+    \addplot[par] coordinates {(0, 92.8) (1, 93.8)};
+    \addplot[par] coordinates {(0, 91.6) (1, 92.3)};
+    \addplot[par] coordinates {(0, 90.8) (1, 91.3)};
+    \addplot[par] coordinates {(0, 90.9) (1, 91.6)};
+    \addplot[par] coordinates {(0, 91.4) (1, 92.4)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+A la izquierda las exactitudes de los dos modelos se traslapan casi por
+completo. A la derecha cada línea es una partición, y las diez suben:
+ViT-S/16 gana en todas. La diferencia entre particiones, de $89.8$ a
+$94.0$, es mucho más grande que la diferencia entre modelos, y el
+pareo la elimina al restar dentro de cada partición. Si se ignora y se
+usa la prueba de dos muestras con los mismos datos,
+\[
+    t = \frac{92.29 - 91.51}{\sqrt{(1.302^2 + 1.380^2) / 10}}
+      = \frac{0.78}{0.600} = 1.30 ,
+    \qquad p = 0.21 ,
+\]
+y no se rechaza nada. Misma diferencia de medias, $0.78$; lo que cambia
+es contra qué ruido se compara: $s_d = 0.32$ contra desviaciones de
+$1.3$ dentro de cada modelo.
+
+\begin{ojo}
+    En validación cruzada las diferencias no son del todo
+    independientes: los conjuntos de entrenamiento de las particiones
+    se traslapan, y la prueba pareada subestima la varianza. Es el
+    problema de IID de la clase del $28$. La corrección de Nadeau y
+    Bengio (2003) cambia el $1/k$ de la varianza de $\bar{d}$ por
+    $1/k + n_{\text{prueba}} / n_{\text{entrenamiento}}$; con $10$
+    particiones, $1/10 + 1/9$:
+    \[
+        t_{\text{corr}} = \frac{0.78}{\sqrt{(0.1 + 0.111) \cdot 0.104}}
+        = 5.26 , \qquad p = 5.2 \times 10^{-4} .
+    \]
+    La conclusión se mantiene, con menos margen.
+\end{ojo}
+
+La segunda presentación trae otro caso igual, un Random Forest contra
+una SVM en las mismas $10$ particiones: $\bar{d} = 0.0089$,
+$s_d = 0.0054$, $t = 5.19$ y $p = 0.0006$; con la corrección,
+$t = 3.57$ y $p = 0.006$. En Python:
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+from scipy import stats
+
+acc_rf  = np.array([.912, .897, .925, .903, .918,
+                    .889, .931, .908, .915, .901])
+acc_svm = np.array([.898, .894, .910, .899, .905,
+                    .887, .914, .901, .909, .893])
+
+t, p = stats.ttest_rel(acc_rf, acc_svm)    # t = 5.19, p = 0.0006
+
+# Correccion de Nadeau y Bengio (2003)
+d = acc_rf - acc_svm
+n, r = len(d), 1 / 9                       # r = n_prueba / n_entrena
+t_c = d.mean() / np.sqrt((1 / n + r) * d.var(ddof=1))
+p_c = 2 * stats.t.sf(abs(t_c), df=n - 1)   # t = 3.57, p = 0.006
+\end{lstlisting}
+
+% =====================================================================
+
+\subsection*{Prueba ji cuadrada de independencia}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+    \toprule
+    Hipótesis & la tabla de contingencia observada difiere de la que se
+                esperaría si las variables fueran independientes \\
+    Requisitos & variables categóricas \\
+    Supuestos & muestra grande, más de $30$; observaciones
+                independientes; al menos $5$ esperadas por celda y
+                ninguna en $0$; corrección de Yates en tablas de
+                $2 \times 2$ \\
+    Resultado & valor $\chi^2$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Es la independencia de la clase del $19$ hecha prueba. Si las variables
+de renglón y columna son independientes, la probabilidad de una celda
+es el producto de las marginales, y el conteo esperado es
+\[
+    E_{ij} = N \cdot \frac{\text{total del renglón } i}{N}
+               \cdot \frac{\text{total de la columna } j}{N}
+           = \frac{\text{total renglón} \times
+                   \text{total columna}}{N} .
+\]
+La estadística mide cuánto se alejan los conteos observados $O_{ij}$ de
+los esperados, igual que en el dado de la clase del $26$:
+\[
+    \chi^2 = \sum_{i, j} \frac{(O_{ij} - E_{ij})^2}{E_{ij}} ,
+    \qquad
+    \text{gl} = (r - 1)(c - 1) ,
+\]
+con $r$ renglones y $c$ columnas. Los grados de libertad son los
+conteos que quedan libres una vez fijos los totales. La corrección de
+Yates, para tablas de $2 \times 2$, le resta $0.5$ a cada
+$\abs{O - E}$ antes de elevar al cuadrado.
+
+\begin{ejemplo}[Errores de un clasificador en tres hospitales]
+    Un clasificador de retinopatía diabética se evalúa con $1000$
+    imágenes de tres hospitales. ¿La proporción de errores depende del
+    hospital? Si sí, hay indicio de \emph{dataset shift}: los datos de
+    algún sitio no se parecen a los de entrenamiento.
+    \begin{center}
+    \small
+    \begin{tabular}{lccccc}
+        \toprule
+        & \textbf{Errores} & \textbf{Aciertos} & \textbf{Total}
+        & \textbf{\% error} & \textbf{Errores esperados} \\
+        \midrule
+        Hospital A & $32$ & $368$ & $400$ & $8.0$ & $43.2$ \\
+        Hospital B & $35$ & $315$ & $350$ & $10.0$ & $37.8$ \\
+        Hospital C & $41$ & $209$ & $250$ & $16.4$ & $27.0$ \\
+        \midrule
+        Total & $108$ & $892$ & $1000$ & $10.8$ & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    $H_0$: el resultado es independiente del hospital. Bajo $H_0$ todos
+    tendrían el $10.8\%$ de error: $400 \cdot 0.108 = 43.2$ en A, y así.
+    Los aciertos esperados son $356.8$, $312.2$ y $223.0$. Las seis
+    contribuciones:
+    \begin{align*}
+        \text{errores:}\quad
+        &\frac{(32 - 43.2)^2}{43.2} + \frac{(35 - 37.8)^2}{37.8}
+         + \frac{(41 - 27)^2}{27} = 2.90 + 0.21 + 7.26 , \\
+        \text{aciertos:}\quad
+        &\frac{(368 - 356.8)^2}{356.8} + \frac{(315 - 312.2)^2}{312.2}
+         + \frac{(209 - 223)^2}{223} = 0.35 + 0.03 + 0.88 ,
+    \end{align*}
+    \[
+        \chi^2 = 11.63 , \qquad \text{gl} = (3 - 1)(2 - 1) = 2 .
+    \]
+    Con $2$ grados de libertad la cola tiene forma cerrada, porque la
+    densidad es $\frac{1}{2} e^{-x/2}$:
+    \[
+        p = P(\chi^2_2 \ge 11.63) = e^{-11.63 / 2} = 0.0030 .
+    \]
+    El valor crítico es $5.99$. Se rechaza $H_0$: la tasa de error
+    depende del hospital.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ybar, bar width=12pt, width=7.6cm, height=5cm,
+    ymin=0, ymax=68, ytick={0, 20, 40}, enlarge x limits=0.25,
+    symbolic x coords={A, B, C}, xtick=data,
+    xticklabels={Hospital A, Hospital B, Hospital C},
+    ylabel={errores}, title={Observados contra esperados},
+    nodes near coords, nodes near coords style={font=\scriptsize},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    title style={font=\small}, legend columns=2,
+    legend style={font=\scriptsize, at={(0.5, 0.97)},
+                  anchor=north}]
+    \addplot[fill=acento!60, draw=acento]
+        coordinates {(A, 32) (B, 35) (C, 41)};
+    \addplot[fill=gray!25, draw=gray]
+        coordinates {(A, 43.2) (B, 37.8) (C, 27)};
+    \legend{observados, esperados bajo $H_0$}
+\end{axis}
+\begin{axis}[
+    at={(8.6cm, 0)}, width=7cm, height=5cm, domain=0:14, samples=100,
+    xmin=0, xmax=14, ymin=0, ymax=0.55, axis on top,
+    xtick={0, 5.99, 11.63}, xticklabels={$0$, $5.99$, $11.63$},
+    ytick=\empty, title={$\chi^2_2$ bajo $H_0$},
+    tick label style={font=\scriptsize}, title style={font=\small}]
+    \addplot[draw=none, fill=orange!60, domain=5.99:14]
+        {0.5*exp(-x/2)} \closedcycle;
+    \addplot[thick, acento] {0.5*exp(-x/2)};
+    \draw[thick, red!70!black] (axis cs:11.63, 0) -- (axis cs:11.63, 0.3)
+        node[above, font=\scriptsize] {observado};
+    \node[font=\scriptsize, anchor=south west] at (axis cs:6.1, 0.06)
+        {$\alpha = 5\%$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+A y B quedan por debajo de lo esperado; C lo supera por $14$ errores.
+La celda de errores en C aporta $7.26$ de los $11.63$: antes de
+desplegar hay que revisar las imágenes de ese sitio.
+
+\begin{ojo}
+    Una $\chi^2$ significativa dice que las variables no son
+    independientes, no en qué celda está la diferencia. Para eso se
+    miran las contribuciones de cada celda, como aquí. Y una no
+    significativa no prueba independencia: dice que la tabla observada
+    podría salir por azar. Con conteos esperados menores que $5$ la
+    aproximación a la $\chi^2$ falla, y se usa la prueba exacta de
+    Fisher.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Prueba de Mann-Whitney}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+    \toprule
+    Hipótesis & una de dos muestras independientes tiende a dar valores
+                más grandes que la otra \\
+    Requisitos & datos ordinales o continuos \\
+    Supuestos & independencia dentro de cada muestra y entre ellas,
+                o sea datos no pareados; escala al menos ordinal; las
+                dos distribuciones con la misma forma salvo su
+                mediana \\
+    Resultado & $U$, y con muestras grandes su aproximación $z$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Es la alternativa a la $t$ de dos muestras cuando no se puede suponer
+normalidad. No usa los valores sino su orden, así que sirve desde la
+escala ordinal de la clase del $12$ y no le afectan los valores
+extremos. También se le llama prueba de suma de rangos de Wilcoxon.
+
+El procedimiento: se juntan las dos muestras, se ordenan, y cada dato
+recibe su rango; si hay empates, cada uno se lleva el promedio de los
+rangos que ocupan. Con $R_1$ la suma de los rangos del grupo $1$,
+\[
+    U_1 = R_1 - \frac{n_1 (n_1 + 1)}{2} ,
+    \qquad
+    U_2 = n_1 n_2 - U_1 .
+\]
+$U_1$ cuenta los pares, uno de cada grupo, en los que gana el grupo
+$1$. Si ninguno tiende a valores mayores, cada grupo gana la mitad de
+los $n_1 n_2$ pares.
+
+\begin{ejemplo}[Mann-Whitney a mano]
+    Latencias en ms de dos versiones de un modelo, $4$ y $5$
+    solicitudes distintas:
+    \[
+        \text{FP32: } 34,\ 41,\ 47,\ 58 ;
+        \qquad
+        \text{INT8: } 28,\ 31,\ 36,\ 39,\ 44 .
+    \]
+    Juntas y ordenadas, con FP32 en negritas:
+    \begin{center}
+    \small
+    \begin{tabular}{lccccccccc}
+        \toprule
+        Latencia & $28$ & $31$ & $\mathbf{34}$ & $36$ & $39$
+                 & $\mathbf{41}$ & $44$ & $\mathbf{47}$
+                 & $\mathbf{58}$ \\
+        Rango & $1$ & $2$ & $\mathbf{3}$ & $4$ & $5$ & $\mathbf{6}$
+              & $7$ & $\mathbf{8}$ & $\mathbf{9}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    $R_{\text{FP32}} = 3 + 6 + 8 + 9 = 26$, y
+    \[
+        U_{\text{FP32}} = 26 - \frac{4 \cdot 5}{2} = 16 ,
+        \qquad
+        U_{\text{INT8}} = 4 \cdot 5 - 16 = 4 .
+    \]
+    Contando pares sale lo mismo: $34$ le gana a $2$ latencias de INT8,
+    $41$ a $4$, $47$ y $58$ a las $5$; en total $16$ de los $20$ pares.
+    FP32 es más lenta en el $80\%$ de las comparaciones. Con muestras
+    tan chicas se usa la distribución exacta de $U$: de las
+    $\binom{9}{4} = 126$ formas de repartir los rangos, $24$ dan un $U$
+    tan extremo o más, así que $p = 24/126 = 0.19$. No se rechaza
+    $H_0$; con $9$ datos, un $80\%$ todavía puede salir por azar.
+\end{ejemplo}
+
+Con muestras grandes $U$ es aproximadamente normal, con
+\[
+    \mu_U = \frac{n_1 n_2}{2} ,
+    \qquad
+    \sigma_U = \sqrt{\frac{n_1 n_2 (n_1 + n_2 + 1)}{12}} ,
+    \qquad
+    z = \frac{U - \mu_U}{\sigma_U} ,
+\]
+y el valor $p$ sale de la normal estándar,
+$p = P(Z > z_{\text{obs}})$ por cola. Es la estandarización de siempre,
+$z = (X - \mu) / \sigma$: cuántas desviaciones estándar queda $U$ de
+lo que se esperaría bajo $H_0$.
+
+\begin{ejemplo}[Latencia de un modelo FP32 contra INT8]
+    Un modelo de lenguaje se cuantiza para servirlo en CPU. Se mide la
+    latencia de $45$ solicitudes independientes con cada versión,
+    distintas en cada grupo. Las latencias tienen cola larga a la
+    derecha, así que la normalidad no es razonable.
+    \begin{center}
+    \small
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Latencia (ms)} & $n$ & \textbf{Mediana}
+        & \textbf{$Q_1$ a $Q_3$} & \textbf{Rango} \\
+        \midrule
+        FP32 & $45$ & $39.5$ & $31.6$ a $47.6$ & $22.4$ a $69.0$ \\
+        INT8 & $45$ & $36.4$ & $29.0$ a $46.1$ & $20.0$ a $61.2$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Se ordenan las $90$ latencias juntas y
+    $R_{\text{FP32}} = 2182.5$; el $.5$ viene de los empates.
+    \[
+        U_1 = 2182.5 - \frac{45 \cdot 46}{2} = 1147.5 ,
+        \qquad
+        U_2 = 2025 - 1147.5 = 877.5 ,
+    \]
+    \[
+        \mu_U = \frac{45 \cdot 45}{2} = 1012.5 ,
+        \qquad
+        \sigma_U = \sqrt{\frac{45 \cdot 45 \cdot 91}{12}} = 123.9 ,
+        \qquad
+        z = \frac{877.5 - 1012.5}{123.9} = -1.09 .
+    \]
+    Con dos colas, $p = 2\, P(Z > 1.09) = 0.276$. No se rechaza
+    $H_0$: con $45$ solicitudes por versión no hay evidencia de que
+    INT8 cambie la latencia. $U_1 / (n_1 n_2) = 1147.5 / 2025 = 0.57$:
+    en el $57\%$ de los pares la solicitud FP32 tardó más.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=5cm, domain=-4:4, samples=120,
+    xmin=-4, xmax=4, ymin=0, ymax=0.62, axis on top,
+    xtick={-1.96, -1.09, 0, 1.09, 1.96}, ytick=\empty,
+    tick label style={font=\scriptsize},
+    legend style={font=\scriptsize, at={(0.99, 0.97)},
+                  anchor=north east}]
+    \addplot[draw=none, fill=acento!30, domain=-4:-1.09, area legend]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[draw=none, fill=acento!30, domain=1.09:4, forget plot]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[draw=none, fill=orange!60, domain=-4:-1.96, area legend]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[draw=none, fill=orange!60, domain=1.96:4, forget plot]
+        {0.398942*exp(-x^2/2)} \closedcycle;
+    \addplot[thick, acento, forget plot] {0.398942*exp(-x^2/2)};
+    \draw[thick, red!70!black] (axis cs:-1.09, 0)
+        -- (axis cs:-1.09, 0.32) node[above, font=\scriptsize]
+        {$z = -1.09$};
+    \legend{$p = 0.276$, región de rechazo $\alpha = 0.05$}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+El valor $p$ es toda el área azul, las dos colas más allá de
+$\pm 1.09$: más de una cuarta parte de la curva. Para rechazar haría
+falta que $z$ cayera en la zona naranja.
+
+\begin{ojo}
+    No rechazar $H_0$ no demuestra que las latencias sean iguales. Para
+    detectar una diferencia de este tamaño hacen falta más mediciones,
+    o un diseño pareado: las mismas solicitudes en las dos versiones,
+    con la prueba de rangos con signo de Wilcoxon, que es la versión
+    pareada de Mann-Whitney. Y si las dispersiones de los grupos son
+    muy distintas, sobre todo con tamaños desiguales, Mann-Whitney da
+    demasiados falsos positivos; la alternativa es Brunner-Munzel.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Prueba $F$: diferencia de varianzas}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+    \toprule
+    Hipótesis & las varianzas de dos poblaciones difieren \\
+    Requisitos & variables numéricas \\
+    Supuestos & distribución normal, a la que es muy sensible;
+                observaciones independientes \\
+    Resultado & valor $F$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Con $H_0\colon \sigma_1^2 = \sigma_2^2$, el cociente $F = s_1^2 / s_2^2$
+sigue una $F_{n_1 - 1,\, n_2 - 1}$ y debe quedar cerca de $1$; es el
+ejemplo de la configuración de la clase del $26$. Se acostumbra poner
+la varianza mayor arriba, y en la prueba de dos colas se compara contra
+el valor crítico de $\alpha / 2$ y se duplica la cola. Si la
+normalidad es dudosa se usa Levene, que hace un ANOVA sobre las
+distancias $\abs{x_i - \bar{x}}$ de cada dato a la media de su grupo,
+o Brown-Forsythe, que hace lo mismo con la mediana y aguanta mejor las
+colas largas.
+
+\begin{ejemplo}[SGD con momento contra Adam]
+    ResNet-18 se entrena en CIFAR-10 con dos optimizadores, $15$
+    semillas cada uno. Las medias son casi idénticas; la pregunta es la
+    estabilidad: cuánto cambia el resultado con la semilla.
+    \begin{center}
+    \small
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Exactitud (\%)} & $n$ & \textbf{Media} & $s$ & $s^2$ \\
+        \midrule
+        SGD con momento & $15$ & $87.43$ & $0.39$ & $0.152$ \\
+        Adam            & $15$ & $87.41$ & $0.84$ & $0.702$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    $H_0\colon \sigma^2_{\text{Adam}} = \sigma^2_{\text{SGD}}$, de dos
+    colas, $\alpha = 0.05$.
+    \[
+        F = \frac{s^2_{\text{Adam}}}{s^2_{\text{SGD}}}
+          = \frac{0.702}{0.152} = 4.60 ,
+        \qquad
+        \text{gl} = (14, 14) .
+    \]
+    Con los $s^2$ redondeados de la tabla sale $4.62$; el $4.60$ es con
+    los valores completos. El valor crítico de la cola superior con
+    $\alpha / 2 = 0.025$ es $2.98$, y
+    $p = 2\, P(F_{14, 14} \ge 4.60) = 2 \cdot 0.0036 = 0.0072$. Se
+    rechaza $H_0$: Adam es menos estable, con una desviación estándar
+    $\sqrt{4.60} = 2.1$ veces la de SGD. Reportar una sola corrida con
+    Adam dice menos de su desempeño esperado.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=4.8cm, domain=85:90, samples=150,
+    xmin=85, xmax=90, ymin=0, ymax=1.1,
+    xlabel={exactitud final (\%)}, ytick=\empty,
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend style={font=\scriptsize, at={(0.98, 0.96)},
+                  anchor=north east}]
+    \addplot[thick, acento]
+        {1.02296*exp(-(x - 87.43)^2/0.3042)};
+    \addplot[thick, dashed, orange!70!black]
+        {0.474931*exp(-(x - 87.41)^2/1.4112)};
+    \legend{SGD con momento: $s = 0.39$, Adam: $s = 0.84$}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Las dos normales están centradas en $87.4\%$; la de Adam es más del
+doble de ancha. Una prueba $t$ sobre las medias no vería nada, y la
+diferencia que importa está en la dispersión.
+
+% =====================================================================
+
+\subsection*{ANOVA de un factor}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.5cm}}
+    \toprule
+    Hipótesis & las medias de más de dos grupos difieren \\
+    Requisitos & variables numéricas \\
+    Supuestos & distribución normal; varianzas homogéneas
+                (homocedasticidad); observaciones independientes \\
+    Resultado & valor $F$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ojo}
+    La presentación lo describe como ``diferencia en el valor de la
+    varianza para más de dos grupos''. Lo que compara son
+    \emph{medias}; las varianzas son la herramienta. El nombre, análisis
+    de varianza, viene de que decide si las medias difieren comparando
+    dos varianzas: la que hay entre los grupos contra la que hay dentro
+    de ellos.
+\end{ojo}
+
+¿Por qué no comparar por pares con pruebas $t$? Con $4$ grupos hay
+$\binom{4}{2} = 6$ pares, y si cada prueba tiene $\alpha = 0.05$, la
+probabilidad de al menos un falso positivo es
+\[
+    1 - 0.95^6 = 0.26 .
+\]
+ANOVA prueba las cuatro medias a la vez con un solo $\alpha$:
+\[
+    H_0\colon \mu_1 = \mu_2 = \cdots = \mu_k ,
+    \qquad
+    H_a\colon \text{al menos una media difiere} .
+\]
+
+La variación total se parte igual que las sumas de cuadrados de la
+regresión de la clase del $9$. Con $k$ grupos de tamaño $n_j$, medias
+$\bar{x}_j$, desviaciones $s_j$ y media global $\bar{x}$, en total $N$
+datos:
+\begin{align*}
+    SS_{\text{entre}} &= \sum_{j=1}^{k} n_j\, (\bar{x}_j - \bar{x})^2
+    && \text{qué tan lejos están las medias entre sí,} \\
+    SS_{\text{dentro}} &= \sum_{j=1}^{k} (n_j - 1)\, s_j^2
+    && \text{qué tan dispersos están los datos de cada grupo.}
+\end{align*}
+Cada suma se divide entre sus grados de libertad para tener un
+cuadrado medio, y el cociente es la estadística:
+\[
+    F = \frac{SS_{\text{entre}} / (k - 1)}
+             {SS_{\text{dentro}} / (N - k)}
+      \sim F_{k - 1,\, N - k} \quad \text{bajo } H_0 .
+\]
+Si las medias son iguales, las dos varianzas estiman la misma
+$\sigma^2$ y $F \approx 1$. Medias separadas inflan el numerador. Por
+eso ANOVA devuelve un valor $F$, y su valor $p$ se saca igual que en
+la prueba $F$. ANOVA no es un modelo sino una familia; este es el de
+un factor.
+
+\begin{ejemplo}[Cuatro estrategias de aumento de datos]
+    Un clasificador de imágenes se entrena con cuatro estrategias de
+    aumento, $8$ semillas cada una, y se mide el F1-macro.
+    \begin{center}
+    \small
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{F1-macro (\%)} & $n$ & \textbf{Media} & $s$ \\
+        \midrule
+        Sin aumento       & $8$ & $78.14$ & $0.81$ \\
+        Volteo horizontal & $8$ & $79.34$ & $1.03$ \\
+        RandAugment       & $8$ & $80.28$ & $0.54$ \\
+        MixUp             & $8$ & $80.25$ & $1.16$ \\
+        \midrule
+        Global            & $32$ & $79.50$ & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    \begin{align*}
+        SS_{\text{entre}}
+        &= 8 \big[ (-1.36)^2 + (-0.16)^2 + 0.78^2 + 0.75^2 \big]
+         = 8 \cdot 3.046 = 24.37 ,
+    \end{align*}
+    y $SS_{\text{dentro}} = 23.39$; con las $s$ redondeadas de la tabla,
+    $7\,(0.81^2 + 1.03^2 + 0.54^2 + 1.16^2) = 23.48$.
+    \begin{center}
+    \small
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Fuente} & $SS$ & \textbf{gl} & \textbf{Cuadrado medio}
+        & $F$ \\
+        \midrule
+        Entre grupos & $24.37$ & $3$ & $8.12$ & $9.72$ \\
+        Dentro de grupos & $23.39$ & $28$ & $0.835$ & \\
+        Total & $47.76$ & $31$ & & \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    El valor crítico de la $F_{3, 28}$ es $2.95$ y
+    $p = 1.5 \times 10^{-4}$. Se rechaza $H_0$: la estrategia de
+    aumento influye en el F1-macro. La fracción de la variación que
+    explica es
+    \[
+        \eta^2 = \frac{SS_{\text{entre}}}{SS_{\text{total}}}
+               = \frac{24.37}{47.76} = 0.51 ,
+    \]
+    el $R^2$ de la clase del $9$ con otro nombre: cerca de la mitad.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=5.4cm, xmin=76, xmax=83, ymin=0.4, ymax=5.1,
+    ytick={1, 2, 3, 4},
+    yticklabels={MixUp, RandAugment, Volteo, Sin aumento},
+    xlabel={F1-macro (\%)},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \draw[dashed, gray] (axis cs:79.50, 0.4) -- (axis cs:79.50, 5.1);
+    \node[font=\scriptsize, gray, anchor=west]
+        at (axis cs:79.55, 4.7) {media global $79.50$};
+    \addplot[only marks, mark=*, mark size=2.2pt, acento,
+             error bars/.cd, x dir=both, x explicit,
+             error bar style={thick, acento}]
+        coordinates {
+            (78.14, 4) +- (0.81, 0)
+            (79.34, 3) +- (1.03, 0)
+            (80.28, 2) +- (0.54, 0)
+            (80.25, 1) +- (1.16, 0)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Cada punto es la media de un grupo y la barra va de una desviación
+estándar a cada lado. ANOVA compara qué tan lejos están los puntos de
+la línea punteada con qué tan largas son las barras.
+
+\begin{ojo}
+    ANOVA dice que hay diferencias, no dónde. Las medias sugieren que
+    RandAugment y MixUp le ganan al modelo sin aumento, pero
+    confirmarlo pide una prueba posterior que controle las
+    comparaciones múltiples, como Tukey HSD. La más simple es la de
+    Bonferroni: cada una de las $m$ comparaciones se hace con
+    $\alpha / m$.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{¿Qué prueba aplicar?}
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}%
+                >{\raggedright\arraybackslash}p{3.6cm}%
+                >{\raggedright\arraybackslash}p{2.6cm}%
+                >{\raggedright\arraybackslash}p{3.4cm}}
+    \toprule
+    \textbf{Pregunta} & \textbf{Datos} & \textbf{Prueba}
+    & \textbf{Si no se cumplen los supuestos} \\
+    \midrule
+    ¿Difieren dos medias? & numéricos, normales
+        & $t$, pareada o de dos muestras
+        & Wilcoxon (pareada) o Mann-Whitney \\
+    \addlinespace
+    ¿Un grupo tiende a valores mayores? & ordinales o continuos,
+        independientes & Mann-Whitney & Brunner-Munzel \\
+    \addlinespace
+    ¿Difieren dos varianzas? & numéricos, normales & $F$
+        & Levene, Brown-Forsythe \\
+    \addlinespace
+    ¿Difieren las medias de tres o más grupos? & numéricos, normales,
+        varianzas iguales & ANOVA & Kruskal-Wallis \\
+    \addlinespace
+    ¿Dos variables categóricas están asociadas? & conteos, al menos
+        $5$ esperados por celda & ji cuadrada & exacta de Fisher \\
+    \addlinespace
+    ¿Un predictor se asocia con $Y$? & modelo de regresión
+        & $t$ sobre $\hat{\beta}$ & \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{idea}
+    Antes que la fórmula, dos preguntas deciden casi todo: qué escala
+    tienen los datos, y si las observaciones están pareadas. El ejemplo
+    de ResNet contra ViT es la prueba: con los mismos datos, la prueba
+    no pareada da $p = 0.21$ y la pareada $p = 3 \times 10^{-5}$.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Ejercicio: un experimento con los datos del proyecto}
+
+Con los datos de su proyecto, cada equipo define un experimento con
+los pasos del ejemplo de los seminarios:
+\begin{enumerate}[itemsep=0.3em]
+    \item Escribir una hipótesis de investigación, del tipo ``si los
+          estudiantes asisten a seminarios además de las clases, su
+          rendimiento mejora''.
+    \item Definir las dos distribuciones que se van a comparar, como
+          los alumnos con y sin seminarios.
+    \item Reescribirla como hipótesis estadísticas, escogiendo la
+          variable que se mide para distinguirlas, y revisar que sea
+          falseable. En el ejemplo, $H_0\colon \mu_d = 0$ y
+          $H_a\colon \mu_d > 0$.
+\end{enumerate}
 
 
 \end{document}
