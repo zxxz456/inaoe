@@ -11,12 +11,13 @@
 %  Metadata:
 %  ----------
 %   * Author : zxxz6 (Bryan Violante Arriaga)
-%   * Version: 2.14.0
+%   * Version: 2.15.0
 %
 %
 %  History:
 %  ------------
 %  Author      Date            Description
+%  zxxz6       11/11/2026      Clase 9 Nov, regresion y correlacion
 %  zxxz6       28/10/2026      Clase 28 Oct, IID, error estandar y teoremas
 %  zxxz6       28/10/2026      Clase 26 Oct, graficas y distribuciones
 %  zxxz6       21/10/2026      Clase 21 Oct, centro, dispersion y forma
@@ -8204,6 +8205,1709 @@ datos.
     promedio no es cuántos datos tiene, sino si sus datos son IID:
     graficarlos en orden, buscar grupos y revisar si el tiempo importa.
 \end{idea}
+
+
+\newpage
+% =====================================================================
+%  Clase 9 Nov - Regresion y correlacion
+% =====================================================================
+
+\clase{Regresión y correlación}{9 de noviembre de 2026}
+
+\begin{quick_sum}
+    Arranca la parte inferencial: cómo pasar de unos datos a un modelo
+    que relacione una variable con otras. Primero qué se quiere
+    explicar y con qué: variable dependiente, independientes y de
+    control, y la diferencia entre un modelo determinista y uno
+    estocástico. Con dependencia estocástica hay dos análisis
+    hermanos: la correlación, que resume en un número qué tan fuerte es
+    la asociación, y la regresión, que estima la ecuación. Se vieron la
+    covarianza, el coeficiente de Pearson y sus alternativas, la
+    regresión lineal simple y múltiple, error contra residuo, el ajuste
+    por mínimos cuadrados y las sumas de cuadrados que llevan a $R^2$.
+    Lo que no alcanzó a verse en clase viene de la presentación: bandas
+    de confianza, diagnóstico con residuos, supuestos, sobreajuste y por
+    qué nada de esto prueba causalidad.
+\end{quick_sum}
+
+Casi todas las cuentas usan el ejercicio de la presentación: un
+programa procesa cinco archivos de distinto tamaño y se mide cuánto
+tarda con cada uno.
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+    \toprule
+    $x$: tamaño (MB) & $100$ & $200$ & $300$ & $400$ & $500$ \\
+    $y$: tiempo (ms) & $7$ & $11$ & $15$ & $18$ & $25$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+
+\subsection*{Descriptiva contra inferencial}
+
+La clase del $7$ ya separó las dos ramas y trae la tabla de
+diferencias. En una línea: la descriptiva cuenta lo que los datos
+muestran, y la inferencial dice hasta dónde se pueden llevar. Parte de
+una muestra representativa para hablar de la población, estima
+parámetros con intervalos de confianza y pone a prueba hipótesis.
+
+La regresión es inferencial. Con cinco archivos no interesa describir
+esos cinco: interesa cuánto va a tardar el programa con cualquier
+archivo, y la pendiente que se calcula con la muestra es solo una
+estimación de la de la población.
+
+% =====================================================================
+
+\subsection*{De los datos al modelo}
+
+Un análisis de regresión sigue siempre el mismo camino:
+
+\begin{center}
+\begin{tikzpicture}[
+    caja/.style={draw=acento, fill=fondoIdea, rounded corners=2pt,
+                 text width=2.5cm, minimum height=1.15cm,
+                 align=center, font=\small},
+    >=stealth]
+    \node[caja] (d) at (0, 0)
+        {\textbf{Datos}\\ {\scriptsize casos observados}};
+    \node[caja] (m) at (3.25, 0)
+        {\textbf{Modelo}\\ {\scriptsize relación supuesta}};
+    \node[caja] (a) at (6.5, 0)
+        {\textbf{Ajuste}\\ {\scriptsize parámetros estimados}};
+    \node[caja] (g) at (9.75, 0)
+        {\textbf{Diagnóstico}\\ {\scriptsize errores y supuestos}};
+    \node[caja] (i) at (13, 0)
+        {\textbf{Interpretación}\\ {\scriptsize y sus límites}};
+    \draw[->] (d) -- (m);
+    \draw[->] (m) -- (a);
+    \draw[->] (a) -- (g);
+    \draw[->] (g) -- (i);
+    \draw[->, gray] (g.south) -- ++(0, -0.45) -| (m.south)
+        node[pos=0.25, below, font=\scriptsize] {si falla, otro modelo};
+\end{tikzpicture}
+\end{center}
+
+El diagnóstico puede mandar de regreso: si los errores muestran un
+patrón, la relación supuesta estaba mal y hay que proponer otra. Pero
+antes de todo eso hay que decidir qué se quiere explicar y con qué
+información.
+
+\subsubsection*{Variables dependientes, independientes y controladas}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Variable dependiente}, $Y$: el resultado que se quiere
+          explicar, resumir o predecir. También se le dice respuesta,
+          variable explicada o salida. Ejemplo: el tiempo de ejecución
+          de un algoritmo.
+    \item \textbf{Variables independientes}, $X_1, \ldots, X_m$: la
+          información que se usa para explicar o predecir la respuesta.
+          También se les dice predictores, regresores o variables
+          explicativas. Ejemplo: tamaño de entrada, memoria, número de
+          hilos.
+    \item \textbf{Variables controladas}: las que se mantienen fijas, o
+          se meten al modelo, para aislar el efecto de las demás.
+\end{itemize}
+
+Aquí ``independiente'' no es la independencia de la clase del $19$.
+Dos predictores pueden estar muy relacionados entre sí y los dos siguen
+siendo variables independientes; el nombre solo dice de qué lado del
+modelo están.
+
+\begin{ejemplo}[Tiempo de entrenamiento de una red]
+    La pregunta es qué explica el tiempo de entrenamiento. La respuesta
+    $Y$ es ese tiempo; los predictores, el número de datos, los
+    parámetros de la red, la GPU y las épocas; y se controlan la
+    versión de la librería, el resto del hardware y el tamaño de lote,
+    que son iguales en todas las corridas.
+    \begin{center}
+    \small
+    \begin{tabular}{cccccc}
+        \toprule
+        \textbf{Caso} & \textbf{Datos} & \textbf{Parámetros}
+        & \textbf{GPU} & \textbf{Épocas} & \textbf{Tiempo} \\
+        \midrule
+        $1$ & $10$k & $1.2$M & T4   & $20$ & $14$ min \\
+        $2$ & $20$k & $1.2$M & T4   & $20$ & $27$ min \\
+        $3$ & $20$k & $3.8$M & T4   & $20$ & $41$ min \\
+        $4$ & $20$k & $3.8$M & A100 & $20$ & $12$ min \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Cada renglón es un caso: una observación junto con las condiciones
+    en que se obtuvo. La tabla está armada para controlar: los casos
+    $1$ y $2$ solo difieren en los datos, y duplicarlos casi duplica el
+    tiempo, de $14$ a $27$ minutos. Los casos $2$ y $3$ solo difieren
+    en los parámetros, y los $3$ y $4$ solo en la GPU. Si en el caso
+    $4$ también hubieran cambiado los datos, no habría forma de saber
+    cuánto de la bajada a $12$ minutos fue por la A100.
+\end{ejemplo}
+
+Con $n$ casos y $m$ predictores, $y_i$ es la respuesta del caso $i$ y
+$x_{ij}$ el valor del predictor $j$ en ese caso. Los predictores forman
+una matriz $X$ de $n \times m$, un renglón por caso, y las respuestas un
+vector $y$ de largo $n$. La regresión trabaja con ese par, y la calidad
+del modelo depende tanto de la teoría como de cómo estén hechos esos
+datos.
+
+% =====================================================================
+
+\subsection*{Qué es la regresión}
+
+\begin{definicion}[Función de regresión]
+    Para dos variables aleatorias $X$ y $Y$, la \textbf{función de
+    regresión} de $Y$ sobre $X$ es el valor esperado de $Y$ cuando $X$
+    toma el valor $x$:
+    \[
+        m(x) = E[\,Y \mid X = x\,] .
+    \]
+    El \textbf{análisis de regresión} estima $m$ a partir de $n$ casos
+    $(x_1, y_1), \ldots, (x_n, y_n)$, suponiendo que tiene una forma
+    conocida $f(x; \beta)$ que depende de unos parámetros $\beta$. En la
+    regresión lineal simple la forma es una recta,
+    $f(x; \beta) = \beta_0 + \beta_1 x$.
+\end{definicion}
+
+\begin{idea}
+    La regresión no demuestra que exista una relación: estima una
+    función bajo supuestos. La forma $f$ la propone uno, no los datos;
+    si está mal escogida, el ajuste igual sale, y sale mal.
+\end{idea}
+
+El nombre viene de Francis Galton, que en 1886 comparó la estatura de
+padres e hijos. Los hijos de padres muy altos eran altos, pero en
+promedio menos que sus padres: ``regresaban'' hacia la media. La recta
+con la que lo describió se quedó con el nombre, aunque hoy ya no tenga
+nada que ver con regresar.
+
+\subsubsection*{Variables, parámetros e hiperparámetros}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.6cm}%
+                 >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    \textbf{Término} & \textbf{Qué es} & \textbf{Ejemplo} \\
+    \midrule
+    Variable & dato medido u observado
+             & $x$ = tamaño de entrada, $y$ = tiempo \\
+    \addlinespace
+    Parámetro & cantidad que estima el ajuste
+              & $\beta_0, \beta_1, \beta_2$ \\
+    \addlinespace
+    Hiperparámetro & decisión que se fija antes de ajustar
+                   & el grado del polinomio \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\[
+    \hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2
+\]
+Las $\beta$ no se observan: se estiman a partir de los casos
+disponibles. El gorro sigue la convención de la clase del $21$:
+$\hat{\beta}_1$ es el estimador de $\beta_1$, y $\hat{y}$ es lo que el
+modelo ajustado predice para $y$.
+
+% =====================================================================
+
+\subsection*{Modelos deterministas y estocásticos}
+
+Modelar es escribir una expresión matemática que describa el
+comportamiento de una variable de interés (Rawlings, 1998). Hay dos
+tipos, según cuánto se le crea a esa expresión.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Determinista}: con los mismos valores de $X$, $Y$
+          siempre vale lo mismo. $Y = f(X)$. Copiar $100$ MB a
+          $50$ MB/s tarda $2$ s, idealmente, y nada más.
+    \item \textbf{Estocástico}: con los mismos valores de $X$, $Y$
+          puede variar. $Y = f(X) + \varepsilon$, donde $\varepsilon$
+          es un error aleatorio con media $0$. Lo que el modelo fija ya
+          no es $Y$ sino su promedio: $E[\,Y \mid X\,] = f(X)$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    modelo/.style={
+        width=7.6cm, height=5cm, xmin=0, xmax=10, ymin=0, ymax=7,
+        xtick=\empty, ytick=\empty, axis lines=left,
+        xlabel={$X$}, ylabel={$Y$}, label style={font=\small},
+        title style={font=\small}},
+    puntos/.style={only marks, mark=*, mark size=1.6pt, acento},
+    recta/.style={thick, orange!70!black, domain=0.5:9.5},
+    campana/.style={gray, domain=-1.4:1.4, samples=40, variable=\t}}
+\begin{axis}[modelo, title={Determinista: $Y = f(X)$}]
+    \addplot[recta] {1 + 0.5*x};
+    \addplot[puntos] coordinates {
+        (1, 1.5) (2, 2) (3, 2.5) (4, 3) (5, 3.5) (6, 4) (7, 4.5)
+        (8, 5) (9, 5.5)
+    };
+\end{axis}
+\begin{axis}[modelo, at={(8.2cm, 0)},
+             title={Estocástico: $Y = f(X) + \varepsilon$}]
+    \addplot[recta] {1 + 0.5*x};
+    \draw[gray!50] (axis cs:2, 0.6) -- (axis cs:2, 3.4);
+    \draw[gray!50] (axis cs:5, 2.1) -- (axis cs:5, 4.9);
+    \draw[gray!50] (axis cs:8, 3.6) -- (axis cs:8, 6.4);
+    \addplot[campana] ({2 + 1.1*exp(-\t^2/0.405)}, {2 + \t});
+    \addplot[campana] ({5 + 1.1*exp(-\t^2/0.405)}, {3.5 + \t});
+    \addplot[campana] ({8 + 1.1*exp(-\t^2/0.405)}, {5 + \t});
+    \addplot[puntos] coordinates {
+        (1.0, 1.8) (1.6, 1.3) (2.1, 2.15) (2.7, 2.95) (3.2, 2.4)
+        (3.9, 2.55) (4.4, 3.7) (4.9, 3.35) (5.5, 3.15) (6.0, 4.3)
+        (6.6, 4.5) (7.1, 4.25) (7.7, 5.55) (8.3, 4.75) (8.8, 5.5)
+    };
+    \node[font=\scriptsize, orange!70!black, anchor=south east]
+        at (axis cs:9.6, 5.9) {$E[\,Y \mid X\,]$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+A la izquierda cada $X$ tiene un solo $Y$: es una \textbf{dependencia
+funcional}. A la derecha cada $X$ tiene toda una distribución de
+posibles $Y$, dibujada de lado en tres puntos, y la recta pasa por los
+centros de esas distribuciones: es una \textbf{dependencia
+estocástica}. El modelo determinista da valores de la variable
+dependiente; el estocástico da su esperanza.
+
+En computación casi todo es estocástico. El mismo programa con la
+misma entrada no tarda lo mismo dos veces: la caché, los otros procesos
+y la frecuencia del procesador le meten ruido a cada corrida.
+
+% =====================================================================
+
+\subsection*{La gráfica de dispersión}
+
+Antes de ajustar se grafica: cada caso es un punto $(x_i, y_i)$. La
+gráfica de dispersión deja ver la tendencia, qué tanto se dispersan los
+puntos alrededor de ella, los valores extremos y si la relación es
+lineal o no. No sustituye al ajuste ni al diagnóstico formal, pero los
+dos se equivocan sin ella.
+
+El ejemplo clásico es el cuarteto de Anscombe (1973): cuatro conjuntos
+de $11$ puntos con la misma media de $x$ ($9$), la misma media de $y$
+($7.5$), la misma recta ajustada, $\hat{y} = 3 + 0.5\,x$, y la misma
+correlación, $r = 0.816$.
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    ans/.style={
+        width=7.4cm, height=4.4cm, xmin=2, xmax=20, ymin=2, ymax=14,
+        xtick={5, 10, 15, 20}, ytick={4, 8, 12},
+        tick label style={font=\scriptsize},
+        title style={font=\small\bfseries, yshift=-1ex}},
+    puntos/.style={only marks, mark=*, mark size=1.4pt, acento},
+    recta/.style={orange!70!black, domain=2:20}}
+\begin{axis}[ans, title={I}]
+    \addplot[recta] {3 + 0.5*x};
+    \addplot[puntos] coordinates {
+        (10, 8.04) (8, 6.95) (13, 7.58) (9, 8.81) (11, 8.33) (14, 9.96)
+        (6, 7.24) (4, 4.26) (12, 10.84) (7, 4.82) (5, 5.68)
+    };
+\end{axis}
+\begin{axis}[ans, at={(7.6cm, 0)}, title={II}]
+    \addplot[recta] {3 + 0.5*x};
+    \addplot[puntos] coordinates {
+        (10, 9.14) (8, 8.14) (13, 8.74) (9, 8.77) (11, 9.26) (14, 8.10)
+        (6, 6.13) (4, 3.10) (12, 9.13) (7, 7.26) (5, 4.74)
+    };
+\end{axis}
+\begin{axis}[ans, at={(0, -4.4cm)}, title={III}]
+    \addplot[recta] {3 + 0.5*x};
+    \addplot[puntos] coordinates {
+        (10, 7.46) (8, 6.77) (13, 12.74) (9, 7.11) (11, 7.81) (14, 8.84)
+        (6, 6.08) (4, 5.39) (12, 8.15) (7, 6.42) (5, 5.73)
+    };
+\end{axis}
+\begin{axis}[ans, at={(7.6cm, -4.4cm)}, title={IV}]
+    \addplot[recta] {3 + 0.5*x};
+    \addplot[puntos] coordinates {
+        (8, 6.58) (8, 5.76) (8, 7.71) (8, 8.84) (8, 8.47) (8, 7.04)
+        (8, 5.25) (19, 12.50) (8, 5.56) (8, 7.91) (8, 6.89)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{I}: lo que uno se imagina con esos números, una nube
+          alrededor de una recta.
+    \item \textbf{II}: una curva perfecta. La recta es el modelo
+          equivocado.
+    \item \textbf{III}: una recta perfecta con un solo punto fuera, que
+          jala hacia él la recta ajustada.
+    \item \textbf{IV}: diez puntos con el mismo $x$ y uno lejos. Ese
+          punto, solo, decide la pendiente.
+\end{itemize}
+
+\begin{ojo}
+    La línea de tendencia es una hipótesis visual; no garantiza que el
+    modelo sea correcto. En los cuatro paneles el ajuste da
+    exactamente los mismos números, y solo en el primero la recta tiene
+    sentido. Por eso se grafica antes de ajustar.
+\end{ojo}
+
+A veces sobre la recta se dibujan bandas que muestran la dispersión de
+los datos o la incertidumbre de la recta misma. Para construirlas hacen
+falta los resultados del ajuste, así que se explican más adelante, en
+las bandas de confianza.
+
+% =====================================================================
+
+\subsection*{Correlación y regresión}
+
+Cuando la dependencia es estocástica hay dos análisis muy relacionados
+que contestan preguntas distintas:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Análisis de correlación}: mide el grado y la
+          consistencia de la asociación entre las variables. Produce un
+          número que resume la fuerza de la relación.
+    \item \textbf{Análisis de regresión}: define el tipo de relación,
+          lineal, exponencial, logarítmica, hiperbólica, y produce una
+          ecuación que la describe.
+\end{itemize}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}%
+                 >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    & \textbf{Correlación} & \textbf{Regresión} \\
+    \midrule
+    Busca & fuerza y dirección de la asociación
+          & una ecuación para explicar o predecir $Y$ \\
+    \addlinespace
+    Da & un número: $r$ o $\rho$
+       & una función: $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ \\
+    \addlinespace
+    Simetría & $\operatorname{Cor}(X, Y) = \operatorname{Cor}(Y, X)$
+             & regresar $Y$ sobre $X$ no es lo mismo que $X$ sobre $Y$ \\
+    \addlinespace
+    Sirve para & explorar y resumir & modelar, inferir, predecir \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+La simetría es la diferencia que más se olvida. La correlación trata
+igual a las dos variables. La regresión no: escoge cuál es la respuesta
+y minimiza los errores en esa dirección, así que la recta de $Y$ sobre
+$X$ y la de $X$ sobre $Y$ salen distintas. Con los archivos se ve en la
+sección de mínimos cuadrados.
+
+\begin{ojo}
+    Correlación alta no implica causalidad, y una regresión con buen
+    ajuste tampoco. Una asociación entre $X$ y $Y$ puede salir sin que
+    $X$ cause $Y$:
+    \begin{itemize}[itemsep=0.2em]
+        \item \textbf{Confusión}: una tercera variable mueve a las dos,
+              como el calor con los helados y los ahogamientos de la
+              clase del $19$. En una regresión es una \emph{variable
+              omitida}: si no está en el modelo, su efecto se le carga
+              a las que sí están.
+        \item \textbf{Causalidad inversa}: es $Y$ la que mueve a $X$.
+              Si los módulos que más se depuran son los que más bugs
+              tienen, no es que depurar meta bugs: los bugs obligan a
+              depurar.
+        \item \textbf{Azar}: con $100$ variables hay $4950$ pares, y a
+              un nivel de $0.05$ unas $250$ correlaciones salen
+              ``significativas'' sin que haya nada detrás.
+    \end{itemize}
+    ``$X$ predice $Y$'' no es ``$X$ causa $Y$''. Para lo segundo hace
+    falta un diseño experimental, o supuestos fuertes y dichos en voz
+    alta. Lo honesto es reportar hasta dónde llega la interpretación.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Covarianza: variación conjunta}
+
+\begin{definicion}[Covarianza]
+    La \textbf{covarianza} de $X$ y $Y$ es el promedio del producto de
+    sus desviaciones respecto de la media:
+    \[
+        \operatorname{Cov}(X, Y) = E\big[ (X - \mu_x)(Y - \mu_y) \big] .
+    \]
+    Su estimador insesgado con una muestra de $n$ pares es
+    \[
+        s_{xy} = \frac{1}{n - 1} \sum_{i=1}^{n}
+                 (x_i - \bar{x})(y_i - \bar{y}) .
+    \]
+\end{definicion}
+
+El $n - 1$ es la corrección de Bessel de la clase del $21$, por la
+misma razón: las desviaciones se miden contra medias calculadas con los
+mismos datos.
+
+El signo de cada producto depende del cuadrante en el que cae el punto,
+tomando $(\bar{x}, \bar{y})$ como origen. Con los archivos:
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=6cm, xmin=0, xmax=600, ymin=0, ymax=30,
+    xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={100, 200, 300, 400, 500}, ytick={0, 10, 20, 30},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \draw[dashed, gray] (axis cs:300, 0) -- (axis cs:300, 30);
+    \draw[dashed, gray] (axis cs:0, 15.2) -- (axis cs:600, 15.2);
+    \filldraw[fill=acento, fill opacity=0.15, draw=acento]
+        (axis cs:300, 15.2) rectangle (axis cs:100, 7);
+    \filldraw[fill=acento, fill opacity=0.15, draw=acento]
+        (axis cs:300, 15.2) rectangle (axis cs:200, 11);
+    \filldraw[fill=acento, fill opacity=0.15, draw=acento]
+        (axis cs:300, 15.2) rectangle (axis cs:400, 18);
+    \filldraw[fill=acento, fill opacity=0.15, draw=acento]
+        (axis cs:300, 15.2) rectangle (axis cs:500, 25);
+    \addplot[only marks, mark=*, mark size=2pt, acento] coordinates {
+        (100, 7) (200, 11) (300, 15) (400, 18) (500, 25)};
+    \node[font=\scriptsize] at (axis cs:150, 9) {$1640$};
+    \node[font=\scriptsize] at (axis cs:250, 13.1) {$420$};
+    \node[font=\scriptsize] at (axis cs:350, 16.6) {$280$};
+    \node[font=\scriptsize] at (axis cs:450, 21.5) {$1960$};
+    \node[font=\large] at (axis cs:560, 27.5) {$+$};
+    \node[font=\large] at (axis cs:40, 27.5) {$-$};
+    \node[font=\large] at (axis cs:40, 2.5) {$+$};
+    \node[font=\large] at (axis cs:560, 2.5) {$-$};
+    \node[font=\scriptsize, gray, anchor=south west]
+        at (axis cs:302, 0.3) {$\bar{x} = 300$};
+    \node[font=\scriptsize, gray, anchor=south west]
+        at (axis cs:5, 15.2) {$\bar{y} = 15.2$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Cada rectángulo va de $(\bar{x}, \bar{y})$ al punto, y su área con
+signo es el producto $(x_i - \bar{x})(y_i - \bar{y})$. Los cuatro
+puntos que no están sobre $\bar{x}$ caen arriba a la derecha o abajo a
+la izquierda, donde las dos desviaciones tienen el mismo signo: todos
+los productos son positivos. La covarianza es el promedio de esas
+áreas, $4300 / 4 = 1075$.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Positiva}: $X$ y $Y$ tienden a crecer juntas.
+    \item \textbf{Negativa}: cuando $X$ crece, $Y$ tiende a bajar; los
+          puntos caen en los otros dos cuadrantes.
+    \item \textbf{Cercana a $0$}: los productos positivos y negativos se
+          cancelan; no hay tendencia lineal.
+\end{itemize}
+
+Su defecto es que la magnitud depende de las unidades. Con el tamaño en
+GB en lugar de MB, todas las desviaciones de $x$ se dividen entre
+$1000$ y la covarianza pasa de $1075$ a $1.075$, aunque la relación sea
+exactamente la misma. Para comparar fuerzas de asociación hay que
+normalizar, y eso lleva a la correlación.
+
+Dos propiedades amarran con clases anteriores:
+\[
+    \operatorname{Cov}(X, X) = \operatorname{Var}(X) ,
+    \qquad
+    \operatorname{Var}(X + Y) = \operatorname{Var}(X)
+        + \operatorname{Var}(Y) + 2 \operatorname{Cov}(X, Y) .
+\]
+La propiedad $5$ de la varianza, en la clase del $21$, es el caso
+$\operatorname{Cov}(X, Y) = 0$; son las covarianzas que aparecían al
+quitar la independencia en el error estándar de la clase del $28$. Y la
+matriz de covarianza del PCA, en la clase de eigenvalores, junta las
+covarianzas de todos los pares de variables, con las varianzas en la
+diagonal.
+
+\begin{ojo}
+    Si $X$ y $Y$ son independientes, su covarianza es $0$. Al revés no
+    se vale. Con $x = -2, -1, 0, 1, 2$ y $y = x^2$, las medias son
+    $\bar{x} = 0$ y $\bar{y} = 2$, y
+    \[
+        \sum_{i} x_i\,(x_i^2 - 2) = \sum_i x_i^3 - 2 \sum_i x_i
+        = 0 - 0 = 0 .
+    \]
+    La covarianza es $0$ y sin embargo $y$ está completamente
+    determinada por $x$. La covarianza solo ve la parte lineal de la
+    relación.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Correlación de Pearson}
+
+\begin{definicion}[Coeficiente de correlación de Pearson]
+    Es la covarianza dividida entre las dos desviaciones estándar:
+    \[
+        \rho = \frac{\operatorname{Cov}(X, Y)}{\sigma_x\, \sigma_y}
+        \quad \text{en la población,}
+        \qquad
+        r = \frac{s_{xy}}{s_x\, s_y}
+        \quad \text{en la muestra.}
+    \]
+\end{definicion}
+
+Como en la tabla de notación de la clase del $21$, $\rho$ es el
+parámetro y $r$ el estimador. Los $n - 1$ de la covarianza y de las dos
+desviaciones se cancelan, y para la cuenta a mano queda
+\[
+    r = \frac{S_{xy}}{\sqrt{S_{xx}\, S_{yy}}} ,
+    \qquad
+    S_{xy} = \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y}) ,
+\]
+con $S_{xx}$ y $S_{yy}$ definidas igual. Las tres sumas $S$ vuelven a
+salir en el ajuste por mínimos cuadrados.
+
+Al dividir entre las desviaciones las unidades se van: $r$ no tiene
+unidades, y pasar los archivos de MB a GB no lo mueve. Mide asociación
+\emph{lineal} entre dos variables cuantitativas, y siempre queda entre
+$-1$ y $1$.
+
+\subsubsection*{Por qué entre $-1$ y $1$}
+
+Con las desviaciones en dos vectores de $\R^n$,
+\[
+    u = (x_1 - \bar{x}, \ldots, x_n - \bar{x}) ,
+    \qquad
+    v = (y_1 - \bar{y}, \ldots, y_n - \bar{y}) ,
+\]
+la fórmula de arriba es
+\[
+    r = \frac{u \cdot v}{\norm{u}\, \norm{v}} = \cos\theta ,
+\]
+el coseno del ángulo entre los dos vectores. Un coseno no sale de
+$[-1, 1]$, y vale $\pm 1$ solo cuando $v$ es múltiplo de $u$, o sea
+cuando todos los puntos caen en una recta. La correlación es geometría
+de la primera parte del curso.
+
+\subsubsection*{Cómo se interpreta}
+
+\begin{itemize}[itemsep=0.3em]
+    \item $r = 1$: correlación positiva perfecta, todos los puntos en
+          una recta creciente.
+    \item $0 < r < 1$: correlación positiva; cuando $X$ crece, $Y$
+          tiende a crecer.
+    \item $r \approx 0$: no hay relación \emph{lineal}. No tiene que
+          dar $0$ exacto; basta con que esté cerca.
+    \item $-1 < r < 0$: correlación negativa; cuando $X$ crece, $Y$
+          tiende a bajar.
+    \item $r = -1$: correlación negativa perfecta, todos los puntos en
+          una recta decreciente.
+\end{itemize}
+
+La presentación dice ``directamente proporcional'' e ``inversamente
+proporcional'', pero no hace falta tanto: proporcional sería una recta
+que pasa por el origen, y para tener $r > 0$ basta con que las
+variables crezcan juntas.
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    rpan/.style={
+        width=3.5cm, height=3.5cm, xmin=0, xmax=10, ymin=0, ymax=10,
+        xtick=\empty, ytick=\empty, axis lines=left,
+        title style={font=\small, yshift=-0.5ex}},
+    puntos/.style={only marks, mark=*, mark size=0.9pt, acento}}
+\begin{axis}[rpan, title={$r = 0.95$}]
+    \addplot[puntos] coordinates {
+        (6.04, 6.01) (7.23, 7.69) (3.57, 3.35) (5.36, 5.80) (6.89, 7.67)
+        (4.65, 5.13) (5.99, 7.11) (4.47, 4.24) (3.86, 4.00) (4.68, 4.83)
+        (5.18, 4.21) (4.45, 4.65) (5.25, 4.68) (8.86, 8.21) (3.26, 3.47)
+        (4.61, 4.66) (2.78, 3.41) (8.79, 8.37) (6.83, 6.20) (4.68, 4.84)
+        (4.15, 3.73) (5.06, 5.28) (4.08, 4.45) (5.47, 5.69) (3.55, 3.65)
+        (4.42, 4.68) (6.68, 5.93) (3.30, 3.70) (5.81, 6.47) (2.66, 2.31)
+    };
+\end{axis}
+\begin{axis}[rpan, at={(3.2cm, 0)}, title={$r = 0.60$}]
+    \addplot[puntos] coordinates {
+        (2.46, 0.39) (6.19, 6.76) (3.60, 5.70) (5.73, 5.88) (1.23, 2.29)
+        (3.44, 4.81) (4.42, 6.55) (4.88, 3.23) (4.95, 4.20) (4.42, 5.93)
+        (5.97, 4.83) (4.89, 5.37) (4.72, 4.43) (6.98, 6.18) (6.29, 5.94)
+        (6.60, 7.15) (3.54, 3.84) (7.27, 5.43) (4.77, 6.03) (7.44, 6.25)
+        (7.06, 6.58) (7.86, 6.99) (4.36, 5.96) (5.93, 4.17) (6.14, 5.08)
+        (5.47, 7.95) (5.64, 3.46) (5.75, 5.64) (6.95, 5.58) (5.14, 2.66)
+    };
+\end{axis}
+\begin{axis}[rpan, at={(6.4cm, 0)}, title={$r = 0$}]
+    \addplot[puntos] coordinates {
+        (6.12, 5.30) (1.76, 4.95) (2.94, 2.35) (4.65, 6.59) (4.86, 3.16)
+        (8.95, 3.94) (5.16, 5.30) (5.21, 5.66) (5.13, 2.37) (2.17, 3.67)
+        (4.07, 4.72) (4.39, 3.97) (5.40, 4.75) (5.78, 4.97) (5.76, 6.64)
+        (6.44, 1.59) (4.93, 5.11) (4.96, 3.00) (2.33, 5.60) (3.53, 6.78)
+        (6.46, 3.25) (1.64, 6.29) (5.08, 4.34) (3.89, 0.96) (7.30, 3.76)
+        (6.26, 6.29) (1.67, 4.45) (5.77, 5.09) (6.77, 3.78) (8.27, 7.13)
+    };
+\end{axis}
+\begin{axis}[rpan, at={(9.6cm, 0)}, title={$r = -0.80$}]
+    \addplot[puntos] coordinates {
+        (2.29, 5.70) (3.84, 6.42) (3.64, 5.20) (4.63, 7.33) (6.69, 3.24)
+        (6.70, 4.13) (4.67, 5.85) (2.39, 6.13) (4.76, 5.75) (6.42, 5.19)
+        (5.21, 4.79) (2.38, 5.96) (4.92, 3.62) (5.15, 4.05) (7.86, 2.80)
+        (7.46, 2.06) (4.03, 5.78) (5.98, 4.00) (1.69, 9.07) (2.39, 8.19)
+        (3.24, 6.42) (3.13, 7.52) (2.73, 5.19) (4.76, 5.21) (4.87, 4.83)
+        (5.17, 4.55) (3.70, 7.51) (7.82, 2.52) (6.46, 4.63) (4.37, 7.60)
+    };
+\end{axis}
+\begin{axis}[rpan, at={(12.8cm, 0)}, title={$r = -0.07$}]
+    \addplot[puntos] coordinates {
+        (0.50, 9.13) (0.97, 7.93) (1.45, 5.71) (1.92, 5.15) (2.39, 3.62)
+        (2.87, 2.72) (3.34, 2.78) (3.82, 1.62) (4.29, 1.19) (4.76, 1.29)
+        (5.24, 1.43) (5.71, 1.19) (6.18, 1.77) (6.66, 1.75) (7.13, 2.69)
+        (7.61, 3.56) (8.08, 4.31) (8.55, 5.51) (9.03, 6.90) (9.50, 9.01)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+El último panel es una parábola: la relación es fortísima y $r$ sale
+en $-0.07$. Y $r$ tampoco es la pendiente: si en el primer panel se
+multiplica $y$ por $0.01$, la nube queda casi horizontal y $r$ sigue
+en $0.95$. Mide qué tan pegados a una recta están los puntos, no qué
+tan inclinada es la recta.
+
+\begin{ejemplo}[De covarianza a correlación con los archivos]
+    Los cinco pasos de la presentación.
+
+    \textbf{1. Medias.} $\bar{x} = 1500 / 5 = 300$ MB y
+    $\bar{y} = 76 / 5 = 15.2$ ms.
+
+    \textbf{2. Desviaciones}, con sus productos y sus cuadrados:
+    \begin{center}
+    \small
+    \begin{tabular}{crrrrrrr}
+        \toprule
+        $i$ & $x_i$ & $y_i$ & $x_i - \bar{x}$ & $y_i - \bar{y}$
+        & producto & $(x_i - \bar{x})^2$ & $(y_i - \bar{y})^2$ \\
+        \midrule
+        $1$ & $100$ & $7$ & $-200$ & $-8.2$
+            & $1640$ & $40\,000$ & $67.24$ \\
+        $2$ & $200$ & $11$ & $-100$ & $-4.2$
+            & $420$ & $10\,000$ & $17.64$ \\
+        $3$ & $300$ & $15$ & $0$ & $-0.2$
+            & $0$ & $0$ & $0.04$ \\
+        $4$ & $400$ & $18$ & $100$ & $2.8$
+            & $280$ & $10\,000$ & $7.84$ \\
+        $5$ & $500$ & $25$ & $200$ & $9.8$
+            & $1960$ & $40\,000$ & $96.04$ \\
+        \midrule
+        $\sum$ & $1500$ & $76$ & $0$ & $0$
+               & $4300$ & $100\,000$ & $188.80$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Las desviaciones suman $0$, como siempre; si no, hay un error de
+    cuenta.
+
+    \textbf{3. Covarianza.} $s_{xy} = 4300 / 4 = 1075$ MB$\cdot$ms.
+
+    \textbf{4. Dividir entre las desviaciones estándar.}
+    $s_x = \sqrt{100\,000 / 4} = 158.11$ MB y
+    $s_y = \sqrt{188.8 / 4} = 6.87$ ms, así que
+    \[
+        r = \frac{1075}{158.11 \cdot 6.87}
+          = \frac{4300}{\sqrt{100\,000 \cdot 188.8}}
+          = \frac{4300}{4345.1} = 0.990 .
+    \]
+
+    \textbf{5. Interpretar.} Positiva y casi $1$: a más tamaño, más
+    tiempo, y los cinco puntos están muy cerca de una recta. Que el
+    tamaño \emph{cause} el tiempo lo dice el sentido común, no $r$.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Otros coeficientes de correlación}
+
+Pearson pide dos variables cuantitativas y solo ve la parte lineal.
+Para cuando eso no se cumple hay otros:
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Spearman}, $r_s$: Pearson calculado sobre los rangos,
+          o sea sobre la posición de cada dato al ordenarlos. Mide qué
+          tan \emph{monótona} es la relación, sea recta o no. Sin
+          empates sale directo de las diferencias de rango $d_i$:
+          \[
+              r_s = 1 - \frac{6 \sum d_i^2}{n\,(n^2 - 1)} .
+          \]
+    \item \textbf{Tau de Kendall}, $\tau$: se toman todos los pares de
+          casos. Un par es \emph{concordante} si el que tiene mayor $x$
+          también tiene mayor $y$, y \emph{discordante} si es al revés.
+          Con $C$ concordantes y $D$ discordantes,
+          $\tau = (C - D) / \binom{n}{2}$. La versión $\tau_b$ corrige
+          el denominador cuando hay muchos empates.
+    \item \textbf{Gamma} de Goodman y Kruskal: la misma idea,
+          $(C - D) / (C + D)$, pero tirando los pares empatados. Es la
+          usual para dos variables ordinales con pocas categorías, como
+          dos escalas de Likert.
+    \item \textbf{Biserial puntual}: Pearson con una variable
+          cuantitativa y otra binaria codificada como $0$ y $1$. Mide
+          qué tan separadas están las medias de los dos grupos.
+\end{itemize}
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.2cm}ll}
+    \toprule
+    \textbf{Situación} & \textbf{Coeficiente} & \textbf{Idea} \\
+    \midrule
+    Dos cuantitativas, relación lineal & Pearson, $r$
+        & asociación lineal \\
+    \addlinespace
+    Relación monótona, no necesariamente lineal & Spearman, $r_s$
+        & Pearson sobre los rangos \\
+    \addlinespace
+    Rangos con muchos empates & Kendall, $\tau_b$
+        & concordancia de pares \\
+    \addlinespace
+    Ordinal con ordinal & Gamma, Kendall & asociación ordinal \\
+    \addlinespace
+    Cuantitativa con binaria & biserial puntual
+        & caso especial de Pearson \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Lo que decide es la escala de medición de la clase del $12$ y la forma
+que se espera de la relación. Pearson necesita escala de intervalo o de
+razón; Spearman y Kendall solo usan el orden, así que sirven desde la
+ordinal. Con una nominal no hay orden, y ninguno de los cuatro aplica.
+
+\begin{ejemplo}[Monótona pero no recta]
+    Un algoritmo exponencial con entradas de tamaño $1$ a $5$ tarda
+    $1, 2, 4, 8, 16$ segundos. Pearson da $r = 0.933$, porque la
+    relación no es una recta. Pero el orden de los tiempos es
+    exactamente el de los tamaños: todas las $d_i$ valen $0$ y
+    $r_s = 1$, y los $10$ pares son concordantes, así que
+    $\tau = 10 / 10 = 1$. Spearman y Kendall dicen que la relación es
+    perfectamente creciente, que es la verdad.
+\end{ejemplo}
+
+% =====================================================================
+
+\subsection*{Regresión lineal simple}
+
+La recta de la secundaria, $y = mx + b$, con $m$ la pendiente y $b$ la
+intersección con el eje vertical, se escribe en regresión con una
+notación que escala a muchos predictores:
+\[
+    y = \beta_1 x + \beta_0 ,
+\]
+con $y$ la variable dependiente, $x$ la independiente y $\beta_0$,
+$\beta_1$ los parámetros. Como modelo determinista se queda así. Como
+modelo estocástico la recta describe el promedio, y cada observación
+lleva su error explícito:
+\[
+    E[\,Y \mid X\,] = \beta_0 + \beta_1 X ,
+    \qquad
+    Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i .
+\]
+
+\begin{center}
+\small
+\begin{tabular}{c>{\raggedright\arraybackslash}p{9.5cm}}
+    \toprule
+    \textbf{Símbolo} & \textbf{Qué es} \\
+    \midrule
+    $\beta_0$ & intersección: valor esperado de $Y$ cuando $X = 0$ \\
+    $\beta_1$ & pendiente: cambio esperado en $Y$ por cada unidad más
+                de $X$ \\
+    $\varepsilon_i$ & error aleatorio del caso $i$; no se observa \\
+    $\hat{y}_i$ & predicción del modelo ajustado para el caso $i$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Las mayúsculas son las variables aleatorias, antes de observarlas; las
+minúsculas, los valores observados. La regresión estima $\beta_0$ y
+$\beta_1$ a partir de los datos, y con ellos
+$\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$.
+
+\subsubsection*{Lineal en los parámetros, no necesariamente en $x$}
+
+``Lineal'' se refiere a las $\beta$, no a la forma de la curva.
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Sigue siendo lineal}:
+          $Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \varepsilon$. La
+          gráfica es una parábola, pero cada $\beta$ multiplica algo
+          conocido y se suman. Basta tomar $X^2$ como otro predictor
+          y es una regresión lineal múltiple.
+    \item \textbf{No lineal en los parámetros}:
+          $Y = \beta_0\, e^{\beta_1 X} + \varepsilon$, o
+          $Y = \beta_0 / (1 + e^{-\beta_1 X}) + \varepsilon$. Aquí
+          $\beta_1$ está dentro de una exponencial, y hacen falta
+          métodos iterativos o una transformación.
+\end{itemize}
+
+\begin{idea}
+    En Análisis y Diseño de Algoritmos, ajustar los tiempos medidos de
+    merge sort a $T(n) = c_1\, n \log n + c_0$ es una regresión lineal
+    simple: el predictor no es $n$ sino $n \log n$, que se calcula
+    antes de ajustar. Y la exponencial de arriba se vuelve lineal con
+    logaritmos cuando el error es multiplicativo:
+    $\ln Y = \ln \beta_0 + \beta_1 X$ más un error.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Error y residuo}
+
+Se parecen y no son lo mismo: uno es del modelo y el otro del ajuste.
+
+\begin{definicion}[Error]
+    $\varepsilon_i = Y_i - E[\,Y_i \mid X_i\,]$: la distancia del caso
+    $i$ a la recta \emph{real}, $\beta_0 + \beta_1 X_i$. Es la parte
+    aleatoria del modelo. No se observa, porque las $\beta$ reales no
+    se conocen.
+\end{definicion}
+
+\begin{definicion}[Residuo]
+    $e_i = y_i - \hat{y}_i$: la distancia del dato observado a la recta
+    \emph{ajustada}, $\hat{\beta}_0 + \hat{\beta}_1 x_i$. Sí se
+    calcula, pero solo después del ajuste.
+\end{definicion}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=9cm, height=6cm, xmin=250, xmax=560, ymin=12, ymax=27,
+    xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={300, 400, 500}, tick label style={font=\scriptsize},
+    label style={font=\small},
+    legend style={font=\scriptsize, at={(0.03, 0.97)},
+                  anchor=north west}]
+    \addplot[thick, orange!70!black, domain=250:560] {2.3 + 0.043*x};
+    \addplot[thick, dashed, gray, domain=250:560] {1.4 + 0.04*x};
+    \addplot[only marks, mark=*, mark size=2pt, acento]
+        coordinates {(300, 15) (400, 18) (500, 25)};
+    \legend{ajustada: $2.3 + 0.043\,x$,
+            real (no se conoce): $1.4 + 0.04\,x$}
+    \draw[<->, >=stealth, thick, red!70!black]
+        (axis cs:400, 18) -- (axis cs:400, 19.5);
+    \draw[<->, >=stealth, thick, gray!70!black]
+        (axis cs:400, 18) -- (axis cs:400, 17.4);
+    \node[font=\scriptsize, red!70!black, anchor=south east]
+        at (axis cs:396, 20.2) {$e_4 = -1.5$};
+    \node[font=\scriptsize, gray!70!black, anchor=north west]
+        at (axis cs:404, 16.6) {$\varepsilon_4 = +0.6$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Suponiendo que la recta real fuera $1.4 + 0.04\,x$, el archivo de
+$400$ MB tiene un error de $+0.6$ ms contra ella y un residuo de
+$-1.5$ ms contra la ajustada: ni siquiera tienen el mismo signo. En la
+práctica la recta punteada nunca se conoce, así que se trabaja con los
+residuos como aproximación de los errores, y todo el diagnóstico se
+hace con ellos.
+
+% =====================================================================
+
+\subsection*{Regresión múltiple}
+
+Con varios predictores la recta se vuelve un plano, o un hiperplano:
+\[
+    Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \cdots
+          + \beta_k x_{ik} + \varepsilon_i .
+\]
+Cada $\beta_j$ es el cambio esperado en $Y$ cuando $x_j$ sube una
+unidad \emph{manteniendo los demás predictores constantes}. Eso es
+``controlar'' dentro de una regresión: no hace falta una tabla tan
+cuidada como la del entrenamiento, porque el modelo estima el efecto de
+cada variable ajustando por las otras. Así entran las variables de
+control.
+
+Las variables categóricas entran codificadas. Una categoría con $c$
+valores se vuelve $c - 1$ \textbf{variables indicadoras}, que valen $1$
+si el caso tiene ese valor y $0$ si no; el valor que se queda sin
+indicadora es la referencia. Con $c$ indicadoras más la intersección,
+las indicadoras sumarían la columna de unos, las columnas de $X$
+serían linealmente dependientes y el ajuste no tendría solución única.
+
+En forma matricial, con una columna de unos para $\beta_0$,
+\[
+    y = X\beta + \varepsilon ,
+    \qquad
+    X = \begin{pmatrix}
+            1 & x_{11} & \cdots & x_{1k} \\
+            1 & x_{21} & \cdots & x_{2k} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            1 & x_{n1} & \cdots & x_{nk}
+        \end{pmatrix} ,
+\]
+y el ajuste por mínimos cuadrados de la sección siguiente da
+\[
+    \hat{\beta} = (X^{\mathsf{T}} X)^{-1} X^{\mathsf{T}} y = X^{+} y .
+\]
+Es la pseudoinversa de la clase de SVD: ahí quedó que $x = A^{+}b$ es
+la solución de mínimos cuadrados de un sistema sin solución, y un
+ajuste con más casos que parámetros es justo eso.
+
+\begin{ejemplo}[El entrenamiento, con una indicadora]
+    Con $x_1$ los datos en miles, $x_2$ los parámetros en millones y
+    $x_3 = 1$ si la GPU es A100,
+    \[
+        \text{tiempo} = \beta_0 + \beta_1 x_1 + \beta_2 x_2
+                        + \beta_3 x_3 .
+    \]
+    Son $4$ casos y $4$ parámetros: un sistema de $4 \times 4$ con
+    solución exacta. Restando renglones que solo difieren en una
+    variable,
+    \[
+        \hat{\beta}_1 = \frac{27 - 14}{10} = 1.3 ,
+        \qquad
+        \hat{\beta}_2 = \frac{41 - 27}{2.6} = 5.38 ,
+        \qquad
+        \hat{\beta}_3 = 12 - 41 = -29 ,
+    \]
+    y del caso $1$, $\hat{\beta}_0 = 14 - 13 - 6.46 = -5.46$. Cada mil
+    datos más cuestan $1.3$ minutos, cada millón de parámetros $5.38$,
+    y la A100 ahorra $29$ minutos con lo demás fijo.
+\end{ejemplo}
+
+\begin{ojo}
+    El modelo dice que la A100 ahorra $29$ minutos siempre, así que
+    para el caso $2$ en una A100 predice $27 - 29 = -2$ minutos. Una
+    GPU más rápida no resta un tiempo fijo: divide, y la A100 va
+    $41 / 12 = 3.4$ veces más rápido. Con $\ln(\text{tiempo})$ como
+    respuesta el efecto se vuelve aditivo,
+    $\hat{\beta}_3 = \ln(12 / 41) = -1.23$, y para el caso $2$ predice
+    $27 \cdot 12 / 41 = 7.9$ minutos. La forma del modelo tiene que
+    tener sentido para el problema. Además, con tantos parámetros como
+    casos el ajuste es exacto: los residuos valen $0$ y no queda nada
+    con qué medir el ruido.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Ajuste por mínimos cuadrados}
+
+De todas las rectas posibles se escoge la que hace más chica la suma
+de los residuos al cuadrado:
+\[
+    \min_{\beta_0,\, \beta_1}\;
+    S(\beta_0, \beta_1) = \sum_{i=1}^{n} e_i^2
+    = \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2 .
+\]
+Ese mínimo se denota $SS(\mathrm{Res})$, la suma de cuadrados de los
+residuos.
+
+Se eleva al cuadrado por tres razones: un residuo de $2$ pesa cuatro
+veces lo que uno de $1$, así que los errores grandes se castigan más;
+la función es derivable; y el mínimo tiene fórmula cerrada. Con valores
+absolutos el ajuste aguanta mejor los datos atípicos, pero se pierde la
+fórmula. Y bajo los supuestos de linealidad, exogeneidad, independencia
+y homocedasticidad de más adelante, el teorema de Gauss-Markov
+garantiza que, de todos los estimadores lineales e insesgados, el de
+mínimos cuadrados es el de menor varianza.
+
+\subsubsection*{Las ecuaciones normales}
+
+$S$ es un paraboloide que abre hacia arriba en $(\beta_0, \beta_1)$,
+así que su mínimo está donde las dos derivadas parciales valen $0$.
+Primero con $\beta_0$:
+\begin{align*}
+    \frac{\partial S}{\partial \beta_0}
+    &= -2 \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_i) = 0
+       \razon{regla de la cadena} \\
+    \sum_{i=1}^{n} y_i &= n \beta_0 + \beta_1 \sum_{i=1}^{n} x_i
+       \razon{se reparte la suma} \\
+    \hat{\beta}_0 &= \bar{y} - \hat{\beta}_1 \bar{x}
+       \razon{entre $n$} .
+\end{align*}
+La recta ajustada pasa por $(\bar{x}, \bar{y})$. Luego con $\beta_1$:
+\begin{align*}
+    \frac{\partial S}{\partial \beta_1}
+    &= -2 \sum_{i=1}^{n} x_i (y_i - \beta_0 - \beta_1 x_i) = 0
+       \razon{regla de la cadena} \\
+    0 &= \sum_{i=1}^{n} x_i \big( (y_i - \bar{y})
+         - \beta_1 (x_i - \bar{x}) \big)
+       \razon{se sustituye $\hat{\beta}_0$} \\
+    \beta_1 \sum_{i=1}^{n} x_i (x_i - \bar{x})
+      &= \sum_{i=1}^{n} x_i (y_i - \bar{y})
+       \razon{se despeja} \\
+    \beta_1 \sum_{i=1}^{n} (x_i - \bar{x})^2
+      &= \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
+       \razon{$\textstyle\sum (x_i - \bar{x})
+              = \sum (y_i - \bar{y}) = 0$} \\
+    \hat{\beta}_1 &= \frac{S_{xy}}{S_{xx}}
+       \razon{definición de las $S$} .
+\end{align*}
+El penúltimo renglón resta $\bar{x}$ veces una suma que vale $0$ en
+cada lado, y así aparecen las desviaciones. Dividiendo arriba y abajo
+entre $n - 1$, $\hat{\beta}_1 = s_{xy} / s_x^2 = r\, s_y / s_x$: la
+pendiente es la correlación pasada a las unidades de $x$ y de $y$.
+
+\begin{ejemplo}[La recta de los archivos]
+    Con las sumas de la tabla de Pearson,
+    \[
+        \hat{\beta}_1 = \frac{4300}{100\,000} = 0.043 \ \text{ms/MB} ,
+        \qquad
+        \hat{\beta}_0 = 15.2 - 0.043 \cdot 300 = 2.3 \ \text{ms} ,
+    \]
+    \[
+        \hat{y} = 2.3 + 0.043\, x .
+    \]
+    \begin{center}
+    \small
+    \begin{tabular}{rrrr}
+        \toprule
+        $x_i$ & $y_i$ & $\hat{y}_i$ & $e_i = y_i - \hat{y}_i$ \\
+        \midrule
+        $100$ & $7$  & $6.6$  & $0.4$ \\
+        $200$ & $11$ & $10.9$ & $0.1$ \\
+        $300$ & $15$ & $15.2$ & $-0.2$ \\
+        $400$ & $18$ & $19.5$ & $-1.5$ \\
+        $500$ & $25$ & $23.8$ & $1.2$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    Los residuos suman $0$, y no por suerte: es la primera ecuación
+    normal. $SS(\mathrm{Res}) = 0.16 + 0.01 + 0.04 + 2.25 + 1.44 =
+    3.9$, y ninguna otra recta da una suma menor.
+
+    Cada $100$ MB más cuestan $4.3$ ms. La intersección diría que un
+    archivo de $0$ MB tarda $2.3$ ms, algo así como el costo fijo de
+    abrirlo, pero el archivo más chico es de $100$ MB: leerla así es
+    extrapolar fuera de los datos, y nada garantiza que la recta siga
+    valiendo ahí.
+\end{ejemplo}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=6.2cm, xmin=0, xmax=600, ymin=0, ymax=30,
+    xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={100, 200, 300, 400, 500}, ytick={0, 10, 20, 30},
+    tick label style={font=\scriptsize}, label style={font=\small}]
+    \addplot[thick, orange!70!black, domain=0:600] {2.3 + 0.043*x};
+    \draw[thick, red!70!black] (axis cs:100, 7) -- (axis cs:100, 6.6);
+    \draw[thick, red!70!black] (axis cs:200, 11) -- (axis cs:200, 10.9);
+    \draw[thick, red!70!black] (axis cs:300, 15) -- (axis cs:300, 15.2);
+    \draw[thick, red!70!black] (axis cs:400, 18) -- (axis cs:400, 19.5);
+    \draw[thick, red!70!black] (axis cs:500, 25) -- (axis cs:500, 23.8);
+    \addplot[only marks, mark=*, mark size=2pt, acento] coordinates {
+        (100, 7) (200, 11) (300, 15) (400, 18) (500, 25)};
+    \node[font=\scriptsize, red!70!black, anchor=north west]
+        at (axis cs:405, 18.6) {$e_4 = -1.5$};
+    \node[font=\scriptsize, red!70!black, anchor=south east]
+        at (axis cs:495, 25) {$e_5 = 1.2$};
+    \node[font=\scriptsize, orange!70!black, anchor=west]
+        at (axis cs:20, 25) {$\hat{y} = 2.3 + 0.043\,x$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+En rojo, los residuos. Los de $100$, $200$ y $300$ MB casi no se ven:
+son de décimas.
+
+\subsubsection*{$Y$ sobre $X$ no es $X$ sobre $Y$}
+
+Si se ajusta al revés, con el tamaño como respuesta y el tiempo como
+predictor, la pendiente es $S_{xy} / S_{yy} = 4300 / 188.8 = 22.78$ MB
+por ms. Despejando $x$ de la recta original sale $1 / 0.043 = 23.26$
+MB por ms. No coinciden porque la primera minimiza errores verticales y
+la segunda horizontales. El producto de las dos pendientes,
+$0.043 \cdot 22.78 = 0.979$, es $r^2$; las dos rectas solo coinciden
+cuando $r = \pm 1$.
+
+% =====================================================================
+
+\subsection*{Sumas de cuadrados y coeficiente de determinación}
+
+Mínimos cuadrados hace $SS(\mathrm{Res})$ lo más chica posible. Falta
+saber si lo que quedó es poco o mucho, o sea qué tan bien representa el
+modelo a los datos. Para eso la variabilidad de $y$ se parte en tres
+sumas:
+\begin{align*}
+    SS(\mathrm{Total}) &= \sum_{i=1}^{n} (y_i - \bar{y})^2
+    && \text{la variabilidad de los datos,} \\
+    SS(\mathrm{Regres}) &= \sum_{i=1}^{n} (\hat{y}_i - \bar{y})^2
+    && \text{la parte que explica el modelo,} \\
+    SS(\mathrm{Res}) &= \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+    && \text{la parte que no explica.}
+\end{align*}
+$SS(\mathrm{Total})$ es $n - 1$ veces la varianza muestral de $y$.
+$SS(\mathrm{Regres})$ es lo que se mueven las predicciones alrededor de
+la media: la parte atribuible a las variables independientes. En la
+presentación la media sale como $\bar{Y}_i$, con subíndice; es la misma
+$\bar{y}$ para todos los casos.
+
+\subsubsection*{La descomposición}
+
+Cada desviación se parte en lo que explica la recta más el residuo:
+\[
+    \underbrace{y_i - \bar{y}}_{\text{total}}
+    = \underbrace{\hat{y}_i - \bar{y}}_{\text{explicada}}
+    + \underbrace{y_i - \hat{y}_i}_{\text{residuo}} .
+\]
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=9cm, height=6cm, xmin=250, xmax=660, ymin=12, ymax=27,
+    xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={300, 400, 500}, tick label style={font=\scriptsize},
+    label style={font=\small}]
+    \addplot[thick, orange!70!black, domain=250:560] {2.3 + 0.043*x};
+    \addplot[dashed, gray, domain=250:560] {15.2};
+    \addplot[only marks, mark=*, mark size=2pt, acento]
+        coordinates {(300, 15) (400, 18) (500, 25)};
+    \draw[<->, >=stealth, thick, green!45!black]
+        (axis cs:500, 15.2) -- (axis cs:500, 23.8);
+    \draw[<->, >=stealth, thick, red!70!black]
+        (axis cs:500, 23.8) -- (axis cs:500, 25);
+    \draw[<->, >=stealth, gray!70!black]
+        (axis cs:530, 15.2) -- (axis cs:530, 25);
+    \node[font=\scriptsize, green!45!black, anchor=east]
+        at (axis cs:494, 16.6) {$\hat{y}_5 - \bar{y} = 8.6$};
+    \node[font=\scriptsize, red!70!black, anchor=east]
+        at (axis cs:494, 24.6) {$e_5 = 1.2$};
+    \node[font=\scriptsize, gray!70!black, anchor=west]
+        at (axis cs:535, 20.1) {$y_5 - \bar{y} = 9.8$};
+    \node[font=\scriptsize, gray, anchor=south west]
+        at (axis cs:255, 15.2) {$\bar{y}$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Al elevar al cuadrado y sumar, el término cruzado desaparece:
+\begin{align*}
+    SS(\mathrm{Total})
+    &= \sum_{i=1}^{n} \big( (\hat{y}_i - \bar{y}) + e_i \big)^2
+       \razon{la partición de arriba} \\
+    &= \sum_{i=1}^{n} (\hat{y}_i - \bar{y})^2
+       + 2 \sum_{i=1}^{n} (\hat{y}_i - \bar{y})\, e_i
+       + \sum_{i=1}^{n} e_i^2
+       \razon{se desarrolla el cuadrado} \\
+    &= SS(\mathrm{Regres})
+       + 2 \hat{\beta}_1 \sum_{i=1}^{n} (x_i - \bar{x})\, e_i
+       + SS(\mathrm{Res})
+       \razon{$\hat{y}_i - \bar{y} = \hat{\beta}_1 (x_i - \bar{x})$} \\
+    &= SS(\mathrm{Regres}) + SS(\mathrm{Res})
+       \razon{ecuaciones normales} .
+\end{align*}
+El último paso usa las dos ecuaciones normales, $\sum e_i = 0$ y
+$\sum x_i e_i = 0$, que juntas dan $\sum (x_i - \bar{x})\, e_i = 0$.
+
+\begin{definicion}[Coeficiente de determinación]
+    \[
+        R^2 = \frac{SS(\mathrm{Regres})}{SS(\mathrm{Total})}
+            = 1 - \frac{SS(\mathrm{Res})}{SS(\mathrm{Total})} .
+    \]
+    Es la fracción de la variabilidad de $y$ que explica el modelo, en
+    los datos con los que se ajustó. En un modelo con intersección va
+    de $0$ a $1$.
+\end{definicion}
+
+La intuición: un modelo representa mejor a los datos mientras menor sea
+la fracción de varianza que deja sin explicar. Si los residuos valen
+$0$, el modelo explica todo y $R^2 = 1$. Si la varianza residual es
+igual a la de $y$, la recta no explica nada que no explicara ya la
+media, y $R^2 = 0$.
+
+\begin{ejemplo}[$R^2$ de los archivos]
+    $SS(\mathrm{Total}) = 188.8$, que ya estaba en la tabla de Pearson.
+    Las predicciones se alejan de $\bar{y}$ en $-8.6, -4.3, 0, 4.3,
+    8.6$, así que $SS(\mathrm{Regres}) = 2\,(73.96 + 18.49) = 184.9$, y
+    $SS(\mathrm{Res}) = 3.9$. Cuadra: $184.9 + 3.9 = 188.8$.
+    \[
+        R^2 = 1 - \frac{3.9}{188.8} = 0.979 .
+    \]
+    El modelo explica el $97.9\%$ de la variabilidad de los tiempos
+    medidos. Y $r^2 = 0.98962^2 = 0.979$.
+\end{ejemplo}
+
+Lo último no es coincidencia: en regresión lineal simple con
+intersección, $R^2$ es el cuadrado del coeficiente de Pearson. Pero no
+son lo mismo. $r$ mide asociación entre dos variables y tiene signo;
+$R^2$ mide qué tan bien ajusta un modelo, y sirve igual con diez
+predictores, donde ya no hay un solo $r$ que elevar al cuadrado. La
+bondad del ajuste resume la discrepancia entre lo observado y lo que
+predice el modelo, y $R^2$ es solo una de muchas medidas.
+
+\begin{ojo}
+    $R^2 = 0.80$ quiere decir que el modelo explica el $80\%$ de la
+    variabilidad observada de $Y$ \emph{en los datos que se usaron para
+    ajustarlo}. No prueba causalidad ni garantiza que prediga bien
+    datos nuevos. Y nunca baja al agregar un predictor, aunque sea
+    ruido puro, porque el ajuste siempre puede ignorarlo. Esa es la
+    puerta del sobreajuste.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Bandas de confianza y de predicción}
+
+Las bandas que a veces acompañan a la recta son intervalos de confianza
+como el de la encuesta de la clase del $7$, pero calculados en cada
+$x$. Primero hace falta estimar $\sigma$, la desviación de los errores:
+\[
+    s_e = \sqrt{\frac{SS(\mathrm{Res})}{n - 2}}
+        = \sqrt{\frac{3.9}{3}} = 1.14 \ \text{ms} .
+\]
+Se divide entre $n - 2$ por la misma razón que la corrección de Bessel:
+los residuos cumplen dos restricciones, las dos ecuaciones normales,
+así que solo $n - 2$ de ellos quedan libres. Con eso hay dos bandas
+distintas en un punto $x_0$:
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{De confianza}, para la recta: dónde está el promedio
+          $E[\,Y \mid x_0\,]$,
+          \[
+              \hat{y}_0 \pm t\, s_e \sqrt{\frac{1}{n}
+                  + \frac{(x_0 - \bar{x})^2}{S_{xx}}} .
+          \]
+    \item \textbf{De predicción}, para los datos: dónde va a caer una
+          observación nueva,
+          \[
+              \hat{y}_0 \pm t\, s_e \sqrt{1 + \frac{1}{n}
+                  + \frac{(x_0 - \bar{x})^2}{S_{xx}}} .
+          \]
+\end{itemize}
+El $t$ es el de la distribución $t$ de la clase del $26$ con $n - 2$
+grados de libertad, que se usa porque $\sigma$ se estimó. Con $5$
+puntos y $95\%$ de confianza, $t = 3.182$, mucho más que el $1.96$ de
+la normal: con tan pocos datos se paga caro no conocer $\sigma$.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=6.4cm, xmin=60, xmax=540, ymin=0, ymax=34,
+    axis on top, xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={100, 200, 300, 400, 500},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend style={font=\scriptsize, at={(0.03, 0.97)},
+                  anchor=north west}]
+    \addplot[draw=none, fill=gray!20, domain=80:520, samples=60,
+             forget plot]
+        {2.3 + 0.043*x + 3.6283*sqrt(1.2 + (x - 300)^2/100000)}
+        \closedcycle;
+    \addplot[draw=none, fill=acento!30, domain=80:520, samples=60,
+             forget plot]
+        {2.3 + 0.043*x + 3.6283*sqrt(0.2 + (x - 300)^2/100000)}
+        \closedcycle;
+    \addplot[draw=none, fill=gray!20, domain=80:520, samples=60,
+             forget plot]
+        {2.3 + 0.043*x - 3.6283*sqrt(0.2 + (x - 300)^2/100000)}
+        \closedcycle;
+    \addplot[draw=none, fill=white, domain=80:520, samples=60,
+             forget plot]
+        {2.3 + 0.043*x - 3.6283*sqrt(1.2 + (x - 300)^2/100000)}
+        \closedcycle;
+    \addplot[thick, orange!70!black, domain=80:520, forget plot]
+        {2.3 + 0.043*x};
+    \addplot[only marks, mark=*, mark size=2pt, acento, forget plot]
+        coordinates {(100, 7) (200, 11) (300, 15) (400, 18) (500, 25)};
+    \addlegendimage{area legend, fill=acento!30, draw=none}
+    \addlegendentry{confianza: dónde está la recta}
+    \addlegendimage{area legend, fill=gray!20, draw=none}
+    \addlegendentry{predicción: dónde cae un dato nuevo}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{cccc}
+    \toprule
+    $x_0$ & $\hat{y}_0$ & \textbf{Confianza (recta)}
+    & \textbf{Predicción (dato)} \\
+    \midrule
+    $300$ & $15.2$ & $\pm 1.62$: $[13.58,\ 16.82]$
+                   & $\pm 3.97$: $[11.23,\ 19.17]$ \\
+    $500$ & $23.8$ & $\pm 2.81$: $[20.99,\ 26.61]$
+                   & $\pm 4.59$: $[19.21,\ 28.39]$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item Las dos son más angostas en $\bar{x}$ y se abren hacia las
+          orillas. La recta siempre pasa por $(\bar{x}, \bar{y})$, y lo
+          que no se conoce bien es la pendiente: un error en ella mueve
+          poco la recta cerca del centro y mucho en los extremos.
+    \item La de predicción es más ancha porque suma el ruido de la
+          observación nueva, el $1$ dentro de la raíz. Con más datos la
+          de confianza se angosta hacia $0$, como el error estándar; la
+          de predicción nunca baja de $\pm t\, s_e$, porque una corrida
+          nueva sigue trayendo su propio ruido.
+\end{itemize}
+
+Es la misma diferencia que entre error estándar y desviación estándar
+en la clase del $28$. La figura de la presentación, la de $r = -0.80$,
+dibuja justo esas dos: ``confidence interval (regression line)'' es la
+de confianza y ``confidence interval (data)'' la de predicción.
+
+% =====================================================================
+
+\subsection*{Diagnóstico con residuos}
+
+Si el modelo capturó todo lo sistemático, lo que sobra tiene que ser
+ruido: al graficar los residuos contra las predicciones $\hat{y}$ debe
+quedar una nube sin forma alrededor de $0$.
+
+\begin{center}
+\begin{tikzpicture}
+\pgfplotsset{
+    res/.style={
+        width=5.6cm, height=4.4cm, xmin=0, xmax=10, ymin=-3, ymax=3,
+        xtick=\empty, ytick={0}, xlabel={$\hat{y}$},
+        tick label style={font=\scriptsize},
+        label style={font=\scriptsize},
+        title style={font=\small, yshift=-1ex}},
+    puntos/.style={only marks, mark=*, mark size=1.2pt, acento},
+    cero/.style={gray!60, thin}}
+\begin{axis}[res, title={Sin patrón}, ylabel={$e$}]
+    \addplot[cero] coordinates {(0, 0) (10, 0)};
+    \addplot[puntos] coordinates {
+        (0.50, -0.98) (0.88, 0.30) (1.25, 0.80) (1.62, -0.41)
+        (2.00, -1.06) (2.38, -0.05) (2.75, 0.38) (3.12, 0.88)
+        (3.50, -0.97) (3.88, -1.03) (4.25, 0.56) (4.62, 0.38)
+        (5.00, 1.23) (5.38, 0.79) (5.75, -0.08) (6.12, -0.22)
+        (6.50, 2.06) (6.88, -0.23) (7.25, -0.63) (7.62, -0.91)
+        (8.00, 0.08) (8.38, 0.12) (8.75, -0.28) (9.12, -0.05)
+        (9.50, 0.22)
+    };
+\end{axis}
+\begin{axis}[res, at={(5.4cm, 0)}, title={Curvatura}]
+    \addplot[cero] coordinates {(0, 0) (10, 0)};
+    \addplot[puntos] coordinates {
+        (0.50, -1.87) (0.88, -1.21) (1.25, -1.04) (1.62, -1.30)
+        (2.00, -0.04) (2.38, -0.44) (2.75, 0.29) (3.12, 0.09)
+        (3.50, 0.81) (3.88, 0.70) (4.25, 1.16) (4.62, 2.31)
+        (5.00, 1.16) (5.38, 1.45) (5.75, 0.62) (6.12, 0.87)
+        (6.50, 1.04) (6.88, 0.57) (7.25, 0.48) (7.62, 0.09)
+        (8.00, -0.64) (8.38, -0.48) (8.75, -1.39) (9.12, -0.93)
+        (9.50, -2.29)
+    };
+\end{axis}
+\begin{axis}[res, at={(10.8cm, 0)}, title={Embudo}]
+    \addplot[cero] coordinates {(0, 0) (10, 0)};
+    \addplot[puntos] coordinates {
+        (0.50, -0.23) (0.88, -0.39) (1.25, -0.02) (1.62, -0.68)
+        (2.00, 0.17) (2.38, -0.47) (2.75, 0.52) (3.12, 0.11)
+        (3.50, -0.27) (3.88, -1.15) (4.25, 0.42) (4.62, 0.14)
+        (5.00, 1.61) (5.38, -0.88) (5.75, 0.38) (6.12, 0.35)
+        (6.50, 0.05) (6.88, -0.05) (7.25, -0.08) (7.62, -1.47)
+        (8.00, -2.30) (8.38, -1.17) (8.75, 0.82) (9.12, 2.82)
+        (9.50, 1.77)
+    };
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Sin patrón}: lo deseable. Ancho parejo, centrado en
+          $0$, sin curva.
+    \item \textbf{Curvatura}: los residuos son negativos en las orillas
+          y positivos en medio. A la recta le falta un término, como el
+          $X^2$; es lo que sale con el panel II de Anscombe.
+    \item \textbf{Embudo}: la dispersión crece con $\hat{y}$. La
+          varianza de los errores no es constante.
+\end{itemize}
+
+\begin{definicion}[Homocedasticidad y heterocedasticidad]
+    Hay \textbf{homocedasticidad} cuando la varianza de los errores es
+    la misma para todo $X$:
+    $\operatorname{Var}(\varepsilon \mid X) = \sigma^2$. Si cambia con
+    $X$, hay \textbf{heterocedasticidad}.
+\end{definicion}
+
+En tiempos de ejecución la heterocedasticidad es lo normal: una corrida
+de $5$ ms varía en décimas, una de $5$ minutos varía en segundos. No
+sesga la recta, pero los errores estándar, los intervalos y las pruebas
+de significancia salen mal, porque usan un solo $s_e$ para todos los
+puntos. Tomar logaritmo de la respuesta suele emparejar la varianza.
+
+Si además se quiere suponer que los errores son normales, se revisa con
+la gráfica Q-Q de la clase del $26$, aplicada a los residuos.
+
+\begin{ojo}
+    Si los residuos muestran estructura, el modelo no está capturando
+    algo importante, aunque $R^2$ salga alto. En el panel II de
+    Anscombe $R^2 = 0.67$ y la recta es el modelo equivocado: la
+    gráfica de residuos lo grita y el número no.
+\end{ojo}
+
+% =====================================================================
+
+\subsection*{Supuestos del modelo lineal clásico}
+
+Son las condiciones bajo las que mínimos cuadrados estima bien y las
+inferencias, como las bandas de arriba, son válidas.
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.2cm}%
+                >{\raggedright\arraybackslash}p{6.2cm}%
+                >{\raggedright\arraybackslash}p{4.2cm}}
+    \toprule
+    \textbf{Supuesto} & \textbf{Qué significa} & \textbf{Qué revisar} \\
+    \midrule
+    $X$ sin error & los predictores se miden sin error
+                  & cómo se midieron \\
+    \addlinespace
+    Casos pareados & cada $x_i$ y su $y_i$ salen del mismo caso
+                   & la tabla de datos \\
+    \addlinespace
+    Linealidad en parámetros & la forma del modelo es la adecuada
+                             & dispersión y residuos \\
+    \addlinespace
+    Exogeneidad & $E[\,\varepsilon \mid X\,] = 0$: lo que quedó fuera
+                  del modelo no se mueve con $X$
+                & diseño, controles, teoría \\
+    \addlinespace
+    Independencia & errores no correlacionados entre casos
+                  & diseño, orden de las mediciones \\
+    \addlinespace
+    Homocedasticidad & $\operatorname{Var}(\varepsilon \mid X)
+                        = \sigma^2$ para todo $X$
+                     & gráfica de residuos \\
+    \addlinespace
+    Normalidad & $\varepsilon \sim N(0, \sigma^2)$; hace falta para
+                 inferencia con muestras chicas
+               & Q-Q de los residuos \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Como lo único aleatorio del modelo son los errores, los $Y_i$ heredan
+la varianza común $\sigma^2$ y la independencia. Esa independencia es
+la de IID de la clase del $28$, y se rompe igual que ahí: con
+mediciones seguidas en la misma máquina o con series de tiempo. Hay
+análisis de regresión más avanzados que quitan cada uno de estos
+supuestos; el clásico los necesita todos.
+
+\begin{idea}
+    Los supuestos no son decorativos: determinan qué inferencias son
+    válidas. Una recta se le ajusta a cualquier nube; que sus
+    intervalos signifiquen algo depende de esta tabla.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Otros tipos de respuesta}
+
+La recta supone una respuesta continua. Si no lo es, la forma del
+modelo cambia con el tipo de variable dependiente:
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+    \toprule
+    \textbf{Respuesta} & \textbf{Modelo común}
+    & \textbf{Ejemplo en computación} \\
+    \midrule
+    Continua   & regresión lineal     & tiempo de ejecución \\
+    Binaria    & regresión logística  & falla o no falla \\
+    Conteo     & regresión de Poisson & número de errores \\
+    Proporción & binomial o beta      & tasa de aciertos \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Son las distribuciones de la clase del $26$: Bernoulli para la binaria,
+Poisson para los conteos. Una recta para una binaria predice
+``probabilidades'' menores que $0$ o mayores que $1$, y para un conteo
+puede predecir errores negativos.
+
+% =====================================================================
+
+\subsection*{Sobreajuste}
+
+El grado del polinomio es un hiperparámetro. Con los cinco archivos, un
+polinomio de grado $4$ tiene cinco coeficientes y pasa exacto por los
+cinco puntos:
+\[
+    p(x) = 10 - \tfrac{31}{3}\, t + \tfrac{39}{4}\, t^2
+         - \tfrac{8}{3}\, t^3 + \tfrac{1}{4}\, t^4 ,
+    \qquad t = x / 100 .
+\]
+Sus residuos valen $0$ y $R^2 = 1$. Es un modelo perfecto para los
+datos que ya se tienen, y no sirve.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=11cm, height=6.4cm, xmin=0, xmax=660, ymin=0, ymax=52,
+    xlabel={tamaño (MB)}, ylabel={tiempo (ms)},
+    xtick={0, 100, 200, 300, 400, 500, 600},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    legend style={font=\scriptsize, at={(0.03, 0.97)},
+                  anchor=north west}]
+    \addplot[thick, acento, domain=0:600, samples=150]
+        {10 - 31/3*(x/100) + 39/4*(x/100)^2 - 8/3*(x/100)^3
+         + (x/100)^4/4};
+    \addplot[thick, orange!70!black, domain=0:600] {2.3 + 0.043*x};
+    \addplot[only marks, mark=*, mark size=2pt, black] coordinates {
+        (100, 7) (200, 11) (300, 15) (400, 18) (500, 25)};
+    \legend{grado $4$: $R^2 = 1$, grado $1$: $R^2 = 0.979$}
+    \draw[dashed, gray] (axis cs:600, 0) -- (axis cs:600, 47);
+    \node[font=\scriptsize, acento, anchor=west]
+        at (axis cs:605, 47) {$47$};
+    \node[font=\scriptsize, orange!70!black, anchor=west]
+        at (axis cs:605, 28.1) {$28.1$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Para un archivo de $600$ MB la recta predice
+$2.3 + 0.043 \cdot 600 = 28.1$ ms, y el polinomio $47$. Hacia el otro
+lado, con $0$ MB, el polinomio dice $10$ ms, más que con $100$. Se
+aprendió los cinco tiempos, ruido incluido, en lugar de la tendencia:
+eso es \textbf{sobreajuste}.
+
+Señales de alerta:
+\begin{itemize}[itemsep=0.3em]
+    \item muchos predictores y pocos casos;
+    \item $R^2$ alto en entrenamiento y mal desempeño en prueba;
+    \item coeficientes inestables, que cambian mucho al quitar un caso,
+          o imposibles de interpretar;
+    \item variables significativas sin ninguna razón teórica para
+          estarlo.
+\end{itemize}
+
+Qué hacer:
+\begin{itemize}[itemsep=0.3em]
+    \item separar datos de entrenamiento y de prueba, y evaluar en los
+          de prueba;
+    \item validación cruzada, con los cuidados de IID de la clase del
+          $28$;
+    \item \textbf{regularización}: sumarle al criterio una penalización
+          por coeficientes grandes. Ridge suma $\lambda \sum \beta_j^2$
+          y encoge todos; Lasso suma $\lambda \sum \abs{\beta_j}$ y
+          puede volver algunos exactamente $0$, lo que de paso escoge
+          variables; Elastic Net mezcla las dos. El $\lambda$ es otro
+          hiperparámetro;
+    \item escoger las variables con teoría y diagnóstico, no metiendo
+          todo lo que haya.
+\end{itemize}
+
+Para comparar modelos con distinto número de predictores $k$ se usa la
+$R^2$ ajustada, que le cobra a cada predictor:
+\[
+    R^2_{\text{aj}} = 1 - (1 - R^2)\, \frac{n - 1}{n - k - 1} .
+\]
+La recta de los archivos queda en $1 - 0.021 \cdot 4/3 = 0.972$. El
+polinomio de grado $4$ tiene $n - k - 1 = 5 - 4 - 1 = 0$ y no se puede
+calcular: no le quedaron grados de libertad, gastó todos los datos en
+fijar coeficientes.
+
+\begin{idea}
+    Más variables no es mejor modelo. Cada parámetro de más le da al
+    ajuste otra forma de pegarse al ruido de esta muestra.
+\end{idea}
+
+% =====================================================================
+
+\subsection*{Explicar o predecir}
+
+\begin{center}
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5cm}%
+                 >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    \textbf{Objetivo} & \textbf{Pregunta} & \textbf{Cómo se evalúa} \\
+    \midrule
+    Explicativo & ¿qué relación hay entre $X$ y $Y$?
+                & $\hat{\beta}$, valores $p$, $R^2$, teoría \\
+    \addlinespace
+    Predictivo & ¿qué tan bien predice datos nuevos?
+               & MAE, RMSE, validación cruzada, prueba externa \\
+    \addlinespace
+    Descriptivo & ¿cómo resumir una estructura complicada?
+                & simplicidad, aproximación, interpretabilidad \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+El mismo modelo puede servir para explicar o para predecir, pero la
+evaluación tiene que corresponder al objetivo. Para predecir se miden
+errores, en las unidades de la respuesta:
+\[
+    \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \abs{y_i - \hat{y}_i} ,
+    \qquad
+    \mathrm{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n}
+                    (y_i - \hat{y}_i)^2} .
+\]
+En los archivos, $\mathrm{MAE} = 3.4 / 5 = 0.68$ ms y
+$\mathrm{RMSE} = \sqrt{3.9 / 5} = 0.88$ ms. Pero salieron de los mismos
+cinco datos del ajuste, así que son optimistas: el polinomio sacaría
+$0$ en las dos. Como error de predicción solo valen sobre datos que el
+modelo no vio.
+
+\subsubsection*{Regresión y aprendizaje automático}
+
+La regresión estadística interpreta relaciones entre variables, hace
+explícitos sus supuestos y parámetros y evalúa su incertidumbre. El
+aprendizaje automático prioriza la predicción en datos no vistos: usa
+validación, regularización y métricas de error, y puede ser mucho menos
+interpretable. Una regresión lineal ya es un modelo de aprendizaje
+automático, y ajustarla por mínimos cuadrados es entrenarla. No todo
+clasificador es una regresión, pero muchos modelos de aprendizaje
+automático pueden verse como funciones ajustadas a datos.
+
+% =====================================================================
+
+\subsection*{Antes de reportar una regresión}
+
+\begin{enumerate}[label=\alph*., itemsep=0.3em]
+    \item Definir claramente $Y$, las $X$ y las variables de control.
+    \item Explorar las gráficas de dispersión y los valores extremos.
+    \item Elegir el modelo según la pregunta y el tipo de respuesta.
+    \item Ajustar e interpretar cada $\hat{\beta}$ con sus unidades.
+    \item Revisar residuos, homocedasticidad y supuestos.
+    \item Reportar $R^2$, y métricas de error si hay predicción.
+    \item No sacar conclusiones causales que el diseño no justifica.
+\end{enumerate}
+
+El reporte mínimo lleva la ecuación, los $\hat{\beta}$, $R^2$ o el
+error, el diagnóstico y los límites de la interpretación. La siguiente
+clase son pruebas de hipótesis, que es lo que falta para decir si un
+$\hat{\beta}$ es distinto de $0$ o salió así por azar.
+
+% =====================================================================
+
+\subsection*{Tarea: correlación y regresión}
+
+Con datos propios de un algoritmo:
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+    \toprule
+    \textbf{Variable} & \textbf{Descripción} \\
+    \midrule
+    $Y$     & tiempo de ejecución de un algoritmo \\
+    $X_1$   & tamaño de entrada \\
+    $X_2$   & memoria disponible \\
+    $X_3$   & lenguaje de implementación \\
+    Control & misma computadora y misma versión del compilador \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[itemsep=0.3em]
+    \item Calcular la correlación entre las variables independientes.
+    \item Seleccionar tres variables no correlacionadas, o poco
+          correlacionadas, entre ellas.
+    \item Ver la gráfica de dispersión de cada una.
+    \item Escribir un modelo lineal posible.
+    \item Ajustar el modelo y calcular los residuos.
+\end{enumerate}
+
+Antes de empezar hay que decidir si el objetivo es explicar o predecir,
+porque de eso depende cómo se evalúa. El entregable: ecuación,
+$\hat{\beta}$ estimados, $R^2$ o error, diagnóstico, una gráfica y los
+límites de la interpretación.
+
+\begin{ojo}
+    El lenguaje de implementación es nominal. Para el paso $1$ no sirve
+    Pearson con él, y en el modelo entra como variables indicadoras:
+    con tres lenguajes, dos indicadoras. Lo de buscar predictores poco
+    correlacionados entre sí es porque, si dos se mueven juntos, el
+    ajuste no puede separar el efecto de uno del efecto del otro y sus
+    $\hat{\beta}$ salen inestables. A eso se le llama
+    multicolinealidad.
+\end{ojo}
 
 
 \end{document}
