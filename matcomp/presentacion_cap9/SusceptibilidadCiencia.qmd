@@ -811,14 +811,15 @@ la probabilidad de la hipótesis casi nunca se puede calcular.]{.nota}
 :::
 
 ::: {.notes}
-- El valor p es la versión científica del número de la fiscal.
-- Misma tabla con las cartas: arriba, hay telepatía; abajo, no hay.
-- El valor p lee el renglón de abajo: sin telepatía, qué tan seguido se
-  aciertan 19 o más. 4.3 %.
-- Lo que queremos es la columna: ya acertó 19, ¿qué tan probable es
-  que no haya telepatía?
-- Ese es el secreto del valor p: los científicos lo reportan porque la
-  otra probabilidad casi nunca se puede calcular, no por engañar.
+el valor p y la probabilidad de que la hipótesis sea cierta son cosas distintas, y confundirlas es la falacia del fiscal.
+
+Cómo se lee la tabla
+
+Los renglones son lo que es verdad: culpable o inocente, telepatía o azar.
+Las columnas son lo que observamos: la huella coincide o no; Carl acierta 19 o más, o menos.
+Óvalo naranja (el renglón), lo que da el valor p: "suponiendo que es inocente, ¿qué tan raro sería que su huella coincidiera?"
+Óvalo azul (la columna), lo que queremos saber: "ya que la huella coincidió, ¿qué tan probable es que sea inocente?"
+ "El valor p responde '¿qué tan raros son estos datos si no pasa nada?'. Lo que queremos saber es '¿qué tan probable es que no pase nada, dados estos datos?'. Son preguntas distintas,
 :::
 
 ## Lo que queremos depende de lo que creíamos
@@ -847,12 +848,7 @@ algo además del azar.
 :::
 
 ::: {.notes}
-- Lo que queremos depende de qué tan creíble era la alternativa antes
-  del experimento.
-- Si la alternativa es que existe la telepatía, era improbable y
-  sigue siéndolo con 19 aciertos.
-- Si es que el amigo hizo trampa, era probable y explica todo.
-- Rechazar la nula no confirma la explicación que me gusta.
+n valor p chico solo dice que no fue azar. No dice cuál de las otras explicaciones es la correcta, y para elegir entre ellas importa qué tan creíble era cada una desde antes.
 :::
 
 # [03]{.num}p-hacking y sesgo de publicación {background-color="#1b2a41"}
