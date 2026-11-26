@@ -21,13 +21,14 @@ Considerations:
 Metadata:
 ----------
 * Author: zxxz6 (Bryan Violante Arriaga)
-* Version: 1.24.1
+* Version: 1.25.0
 * License: Copyright (c) 2026 Bryan Violante Arriaga.
 
 
 History:
 ------------
 Author      Date            Description
+zxxz6       26/11/2026      Agregue seminario1/presentacion_etica
 zxxz6       17/11/2026      Presentacion del capitulo 9 con los
                             ejemplos del libro
 zxxz6       16/11/2026      Agregue matcomp/presentacion_cap9
@@ -164,6 +165,11 @@ para ejercicios, prácticas y experimentos de las materias del INAOE.
 - [seminario1/](seminario1/) - Seminario de Metodología.
   - [apuntes/](seminario1/apuntes/) - Todavía no hay libreta; por ahora
     solo la toma cruda en [raw_notes/](seminario1/apuntes/raw_notes/).
+  - [presentacion_etica/](seminario1/presentacion_etica/) - Presentación
+    sobre ética en la investigación científica con Pruzan, Dawson y el
+    informe de IA del MIT: respeto y consentimiento, integridad,
+    honestidad, responsabilidad y el paso de evitar faltas a promover lo
+    ético.
 - [taylf/](taylf/) - Teoría de Autómatas y Lenguajes Formales.
   - [DTM_simple/](taylf/DTM_simple/) - Simulador de una Máquina de Turing
     determinista de una sola cinta
